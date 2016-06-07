@@ -18,6 +18,7 @@
 		FA44BB201CF5A7E00018C9D0 /* BluenetLocalization.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE862591CF4530F0027539D /* BluenetLocalization.swift */; };
 		FA44BB211CF5A7E00018C9D0 /* Eventbus.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE8625B1CF478E50027539D /* Eventbus.swift */; };
 		FA44BB221CF5A7E00018C9D0 /* util.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE8625F1CF48E530027539D /* util.swift */; };
+		FAA047F71D072300000D333A /* OMGHTTPURLRQ.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAA047F61D072300000D333A /* OMGHTTPURLRQ.framework */; };
 		FAD4EB381D070FA70026DDA2 /* PromiseKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD4EB351D070FA70026DDA2 /* PromiseKit.framework */; };
 		FAD4EB391D070FA70026DDA2 /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD4EB361D070FA70026DDA2 /* SwiftyJSON.framework */; };
 		FAD4EB3B1D0710CF0026DDA2 /* CryptoSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD4EB341D070FA70026DDA2 /* CryptoSwift.framework */; };
@@ -48,6 +49,7 @@
 		FA3C18991CBBDB9400A11CF7 /* BleMangager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BleMangager.swift; sourceTree = "<group>"; };
 		FA3C189A1CBBDB9400A11CF7 /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		FA44BB171CF5A6B50018C9D0 /* PromiseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseTests.swift; sourceTree = "<group>"; };
+		FAA047F61D072300000D333A /* OMGHTTPURLRQ.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OMGHTTPURLRQ.framework; path = Carthage/Build/iOS/OMGHTTPURLRQ.framework; sourceTree = "<group>"; };
 		FAD4EB341D070FA70026DDA2 /* CryptoSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoSwift.framework; path = Carthage/Build/iOS/CryptoSwift.framework; sourceTree = "<group>"; };
 		FAD4EB351D070FA70026DDA2 /* PromiseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PromiseKit.framework; path = Carthage/Build/iOS/PromiseKit.framework; sourceTree = "<group>"; };
 		FAD4EB361D070FA70026DDA2 /* SwiftyJSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftyJSON.framework; path = Carthage/Build/iOS/SwiftyJSON.framework; sourceTree = "<group>"; };
@@ -66,6 +68,7 @@
 				FAD4EB381D070FA70026DDA2 /* PromiseKit.framework in Frameworks */,
 				FAD4EB391D070FA70026DDA2 /* SwiftyJSON.framework in Frameworks */,
 				FAD4EB3B1D0710CF0026DDA2 /* CryptoSwift.framework in Frameworks */,
+				FAA047F71D072300000D333A /* OMGHTTPURLRQ.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,6 +86,7 @@
 			isa = PBXGroup;
 			children = (
 				FAE862611CF4B3830027539D /* Cartfile */,
+				FAA047F61D072300000D333A /* OMGHTTPURLRQ.framework */,
 				FAD4EB341D070FA70026DDA2 /* CryptoSwift.framework */,
 				FAD4EB351D070FA70026DDA2 /* PromiseKit.framework */,
 				FAD4EB361D070FA70026DDA2 /* SwiftyJSON.framework */,
@@ -148,7 +152,6 @@
 				FA3C18751CBBDA6B00A11CF7 /* Frameworks */,
 				FA3C18761CBBDA6B00A11CF7 /* Headers */,
 				FA3C18771CBBDA6B00A11CF7 /* Resources */,
-				FAD4EB3A1D070FD30026DDA2 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -259,22 +262,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "";
-		};
-		FAD4EB3A1D070FD30026DDA2 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"$(SRCROOT)/Carthage/Build/iOS/PromiseKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/SwiftyJSON.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/CryptoSwift.framework",
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "/usr/local/bin/carthage copy-frameworks";
 		};
 /* End PBXShellScriptBuildPhase section */
 
