@@ -8,16 +8,14 @@
 import Foundation
 import UIKit
 
-
 public class BluenetLocalization {
     var locationManager : LocationManager!
     let eventBus : EventBus!
     
-    public init(viewController: UIViewController, appName: String) {
+    public init(appName: String) {
         self.eventBus = EventBus()
         self.locationManager = LocationManager(eventBus: self.eventBus)
         APPNAME = appName
-        VIEWCONTROLLER = viewController;
         // let guideStone = BeaconID(id: "dobeacon",uuid: "a643423e-e175-4af0-a2e4-31e32f729a8a");
     }
     

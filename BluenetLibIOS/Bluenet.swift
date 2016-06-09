@@ -74,6 +74,10 @@ public class AvailableDevice {
     }
 }
 
+public func setViewController(viewController: UIViewController) {
+    VIEWCONTROLLER = viewController;
+}
+
 public class Bluenet {
     // todo: set back to private
     public let bleManager : BleManager!
@@ -81,14 +85,12 @@ public class Bluenet {
     
     var deviceList = [String: AvailableDevice]()
     
-    public init(viewController: UIViewController, appName: String) {
+    public init(appName: String) {
         self.eventBus = EventBus()
         self.bleManager = BleManager(eventBus: self.eventBus)
         
         self.eventBus.on("advertisementData", self.parseAdvertisement)
         APPNAME = appName
-        VIEWCONTROLLER = viewController;
-        
     }
     
     func parseAdvertisement(data: AnyObject) {
