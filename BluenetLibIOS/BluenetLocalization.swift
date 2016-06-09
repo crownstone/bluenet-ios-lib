@@ -1,7 +1,7 @@
 //
 //  BluenetNavigation.swift
 //  BluenetLibIOS
-////  Created by Alex de Mulder on 24/05/16.
+//
 //  Copyright © 2016 Alex de Mulder. All rights reserved.
 //
 
@@ -26,15 +26,16 @@ public class BluenetLocalization {
         self.locationManager = LocationManager(eventBus: self.eventBus)
     }
     
-    func trackUUID(uuid: String, groupName: String) {
-        let trackStone = BeaconID(id: groupName, uuid: uuid);
+    public func trackUUID(uuid: String, groupName: String) {
+        let trackStone = BeaconID(id: groupName, uuid: uuid)
+        self.locationManager.trackBeacon(trackStone)
     }
         
-    func on(topic: String, _ callback: (AnyObject) -> Void) -> Int {
+    public func on(topic: String, _ callback: (AnyObject) -> Void) -> Int {
         return self.eventBus.on(topic, callback)
     }
     
-    func off(id: Int) {
+    public func off(id: Int) {
         self.eventBus.off(id);
     }
 

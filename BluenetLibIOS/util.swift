@@ -9,7 +9,8 @@
 import Foundation
 
 // there is an inherent delay in this method of around 40 - 150 ms
-public func delay(delay:Double, closure:()->()) {
+// delay in seconds
+public func delay(delay:Double, _ closure:()->()) {
     dispatch_after(
         dispatch_time(
             DISPATCH_TIME_NOW,

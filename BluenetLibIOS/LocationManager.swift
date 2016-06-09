@@ -46,6 +46,13 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         
         print("location services enabled: \(CLLocationManager.locationServicesEnabled())");
         print("ranging services enabled: \(CLLocationManager.isRangingAvailable())");
+        
+        // stop monitoring all previous regions
+        for region in self.manager.monitoredRegions {
+            print ("INITIALIZATION: stop monitoring: \(region)")
+            self.manager.stopMonitoringForRegion(region)
+        }
+        
 
         self.check()
     }
@@ -105,7 +112,6 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     public func locationManager(manager : CLLocationManager, didRangeBeacons beacons : [CLBeacon], inRegion region: CLBeaconRegion) {
-        
         print("did range  - \(beacons) : \(region) \n")
         
     }
@@ -127,7 +133,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         if (state.rawValue == 1) {
             self._startRanging(region)
         }
-        else {
+        else { // 0 == unknown, 2 is outside
             self._stopRanging(region)
         }
     }

@@ -21,6 +21,7 @@ enum BleError : ErrorType {
     case CHARACTERISTIC_DOES_NOT_EXIST
     case WRONG_TYPE_OF_PROMISE
     case INVALID_UUID
+    case NOT_INITIALIZED
 }
 
 enum RequestType {
@@ -43,6 +44,7 @@ enum PromiseType {
     case CHARACTERISTICLIST
     case CHARACTERISTIC
 }
+
 
 
 
@@ -164,15 +166,38 @@ class promiseContainer {
     
 }
 
+public class Advertisement {
+    var uuid : String
+    var name : String?
+    var rssi : NSNumber
+    var serviceData = [String: NSData]()
+    var serviceDataAvailable : Bool
+    
+    init(uuid: String, name: String?, rssi: NSNumber, serviceData: AnyObject?) {
+        self.uuid = uuid
+        self.name = name
+        self.rssi = rssi
+        self.serviceDataAvailable = false
+        
+        if let castData = serviceData as? [CBUUID: NSData] {
+            for (serviceCUUID, data) in castData {
+                self.serviceData[serviceCUUID.UUIDString] = data
+                self.serviceDataAvailable = true
+            }
+        }
+    }
+    
+}
+
 public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     var centralManager : CBCentralManager!
     var connectedPeripheral: CBPeripheral?
     var connectingPeripheral: CBPeripheral?
     
-    var BleState = "unknown"
+    var BleState : CBCentralManagerState = .Unknown
     var pendingPromise : promiseContainer!
     var eventBus : EventBus!
-    
+
     public init(eventBus: EventBus) {
         super.init();
         
@@ -185,24 +210,39 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     
     // MARK: API
     
-    public func connect(uuid: String) -> Promise<Void> {
+    public func isReady() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
-            // cancel any connection attempt in progress.
-            if (connectingPeripheral != nil) {
-                abortConnecting()
-            }
-            if (connectedPeripheral != nil) {
-                disconnect()
-                    .then({ _ in return self._connect(uuid)})
-                    .then({ _ in fulfill()})
-                    .error(reject)
+            if (self.BleState != .PoweredOn) {
+                delay(0.25, {_ in self.isReady().then({_ in fulfill()})})
             }
             else {
-                self._connect(uuid)
-                    .then({ _ in fulfill()})
-                    .error(reject)
+                fulfill()
             }
-            
+        }
+    }
+    
+    public func connect(uuid: String) -> Promise<Void> {
+        return Promise<Void> { fulfill, reject in
+            if (self.BleState != .PoweredOn) {
+                reject(BleError.NOT_INITIALIZED)
+            }
+            else {
+                // cancel any connection attempt in progress.
+                if (connectingPeripheral != nil) {
+                    abortConnecting()
+                }
+                if (connectedPeripheral != nil) {
+                    disconnect()
+                        .then({ _ in return self._connect(uuid)})
+                        .then({ _ in fulfill()})
+                        .error(reject)
+                }
+                else {
+                    self._connect(uuid)
+                        .then({ _ in fulfill()})
+                        .error(reject)
+                }
+            }
         };
     }
     
@@ -214,7 +254,6 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             if (pendingPromise.type == .CONNECT) {
                pendingPromise.reject(BleError.CONNECTION_CANCELLED)
             }
-            
         }
     }
     
@@ -258,10 +297,10 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 fulfill()
             }
         }
-    }
+    }	
     
     
-    func getServicesFromDevice() -> Promise<[CBService]> {
+    public func getServicesFromDevice() -> Promise<[CBService]> {
         return Promise<[CBService]> { fulfill, reject in
             if (connectedPeripheral != nil) {
                 if let services = connectedPeripheral!.services {
@@ -274,7 +313,9 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                     connectedPeripheral!.discoverServices(nil) // then return services
                 }
             }
-            reject(BleError.NOT_CONNECTED)
+            else {
+                reject(BleError.NOT_CONNECTED)
+            }
         }
     }
     
@@ -285,6 +326,35 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             }
         }
         return nil;
+    }
+    
+    public func getCharacteristicsFromDevice(serviceId: String) -> Promise<[CBCharacteristic]> {
+        return Promise<[CBCharacteristic]> { fulfill, reject in
+            // if we are not connected, exit
+            if (connectedPeripheral != nil) {
+                // get all services from connected device (is cached if we already know it)
+                self.getServicesFromDevice()
+                    // then get all characteristics from connected device (is cached if we already know it)
+                    .then({(services: [CBService]) -> Promise<[CBCharacteristic]> in // get characteristics
+                        if let service = self.getServiceFromList(services, serviceId) {
+                            return self.getCharacteristicsFromDevice(service)
+                        }
+                        else {
+                            throw BleError.SERVICE_DOES_NOT_EXIST
+                        }
+                    })
+                    // then get the characteristic we need if it is in the list.
+                    .then({(characteristics: [CBCharacteristic]) -> Void in
+                        fulfill(characteristics);
+                    })
+                    .error({(error: ErrorType) -> Void in
+                        reject(error)
+                    })
+            }
+            else {
+                reject(BleError.NOT_CONNECTED)
+            }
+        }
     }
     
     func getCharacteristicsFromDevice(service: CBService) -> Promise<[CBCharacteristic]> {
@@ -300,7 +370,9 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                     connectedPeripheral!.discoverCharacteristics(nil, forService: service)// then return services
                 }
             }
-            reject(BleError.NOT_CONNECTED)
+            else {
+                reject(BleError.NOT_CONNECTED)
+            }
         }
     }
     
@@ -341,7 +413,9 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                         reject(error)
                     })
             }
-            reject(BleError.NOT_CONNECTED)
+            else {
+                reject(BleError.NOT_CONNECTED)
+            }
         }
     }
     
@@ -447,49 +521,39 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     // MARK: CENTRAL MANAGER DELEGATE
     
     public func centralManagerDidUpdateState(central: CBCentralManager) {
+        self.BleState = central.state;
         switch (central.state) {
         case .Unsupported:
             print("BLE is Unsupported")
-            self.BleState = "unsupported";
         case .Unauthorized:
             print("BLE is Unauthorized")
-            self.BleState = "unauthorized";
         case .Unknown:
             print("BLE is Unknown")
-            self.BleState = "unknown";
         case .Resetting:
             print("BLE is Resetting")
-            self.BleState = "resetting";
         case .PoweredOff:
             print("BLE is PoweredOff")
-            self.BleState = "off";
         case .PoweredOn:
             print("BLE is PoweredOn, start scanning")
-            self.BleState = "on";
             self.startScanning()
         }
     }
     
     public func centralManager(central: CBCentralManager, didDiscoverPeripheral peripheral: CBPeripheral, advertisementData: [String : AnyObject], RSSI: NSNumber) {
-        //print("Found one: \(peripheral.name) ")
-        let date = NSDate()
         
-        print("\n\(peripheral): \(RSSI) dBm : \(advertisementData) @ \(date.timeIntervalSince1970)")
-        //let name = "Kontakt"
-        // if (peripheral.name == name) {
-        //     print("\n\(peripheral.name) : \(peripheral.identifier) : \(RSSI) dBm : \(advertisementData)")
-        // }
+        var emitData = Advertisement(
+            uuid: peripheral.identifier.UUIDString,
+            name: peripheral.name,
+            rssi: RSSI,
+            serviceData: advertisementData["kCBAdvDataServiceData"]
+        );
         
-        //if (peripheral.name == name && self.connected == false && 2 == 1) {
-          //  connectedPeripheral = peripheral
-            //connectedPeripheral.delegate = self
-            //centralManager.connectPeripheral(connectedPeripheral, options: nil)
-            //connected = true;
-       // }
+        self.eventBus.emit("advertisementData",emitData)
     }
     
     public func centralManager(central: CBCentralManager, didConnectPeripheral peripheral: CBPeripheral) {
         if (pendingPromise.type == .CONNECT) {
+            print("connectiong")
             connectedPeripheral = peripheral
             connectingPeripheral = nil
             pendingPromise.fulfill()
