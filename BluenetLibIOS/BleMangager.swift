@@ -11,7 +11,7 @@ import CoreBluetooth
 import SwiftyJSON
 import PromiseKit
 
-enum BleError : ErrorType {
+public enum BleError : ErrorType {
     case DISCONNECTED
     case CONNECTION_CANCELLED
     case CONNECTION_TIMEOUT
