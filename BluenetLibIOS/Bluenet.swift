@@ -66,7 +66,7 @@ public class AvailableDevice {
     func calculateRssiAverage() {
         var count = 0
         var total : Double = 0
-        for (date, rssi) in self.rssiHistory {
+        for (_, rssi) in self.rssiHistory {
             total = total + Double(rssi)
             count += 1
         }

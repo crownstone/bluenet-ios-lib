@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreBluetooth
+import SwiftyJSON
 import PromiseKit
 
 enum BleError : ErrorType {
@@ -167,11 +168,11 @@ class promiseContainer {
 }
 
 public class Advertisement {
-    var uuid : String
-    var name : String?
-    var rssi : NSNumber
-    var serviceData = [String: NSData]()
-    var serviceDataAvailable : Bool
+    public var uuid : String
+    public var name : String?
+    public var rssi : NSNumber
+    public var serviceData = [String: NSData]()
+    public var serviceDataAvailable : Bool
     
     init(uuid: String, name: String?, rssi: NSNumber, serviceData: AnyObject?) {
         self.uuid = uuid
@@ -185,6 +186,16 @@ public class Advertisement {
                 self.serviceDataAvailable = true
             }
         }
+    }
+    
+    public func getJSON() -> JSON {
+        var dataDict = [String : AnyObject]()
+        dataDict["id"] = self.uuid
+        dataDict["name"] = self.name
+        dataDict["rssi"] = self.rssi
+        dataDict["serviceData"] = self.serviceData
+
+        return JSON(dataDict)
     }
     
 }
