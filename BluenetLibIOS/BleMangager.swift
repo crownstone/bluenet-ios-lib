@@ -169,14 +169,19 @@ class promiseContainer {
 
 public class Advertisement {
     public var uuid : String
-    public var name : String?
+    public var name : String
     public var rssi : NSNumber
     public var serviceData = [String: NSData]()
     public var serviceDataAvailable : Bool
     
     init(uuid: String, name: String?, rssi: NSNumber, serviceData: AnyObject?) {
+        if (name != nil) {
+            self.name = name
+        }
+        else {
+            self.name = ""
+        }
         self.uuid = uuid
-        self.name = name
         self.rssi = rssi
         self.serviceDataAvailable = false
         

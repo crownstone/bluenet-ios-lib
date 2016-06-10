@@ -52,9 +52,6 @@ public class AvailableDevice {
     }
     
     func update(data: Advertisement) {
-        if (data.uuid == "8300AADA-B46D-DB79-FADD-B8444F7FDE39") {
-            print("name: \(data.name), uuid: \(data.uuid)")
-        }
         self.rssi = data.rssi.integerValue
         self.lastUpdate = NSDate().timeIntervalSince1970
         self.rssiHistory[self.lastUpdate] = self.rssi;
