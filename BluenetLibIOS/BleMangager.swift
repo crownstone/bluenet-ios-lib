@@ -171,7 +171,7 @@ public class Advertisement {
     public var uuid : String
     public var name : String
     public var rssi : NSNumber
-    public var serviceData = [String: NSData]()
+    public var serviceData = [String: [NSNumber]]()
     public var serviceDataAvailable : Bool
     
     init(uuid: String, name: String?, rssi: NSNumber, serviceData: AnyObject?) {
@@ -187,7 +187,13 @@ public class Advertisement {
         
         if let castData = serviceData as? [CBUUID: NSData] {
             for (serviceCUUID, data) in castData {
-                self.serviceData[serviceCUUID.UUIDString] = data
+                // convert data to uint8 array
+                let uint8Arr = Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(data.bytes), count: data.length))
+                var numberArray = [NSNumber]()
+                for uint8 in uint8Arr {
+                    numberArray.append(NSNumber(unsignedChar: uint8))
+                }
+                self.serviceData[serviceCUUID.UUIDString] = numberArray
                 self.serviceDataAvailable = true
             }
         }
