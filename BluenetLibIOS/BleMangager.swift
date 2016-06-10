@@ -176,7 +176,7 @@ public class Advertisement {
     
     init(uuid: String, name: String?, rssi: NSNumber, serviceData: AnyObject?) {
         if (name != nil) {
-            self.name = name
+            self.name = name!
         }
         else {
             self.name = ""
