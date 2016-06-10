@@ -198,9 +198,17 @@ public class Advertisement {
         dataDict["id"] = self.uuid
         dataDict["name"] = self.name
         dataDict["rssi"] = self.rssi
-        dataDict["serviceData"] = self.serviceData
+        
+        var dataJSON = JSON(dataDict)
+        
+        if (self.serviceDataAvailable) {
+            dataJSON["serviceData"] = JSON(self.serviceData)
+        }
+        else {
+            dataJSON["serviceData"] = []
+        }
 
-        return JSON(dataDict)
+        return dataJSON
     }
     
 }
