@@ -20,13 +20,13 @@ class NBSummary {
 
 
 class NaiveBayes {
-    var fingerPrints = [String: Fingerprint]()
+    var fingerprints = [String: Fingerprint]()
     var summaries = [String: [String: NBSummary]]() // classId: observableId: summary
     
     init() {}
     
     func loadFingerprint(id: String, _ fingerPrint: Fingerprint) {
-        self.fingerPrints[id] = fingerPrint
+        self.fingerprints[id] = fingerPrint
         self._processFingerPrint(id, fingerPrint)
     }
     
@@ -43,6 +43,11 @@ class NaiveBayes {
         }
         
         return highestPredictionLabel
+    }
+    
+    func reset() {
+        self.fingerprints = [String: Fingerprint]()
+        self.summaries = [String: [String: NBSummary]]()
     }
     
     func _predict(inputVector: [iBeaconPacket], _ summary: [String: NBSummary]) -> Double {
@@ -62,8 +67,6 @@ class NaiveBayes {
         // we average to ensure missing datapoints will not influence the result.
         return totalProbability / totalMatches
     }
-    
-    
     
     func _processFingerPrint(id: String, _ fingerprint: Fingerprint) {
         for (stoneId, measurements) in fingerprint.data {

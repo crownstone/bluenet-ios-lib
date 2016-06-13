@@ -37,5 +37,9 @@ public class LocationClassifier {
         }
     }
     
+    func reset() {
+        self.naiveBayes.reset()
+    }
+    
     
 }

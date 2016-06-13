@@ -59,6 +59,11 @@ public class EventBus {
         return (self.topics[topic] != nil)
     }
     
+    func reset() {
+        self.topics = [String: [Int: callbackType]]()
+        self.subscribers = [Int: String]()
+    }
+    
     
     // MARK: Util
     

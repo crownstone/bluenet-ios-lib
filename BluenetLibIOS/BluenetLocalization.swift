@@ -66,6 +66,13 @@ public class BluenetLocalization {
         self.eventBus.off(id);
     }
     
+    public func reset() {
+        self.eventBus.reset()
+        for (location, classifier) in self.classifier {
+            self.classifier[location]!.reset()
+        }
+    }
+    
     public func loadFingerprint(groupId: String, locationId: String, fingerprint: Fingerprint) {
         self._loadFingerprint(groupId, locationId: locationId, fingerprint: fingerprint)
     }

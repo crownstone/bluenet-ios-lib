@@ -101,6 +101,10 @@ public class Bluenet {
         }
     }
     
+    public func reset() {
+        self.eventBus.reset()
+    }
+    
     public func isReady() -> Promise<Void> {
         return self.bleManager.isReady()
     }
