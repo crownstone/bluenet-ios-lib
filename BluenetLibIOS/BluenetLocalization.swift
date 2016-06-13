@@ -9,18 +9,18 @@ import Foundation
 import CoreLocation
 import UIKit
 
-public class FingerPrint {
+public class Fingerprint {
     var data = [String: [NSNumber]]()
     
     func collect(ibeaconData: [iBeaconPacket]) {
         for point in ibeaconData {
             // we claim that the uuid, major and minor combination is unique.
-            let idString = point.uuid + String(point.major) + String(point.minor)
-            if (data.indexForKey(idString) == nil) {
-                data[idString] = [NSNumber]()
+            
+            if (data.indexForKey(point.idString) == nil) {
+                data[point.idString] = [NSNumber]()
             }
             
-            data[idString]!.append(point.rssi)
+            data[point.idString]!.append(point.rssi)
         }
     }
 }
@@ -30,13 +30,13 @@ public class BluenetLocalization {
     let eventBus : EventBus!
     
     var classifier = [String: LocationClassifier]()
-    var collectingFingerPrint : FingerPrint?
+    var collectingFingerprint : Fingerprint?
     var collectingCallbackId : Int?
     var collectingLocation : String?
     var activeGroup : String?
     var activeLocation : String?
     
-    var fingerPrintData = [String : [String : FingerPrint]]() // groupId: locationId: fingerprint
+    var fingerprintData = [String : [String : Fingerprint]]() // groupId: locationId: Fingerprint
     
     
     public init(appName: String) {
@@ -66,27 +66,36 @@ public class BluenetLocalization {
         self.eventBus.off(id);
     }
     
-    public func loadFingerPrint(groupId: String, locationId: String, fingerPrint: FingerPrint) {
-        self._loadFingerPrint(groupId, locationId: locationId, fingerPrint: fingerPrint)
+    public func loadFingerprint(groupId: String, locationId: String, fingerprint: Fingerprint) {
+        self._loadFingerprint(groupId, locationId: locationId, fingerprint: fingerprint)
     }
     
-    func _loadFingerPrint(groupId: String, locationId: String, fingerPrint: FingerPrint) {
+    public func getFingerprint(groupId: String, locationId: String) -> Fingerprint? {
+        if let groupFingerprints = self.fingerprintData[groupId] {
+            if let returnPrint = groupFingerprints[locationId] {
+                return returnPrint
+            }
+        }
+        return nil
+    }
+    
+    func _loadFingerprint(groupId: String, locationId: String, fingerprint: Fingerprint) {
         if (self.classifier[groupId] == nil) {
             self.classifier[groupId] = LocationClassifier()
         }
-        self.classifier[groupId]!.loadFingerPrint(locationId, fingerPrint: fingerPrint)
+        self.classifier[groupId]!.loadFingerprint(locationId, fingerprint: fingerprint)
     }
     
     public func startCollectingFingerprint(locationId: String, groupId: String) {
-        self.collectingFingerPrint = FingerPrint()
+        self.collectingFingerprint = Fingerprint()
         self.collectingLocation = locationId
         self.collectingCallbackId = self.eventBus.on("iBeaconAdvertisement", {ibeaconData in
             if let data = ibeaconData as? [iBeaconPacket] {
-                if let fingerPrint = self.collectingFingerPrint {
-                    fingerPrint.collect(data)
+                if let Fingerprint = self.collectingFingerprint {
+                    Fingerprint.collect(data)
                 }
                 else {
-                    self._cleanupCollectingFingerPrint()
+                    self._cleanupCollectingFingerprint()
                 }
             }
         });
@@ -94,23 +103,23 @@ public class BluenetLocalization {
    
     public func finishCollectingFingerprint() {
         if let activeGroup = self.activeGroup {
-            if (self.collectingFingerPrint != nil && self.collectingLocation != nil) {
-                if (self.fingerPrintData[activeGroup] == nil) {
-                    self.fingerPrintData[activeGroup] = [String: FingerPrint]()
+            if (self.collectingFingerprint != nil && self.collectingLocation != nil) {
+                if (self.fingerprintData[activeGroup] == nil) {
+                    self.fingerprintData[activeGroup] = [String: Fingerprint]()
                 }
-                self.fingerPrintData[activeGroup]![self.collectingLocation!] = self.collectingFingerPrint!
-                self._loadFingerPrint(activeGroup, locationId: self.collectingLocation!, fingerPrint: self.collectingFingerPrint!)
+                self.fingerprintData[activeGroup]![self.collectingLocation!] = self.collectingFingerprint!
+                self._loadFingerprint(activeGroup, locationId: self.collectingLocation!, fingerprint: self.collectingFingerprint!)
             }
         }
-        self._cleanupCollectingFingerPrint()
+        self._cleanupCollectingFingerprint()
     }
     
-    func _cleanupCollectingFingerPrint() {
+    func _cleanupCollectingFingerprint() {
         if let callbackId = self.collectingCallbackId {
             self.off(callbackId)
         }
         self.collectingCallbackId = nil
-        self.collectingFingerPrint = nil
+        self.collectingFingerprint = nil
         self.collectingLocation = nil
     }
     
@@ -136,10 +145,9 @@ public class BluenetLocalization {
     }
     
     func getLocation(data : [iBeaconPacket]) -> String {
-        // LOCATION algorithm here
-        
-        self.eventBus.emit("locationUpdate", "location")
-        return "bla"
+        var location = self.classifier[self.activeGroup!]!.predict(data)
+        self.eventBus.emit("currentLocation", location)
+        return location
     }
 
    

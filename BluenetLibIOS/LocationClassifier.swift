@@ -23,14 +23,14 @@ public class LocationClassifier {
         self.classifierType = classifier
     }
     
-    func loadFingerPrint(locationId: String, fingerPrint: FingerPrint) {
+    func loadFingerprint(locationId: String, fingerprint: Fingerprint) {
         switch (self.classifierType) {
             case .NAIVE_BAYES:
-                self.naiveBayes.loadFingerprint(locationId, fingerPrint)
+                self.naiveBayes.loadFingerprint(locationId, fingerprint)
         }
     }
     
-    func predict(inputVector: [String: NSNumber]) -> String {
+    func predict(inputVector: [iBeaconPacket]) -> String {
         switch (self.classifierType) {
             case .NAIVE_BAYES:
                 return self.naiveBayes.predict(inputVector)

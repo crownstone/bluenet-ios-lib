@@ -20,17 +20,17 @@ class NBSummary {
 
 
 class NaiveBayes {
-    var fingerPrints = [String: FingerPrint]()
+    var fingerPrints = [String: Fingerprint]()
     var summaries = [String: [String: NBSummary]]() // classId: observableId: summary
     
     init() {}
     
-    func loadFingerprint(id: String, _ fingerPrint: FingerPrint) {
+    func loadFingerprint(id: String, _ fingerPrint: Fingerprint) {
         self.fingerPrints[id] = fingerPrint
         self._processFingerPrint(id, fingerPrint)
     }
     
-    func predict(inputVector: [String: NSNumber]) -> String {
+    func predict(inputVector: [iBeaconPacket]) -> String {
         var highestPrediction : Double = 0
         var highestPredictionLabel = ""
         
@@ -45,12 +45,13 @@ class NaiveBayes {
         return highestPredictionLabel
     }
     
-    func _predict(inputVector: [String: NSNumber], _ summary: [String: NBSummary]) -> Double {
+    func _predict(inputVector: [iBeaconPacket], _ summary: [String: NBSummary]) -> Double {
         var totalProbability : Double = 1
         var totalMatches : Double = 0
-        for (stoneId, rssi) in inputVector {
+        for packet in inputVector {
+            let stoneId = packet.idString
             if (summary[stoneId] != nil) {
-                let RSSI = Double(rssi);
+                let RSSI = Double(packet.rssi);
                 let mean = summary[stoneId]!.mean
                 let std =  summary[stoneId]!.std
                 var exponent = exp(-(pow(RSSI - mean,2)/(2*pow(std,2))))
@@ -64,8 +65,8 @@ class NaiveBayes {
     
     
     
-    func _processFingerPrint(id: String, _ fingerPrint: FingerPrint) {
-        for (stoneId, measurements) in fingerPrint.data {
+    func _processFingerPrint(id: String, _ fingerprint: Fingerprint) {
+        for (stoneId, measurements) in fingerprint.data {
             let mean = self._getMean(measurements)
             let std = self._getSTD(mean, measurements)
             let summary = NBSummary(mean, std)

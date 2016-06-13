@@ -28,12 +28,14 @@ public class iBeaconPacket {
     public var major: NSNumber
     public var minor: NSNumber
     public var rssi : NSNumber
+    public var idString: String
     
     init(uuid: String, major: NSNumber, minor: NSNumber, rssi: NSNumber) {
         self.uuid = uuid
         self.major = major
         self.minor = minor
         self.rssi = rssi
+        self.idString = uuid + String(major) + String(minor)
     }
 }
 
