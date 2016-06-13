@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		FA086A811D0EB34F005F2024 /* NaiveBayes.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA086A801D0EB34F005F2024 /* NaiveBayes.swift */; };
-		FA086A831D0EB4AF005F2024 /* Classifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA086A821D0EB4AF005F2024 /* Classifier.swift */; };
+		FA086A831D0EB4AF005F2024 /* LocationClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA086A821D0EB4AF005F2024 /* LocationClassifier.swift */; };
 		FA3C187D1CBBDA6B00A11CF7 /* BluenetLibIOS.h in Headers */ = {isa = PBXBuildFile; fileRef = FA3C187C1CBBDA6B00A11CF7 /* BluenetLibIOS.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FA3C18891CBBDA6B00A11CF7 /* BluenetLibIOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3C18881CBBDA6B00A11CF7 /* BluenetLibIOSTests.swift */; };
 		FA3C189B1CBBDB9400A11CF7 /* BleMangager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3C18991CBBDB9400A11CF7 /* BleMangager.swift */; };
@@ -45,7 +45,7 @@
 
 /* Begin PBXFileReference section */
 		FA086A801D0EB34F005F2024 /* NaiveBayes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NaiveBayes.swift; sourceTree = "<group>"; };
-		FA086A821D0EB4AF005F2024 /* Classifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Classifier.swift; sourceTree = "<group>"; };
+		FA086A821D0EB4AF005F2024 /* LocationClassifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationClassifier.swift; sourceTree = "<group>"; };
 		FA3C18791CBBDA6B00A11CF7 /* BluenetLibIOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BluenetLibIOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA3C187C1CBBDA6B00A11CF7 /* BluenetLibIOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BluenetLibIOS.h; sourceTree = "<group>"; };
 		FA3C187E1CBBDA6B00A11CF7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -121,7 +121,7 @@
 				FA3C18991CBBDB9400A11CF7 /* BleMangager.swift */,
 				FA3C189A1CBBDB9400A11CF7 /* LocationManager.swift */,
 				FAE862571CF4515A0027539D /* Bluenet.swift */,
-				FA086A821D0EB4AF005F2024 /* Classifier.swift */,
+				FA086A821D0EB4AF005F2024 /* LocationClassifier.swift */,
 				FA4E02981D0873CD0086E2BF /* BluenetLocalization.swift */,
 				FA086A801D0EB34F005F2024 /* NaiveBayes.swift */,
 				FAE8625B1CF478E50027539D /* Eventbus.swift */,
@@ -282,7 +282,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FA086A831D0EB4AF005F2024 /* Classifier.swift in Sources */,
+				FA086A831D0EB4AF005F2024 /* LocationClassifier.swift in Sources */,
 				FA3C189D1CBBDB9400A11CF7 /* LocationManager.swift in Sources */,
 				FA086A811D0EB34F005F2024 /* NaiveBayes.swift in Sources */,
 				FAE8625C1CF478E50027539D /* Eventbus.swift in Sources */,
