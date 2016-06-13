@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreLocation
+import SwiftyJSON
 import UIKit
 
 
@@ -36,6 +37,19 @@ public class iBeaconPacket {
         self.minor = minor
         self.rssi = rssi
         self.idString = uuid + String(major) + String(minor)
+    }
+    
+    func toJSON() -> JSON {
+        var dataDict = [String : AnyObject]()
+        dataDict["id"]    = self.idString
+        dataDict["uuid"]  = self.uuid
+        dataDict["major"] = self.major
+        dataDict["minor"] = self.minor
+        dataDict["rssi"]  = self.rssi
+        
+        var dataJSON = JSON(dataDict)
+        
+        return dataJSON
     }
 }
 
