@@ -105,6 +105,14 @@ public class Bluenet {
         self.eventBus.reset()
     }
     
+    public func startScanning() {
+        self.bleManager.startScanning()
+    }
+    
+    public func stopScanning() {
+        self.bleManager.stopScanning()
+    }
+    
     public func isReady() -> Promise<Void> {
         return self.bleManager.isReady()
     }
@@ -117,13 +125,13 @@ public class Bluenet {
        return self.bleManager.disconnect()
     }
     
-    func getBLEstate() -> CBCentralManagerState {
+    public func getBLEstate() -> CBCentralManagerState {
         return self.bleManager.BleState;
     }
     
-    func setSwitchState(state: Float) {
+    public func setSwitchState(state: Float) -> Promise<Void> {
         
-    }    
+    }
     
     public func on(topic: String, _ callback: (AnyObject) -> Void) -> Int {
         return self.eventBus.on(topic, callback)
