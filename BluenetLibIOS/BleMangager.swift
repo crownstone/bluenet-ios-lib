@@ -47,8 +47,6 @@ enum PromiseType {
 }
 
 
-
-
 class promiseContainer {
     private var _fulfillVoidPromise             : (Void) -> Void                = {_ in }
     private var _fulfillIntPromise              : (Int) -> Void                 = {_ in }
@@ -422,7 +420,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 // get all services from connected device (is cached if we already know it)
                 self.getServicesFromDevice()
                     // then get all characteristics from connected device (is cached if we already know it)
-                    .then({(services: [CBService]) -> Promise<[CBCharacteristic]> in // get characteristics
+                    .then({(services: [CBService]) -> Promise<[CBCharacteristic]> in
                         if let service = self.getServiceFromList(services, serviceId) {
                             return self.getCharacteristicsFromDevice(service)
                         }
@@ -583,7 +581,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     
     public func centralManager(central: CBCentralManager, didConnectPeripheral peripheral: CBPeripheral) {
         if (pendingPromise.type == .CONNECT) {
-            print("connectiong")
+            print("connecting")
             connectedPeripheral = peripheral
             connectingPeripheral = nil
             pendingPromise.fulfill()
@@ -614,7 +612,6 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 pendingPromise.fulfill()
             }
         }
-        
     }
     
     public func centralManager(central: CBCentralManager, willRestoreState dict: [String : AnyObject]) {

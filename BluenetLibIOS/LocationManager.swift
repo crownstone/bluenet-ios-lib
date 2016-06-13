@@ -23,8 +23,19 @@ public class BeaconID {
     }
 }
 
-
-
+public class iBeaconPacket {
+    public var uuid : String
+    public var major: NSNumber
+    public var minor: NSNumber
+    public var rssi : NSNumber
+    
+    init(uuid: String, major: NSNumber, minor: NSNumber, rssi: NSNumber) {
+        self.uuid = uuid
+        self.major = major
+        self.minor = minor
+        self.rssi = rssi
+    }
+}
 
 public class LocationManager : NSObject, CLLocationManagerDelegate {
     var manager : CLLocationManager!
@@ -112,7 +123,19 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     public func locationManager(manager : CLLocationManager, didRangeBeacons beacons : [CLBeacon], inRegion region: CLBeaconRegion) {
-        print("did range  - \(beacons) : \(region) \n")
+
+        var iBeacons = [iBeaconPacket]()
+        
+        for beacon in beacons {
+            iBeacons.append(iBeaconPacket(
+                uuid: beacon.proximityUUID.UUIDString,
+                major: beacon.major,
+                minor: beacon.minor,
+                rssi: beacon.rssi
+            ))
+        }
+        
+        self.eventBus.emit("iBeaconAdvertisement", iBeacons)
         
     }
     
@@ -159,6 +182,8 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     func _startRanging(region: CLRegion) {
+        self.eventBus.emit("enterRegion", region.identifier)
+        
         for element in self.trackingBeacons {
             print ("region id \(region.identifier) vs elementId \(element.region.identifier) \n")
             if (element.region.identifier == region.identifier) {
@@ -169,6 +194,8 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     func _stopRanging(region: CLRegion) {
+        self.eventBus.emit("exitRegion", region.identifier)
+        
         for element in self.trackingBeacons {
             print ("region id \(region.identifier) vs elementId \(element.region.identifier) \n")
             if (element.region.identifier == region.identifier) {
