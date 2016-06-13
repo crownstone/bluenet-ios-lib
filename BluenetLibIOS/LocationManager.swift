@@ -39,7 +39,7 @@ public class iBeaconPacket {
         self.idString = uuid + String(major) + String(minor)
     }
     
-    func getJSON() -> JSON {
+    public func getJSON() -> JSON {
         var dataDict = [String : AnyObject]()
         dataDict["id"]    = self.idString
         dataDict["uuid"]  = self.uuid
