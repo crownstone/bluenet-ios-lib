@@ -132,12 +132,18 @@ public class BluenetLocalization {
     
     func updateState(ibeaconData: AnyObject) {
         if let data = ibeaconData as? [iBeaconPacket] {
+            
             if (self.activeGroup != data[0].uuid) {
                 if (self.activeGroup != nil) {
                     self.eventBus.emit("exitRegion", self.activeGroup!)
                 }
                 self.activeGroup = data[0].uuid
                 self.eventBus.emit("enterRegion", self.activeGroup!)
+            }
+            
+            // create classifiers for this group if required.
+            if (self.classifier[self.activeGroup!] == nil) {
+                self.classifier[self.activeGroup!] = LocationClassifier()
             }
             
             var currentlocation = self.getLocation(data)
