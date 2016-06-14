@@ -130,7 +130,9 @@ public class Bluenet {
     }
     
     public func setSwitchState(state: Float) -> Promise<Void> {
-        
+        return Promise<Void> { fulfill, reject in
+            fulfill()
+        }
     }
     
     public func on(topic: String, _ callback: (AnyObject) -> Void) -> Int {
