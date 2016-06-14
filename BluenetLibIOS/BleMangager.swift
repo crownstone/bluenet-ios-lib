@@ -238,6 +238,10 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     
     // MARK: API
     
+    /**
+     * This method will fulfill when the bleManager is ready. It polls itself every 0.25 seconds.
+     *
+     */
     public func isReady() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             if (self.BleState != .PoweredOn) {
@@ -249,6 +253,10 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         }
     }
     
+    /**
+     * Connect to a ble device. The uuid is the Apple UUID which differs between phones for a single device
+     *
+     */
     public func connect(uuid: String) -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             if (self.BleState != .PoweredOn) {
@@ -274,6 +282,9 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         };
     }
     
+    /**
+     *  Cancel a pending connection
+     */
     func abortConnecting() {
         if (connectingPeripheral != nil) {
             centralManager.cancelPeripheralConnection(connectingPeripheral!)
@@ -285,6 +296,10 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         }
     }
     
+    /**
+     *  This does the actual connection. It stores the pending promise and waits for the delegate to return.
+     *
+     */
     func _connect(uuid: String) -> Promise<Void> {
         let nsUuid = NSUUID(UUIDString: uuid)
         return Promise<Void> { fulfill, reject in
@@ -306,6 +321,10 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         }
     }
     
+    /**
+     *  Disconnect from the connected BLE device
+     *
+     */
     public func disconnect() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             // only disconnect if we are actually connected!
@@ -327,7 +346,10 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         }
     }	
     
-    
+    /**
+     *  Get the services from a connected device
+     *
+     */
     public func getServicesFromDevice() -> Promise<[CBService]> {
         return Promise<[CBService]> { fulfill, reject in
             if (connectedPeripheral != nil) {
@@ -347,7 +369,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         }
     }
     
-    func getServiceFromList(list:[CBService], _ uuid: String) -> CBService? {
+    func _getServiceFromList(list:[CBService], _ uuid: String) -> CBService? {
         for service in list {
             if (service.UUID.UUIDString == uuid) {
                 return service
@@ -364,7 +386,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 self.getServicesFromDevice()
                     // then get all characteristics from connected device (is cached if we already know it)
                     .then({(services: [CBService]) -> Promise<[CBCharacteristic]> in // get characteristics
-                        if let service = self.getServiceFromList(services, serviceId) {
+                        if let service = self._getServiceFromList(services, serviceId) {
                             return self.getCharacteristicsFromDevice(service)
                         }
                         else {
@@ -421,7 +443,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 self.getServicesFromDevice()
                     // then get all characteristics from connected device (is cached if we already know it)
                     .then({(services: [CBService]) -> Promise<[CBCharacteristic]> in
-                        if let service = self.getServiceFromList(services, serviceId) {
+                        if let service = self._getServiceFromList(services, serviceId) {
                             return self.getCharacteristicsFromDevice(service)
                         }
                         else {
@@ -563,7 +585,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             print("BLE is PoweredOff")
         case .PoweredOn:
             print("BLE is PoweredOn, start scanning")
-            self.startScanning()
+            //self.startScanning()
         }
     }
     
