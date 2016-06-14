@@ -129,6 +129,8 @@ public class Bluenet {
         return self.bleManager.BleState;
     }
     
+    
+    
     /**
      * Set the switch state. If 0 or 1, switch on or off. If 0 < x < 1 then dim.
      */

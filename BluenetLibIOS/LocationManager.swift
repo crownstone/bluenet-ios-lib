@@ -79,12 +79,15 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
             print ("INITIALIZATION: stop monitoring: \(region)")
             self.manager.stopMonitoringForRegion(region)
         }
-        
 
         self.check()
     }
     
     public func trackBeacon(beacon: BeaconID) {
+        print(self.trackingBeacons)
+        print(!self._beaconInList(beacon, list: self.trackingBeacons))
+        print(self.started)
+        
         if (!self._beaconInList(beacon, list: self.trackingBeacons)) {
             trackingBeacons.append(beacon);
             self.manager.startMonitoringForRegion(beacon.region)
@@ -139,7 +142,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     public func locationManager(manager : CLLocationManager, didRangeBeacons beacons : [CLBeacon], inRegion region: CLBeaconRegion) {
-
+        print ("got datapoint!")
         var iBeacons = [iBeaconPacket]()
         
         for beacon in beacons {
