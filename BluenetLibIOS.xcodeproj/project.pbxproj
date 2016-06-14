@@ -130,8 +130,8 @@
 				FA4E02981D0873CD0086E2BF /* BluenetLocalization.swift */,
 				FAE8625B1CF478E50027539D /* Eventbus.swift */,
 				FAE8625F1CF48E530027539D /* util.swift */,
-				FA4A09D71D096932005753CE /* packets.swift */,
 				FA4A09D91D099D01005753CE /* types.swift */,
+				FA4A09D71D096932005753CE /* packets.swift */,
 				FA270B041D0F12CD00CB0AE8 /* characteristics.swift */,
 				FA270B061D0F12D800CB0AE8 /* services.swift */,
 			);

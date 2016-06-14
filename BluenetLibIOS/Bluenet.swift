@@ -129,9 +129,27 @@ public class Bluenet {
         return self.bleManager.BleState;
     }
     
+    /**
+     * Set the switch state. If 0 or 1, switch on or off. If 0 < x < 1 then dim.
+     */
     public func setSwitchState(state: Float) -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
-            fulfill()
+        if (state == 0 || state >= 1) {
+            var switchState = UInt8(state)
+            return self.bleManager.writeToCharacteristic(
+                CSServices.CrownstoneService,
+                characteristicId: CrownstoneCharacteristics.Control,
+                data: ControlPacket(type: .SWITCH, payload8: switchState).getNSData(),
+                type: CBCharacteristicWriteType.WithoutResponse
+            )
+        }
+        else {
+            var switchState = UInt8(state*100.0)
+            return self.bleManager.writeToCharacteristic(
+                CSServices.CrownstoneService,
+                characteristicId: CrownstoneCharacteristics.Control,
+                data: ControlPacket(type: .PWM, payload8: switchState).getNSData(),
+                type: CBCharacteristicWriteType.WithoutResponse
+            )
         }
     }
     

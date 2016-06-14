@@ -35,6 +35,14 @@ func string_to_uint8_array(string: String) -> [UInt8] {
     return arr
 }
 
+/*
+ *
+ *
+ *  These are valid for SDK 0.4.1
+ *
+ *
+ */
+
 class BLEPacket {
     var type : UInt8 = 0
     var length : [UInt8] = [0,0]
@@ -71,6 +79,11 @@ class BLEPacket {
         arr += self.length
         arr += self.payload
         return arr
+    }
+    
+    func getNSData() -> NSData {
+        let bytes = self.getPacket()
+        return NSData(bytes: bytes, length: bytes.count)
     }
 }
 
