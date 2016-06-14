@@ -94,9 +94,10 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
             self.manager.requestStateForRegion(beacon.region)
         }
         
-        if (self.started == false) {
-            self.start();
-        }
+//        if (self.started == false) {
+//            self.start();
+//        }
+        self.start();
     }
     
     public func check() {
