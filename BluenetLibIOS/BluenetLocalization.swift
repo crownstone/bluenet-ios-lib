@@ -110,7 +110,7 @@ public class BluenetLocalization {
         self._cleanupCollectingFingerprint()
     }
    
-    public func finalizeFingerprint(locationId: String, groupId: String) {
+    public func finalizeFingerprint(groupId: String, locationId: String) {
         if (self.collectingFingerprint != nil) {
             if (self.fingerprintData[groupId] == nil) {
                 self.fingerprintData[groupId] = [String: Fingerprint]()
