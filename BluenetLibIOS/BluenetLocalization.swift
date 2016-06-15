@@ -6,22 +6,30 @@
 //
 
 import Foundation
-import CoreLocation
 import UIKit
+import CoreLocation
+import SwiftyJSON
+
 
 public class Fingerprint {
     var data = [String: [NSNumber]]()
     
     func collect(ibeaconData: [iBeaconPacket]) {
         for point in ibeaconData {
-            // we claim that the uuid, major and minor combination is unique.
-            
             if (data.indexForKey(point.idString) == nil) {
                 data[point.idString] = [NSNumber]()
             }
             
             data[point.idString]!.append(point.rssi)
         }
+    }
+    
+    public func getJSON() -> JSON {
+        return JSON(self.data)
+    }
+    
+    public func stringify() -> String {
+        return JSONUtils.stringify(JSON(self.data))
     }
 }
 

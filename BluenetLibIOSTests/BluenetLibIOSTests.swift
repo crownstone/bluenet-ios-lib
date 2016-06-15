@@ -7,7 +7,6 @@
 //
 
 import XCTest
-@testable import BluenetLibIOS
 
 class BluenetLibIOSTests: XCTestCase {
     
@@ -21,9 +20,13 @@ class BluenetLibIOSTests: XCTestCase {
         super.tearDown()
     }
     
-    func testExample() {
+    func testConversion() {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
+        let uint8Array16 : [UInt8] = [10,32]
+        let uint8Array32 : [UInt8] = [10,32,0,2]
+        XCTAssertEqual(Conversion.uint8_array_to_uint16(uint8Array16), UInt16(8202))
+        XCTAssertEqual(Conversion.uint8_array_to_uint32(uint8Array32), UInt32(33562634))
+        XCTAssertEqual(Conversion.uint32_to_int32(UInt32(3147483647)), Int32(-1147483649))
     }
-    
 }

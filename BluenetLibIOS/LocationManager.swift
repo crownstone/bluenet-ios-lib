@@ -36,6 +36,8 @@ public class iBeaconPacket {
         self.major = major
         self.minor = minor
         self.rssi = rssi
+        
+        // we claim that the uuid, major and minor combination is unique.
         self.idString = uuid + String(major) + String(minor)
     }
     
@@ -51,6 +53,11 @@ public class iBeaconPacket {
         
         return dataJSON
     }
+    
+    public func stringify() -> String {
+        return JSONUtils.stringify(self.getJSON())
+    }
+    
 }
 
 public class LocationManager : NSObject, CLLocationManagerDelegate {

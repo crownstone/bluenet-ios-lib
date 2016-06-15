@@ -7,34 +7,7 @@
 //
 
 import Foundation
-
-// Convert a number into an array of 2 bytes.
-func uint16_to_uint8_array(value: UInt16) -> [UInt8] {
-    return [
-        UInt8((value >> 0 & 0xFF)),
-        UInt8((value >> 8 & 0xFF))
-    ]
-}
-
-// Convert a number into an array of 4 bytes.
-func uint32_to_uint8_array(value: UInt32) -> [UInt8] {
-    return [
-        UInt8((value >> 0 & 0xFF)),
-        UInt8((value >> 8 & 0xFF)),
-        UInt8((value >> 16 & 0xFF)),
-        UInt8((value >> 24 & 0xFF))
-    ]
-}
-
-func string_to_uint8_array(string: String) -> [UInt8] {
-    var arr = [UInt8]();
-    for c in string.characters {
-        let scalars = String(c).unicodeScalars
-        arr.append(UInt8(scalars[scalars.startIndex].value))
-    }
-    return arr
-}
-
+import SwiftyJSON
 /*
  *
  *
@@ -50,26 +23,26 @@ class BLEPacket {
     
     init(type: UInt8, payload: String) {
         self.type = type
-        self.payload = string_to_uint8_array(payload)
-        self.length = uint16_to_uint8_array(__uint16_t(self.payload.count))
+        self.payload = Conversion.string_to_uint8_array(payload)
+        self.length = Conversion.uint16_to_uint8_array(__uint16_t(self.payload.count))
     }
     
     init(type: UInt8, payload: UInt8) {
         self.type = type
         self.payload = [payload]
-        self.length = uint16_to_uint8_array(__uint16_t(self.payload.count))
+        self.length = Conversion.uint16_to_uint8_array(__uint16_t(self.payload.count))
     }
     
     init(type: UInt8, payload: UInt16) {
         self.type = type
-        self.payload = uint16_to_uint8_array(payload)
-        self.length = uint16_to_uint8_array(__uint16_t(self.payload.count))
+        self.payload = Conversion.uint16_to_uint8_array(payload)
+        self.length = Conversion.uint16_to_uint8_array(__uint16_t(self.payload.count))
     }
     
     init(type: UInt8, payload: UInt32) {
         self.type = type
-        self.payload = uint32_to_uint8_array(payload)
-        self.length = uint16_to_uint8_array(__uint16_t(self.payload.count))
+        self.payload = Conversion.uint32_to_uint8_array(payload)
+        self.length = Conversion.uint16_to_uint8_array(__uint16_t(self.payload.count))
     }
     
     func getPacket() -> [UInt8] {
@@ -175,3 +148,63 @@ class WriteStatePacket : ReadStatePacket {
 class NotificationStatePacket : ReadStatePacket {
     override func getOpCode() -> OpCode { return .NOTIFY }
 }
+
+
+public class ScanResponcePacket {
+    var crownstoneId        : UInt16
+    var crownstoneStateId   : UInt16
+    var switchState         : UInt8
+    var eventBitmask        : UInt8
+    var reserved            : UInt16
+    var powerUsage          : Int32
+    var accumulatedEnergy   : Int32
+    
+    init(data: [UInt8]) {
+        self.crownstoneId      = Conversion.uint8_array_to_uint16([data[0], data[1]])
+        self.crownstoneStateId = Conversion.uint8_array_to_uint16([data[2], data[3]])
+        self.switchState       = data[4]
+        self.eventBitmask      = data[5]
+        self.reserved          = Conversion.uint8_array_to_uint16([data[6], data[7]])
+        self.powerUsage        = Conversion.uint32_to_int32(
+            Conversion.uint8_array_to_uint32([
+                data[8],
+                data[9],
+                data[10],
+                data[11]
+            ])
+        )
+        self.accumulatedEnergy = Conversion.uint32_to_int32(
+            Conversion.uint8_array_to_uint32([
+                data[12],
+                data[13],
+                data[14],
+                data[15]
+            ])
+        )
+    }
+    
+    public func getJSON() -> JSON {
+        var returnDict = [String: NSNumber]()
+        returnDict["crownstoneId"] = NSNumber(unsignedShort: self.crownstoneId)
+        returnDict["crownstoneStateId"] = NSNumber(unsignedShort: self.crownstoneStateId)
+        returnDict["switchState"] = NSNumber(unsignedChar: self.switchState)
+        returnDict["eventBitmask"] = NSNumber(unsignedChar: self.eventBitmask)
+        returnDict["reserved"] = NSNumber(unsignedShort: self.reserved)
+        returnDict["powerUsage"] = NSNumber(int: self.powerUsage)
+        returnDict["accumulatedEnergy"] = NSNumber(int: self.accumulatedEnergy)
+        
+        return JSON(returnDict)
+    }
+    
+    public func stringify() -> String {
+        return JSONUtils.stringify(self.getJSON())
+    }
+}
+
+
+
+
+
+
+
+

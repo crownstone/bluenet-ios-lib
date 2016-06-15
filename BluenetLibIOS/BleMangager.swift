@@ -169,7 +169,7 @@ public class Advertisement {
     public var uuid : String
     public var name : String
     public var rssi : NSNumber
-    public var serviceData = [String: [NSNumber]]()
+    public var serviceData = [String: [UInt8]]()
     public var serviceDataAvailable : Bool
     
     init(uuid: String, name: String?, rssi: NSNumber, serviceData: AnyObject?) {
@@ -187,13 +187,35 @@ public class Advertisement {
             for (serviceCUUID, data) in castData {
                 // convert data to uint8 array
                 let uint8Arr = Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(data.bytes), count: data.length))
-                var numberArray = [NSNumber]()
-                for uint8 in uint8Arr {
-                    numberArray.append(NSNumber(unsignedChar: uint8))
-                }
-                self.serviceData[serviceCUUID.UUIDString] = numberArray
+                self.serviceData[serviceCUUID.UUIDString] = uint8Arr
                 self.serviceDataAvailable = true
             }
+        }
+    }
+    
+    func getNumberArray(data: [UInt8]) -> [NSNumber] {
+        var numberArray = [NSNumber]()
+        for uint8 in data {
+            numberArray.append(NSNumber(unsignedChar: uint8))
+        }
+        return numberArray
+    }
+    
+    func getServiceDataJSON() -> JSON {
+        if (self.serviceDataAvailable) {
+            var serviceData = [String: JSON]()
+            for (id, data) in self.serviceData {
+                if (id == "C001") {
+                    serviceData[id] = JSON(self.getNumberArray(data))
+                }
+                else {
+                    serviceData[id] = JSON(self.getNumberArray(data))
+                }
+            }
+            return JSON(serviceData);
+        }
+        else {
+            return JSON([])
         }
     }
     
@@ -204,15 +226,12 @@ public class Advertisement {
         dataDict["rssi"] = self.rssi
         
         var dataJSON = JSON(dataDict)
-        
-        if (self.serviceDataAvailable) {
-            dataJSON["serviceData"] = JSON(self.serviceData)
-        }
-        else {
-            dataJSON["serviceData"] = []
-        }
-
+        dataJSON["serviceData"] = self.getServiceDataJSON()
         return dataJSON
+    }
+    
+    public func stringify() -> String {
+        return JSONUtils.stringify(self.getJSON())
     }
     
 }
