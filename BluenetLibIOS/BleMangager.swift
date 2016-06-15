@@ -378,7 +378,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 }
                 else {
                     self.pendingPromise = promiseContainer(fulfill, reject, type: .GET_SERVICES)
-                    
+
                     // the fulfil and reject are handled in the peripheral delegate
                     connectedPeripheral!.discoverServices(nil) // then return services
                 }
@@ -390,8 +390,9 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     }
     
     func _getServiceFromList(list:[CBService], _ uuid: String) -> CBService? {
+        let matchString = uuid.uppercaseString
         for service in list {
-            if (service.UUID.UUIDString == uuid) {
+            if (service.UUID.UUIDString == matchString) {
                 return service
             }
         }
@@ -447,8 +448,9 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     }
     
     func getCharacteristicFromList(list: [CBCharacteristic], _ uuid: String) -> CBCharacteristic? {
+        let matchString = uuid.uppercaseString
         for characteristic in list {
-            if (characteristic.UUID.UUIDString == uuid) {
+            if (characteristic.UUID.UUIDString == matchString) {
                 return characteristic
             }
         }
@@ -511,7 +513,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             self.getChacteristic(serviceId, characteristicId)
                 .then({characteristic in
                     self.pendingPromise = promiseContainer(fulfill, reject, type: .WRITE_CHARACTERISTIC)
-                    
+                    print ("writing \(data) ")
                     // the fulfil and reject are handled in the peripheral delegate
                     self.connectedPeripheral!.writeValue(data, forCharacteristic: characteristic, type: type)
                 })
@@ -628,7 +630,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     
     public func centralManager(central: CBCentralManager, didConnectPeripheral peripheral: CBPeripheral) {
         if (pendingPromise.type == .CONNECT) {
-            print("connecting")
+            print("connected")
             connectedPeripheral = peripheral
             connectingPeripheral = nil
             pendingPromise.fulfill()
@@ -728,6 +730,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     
     
     public func peripheral(peripheral: CBPeripheral, didWriteValueForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
+        print("written")
         if (pendingPromise.type == .WRITE_CHARACTERISTIC) {
             if (error != nil) {
                 pendingPromise.reject(error!)

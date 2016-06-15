@@ -130,6 +130,7 @@ public class Bluenet {
     }
     
     public func disconnect() -> Promise<Void> {
+        print("disconnectiong")
        return self.bleManager.disconnect()
     }
     
@@ -144,6 +145,7 @@ public class Bluenet {
      */
     public func setSwitchState(state: Float) -> Promise<Void> {
 //        if (state == 0 || state >= 1) {
+            print ("switching")
             var roundedState = max(0,min(255,round(state*255)))
             var switchState = UInt8(roundedState)
             var packet : [UInt8] = [switchState]
@@ -151,7 +153,7 @@ public class Bluenet {
                 CSServices.PowerService,
                 characteristicId: PowerCharacteristics.Relay,
                 data: NSData(bytes: packet, length: packet.count),
-                type: CBCharacteristicWriteType.WithoutResponse
+                type: CBCharacteristicWriteType.WithResponse
             )
 //        }
 //        else {
