@@ -26,7 +26,7 @@ public class Fingerprint {
 }
 
 public class BluenetLocalization {
-    var locationManager : LocationManager!
+    public var locationManager : LocationManager!
     let eventBus : EventBus!
     
     var classifier = [String: LocationClassifier]()
@@ -93,9 +93,8 @@ public class BluenetLocalization {
         self.classifier[groupId]!.loadFingerprint(locationId, fingerprint: fingerprint)
     }
     
-    public func startCollectingFingerprint(locationId: String, groupId: String) {
+    public func startCollectingFingerprint() {
         self.collectingFingerprint = Fingerprint()
-        self.collectingLocation = locationId
         self.collectingCallbackId = self.eventBus.on("iBeaconAdvertisement", {ibeaconData in
             if let data = ibeaconData as? [iBeaconPacket] {
                 if let Fingerprint = self.collectingFingerprint {
@@ -108,15 +107,13 @@ public class BluenetLocalization {
         });
     }
    
-    public func finishCollectingFingerprint() {
-        if let activeGroup = self.activeGroup {
-            if (self.collectingFingerprint != nil && self.collectingLocation != nil) {
-                if (self.fingerprintData[activeGroup] == nil) {
-                    self.fingerprintData[activeGroup] = [String: Fingerprint]()
-                }
-                self.fingerprintData[activeGroup]![self.collectingLocation!] = self.collectingFingerprint!
-                self._loadFingerprint(activeGroup, locationId: self.collectingLocation!, fingerprint: self.collectingFingerprint!)
+    public func finishCollectingFingerprint(locationId: String, groupId: String) {
+        if (self.collectingFingerprint != nil && self.collectingLocation != nil) {
+            if (self.fingerprintData[groupId] == nil) {
+                self.fingerprintData[groupId] = [String: Fingerprint]()
             }
+            self.fingerprintData[groupId]![self.collectingLocation!] = self.collectingFingerprint!
+            self._loadFingerprint(groupId, locationId: locationId, fingerprint: self.collectingFingerprint!)
         }
         self._cleanupCollectingFingerprint()
     }

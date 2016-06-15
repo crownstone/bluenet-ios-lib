@@ -84,19 +84,12 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     public func trackBeacon(beacon: BeaconID) {
-        print(self.trackingBeacons)
-        print(!self._beaconInList(beacon, list: self.trackingBeacons))
-        print(self.started)
-        
         if (!self._beaconInList(beacon, list: self.trackingBeacons)) {
             trackingBeacons.append(beacon);
             self.manager.startMonitoringForRegion(beacon.region)
             self.manager.requestStateForRegion(beacon.region)
         }
         
-//        if (self.started == false) {
-//            self.start();
-//        }
         self.start();
     }
     
@@ -118,21 +111,21 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     public func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
         switch (CLLocationManager.authorizationStatus()) {
         case .NotDetermined:
-            print("NotDetermined")
+            print("location NotDetermined")
             /*
              First you need to add NSLocationWhenInUseUsageDescription or NSLocationAlwaysUsageDescription(if you want to use in background) in your info.plist file OF THE PROGRAM THAT IMPLEMENTS THIS!
              */
             manager.requestAlwaysAuthorization()
         case .Restricted:
-            print("Restricted")
+            print("location Restricted")
         case .Denied:
             showLocationAlert()
-            print("Denied")
+            print("location Denied")
         case .AuthorizedAlways:
-            print("AuthorizedAlways")
+            print("location AuthorizedAlways")
             start()
         case .AuthorizedWhenInUse:
-            print("AuthorizedWhenInUse")
+            print("location AuthorizedWhenInUse")
             showLocationAlert()
         }
     }
@@ -156,7 +149,6 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         }
         
         self.eventBus.emit("iBeaconAdvertisement", iBeacons)
-        
     }
     
     public func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
@@ -183,7 +175,42 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     
     
     
+    /*
+     *  locationManager:rangingBeaconsDidFailForRegion:withError:
+     *
+     *  Discussion:
+     *    Invoked when an error has occurred ranging beacons in a region. Error types are defined in "CLError.h".
+     */
+
+    public func locationManager(manager: CLLocationManager, rangingBeaconsDidFailForRegion region: CLBeaconRegion, withError error: NSError) {
+         print("did rangingBeaconsDidFailForRegion \(region)  withError: \(error) \n");
+    }
     
+    
+
+    /*
+     *  locationManager:didFailWithError:
+     *
+     *  Discussion:
+     *    Invoked when an error has occurred. Error types are defined in "CLError.h".
+     */
+  
+    public func locationManager(manager: CLLocationManager, didFailWithError error: NSError){
+        print("did didFailWithError withError: \(error) \n");
+    }
+    
+    /*
+     *  locationManager:monitoringDidFailForRegion:withError:
+     *
+     *  Discussion:
+     *    Invoked when a region monitoring error has occurred. Error types are defined in "CLError.h".
+     */
+ 
+    public func locationManager(manager: CLLocationManager, monitoringDidFailForRegion region: CLRegion?, withError error: NSError){
+        print("did monitoringDidFailForRegion \(region)  withError: \(error) \n");
+    }
+    
+
     
     
     
