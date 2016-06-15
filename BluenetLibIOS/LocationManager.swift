@@ -38,7 +38,7 @@ public class iBeaconPacket {
         self.rssi = rssi
         
         // we claim that the uuid, major and minor combination is unique.
-        self.idString = uuid + String(major) + String(minor)
+        self.idString = uuid + ".Maj:" + String(major) + ".Min:" + String(minor)
     }
     
     public func getJSON() -> JSON {
@@ -141,6 +141,11 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     public func locationManager(manager : CLLocationManager, didRangeBeacons beacons : [CLBeacon], inRegion region: CLBeaconRegion) {
+//        print ("Did Range:")
+//        for beacon in beacons {
+//            print("\(beacon)")
+//        }
+//        print(" ")
         var iBeacons = [iBeaconPacket]()
         
         for beacon in beacons {

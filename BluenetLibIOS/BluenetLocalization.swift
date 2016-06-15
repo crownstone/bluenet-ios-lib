@@ -14,8 +14,8 @@ import SwiftyJSON
 public class Fingerprint {
     var data = [String: [NSNumber]]()
     
-    init() {}
-    init(stringifiedData: String) {
+    public init() {}
+    public init(stringifiedData: String) {
         let jsonData = JSON.parse(stringifiedData)
         if let dictData = jsonData.dictionaryObject {
             for (key, data) in dictData {
