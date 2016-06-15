@@ -32,7 +32,6 @@ public class BluenetLocalization {
     var classifier = [String: LocationClassifier]()
     var collectingFingerprint : Fingerprint?
     var collectingCallbackId : Int?
-    var collectingLocation : String?
     var activeGroup : String?
     var activeLocation : String?
     
@@ -69,7 +68,7 @@ public class BluenetLocalization {
     public func reset() {
         self.eventBus.reset()
         for (location, classifier) in self.classifier {
-            self.classifier[location]!.reset()
+            classifier.reset()
         }
     }
     
@@ -106,13 +105,17 @@ public class BluenetLocalization {
             }
         });
     }
+    
+    public func abortCollectingFingerprint() {
+        self._cleanupCollectingFingerprint()
+    }
    
-    public func finishCollectingFingerprint(locationId: String, groupId: String) {
-        if (self.collectingFingerprint != nil && self.collectingLocation != nil) {
+    public func finalizeFingerprint(locationId: String, groupId: String) {
+        if (self.collectingFingerprint != nil) {
             if (self.fingerprintData[groupId] == nil) {
                 self.fingerprintData[groupId] = [String: Fingerprint]()
             }
-            self.fingerprintData[groupId]![self.collectingLocation!] = self.collectingFingerprint!
+            self.fingerprintData[groupId]![locationId] = self.collectingFingerprint!
             self._loadFingerprint(groupId, locationId: locationId, fingerprint: self.collectingFingerprint!)
         }
         self._cleanupCollectingFingerprint()
@@ -124,7 +127,6 @@ public class BluenetLocalization {
         }
         self.collectingCallbackId = nil
         self.collectingFingerprint = nil
-        self.collectingLocation = nil
     }
     
     func updateState(ibeaconData: AnyObject) {
