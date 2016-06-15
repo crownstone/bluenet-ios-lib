@@ -49,9 +49,7 @@ public class iBeaconPacket {
         dataDict["minor"] = self.minor
         dataDict["rssi"]  = self.rssi
         
-        var dataJSON = JSON(dataDict)
-        
-        return dataJSON
+        return JSON(dataDict)
     }
     
     public func stringify() -> String {
@@ -143,7 +141,6 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     public func locationManager(manager : CLLocationManager, didRangeBeacons beacons : [CLBeacon], inRegion region: CLBeaconRegion) {
-        print ("got datapoint!")
         var iBeacons = [iBeaconPacket]()
         
         for beacon in beacons {
