@@ -206,7 +206,8 @@ public class Advertisement {
             var serviceData = [String: JSON]()
             for (id, data) in self.serviceData {
                 if (id == "C001") {
-                    serviceData[id] = JSON(self.getNumberArray(data))
+                    let crownstoneScanResponse = ScanResponcePacket(data)
+                    serviceData[id] = crownstoneScanResponse.getJSON()
                 }
                 else {
                     serviceData[id] = JSON(self.getNumberArray(data))
@@ -579,6 +580,11 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         //let generalService = CBUUID(string: "5432")
         // centralManager.scanForPeripheralsWithServices([generalService], options:nil)//, options:[CBCentralManagerScanOptionAllowDuplicatesKey:false])
         centralManager.scanForPeripheralsWithServices(nil, options:[CBCentralManagerScanOptionAllowDuplicatesKey:true])
+    }
+    
+    public func startScanningForService(serviceUUID: String) {
+        let service = CBUUID(string: serviceUUID)
+        centralManager.scanForPeripheralsWithServices([service], options:[CBCentralManagerScanOptionAllowDuplicatesKey:true])
     }
     
     public func stopScanning() {

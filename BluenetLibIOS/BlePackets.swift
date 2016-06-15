@@ -159,7 +159,7 @@ public class ScanResponcePacket {
     var powerUsage          : Int32
     var accumulatedEnergy   : Int32
     
-    init(data: [UInt8]) {
+    init(_ data: [UInt8]) {
         self.crownstoneId      = Conversion.uint8_array_to_uint16([data[0], data[1]])
         self.crownstoneStateId = Conversion.uint8_array_to_uint16([data[2], data[3]])
         self.switchState       = data[4]

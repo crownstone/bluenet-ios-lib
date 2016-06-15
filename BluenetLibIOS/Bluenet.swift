@@ -109,6 +109,14 @@ public class Bluenet {
         self.bleManager.startScanning()
     }
     
+    public func startScanningForCrownstones() {
+        self.startScanningForService("C001")
+    }
+    
+    public func startScanningForService(serviceUUID: String) {
+        self.bleManager.startScanningForService(serviceUUID)
+    }
+    
     public func stopScanning() {
         self.bleManager.stopScanning()
     }
