@@ -14,6 +14,18 @@ import SwiftyJSON
 public class Fingerprint {
     var data = [String: [NSNumber]]()
     
+    init() {}
+    init(stringifiedData: String) {
+        let jsonData = JSON.parse(stringifiedData)
+        if let dictData = jsonData.dictionaryObject {
+            for (key, data) in dictData {
+                if let numArray = data as? [NSNumber] {
+                    self.data[key] = numArray
+                }
+            }
+        }
+    }
+    
     func collect(ibeaconData: [iBeaconPacket]) {
         for point in ibeaconData {
             if (data.indexForKey(point.idString) == nil) {
@@ -31,6 +43,7 @@ public class Fingerprint {
     public func stringify() -> String {
         return JSONUtils.stringify(JSON(self.data))
     }
+    
 }
 
 public class BluenetLocalization {
@@ -75,7 +88,7 @@ public class BluenetLocalization {
     
     public func reset() {
         self.eventBus.reset()
-        for (location, classifier) in self.classifier {
+        for (_, classifier) in self.classifier {
             classifier.reset()
         }
     }
@@ -153,7 +166,7 @@ public class BluenetLocalization {
                 self.classifier[self.activeGroup!] = LocationClassifier()
             }
             
-            var currentlocation = self.getLocation(data)
+            let currentlocation = self.getLocation(data)
             if (self.activeLocation != currentlocation) {
                 if (self.activeLocation != nil) {
                     self.eventBus.emit("exitLocation", self.activeLocation!)
@@ -165,7 +178,7 @@ public class BluenetLocalization {
     }
     
     func getLocation(data : [iBeaconPacket]) -> String {
-        var location = self.classifier[self.activeGroup!]!.predict(data)
+        let location = self.classifier[self.activeGroup!]!.predict(data)
         self.eventBus.emit("currentLocation", location)
         return location
     }
