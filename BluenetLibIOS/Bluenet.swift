@@ -143,10 +143,10 @@ public class Bluenet {
     /**
      * Set the switch state. If 0 or 1, switch on or off. If 0 < x < 1 then dim.
      */
-    public func setSwitchState(state: Float) -> Promise<Void> {
+    public func setSwitchState(state: NSNumber) -> Promise<Void> {
 //        if (state == 0 || state >= 1) {
             print ("switching to \(state)")
-            var roundedState = max(0,min(255,round(state*255)))
+            var roundedState = max(0, min(255, round(state.doubleValue * 255)))
             var switchState = UInt8(roundedState)
             var packet : [UInt8] = [switchState]
             return self.bleManager.writeToCharacteristic(
