@@ -26,19 +26,19 @@ class NaiveBayes {
     init() {}
     
     func loadFingerprint(id: String, _ fingerprint: Fingerprint) {
-        print ("loaded fingerprint into naive bayes \(id) : \(fingerprint.getJSON())")
+//        print ("loaded fingerprint into naive bayes \(id) : \(fingerprint.getJSON())")
         self.fingerprints[id] = fingerprint
         self._processFingerPrint(id, fingerprint)
     }
     
     func predict(inputVector: [iBeaconPacket]) -> String {
-        print("asking for prediction")
+//        print("asking for prediction")
         var highestPrediction : Double = 0
         var highestPredictionLabel = ""
         
         for (label, summary) in self.summaries {
             var prediction = self._predict(inputVector, summary)
-            print ("in prediction Loop \(prediction) , \(highestPrediction)")
+//            print ("in prediction Loop \(prediction) , \(highestPrediction)")
             if (highestPrediction < prediction) {
                 highestPrediction = prediction
                 highestPredictionLabel = label
@@ -56,21 +56,21 @@ class NaiveBayes {
     func _predict(inputVector: [iBeaconPacket], _ summary: [String: NBSummary]) -> Double {
         var totalProbability : Double = 1
         var totalMatches : Double = 0
-        print ("input vector \(inputVector)")
+//        print ("input vector \(inputVector)")
         for packet in inputVector {
-            print ("packet \(packet)")
+//            print ("packet \(packet)")
             let stoneId = packet.idString
-            print ("stoneId: \(stoneId)")
+//            print ("stoneId: \(stoneId)")
             if (summary[stoneId] != nil) {
-                print ("in summary check")
+//                print ("in summary check")
                 let RSSI = Double(packet.rssi);
                 let mean = summary[stoneId]!.mean
                 let std =  summary[stoneId]!.std
-                print ("rssi \(RSSI) mean \(mean) std \(std)")
+//                print ("rssi \(RSSI) mean \(mean) std \(std)")
                 var exponent = exp(-(pow(RSSI - mean,2)/(2*pow(std,2))))
-                print ("exponent \(exponent)")
+//                print ("exponent \(exponent)")
                 totalProbability *= exponent / (sqrt(2*M_PI) * std)
-                print ("totalProbability \(totalProbability)")
+//                print ("totalProbability \(totalProbability)")
                 totalMatches += 1
             }
         }
@@ -83,7 +83,7 @@ class NaiveBayes {
             let mean = self._getMean(measurements)
             let std = self._getSTD(mean, measurements)
             let summary = NBSummary(mean, std)
-            print(" processing fingerprint \(id) mean \(mean) std \(std)")
+//            print(" processing fingerprint \(id) mean \(mean) std \(std)")
             self._addToSummary(id, stoneId: stoneId, summary: summary)
         }
     }
