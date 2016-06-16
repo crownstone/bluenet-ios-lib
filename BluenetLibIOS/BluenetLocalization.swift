@@ -12,7 +12,7 @@ import SwiftyJSON
 
 
 public class Fingerprint {
-    var data = [String: [NSNumber]]()
+    public var data = [String: [NSNumber]]()
     
     public init() {}
     public init(stringifiedData: String) {

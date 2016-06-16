@@ -25,17 +25,16 @@ class NaiveBayes {
     
     init() {}
     
-    func loadFingerprint(id: String, _ fingerPrint: Fingerprint) {
-        print ("loaded fingerprint into naive bayes \(id)")
-        self.fingerprints[id] = fingerPrint
-        self._processFingerPrint(id, fingerPrint)
+    func loadFingerprint(id: String, _ fingerprint: Fingerprint) {
+        print ("loaded fingerprint into naive bayes \(id) : \(fingerprint.getJSON())")
+        self.fingerprints[id] = fingerprint
+        self._processFingerPrint(id, fingerprint)
     }
     
     func predict(inputVector: [iBeaconPacket]) -> String {
         print("asking for prediction")
         var highestPrediction : Double = 0
         var highestPredictionLabel = ""
-        
         
         for (label, summary) in self.summaries {
             var prediction = self._predict(inputVector, summary)
@@ -84,6 +83,7 @@ class NaiveBayes {
             let mean = self._getMean(measurements)
             let std = self._getSTD(mean, measurements)
             let summary = NBSummary(mean, std)
+            print(" processing fingerprint \(id) mean \(mean) std \(std)")
             self._addToSummary(id, stoneId: stoneId, summary: summary)
         }
     }
