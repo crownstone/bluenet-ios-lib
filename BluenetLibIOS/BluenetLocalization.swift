@@ -55,6 +55,9 @@ public class BluenetLocalization {
     var collectingCallbackId : Int?
     var activeGroup : String?
     var activeLocation : String?
+    var certainty = 3
+    var sameCounter = 0
+    var lastMeasurement = ""
     
     var fingerprintData = [String : [String : Fingerprint]]() // groupId: locationId: Fingerprint
     
@@ -164,14 +167,28 @@ public class BluenetLocalization {
                 
                 let currentlocation = self.getLocation(data)
                 if (self.activeLocation != currentlocation) {
-                    if (self.activeLocation != nil) {
-                        self.eventBus.emit("exitLocation", self.activeLocation!)
+                    if (self.lastMeasurement == currentlocation) {
+                        self.sameCounter += 1
+                        if (self.sameCounter == self.certainty) {
+                            self.moveToNewLocation(currentlocation)
+                            self.sameCounter = 0
+                        }
                     }
-                    self.activeLocation = currentlocation
-                    self.eventBus.emit("enterLocation", self.activeLocation!)
+                    else {
+                        self.sameCounter = 0
+                    }
                 }
+                self.lastMeasurement = currentlocation
             }
         }
+    }
+    
+    func moveToNewLocation(newLocation: String ) {
+        if (self.activeLocation != nil) {
+            self.eventBus.emit("exitLocation", self.activeLocation!)
+        }
+        self.activeLocation = newLocation
+        self.eventBus.emit("enterLocation", self.activeLocation!)
     }
     
     func handleRegionExit(regionId: AnyObject) {
