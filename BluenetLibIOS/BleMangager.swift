@@ -23,6 +23,8 @@ public enum BleError : ErrorType {
     case WRONG_TYPE_OF_PROMISE
     case INVALID_UUID
     case NOT_INITIALIZED
+    case CANNOT_SET_TIMEOUT_WITH_THIS_TYPE_OF_PROMISE
+    case TIMEOUT
 }
 
 enum RequestType {
@@ -56,6 +58,8 @@ class promiseContainer {
     private var _rejectPromise                  : (ErrorType) -> Void           = {_ in }
     var type = RequestType.NONE
     var promiseType = PromiseType.NONE
+    var completed = false
+
     
     init(_ fulfill: (Void) -> Void, _ reject: (ErrorType) -> Void, type: RequestType) {
         _fulfillVoidPromise = fulfill
@@ -92,6 +96,19 @@ class promiseContainer {
         self.type = type
     }
     
+    func setFulfillOnTimeout(delayTimeInSeconds: Double) {
+        if (promiseType == .VOID) {
+            delay(delayTimeInSeconds, {_ in self.fulfill()})
+        }
+        else {
+            _rejectPromise(BleError.CANNOT_SET_TIMEOUT_WITH_THIS_TYPE_OF_PROMISE)
+        }
+    }
+    
+    func setTimeout(delayTimeInSeconds: Double) {
+        delay(delayTimeInSeconds, {_ in self.reject(BleError.TIMEOUT)})
+    }
+    
     
     init() {
         self.clear()
@@ -109,57 +126,75 @@ class promiseContainer {
     }
     
     func fulfill(data: Void) {
-        if (promiseType == .VOID) {
-            _fulfillVoidPromise(data)
+        if (self.completed == false) {
+            self.completed = true
+            if (promiseType == .VOID) {
+                _fulfillVoidPromise(data)
+            }
+            else {
+                _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
+            }
+            clear()
         }
-        else {
-            _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
-        }
-        clear()
     }
     
     func fulfill(data: Int) {
-        if (promiseType == .INT) {
-            _fulfillIntPromise(data)
-        }
-        else {
-            _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
+        if (self.completed == false) {
+            self.completed = true
+            if (promiseType == .INT) {
+                _fulfillIntPromise(data)
+            }
+            else {
+                _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
+            }
         }
         clear()
     }
     
     func fulfill(data: [CBService]) {
-        if (promiseType == .SERVICELIST) {
-            _fulfillServiceListPromise(data)
-        }
-        else {
-            _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
+        if (self.completed == false) {
+            self.completed = true
+            if (promiseType == .SERVICELIST) {
+                _fulfillServiceListPromise(data)
+            }
+            else {
+                _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
+            }
         }
         clear()
     }
     
     func fulfill(data: [CBCharacteristic]) {
-        if (promiseType == .CHARACTERISTICLIST) {
-            _fulfillCharacteristicListPromise(data)
-        }
-        else {
-            _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
+        if (self.completed == false) {
+            self.completed = true
+            if (promiseType == .CHARACTERISTICLIST) {
+                _fulfillCharacteristicListPromise(data)
+            }
+            else {
+                _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
+            }
         }
         clear()
     }
     
     func fulfill(data: CBCharacteristic) {
-        if (promiseType == .CHARACTERISTIC) {
-            _fulfillCharacteristicPromise(data)
-        }
-        else {
-            _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
+        if (self.completed == false) {
+            self.completed = true
+            if (promiseType == .CHARACTERISTIC) {
+                _fulfillCharacteristicPromise(data)
+            }
+            else {
+                _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
+            }
         }
         clear()
     }
     
     func reject(error: ErrorType) {
-        _rejectPromise(error)
+        if (self.completed == false) {
+            self.completed = true
+            _rejectPromise(error)
+        }
         clear()
     }
     
@@ -514,6 +549,9 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 .then({characteristic in
                     self.pendingPromise = promiseContainer(fulfill, reject, type: .WRITE_CHARACTERISTIC)
                     print ("writing \(data) ")
+                    
+                    self.pendingPromise.setTimeout(0.5)
+                    
                     // the fulfil and reject are handled in the peripheral delegate
                     self.connectedPeripheral!.writeValue(data, forCharacteristic: characteristic, type: type)
                 })
