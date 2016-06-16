@@ -26,7 +26,7 @@ class NaiveBayes {
     init() {}
     
     func loadFingerprint(id: String, _ fingerPrint: Fingerprint) {
-        print ("loaded fingerpritn into naive bayes")
+        print ("loaded fingerprint into naive bayes \(id)")
         self.fingerprints[id] = fingerPrint
         self._processFingerPrint(id, fingerPrint)
     }
@@ -36,8 +36,10 @@ class NaiveBayes {
         var highestPrediction : Double = 0
         var highestPredictionLabel = ""
         
+        
         for (label, summary) in self.summaries {
             var prediction = self._predict(inputVector, summary)
+            print ("in prediction Loop \(prediction) , \(highestPrediction)")
             if (highestPrediction < prediction) {
                 highestPrediction = prediction
                 highestPredictionLabel = label
@@ -55,14 +57,21 @@ class NaiveBayes {
     func _predict(inputVector: [iBeaconPacket], _ summary: [String: NBSummary]) -> Double {
         var totalProbability : Double = 1
         var totalMatches : Double = 0
+        print ("input vector \(inputVector)")
         for packet in inputVector {
+            print ("packet \(packet)")
             let stoneId = packet.idString
+            print ("stoneId: \(stoneId)")
             if (summary[stoneId] != nil) {
+                print ("in summary check")
                 let RSSI = Double(packet.rssi);
                 let mean = summary[stoneId]!.mean
                 let std =  summary[stoneId]!.std
+                print ("rssi \(RSSI) mean \(mean) std \(std)")
                 var exponent = exp(-(pow(RSSI - mean,2)/(2*pow(std,2))))
+                print ("exponent \(exponent)")
                 totalProbability *= exponent / (sqrt(2*M_PI) * std)
+                print ("totalProbability \(totalProbability)")
                 totalMatches += 1
             }
         }
