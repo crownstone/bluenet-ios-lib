@@ -26,11 +26,13 @@ class NaiveBayes {
     init() {}
     
     func loadFingerprint(id: String, _ fingerPrint: Fingerprint) {
+        print ("loaded fingerpritn into naive bayes")
         self.fingerprints[id] = fingerPrint
         self._processFingerPrint(id, fingerPrint)
     }
     
     func predict(inputVector: [iBeaconPacket]) -> String {
+        print("asking for prediction")
         var highestPrediction : Double = 0
         var highestPredictionLabel = ""
         
