@@ -149,15 +149,19 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         var iBeacons = [iBeaconPacket]()
         
         for beacon in beacons {
-            iBeacons.append(iBeaconPacket(
-                uuid: beacon.proximityUUID.UUIDString,
-                major: beacon.major,
-                minor: beacon.minor,
-                rssi: beacon.rssi
-            ))
+            if (beacon.rssi < -1) {
+                iBeacons.append(iBeaconPacket(
+                    uuid: beacon.proximityUUID.UUIDString,
+                    major: beacon.major,
+                    minor: beacon.minor,
+                    rssi: beacon.rssi
+                ))
+            }
         }
         
-        self.eventBus.emit("iBeaconAdvertisement", iBeacons)
+        if (iBeacons.count > 0) {
+            self.eventBus.emit("iBeaconAdvertisement", iBeacons)
+        }
     }
     
     public func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {

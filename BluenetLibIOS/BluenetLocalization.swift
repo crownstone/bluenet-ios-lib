@@ -152,27 +152,28 @@ public class BluenetLocalization {
     
     func updateState(ibeaconData: AnyObject) {
         if let data = ibeaconData as? [iBeaconPacket] {
-            
-            if (self.activeGroup != data[0].uuid) {
-                if (self.activeGroup != nil) {
-                    self.eventBus.emit("exitRegion", self.activeGroup!)
+            if (data.count > 0) {
+                if (self.activeGroup != data[0].uuid) {
+                    if (self.activeGroup != nil) {
+                        self.eventBus.emit("exitRegion", self.activeGroup!)
+                    }
+                    self.activeGroup = data[0].uuid
+                    self.eventBus.emit("enterRegion", self.activeGroup!)
                 }
-                self.activeGroup = data[0].uuid
-                self.eventBus.emit("enterRegion", self.activeGroup!)
-            }
-            
-            // create classifiers for this group if required.
-            if (self.classifier[self.activeGroup!] == nil) {
-                self.classifier[self.activeGroup!] = LocationClassifier()
-            }
-            
-            let currentlocation = self.getLocation(data)
-            if (self.activeLocation != currentlocation) {
-                if (self.activeLocation != nil) {
-                    self.eventBus.emit("exitLocation", self.activeLocation!)
+                
+                // create classifiers for this group if required.
+                if (self.classifier[self.activeGroup!] == nil) {
+                    self.classifier[self.activeGroup!] = LocationClassifier()
                 }
-                self.activeLocation = currentlocation
-                self.eventBus.emit("enterLocation", self.activeLocation!)
+                
+                let currentlocation = self.getLocation(data)
+                if (self.activeLocation != currentlocation) {
+                    if (self.activeLocation != nil) {
+                        self.eventBus.emit("exitLocation", self.activeLocation!)
+                    }
+                    self.activeLocation = currentlocation
+                    self.eventBus.emit("enterLocation", self.activeLocation!)
+                }
             }
         }
     }
