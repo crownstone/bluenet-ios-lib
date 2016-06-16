@@ -145,7 +145,7 @@ public class Bluenet {
      */
     public func setSwitchState(state: Float) -> Promise<Void> {
 //        if (state == 0 || state >= 1) {
-            print ("switching")
+            print ("switching to \(state)")
             var roundedState = max(0,min(255,round(state*255)))
             var switchState = UInt8(roundedState)
             var packet : [UInt8] = [switchState]
