@@ -64,6 +64,8 @@ public class BluenetLocalization {
         self.locationManager = LocationManager(eventBus: self.eventBus)
 
         self.eventBus.on("iBeaconAdvertisement", self.updateState);
+        self.eventBus.on("lowLevelEnterRegion",  self.handleRegionEnter);
+        self.eventBus.on("lowLevelExitRegion",   self.handleRegionExit);
         APPNAME = appName
     }
     
@@ -71,10 +73,12 @@ public class BluenetLocalization {
         self.eventBus = EventBus()
         self.locationManager = LocationManager(eventBus: self.eventBus)
         self.eventBus.on("iBeaconAdvertisement", self.updateState);
+        self.eventBus.on("lowLevelEnterRegion",  self.handleRegionEnter);
+        self.eventBus.on("lowLevelExitRegion",   self.handleRegionExit);
     }
     
     public func trackUUID(uuid: String, groupName: String) {
-        let trackStone = BeaconID(id: groupName, uuid: uuid)
+        let trackStone = BeaconID(name: groupName, uuid: uuid)
         self.locationManager.trackBeacon(trackStone)
     }
         
@@ -152,15 +156,7 @@ public class BluenetLocalization {
     
     func updateState(ibeaconData: AnyObject) {
         if let data = ibeaconData as? [iBeaconPacket] {
-            if (data.count > 0) {
-                if (self.activeGroup != data[0].uuid) {
-                    if (self.activeGroup != nil) {
-                        self.eventBus.emit("exitRegion", self.activeGroup!)
-                    }
-                    self.activeGroup = data[0].uuid
-                    self.eventBus.emit("enterRegion", self.activeGroup!)
-                }
-                
+            if (data.count > 0 && self.activeGroup != nil) {
                 // create classifiers for this group if required.
                 if (self.classifier[self.activeGroup!] == nil) {
                     self.classifier[self.activeGroup!] = LocationClassifier()
@@ -177,6 +173,43 @@ public class BluenetLocalization {
             }
         }
     }
+    
+    func handleRegionExit(regionId: AnyObject) {
+        if let regionString = regionId as? String {
+            if (self.activeGroup != nil) {
+                self.eventBus.emit("exitRegion", regionId)
+            }
+        }
+        else {
+            if (self.activeGroup != nil) {
+                self.eventBus.emit("exitRegion", self.activeGroup!)
+            }
+        }
+        self.activeGroup = nil
+    }
+    
+    func handleRegionEnter(regionId: AnyObject) {
+        if let regionString = regionId as? String {
+            if (self.activeGroup != nil) {
+                if (self.activeGroup! != regionString) {
+                    self.eventBus.emit("exitRegion", self.activeGroup!)
+                    self.eventBus.emit("enterRegion", regionString)
+                }
+            }
+            else {
+                self.eventBus.emit("enterRegion", regionString)
+            }
+            self.activeGroup = regionString
+        }
+    }
+//        if (self.activeGroup != identifier) {
+//            if (self.activeGroup != nil) {
+//                self.eventBus.emit("exitRegion", self.activeGroup!)
+//            }
+//            self.activeGroup = data[0].uuid
+//            self.eventBus.emit("enterRegion", self.activeGroup!)
+//        }
+    
     
     func getLocation(data : [iBeaconPacket]) -> String {
         let location = self.classifier[self.activeGroup!]!.predict(data)

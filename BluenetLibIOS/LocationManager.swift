@@ -14,13 +14,13 @@ import UIKit
 
 public class BeaconID {
     var UUID : NSUUID;
-    var id = ""
+    var name = ""
     var region : CLBeaconRegion;
     
-    public init(id: String, uuid: String) {
+    public init(name: String, uuid: String) {
         self.UUID = NSUUID(UUIDString : uuid)!;
-        self.id = id;
-        self.region = CLBeaconRegion(proximityUUID: self.UUID, identifier: self.id);
+        self.name = name;
+        self.region = CLBeaconRegion(proximityUUID: self.UUID, identifier: uuid);
     }
 }
 
@@ -240,9 +240,9 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         }
         return false;
     }
-    
+
     func _startRanging(region: CLRegion) {
-        self.eventBus.emit("enterRegion", region.identifier)
+        self.eventBus.emit("lowLevelEnterRegion", region.identifier)
         
         for element in self.trackingBeacons {
             print ("region id \(region.identifier) vs elementId \(element.region.identifier) \n")
@@ -254,7 +254,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     func _stopRanging(region: CLRegion) {
-        self.eventBus.emit("exitRegion", region.identifier)
+        self.eventBus.emit("lowLevelExitRegion", region.identifier)
         
         for element in self.trackingBeacons {
             print ("region id \(region.identifier) vs elementId \(element.region.identifier) \n")
