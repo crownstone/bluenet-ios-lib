@@ -16,6 +16,8 @@ import Foundation
  *
  */
 
+public let CrownstoneAdvertisementServiceUUID   = "C001"
+
 public struct CSServices {
     public static let CrownstoneService         = "24f00000-7d10-4805-bfc1-7663a01c3bff"
     public static let SetupService              = "24f10000-7d10-4805-bfc1-7663a01c3bff"

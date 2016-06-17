@@ -13,7 +13,7 @@ enum Classifiers {
 }
 
 
-public class LocationClassifier {
+public class ClassifierWrapper {
     var classifierType = Classifiers.NAIVE_BAYES
     var naiveBayes = NaiveBayes()
     

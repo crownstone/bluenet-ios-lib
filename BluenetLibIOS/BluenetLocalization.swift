@@ -11,99 +11,98 @@ import CoreLocation
 import SwiftyJSON
 
 
-public class Fingerprint {
-    public var data = [String: [NSNumber]]()
-    
-    public init() {}
-    public init(stringifiedData: String) {
-        let jsonData = JSON.parse(stringifiedData)
-        if let dictData = jsonData.dictionaryObject {
-            for (key, data) in dictData {
-                if let numArray = data as? [NSNumber] {
-                    self.data[key] = numArray
-                }
-            }
-        }
-    }
-    
-    func collect(ibeaconData: [iBeaconPacket]) {
-        for point in ibeaconData {
-            if (data.indexForKey(point.idString) == nil) {
-                data[point.idString] = [NSNumber]()
-            }
-            
-            data[point.idString]!.append(point.rssi)
-        }
-    }
-    
-    public func getJSON() -> JSON {
-        return JSON(self.data)
-    }
-    
-    public func stringify() -> String {
-        return JSONUtils.stringify(JSON(self.data))
-    }
-    
-}
-
+/**
+ * Bluenet Localization.
+ * This lib is used to interact with the indoor localization algorithms of the Crownstone.
+ *
+ *
+ * With this lib you train fingerprints, get and load them and determine in which location you are.
+ * It wraps around the CoreLocation services to handle all iBeacon logic.
+ * As long as you can ensure that each beacon's UUID+major+minor combination is unique, you can use this
+ * localization lib.
+ *
+ * You input groups by adding their tracking UUIDS
+ * You input locations by providing their fingerprints or training them.
+ *
+ * This lib broadcasts the following data:
+    topic:                      dataType:               when:
+    "iBeaconAdvertisement"      [iBeaconPacket]         Once a second when the iBeacon's are ranged   (array of iBeaconPacket objects)
+    "enterRegion"               String                  When a region (denoted by groupId) is entered (data is the groupId as String)
+    "exitRegion"                String                  When a region (denoted by groupId) is no longer detected (data is the groupId as String)
+    "enterLocation"             String                  When the classifier determines the user has entered a new location (data is the locationId as String)
+    "exitLocation"              String                  When the classifier determines the user has left his location in favor 
+                                                            of a new one. Not triggered when region is left (data is the locationId as String)
+    "currentLocation"           String                  Once a second when the iBeacon's are ranged and the classifier makes a prediction (data is the locationId as String)
+ */
 public class BluenetLocalization {
     public var locationManager : LocationManager!
-    let eventBus : EventBus!
+    var eventBus : EventBus!
     
-    var classifier = [String: LocationClassifier]()
+    var classifier = [String: ClassifierWrapper]()
     var collectingFingerprint : Fingerprint?
     var collectingCallbackId : Int?
-    var activeGroup : String?
-    var activeLocation : String?
-    var certainty = 3
+    var activeGroupId : String?
+    var activeLocationId : String?
+    var certainty = 2
     var sameCounter = 0
     var lastMeasurement = ""
-    
     var fingerprintData = [String : [String : Fingerprint]]() // groupId: locationId: Fingerprint
     
+    // MARK API
     
-    public init(appName: String) {
-        self.eventBus = EventBus()
-        self.locationManager = LocationManager(eventBus: self.eventBus)
-
-        self.eventBus.on("iBeaconAdvertisement", self.updateState);
-        self.eventBus.on("lowLevelEnterRegion",  self.handleRegionEnter);
-        self.eventBus.on("lowLevelExitRegion",   self.handleRegionExit);
-        APPNAME = appName
-    }
-    
+    /**
+     * On init the handlers and interpreters are bound to the events broadcasted by this lib.
+     */
     public init() {
         self.eventBus = EventBus()
         self.locationManager = LocationManager(eventBus: self.eventBus)
-        self.eventBus.on("iBeaconAdvertisement", self.updateState);
-        self.eventBus.on("lowLevelEnterRegion",  self.handleRegionEnter);
-        self.eventBus.on("lowLevelExitRegion",   self.handleRegionExit);
+        self.eventBus.on("iBeaconAdvertisement", self._updateState);
+        self.eventBus.on("lowLevelEnterRegion",  self._handleRegionEnter);
+        self.eventBus.on("lowLevelExitRegion",   self._handleRegionExit);
     }
     
-    public func trackUUID(uuid: String, groupName: String) {
-        let trackStone = BeaconID(name: groupName, uuid: uuid)
+    
+    /**
+     * This method configures an ibeacon with the ibeaconUUID you provide. The groupId is used to notify
+     * you when this region is entered as well as to keep track of which classifiers belong to which group.
+     */
+    public func trackUUID(uuid: String, groupId: String) {
+        let trackStone = iBeaconContainer(groupId: groupId, uuid: uuid)
         self.locationManager.trackBeacon(trackStone)
     }
-        
+    
+    
+    /**
+     * Subscribe to a topic with a callback. This method returns an Int which is used as identifier of the subscription.
+     * This identifier is supplied to the off method to unsubscribe.
+     */
     public func on(topic: String, _ callback: (AnyObject) -> Void) -> Int {
         return self.eventBus.on(topic, callback)
     }
     
+    
+    /**
+     * Unsubscribe from a subscription.
+     * This identifier is obtained as a return of the on() method.
+     */
     public func off(id: Int) {
         self.eventBus.off(id);
     }
     
-    public func reset() {
-        self.eventBus.reset()
-        for (_, classifier) in self.classifier {
-            classifier.reset()
-        }
-    }
     
+    /**
+     * Load a fingerprint into the classifier(s) for the specified groupId and locationId.
+     * The fingerprint can be constructed from a string by using the initializer when creating the Fingerprint object
+     */
     public func loadFingerprint(groupId: String, locationId: String, fingerprint: Fingerprint) {
         self._loadFingerprint(groupId, locationId: locationId, fingerprint: fingerprint)
     }
+   
     
+    /**
+     * Obtain the fingerprint for this groupId and locationId. usually done after collecting it.
+     * The user is responsible for persistently storing and loading the fingerprints.
+     */
     public func getFingerprint(groupId: String, locationId: String) -> Fingerprint? {
         if let groupFingerprints = self.fingerprintData[groupId] {
             if let returnPrint = groupFingerprints[locationId] {
@@ -113,13 +112,10 @@ public class BluenetLocalization {
         return nil
     }
     
-    func _loadFingerprint(groupId: String, locationId: String, fingerprint: Fingerprint) {
-        if (self.classifier[groupId] == nil) {
-            self.classifier[groupId] = LocationClassifier()
-        }
-        self.classifier[groupId]!.loadFingerprint(locationId, fingerprint: fingerprint)
-    }
     
+    /**
+     * Start collecting a fingerprint.
+     */
     public func startCollectingFingerprint() {
         self.collectingFingerprint = Fingerprint()
         self.collectingCallbackId = self.eventBus.on("iBeaconAdvertisement", {ibeaconData in
@@ -134,10 +130,18 @@ public class BluenetLocalization {
         });
     }
     
+    
+    /**
+     * Stop collecting a fingerprint without loading it into the classifier.
+     */
     public func abortCollectingFingerprint() {
         self._cleanupCollectingFingerprint()
     }
    
+    
+    /**
+     * Finalize collecting a fingerprint and store it in the appropriate classifier based on the groupId and the locationId.
+     */
     public func finalizeFingerprint(groupId: String, locationId: String) {
         if (self.collectingFingerprint != nil) {
             if (self.fingerprintData[groupId] == nil) {
@@ -149,6 +153,8 @@ public class BluenetLocalization {
         self._cleanupCollectingFingerprint()
     }
     
+    // MARK: UTIL
+    
     func _cleanupCollectingFingerprint() {
         if let callbackId = self.collectingCallbackId {
             self.off(callbackId)
@@ -157,20 +163,20 @@ public class BluenetLocalization {
         self.collectingFingerprint = nil
     }
     
-    func updateState(ibeaconData: AnyObject) {
+    func _updateState(ibeaconData: AnyObject) {
         if let data = ibeaconData as? [iBeaconPacket] {
-            if (data.count > 0 && self.activeGroup != nil) {
+            if (data.count > 0 && self.activeGroupId != nil) {
                 // create classifiers for this group if required.
-                if (self.classifier[self.activeGroup!] == nil) {
-                    self.classifier[self.activeGroup!] = LocationClassifier()
+                if (self.classifier[self.activeGroupId!] == nil) {
+                    self.classifier[self.activeGroupId!] = ClassifierWrapper()
                 }
                 
-                let currentlocation = self.getLocation(data)
-                if (self.activeLocation != currentlocation) {
+                let currentlocation = self._getLocation(data)
+                if (self.activeLocationId != currentlocation) {
                     if (self.lastMeasurement == currentlocation) {
                         self.sameCounter += 1
                         if (self.sameCounter == self.certainty) {
-                            self.moveToNewLocation(currentlocation)
+                            self._moveToNewLocation(currentlocation)
                             self.sameCounter = 0
                         }
                     }
@@ -183,53 +189,52 @@ public class BluenetLocalization {
         }
     }
     
-    func moveToNewLocation(newLocation: String ) {
-        if (self.activeLocation != nil) {
-            self.eventBus.emit("exitLocation", self.activeLocation!)
+    func _loadFingerprint(groupId: String, locationId: String, fingerprint: Fingerprint) {
+        if (self.classifier[groupId] == nil) {
+            self.classifier[groupId] = ClassifierWrapper()
         }
-        self.activeLocation = newLocation
-        self.eventBus.emit("enterLocation", self.activeLocation!)
+        self.classifier[groupId]!.loadFingerprint(locationId, fingerprint: fingerprint)
     }
     
-    func handleRegionExit(regionId: AnyObject) {
+    func _moveToNewLocation(newLocation: String ) {
+        if (self.activeLocationId != nil) {
+            self.eventBus.emit("exitLocation", self.activeLocationId!)
+        }
+        self.activeLocationId = newLocation
+        self.eventBus.emit("enterLocation", self.activeLocationId!)
+    }
+    
+    func _handleRegionExit(regionId: AnyObject) {
         if let regionString = regionId as? String {
-            if (self.activeGroup != nil) {
+            if (self.activeGroupId != nil) {
                 self.eventBus.emit("exitRegion", regionId)
             }
         }
         else {
-            if (self.activeGroup != nil) {
-                self.eventBus.emit("exitRegion", self.activeGroup!)
+            if (self.activeGroupId != nil) {
+                self.eventBus.emit("exitRegion", self.activeGroupId!)
             }
         }
-        self.activeGroup = nil
+        self.activeGroupId = nil
     }
     
-    func handleRegionEnter(regionId: AnyObject) {
+    func _handleRegionEnter(regionId: AnyObject) {
         if let regionString = regionId as? String {
-            if (self.activeGroup != nil) {
-                if (self.activeGroup! != regionString) {
-                    self.eventBus.emit("exitRegion", self.activeGroup!)
+            if (self.activeGroupId != nil) {
+                if (self.activeGroupId! != regionString) {
+                    self.eventBus.emit("exitRegion", self.activeGroupId!)
                     self.eventBus.emit("enterRegion", regionString)
                 }
             }
             else {
                 self.eventBus.emit("enterRegion", regionString)
             }
-            self.activeGroup = regionString
+            self.activeGroupId = regionString
         }
-    }
-//        if (self.activeGroup != identifier) {
-//            if (self.activeGroup != nil) {
-//                self.eventBus.emit("exitRegion", self.activeGroup!)
-//            }
-//            self.activeGroup = data[0].uuid
-//            self.eventBus.emit("enterRegion", self.activeGroup!)
-//        }
+    }    
     
-    
-    func getLocation(data : [iBeaconPacket]) -> String {
-        let location = self.classifier[self.activeGroup!]!.predict(data)
+    func _getLocation(data : [iBeaconPacket]) -> String {
+        let location = self.classifier[self.activeGroupId!]!.predict(data)
         self.eventBus.emit("currentLocation", location)
         return location
     }
@@ -237,25 +242,3 @@ public class BluenetLocalization {
    
 }
 
-
-/**
- * This will show an alert about location and forward the user to the settings page
- **/
-func showLocationAlert() {
-    let alertController = UIAlertController(title: "Allow \(APPNAME) to use your location",
-                                            message: "The location permission was not authorized. Please set it to \"Always\" in Settings to continue.",
-                                            preferredStyle: .Alert)
-    
-    let settingsAction = UIAlertAction(title: "Settings", style: .Default) { (alertAction) in
-        // THIS IS WHERE THE MAGIC HAPPENS!!!! It triggers the settings page to change the permissions
-        if let appSettings = NSURL(string: UIApplicationOpenSettingsURLString) {
-            UIApplication.sharedApplication().openURL(appSettings)
-        }
-    }
-    alertController.addAction(settingsAction)
-    
-    let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil)
-    alertController.addAction(cancelAction)
-    
-    VIEWCONTROLLER!.presentViewController(alertController, animated: true, completion: nil)
-}

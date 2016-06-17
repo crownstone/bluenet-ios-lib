@@ -11,58 +11,11 @@ import CoreLocation
 import SwiftyJSON
 import UIKit
 
-
-public class BeaconID {
-    var UUID : NSUUID;
-    var name = ""
-    var region : CLBeaconRegion;
-    
-    public init(name: String, uuid: String) {
-        self.UUID = NSUUID(UUIDString : uuid)!;
-        self.name = name;
-        self.region = CLBeaconRegion(proximityUUID: self.UUID, identifier: uuid);
-    }
-}
-
-public class iBeaconPacket {
-    public var uuid : String
-    public var major: NSNumber
-    public var minor: NSNumber
-    public var rssi : NSNumber
-    public var idString: String
-    
-    init(uuid: String, major: NSNumber, minor: NSNumber, rssi: NSNumber) {
-        self.uuid = uuid
-        self.major = major
-        self.minor = minor
-        self.rssi = rssi
-        
-        // we claim that the uuid, major and minor combination is unique.
-        self.idString = uuid + ".Maj:" + String(major) + ".Min:" + String(minor)
-    }
-    
-    public func getJSON() -> JSON {
-        var dataDict = [String : AnyObject]()
-        dataDict["id"]    = self.idString
-        dataDict["uuid"]  = self.uuid
-        dataDict["major"] = self.major
-        dataDict["minor"] = self.minor
-        dataDict["rssi"]  = self.rssi
-        
-        return JSON(dataDict)
-    }
-    
-    public func stringify() -> String {
-        return JSONUtils.stringify(self.getJSON())
-    }
-    
-}
-
 public class LocationManager : NSObject, CLLocationManagerDelegate {
     var manager : CLLocationManager!
     
     var eventBus : EventBus!
-    var trackingBeacons = [BeaconID]()
+    var trackingBeacons = [iBeaconContainer]()
     var appName = "Crownstone"
     var started = false;
 
@@ -72,12 +25,12 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         
         self.eventBus = eventBus;
         
-        print("Starting location manager")
+        //print("Starting location manager")
         self.manager = CLLocationManager()
         self.manager.delegate = self;
         
-        print("location services enabled: \(CLLocationManager.locationServicesEnabled())");
-        print("ranging services enabled: \(CLLocationManager.isRangingAvailable())");
+        //print("location services enabled: \(CLLocationManager.locationServicesEnabled())");
+        //print("ranging services enabled: \(CLLocationManager.isRangingAvailable())");
         
         // stop monitoring all previous regions
         for region in self.manager.monitoredRegions {
@@ -88,7 +41,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         self.check()
     }
     
-    public func trackBeacon(beacon: BeaconID) {
+    public func trackBeacon(beacon: iBeaconContainer) {
         if (!self._beaconInList(beacon, list: self.trackingBeacons)) {
             trackingBeacons.append(beacon);
             self.manager.startMonitoringForRegion(beacon.region)
@@ -105,7 +58,6 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     
     
     func start() {
-        print("starting!")
         self.manager.startUpdatingLocation()
         if (self.manager.respondsToSelector("allowsBackgroundLocationUpdates")) {
             self.manager.allowsBackgroundLocationUpdates = true
@@ -232,7 +184,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     // -------------------- UITL -------------------------//
     
     
-    func _beaconInList(beacon: BeaconID, list: [BeaconID]) -> Bool {
+    func _beaconInList(beacon: iBeaconContainer, list: [iBeaconContainer]) -> Bool {
         for element in list {
             if (element.UUID == beacon.UUID) {
                 return true;

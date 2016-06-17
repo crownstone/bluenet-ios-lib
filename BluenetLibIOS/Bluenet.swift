@@ -7,90 +7,156 @@
 //
 
 import Foundation
-import UIKit
 import PromiseKit
 import CoreBluetooth
 
-var APPNAME = "Crownstone"
-var VIEWCONTROLLER : UIViewController?
 
-//public func parseServiceData(data) -> [String: AnyObject] {
-    
-//}
 
-public class AvailableDevice {
-    var rssiHistory = [Double: Int]()
-    var rssi : Int!
-    var name : String?
-    var uuid : String
-    var lastUpdate : Double = 0
-    var cleanupCallback : () -> Void
-    var avgRssi : Double!
-    
-    // config
-    let timeout : Double = 5 //seconds
-    let rssiTimeout : Double = 2 //seconds
-    
-    init(_ data: Advertisement, _ cleanupCallback: () -> Void) {
-        self.name = data.name
-        self.uuid = data.uuid
-        self.cleanupCallback = cleanupCallback
-        self.avgRssi = data.rssi.doubleValue
-        self.update(data)
-    }
-    
-    func checkTimeout(referenceTime : Double) {
-        // if they are equal, no update has happened since the scheduling of this check.
-        if (self.lastUpdate == referenceTime) {
-            self.cleanupCallback()
-        }
-    }
-    
-    func clearRSSI(referenceTime : Double) {
-        self.rssiHistory.removeValueForKey(referenceTime)
-        self.calculateRssiAverage()
-    }
-    
-    func update(data: Advertisement) {
-        self.rssi = data.rssi.integerValue
-        self.lastUpdate = NSDate().timeIntervalSince1970
-        self.rssiHistory[self.lastUpdate] = self.rssi;
-        self.calculateRssiAverage()
-        delay(self.timeout, {_ in self.checkTimeout(self.lastUpdate)});
-        delay(self.rssiTimeout, {_ in self.clearRSSI(self.lastUpdate)});
-    }
-    
-    func calculateRssiAverage() {
-        var count = 0
-        var total : Double = 0
-        for (_, rssi) in self.rssiHistory {
-            total = total + Double(rssi)
-            count += 1
-        }
-        self.avgRssi = total/Double(count);
-    }
-}
-
-public func setViewController(viewController: UIViewController) {
-    VIEWCONTROLLER = viewController;
-}
-
+/**
+ * Bluenet.
+ * This lib is used to interact with the Crownstone family of devices.
+ * There are convenience methods that wrap the corebluetooth backend as well as 
+ * methods that simplify the services and characteristics.
+ *
+ * With this lib you can setup, pair, configure and control the Crownstone family of products.
+ 
+ * This lib broadcasts the following data:
+     topic:                      dataType:             when:
+     "advertisementData"         Advertisement         When an advertisment packet is received
+ */
 public class Bluenet {
-    // todo: set back to private
+    // todo: set back to private, currently public for DEBUG
     public let bleManager : BleManager!
     let eventBus : EventBus!
-    
     var deviceList = [String: AvailableDevice]()
     
-    public init(appName: String) {
+    // MARK: API
+    
+    
+    /**
+     * We use the appname in the popup messages that can be generated to check if the bluetooth is on and
+     * permissions are set correctly.
+     */
+    public init() {
         self.eventBus = EventBus()
         self.bleManager = BleManager(eventBus: self.eventBus)
         
-        self.eventBus.on("advertisementData", self.parseAdvertisement)
-        APPNAME = appName
+        self.eventBus.on("advertisementData", self._parseAdvertisement)
+
     }
     
-    func parseAdvertisement(data: AnyObject) {
+    
+    /**
+     * Start actively scanning for BLE devices.
+     * Scan results will be broadcasted on the "advertisementData" topic.
+     */
+    public func startScanning() {
+        self.bleManager.startScanning()
+    }
+    
+    
+    /**
+     * Start actively scanning for Crownstones based on the scan response service uuid.
+     * Scan results will be broadcasted on the "advertisementData" topic.
+     */
+    public func startScanningForCrownstones() {
+        self.startScanningForService(CrownstoneAdvertisementServiceUUID)
+    }
+    
+    
+    /**
+     * Start actively scanning for BLE devices containing a specific serviceUUID.
+     * Scan results will be broadcasted on the "advertisementData" topic.
+     */
+    public func startScanningForService(serviceUUID: String) {
+        self.bleManager.startScanningForService(serviceUUID)
+    }
+    
+    
+    /**
+     * Stop actively scanning for BLE devices.
+     */
+    public func stopScanning() {
+        self.bleManager.stopScanning()
+    }
+    
+    
+    /**
+     * Returns if the BLE manager is initialized. 
+     * Should be used to make sure commands are not send before it's finished and get stuck.
+     */
+    public func isReady() -> Promise<Void> {
+        return self.bleManager.isReady()
+    }
+    
+    
+    /**
+     * Connect to a BLE device with the provided UUID.
+     * This UUID is unique per BLE device per iOS device and is NOT the MAC address.
+     * Timeout is set to 3 seconds starting from the actual start of the connection. 
+     *   - It will abort other pending connection requests
+     *   - It will disconnect from a connected device if that is the case
+     */
+    public func connect(uuid: String) -> Promise<Void> {
+        return self.bleManager.connect(uuid)
+    }
+
+    
+    /**
+     * Disconnect from the connected device. Will also fulfil if there is nothing connected.
+     * Timeout is set to 2 seconds.
+     */
+    public func disconnect() -> Promise<Void> {
+       return self.bleManager.disconnect()
+    }
+    
+    
+    /**
+     * Debug.
+     */
+    public func getBLEstate() -> CBCentralManagerState {
+        return self.bleManager.BleState;
+    }
+    
+    
+    /**
+     * Set the switch state. If 0 or 1, switch on or off. If 0 < x < 1 then dim.
+     * TODO: currently only relay is supported.
+     */
+    public func setSwitchState(state: NSNumber) -> Promise<Void> {
+        print ("switching to \(state)")
+        var roundedState = max(0, min(255, round(state.doubleValue * 255)))
+        var switchState = UInt8(roundedState)
+        var packet : [UInt8] = [switchState]
+        return self.bleManager.writeToCharacteristic(
+            CSServices.PowerService,
+            characteristicId: PowerCharacteristics.Relay,
+            data: NSData(bytes: packet, length: packet.count),
+            type: CBCharacteristicWriteType.WithResponse
+        )
+    }
+    
+    
+    /**
+     * Subscribe to a topic with a callback. This method returns an Int which is used as identifier of the subscription.
+     * This identifier is supplied to the off method to unsubscribe.
+     */
+    public func on(topic: String, _ callback: (AnyObject) -> Void) -> Int {
+        return self.eventBus.on(topic, callback)
+    }
+    
+    
+    /**
+     * Unsubscribe from a subscription.
+     * This identifier is obtained as a return of the on() method.
+     */
+    public func off(id: Int) {
+        self.eventBus.off(id);
+    }
+    
+    // MARK: util
+    
+    func _parseAdvertisement(data: AnyObject) {
         if let castData = data as? Advertisement {
             if deviceList[castData.uuid] != nil {
                 deviceList[castData.uuid]!.update(castData)
@@ -101,78 +167,8 @@ public class Bluenet {
         }
     }
     
-    public func reset() {
-        self.eventBus.reset()
-    }
-    
-    public func startScanning() {
-        self.bleManager.startScanning()
-    }
-    
-    public func startScanningForCrownstones() {
-        self.startScanningForService("C001")
-    }
-    
-    public func startScanningForService(serviceUUID: String) {
-        self.bleManager.startScanningForService(serviceUUID)
-    }
-    
-    public func stopScanning() {
-        self.bleManager.stopScanning()
-    }
-    
-    public func isReady() -> Promise<Void> {
-        return self.bleManager.isReady()
-    }
-    
-    public func connect(uuid: String) -> Promise<Void> {
-        return self.bleManager.connect(uuid)
-    }
-    
-    public func disconnect() -> Promise<Void> {
-        print("disconnectiong")
-       return self.bleManager.disconnect()
-    }
-    
-    public func getBLEstate() -> CBCentralManagerState {
-        return self.bleManager.BleState;
-    }
-    
-    
-    
-    /**
-     * Set the switch state. If 0 or 1, switch on or off. If 0 < x < 1 then dim.
-     */
-    public func setSwitchState(state: NSNumber) -> Promise<Void> {
-//        if (state == 0 || state >= 1) {
-            print ("switching to \(state)")
-            var roundedState = max(0, min(255, round(state.doubleValue * 255)))
-            var switchState = UInt8(roundedState)
-            var packet : [UInt8] = [switchState]
-            return self.bleManager.writeToCharacteristic(
-                CSServices.PowerService,
-                characteristicId: PowerCharacteristics.Relay,
-                data: NSData(bytes: packet, length: packet.count),
-                type: CBCharacteristicWriteType.WithResponse
-            )
-//        }
-//        else {
-//            var switchState = UInt8(state*100.0)
-//            return self.bleManager.writeToCharacteristic(
-//                CSServices.CrownstoneService,
-//                characteristicId: CrownstoneCharacteristics.Control,
-//                data: ControlPacket(type: .PWM, payload8: switchState).getNSData(),
-//                type: CBCharacteristicWriteType.WithoutResponse
-//            )
-//        }
-    }
-    
-    public func on(topic: String, _ callback: (AnyObject) -> Void) -> Int {
-        return self.eventBus.on(topic, callback)
-    }
-    
-    public func off(id: Int) {
-        self.eventBus.off(id);
-    }
+    // TODO: returning device list
+    // TODO: other charactertics and services
+
 }
 

@@ -25,10 +25,10 @@ class NaiveBayes {
     
     init() {}
     
-    func loadFingerprint(id: String, _ fingerprint: Fingerprint) {
-//        print ("loaded fingerprint into naive bayes \(id) : \(fingerprint.getJSON())")
-        self.fingerprints[id] = fingerprint
-        self._processFingerPrint(id, fingerprint)
+    func loadFingerprint(locationId: String, _ fingerprint: Fingerprint) {
+//        print ("loaded fingerprint into naive bayes \(locationId) : \(fingerprint.getJSON())")
+        self.fingerprints[locationId] = fingerprint
+        self._processFingerPrint(locationId, fingerprint)
     }
     
     func predict(inputVector: [iBeaconPacket]) -> String {
@@ -37,6 +37,7 @@ class NaiveBayes {
         var highestPredictionLabel = ""
         
         for (label, summary) in self.summaries {
+//            print ("evaluating \(label)")
             var prediction = self._predict(inputVector, summary)
 //            print ("in prediction Loop \(prediction) , \(highestPrediction)")
             if (highestPrediction < prediction) {
@@ -56,42 +57,46 @@ class NaiveBayes {
     func _predict(inputVector: [iBeaconPacket], _ summary: [String: NBSummary]) -> Double {
         var totalProbability : Double = 1
         var totalMatches : Double = 0
-//        print ("input vector \(inputVector)")
         for packet in inputVector {
-//            print ("packet \(packet)")
             let stoneId = packet.idString
-//            print ("stoneId: \(stoneId)")
             if (summary[stoneId] != nil) {
-//                print ("in summary check")
                 let RSSI = Double(packet.rssi);
                 let mean = summary[stoneId]!.mean
                 let std =  summary[stoneId]!.std
-//                print ("rssi \(RSSI) mean \(mean) std \(std)")
                 var exponent = exp(-(pow(RSSI - mean,2)/(2*pow(std,2))))
-//                print ("exponent \(exponent)")
                 totalProbability *= exponent / (sqrt(2*M_PI) * std)
-//                print ("totalProbability \(totalProbability)")
                 totalMatches += 1
             }
+            else {
+                print("CANNOT LOAD SUMMARY FOR \(stoneId)")
+            }
+        }
+        
+        if (totalMatches == 0) {
+            return 0
         }
         // we average to ensure missing datapoints will not influence the result.
+        let probability = totalProbability / totalMatches
+        
         return totalProbability / totalMatches
     }
     
-    func _processFingerPrint(id: String, _ fingerprint: Fingerprint) {
+    func _processFingerPrint(locationId: String, _ fingerprint: Fingerprint) {
         for (stoneId, measurements) in fingerprint.data {
             let mean = self._getMean(measurements)
             let std = self._getSTD(mean, measurements)
             let summary = NBSummary(mean, std)
-//            print(" processing fingerprint \(id) mean \(mean) std \(std)")
-            self._addToSummary(id, stoneId: stoneId, summary: summary)
+            
+            self._addToSummary(locationId, stoneId: stoneId, summary: summary)
         }
     }
     
-    func _addToSummary(id: String, stoneId: String, summary: NBSummary) {
+    func _addToSummary(locationId: String, stoneId: String, summary: NBSummary) {
         // we clear the existing summery if it existed
-        self.summaries[id] = [String: NBSummary]()
-        self.summaries[id]![stoneId] = summary
+        if (self.summaries[locationId] == nil) {
+            self.summaries[locationId] = [String: NBSummary]()
+        }
+        self.summaries[locationId]![stoneId] = summary
     }
     
     func _getMean(measurements: [NSNumber]) -> Double {

@@ -27,251 +27,6 @@ public enum BleError : ErrorType {
     case TIMEOUT
 }
 
-enum RequestType {
-    case NONE
-    case DISCONNECT
-    case CONNECT
-    case GET_SERVICES
-    case GET_CHARACTERISTICS
-    case READ_CHARACTERISTIC
-    case WRITE_CHARACTERISTIC
-    case ENABLE_NOTIFICATIONS
-    case DISABLE_NOTIFICATIONS
-}
-
-enum PromiseType {
-    case NONE
-    case VOID
-    case INT
-    case SERVICELIST
-    case CHARACTERISTICLIST
-    case CHARACTERISTIC
-}
-
-
-class promiseContainer {
-    private var _fulfillVoidPromise             : (Void) -> Void                = {_ in }
-    private var _fulfillIntPromise              : (Int) -> Void                 = {_ in }
-    private var _fulfillServiceListPromise      : ([CBService]) -> Void         = {_ in }
-    private var _fulfillCharacteristicListPromise : ([CBCharacteristic]) -> Void = {_ in }
-    private var _fulfillCharacteristicPromise   : (CBCharacteristic) -> Void    = {_ in }
-    private var _rejectPromise                  : (ErrorType) -> Void           = {_ in }
-    var type = RequestType.NONE
-    var promiseType = PromiseType.NONE
-    var completed = false
-
-    
-    init(_ fulfill: (Void) -> Void, _ reject: (ErrorType) -> Void, type: RequestType) {
-        _fulfillVoidPromise = fulfill
-        promiseType = .VOID
-        initShared(reject, type)
-    }
-
-    init(_ fulfill: (Int) -> Void, _ reject: (ErrorType) -> Void, type: RequestType) {
-        _fulfillIntPromise = fulfill
-        promiseType = .INT
-        initShared(reject, type)
-    }
-    
-    init(_ fulfill: ([CBService]) -> Void, _ reject: (ErrorType) -> Void, type: RequestType) {
-        _fulfillServiceListPromise = fulfill
-        promiseType = .SERVICELIST
-        initShared(reject, type)
-    }
-    
-    init(_ fulfill: ([CBCharacteristic]) -> Void, _ reject: (ErrorType) -> Void, type: RequestType) {
-        _fulfillCharacteristicListPromise = fulfill
-        promiseType = .CHARACTERISTICLIST
-        initShared(reject, type)
-    }
-    
-    init(_ fulfill: (CBCharacteristic) -> Void, _ reject: (ErrorType) -> Void, type: RequestType) {
-        _fulfillCharacteristicPromise = fulfill
-        promiseType = .CHARACTERISTIC
-        initShared(reject, type)
-    }
-    
-    func initShared(reject: (ErrorType) -> Void, _ type: RequestType) {
-        _rejectPromise = reject
-        self.type = type
-    }
-    
-    func setFulfillOnTimeout(delayTimeInSeconds: Double) {
-        if (promiseType == .VOID) {
-            delay(delayTimeInSeconds, {_ in self.fulfill()})
-        }
-        else {
-            _rejectPromise(BleError.CANNOT_SET_TIMEOUT_WITH_THIS_TYPE_OF_PROMISE)
-        }
-    }
-    
-    func setTimeout(delayTimeInSeconds: Double) {
-        delay(delayTimeInSeconds, {_ in self.reject(BleError.TIMEOUT)})
-    }
-    
-    
-    init() {
-        self.clear()
-    }
-    
-    
-    func clear() {
-        type = .NONE
-        promiseType = .NONE
-        _fulfillVoidPromise  = {_ in }
-        _fulfillServiceListPromise = {_ in }
-        _fulfillCharacteristicListPromise = {_ in }
-        _fulfillCharacteristicPromise = {_ in }
-        _rejectPromise = {_ in }
-    }
-    
-    func fulfill(data: Void) {
-        if (self.completed == false) {
-            self.completed = true
-            if (promiseType == .VOID) {
-                _fulfillVoidPromise(data)
-            }
-            else {
-                _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
-            }
-            clear()
-        }
-    }
-    
-    func fulfill(data: Int) {
-        if (self.completed == false) {
-            self.completed = true
-            if (promiseType == .INT) {
-                _fulfillIntPromise(data)
-            }
-            else {
-                _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
-            }
-        }
-        clear()
-    }
-    
-    func fulfill(data: [CBService]) {
-        if (self.completed == false) {
-            self.completed = true
-            if (promiseType == .SERVICELIST) {
-                _fulfillServiceListPromise(data)
-            }
-            else {
-                _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
-            }
-        }
-        clear()
-    }
-    
-    func fulfill(data: [CBCharacteristic]) {
-        if (self.completed == false) {
-            self.completed = true
-            if (promiseType == .CHARACTERISTICLIST) {
-                _fulfillCharacteristicListPromise(data)
-            }
-            else {
-                _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
-            }
-        }
-        clear()
-    }
-    
-    func fulfill(data: CBCharacteristic) {
-        if (self.completed == false) {
-            self.completed = true
-            if (promiseType == .CHARACTERISTIC) {
-                _fulfillCharacteristicPromise(data)
-            }
-            else {
-                _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
-            }
-        }
-        clear()
-    }
-    
-    func reject(error: ErrorType) {
-        if (self.completed == false) {
-            self.completed = true
-            _rejectPromise(error)
-        }
-        clear()
-    }
-    
-}
-
-public class Advertisement {
-    public var uuid : String
-    public var name : String
-    public var rssi : NSNumber
-    public var serviceData = [String: [UInt8]]()
-    public var serviceDataAvailable : Bool
-    
-    init(uuid: String, name: String?, rssi: NSNumber, serviceData: AnyObject?) {
-        if (name != nil) {
-            self.name = name!
-        }
-        else {
-            self.name = ""
-        }
-        self.uuid = uuid
-        self.rssi = rssi
-        self.serviceDataAvailable = false
-        
-        if let castData = serviceData as? [CBUUID: NSData] {
-            for (serviceCUUID, data) in castData {
-                // convert data to uint8 array
-                let uint8Arr = Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(data.bytes), count: data.length))
-                self.serviceData[serviceCUUID.UUIDString] = uint8Arr
-                self.serviceDataAvailable = true
-            }
-        }
-    }
-    
-    func getNumberArray(data: [UInt8]) -> [NSNumber] {
-        var numberArray = [NSNumber]()
-        for uint8 in data {
-            numberArray.append(NSNumber(unsignedChar: uint8))
-        }
-        return numberArray
-    }
-    
-    func getServiceDataJSON() -> JSON {
-        if (self.serviceDataAvailable) {
-            var serviceData = [String: JSON]()
-            for (id, data) in self.serviceData {
-                if (id == "C001") {
-                    let crownstoneScanResponse = ScanResponcePacket(data)
-                    serviceData[id] = crownstoneScanResponse.getJSON()
-                }
-                else {
-                    serviceData[id] = JSON(self.getNumberArray(data))
-                }
-            }
-            return JSON(serviceData);
-        }
-        else {
-            return JSON([])
-        }
-    }
-    
-    public func getJSON() -> JSON {
-        var dataDict = [String : AnyObject]()
-        dataDict["id"] = self.uuid
-        dataDict["name"] = self.name
-        dataDict["rssi"] = self.rssi
-        
-        var dataJSON = JSON(dataDict)
-        dataJSON["serviceData"] = self.getServiceDataJSON()
-        return dataJSON
-    }
-    
-    public func stringify() -> String {
-        return JSONUtils.stringify(self.getJSON())
-    }
-    
-}
-
 public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     var centralManager : CBCentralManager!
     var connectedPeripheral: CBPeripheral?
@@ -369,7 +124,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 
                 // setup the pending promise for connection
                 pendingPromise = promiseContainer(fulfill, reject, type: .CONNECT)
-                
+                pendingPromise.setTimeout(3)
                 // TODO: implement timeout.
                 centralManager.connectPeripheral(connectingPeripheral!, options: nil)
             }
@@ -386,6 +141,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             if (self.connectedPeripheral != nil) {
                 let disconnectPromise = Promise<Void> { success, failure in
                     self.pendingPromise = promiseContainer(success, failure, type: .DISCONNECT)
+                    self.pendingPromise.setTimeout(2)
                     self.centralManager.cancelPeripheralConnection(connectedPeripheral!)
                 }
                 // we clean up (self.connectedPeripheral = nil) inside the disconnect() method, thereby needing this inner promise
@@ -687,6 +443,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     }
     
     public func centralManager(central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: NSError?) {
+        print("Disconnectd")
         if (error != nil) {
             pendingPromise.reject(error!)
         }

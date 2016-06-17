@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		FA086A811D0EB34F005F2024 /* NaiveBayes.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA086A801D0EB34F005F2024 /* NaiveBayes.swift */; };
-		FA086A831D0EB4AF005F2024 /* LocationClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA086A821D0EB4AF005F2024 /* LocationClassifier.swift */; };
+		FA086A831D0EB4AF005F2024 /* ClassifierWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA086A821D0EB4AF005F2024 /* ClassifierWrapper.swift */; };
 		FA0C96321D1183DB00794D85 /* JSONUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0C96311D1183DB00794D85 /* JSONUtils.swift */; };
 		FA0C963B1D11904900794D85 /* Conversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0C963A1D11904900794D85 /* Conversion.swift */; };
 		FA0C963C1D11906700794D85 /* Conversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0C963A1D11904900794D85 /* Conversion.swift */; };
@@ -30,6 +30,12 @@
 		FAE8625C1CF478E50027539D /* Eventbus.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE8625B1CF478E50027539D /* Eventbus.swift */; };
 		FAE862601CF48E530027539D /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE8625F1CF48E530027539D /* Util.swift */; };
 		FAE862621CF4B3830027539D /* Cartfile in Resources */ = {isa = PBXBuildFile; fileRef = FAE862611CF4B3830027539D /* Cartfile */; };
+		FAFE003F1D1434AD001CF20C /* AvailableDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE003E1D1434AD001CF20C /* AvailableDevice.swift */; };
+		FAFE00421D1434D9001CF20C /* Advertisement.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE00411D1434D9001CF20C /* Advertisement.swift */; };
+		FAFE00441D14350F001CF20C /* PromiseContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE00431D14350F001CF20C /* PromiseContainer.swift */; };
+		FAFE00461D14363E001CF20C /* Fingerprint.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE00451D14363E001CF20C /* Fingerprint.swift */; };
+		FAFE00481D14364B001CF20C /* iBeaconContainers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE00471D14364B001CF20C /* iBeaconContainers.swift */; };
+		FAFE004E1D14379B001CF20C /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE004D1D14379B001CF20C /* Globals.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,7 +50,7 @@
 
 /* Begin PBXFileReference section */
 		FA086A801D0EB34F005F2024 /* NaiveBayes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NaiveBayes.swift; sourceTree = "<group>"; };
-		FA086A821D0EB4AF005F2024 /* LocationClassifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationClassifier.swift; sourceTree = "<group>"; };
+		FA086A821D0EB4AF005F2024 /* ClassifierWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassifierWrapper.swift; sourceTree = "<group>"; };
 		FA0C96311D1183DB00794D85 /* JSONUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONUtils.swift; sourceTree = "<group>"; };
 		FA0C963A1D11904900794D85 /* Conversion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversion.swift; sourceTree = "<group>"; };
 		FA270B041D0F12CD00CB0AE8 /* Characteristics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Characteristics.swift; sourceTree = "<group>"; };
@@ -69,6 +75,13 @@
 		FAE8625B1CF478E50027539D /* Eventbus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Eventbus.swift; sourceTree = "<group>"; };
 		FAE8625F1CF48E530027539D /* Util.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		FAE862611CF4B3830027539D /* Cartfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Cartfile; sourceTree = "<group>"; };
+		FAE9371D1D14453000945989 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		FAFE003E1D1434AD001CF20C /* AvailableDevice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AvailableDevice.swift; sourceTree = "<group>"; };
+		FAFE00411D1434D9001CF20C /* Advertisement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Advertisement.swift; sourceTree = "<group>"; };
+		FAFE00431D14350F001CF20C /* PromiseContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseContainer.swift; sourceTree = "<group>"; };
+		FAFE00451D14363E001CF20C /* Fingerprint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Fingerprint.swift; sourceTree = "<group>"; };
+		FAFE00471D14364B001CF20C /* iBeaconContainers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = iBeaconContainers.swift; sourceTree = "<group>"; };
+		FAFE004D1D14379B001CF20C /* Globals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +114,7 @@
 				FAA048211D072AE5000D333A /* PromiseKit.framework */,
 				FAA048221D072AE5000D333A /* SwiftyJSON.framework */,
 				FAE862611CF4B3830027539D /* Cartfile */,
+				FAE9371D1D14453000945989 /* README.md */,
 				FA3C187B1CBBDA6B00A11CF7 /* BluenetLibIOS */,
 				FA3C18871CBBDA6B00A11CF7 /* BluenetLibIOSTests */,
 				FA3C187A1CBBDA6B00A11CF7 /* Products */,
@@ -121,20 +135,14 @@
 			children = (
 				FA3C187E1CBBDA6B00A11CF7 /* Info.plist */,
 				FA3C187C1CBBDA6B00A11CF7 /* BluenetLibIOS.h */,
-				FA3C18991CBBDB9400A11CF7 /* BleMangager.swift */,
-				FA3C189A1CBBDB9400A11CF7 /* LocationManager.swift */,
-				FA086A821D0EB4AF005F2024 /* LocationClassifier.swift */,
-				FA086A801D0EB34F005F2024 /* NaiveBayes.swift */,
 				FAE862571CF4515A0027539D /* Bluenet.swift */,
 				FA4E02981D0873CD0086E2BF /* BluenetLocalization.swift */,
-				FAE8625B1CF478E50027539D /* Eventbus.swift */,
-				FA4A09D91D099D01005753CE /* BluenetTypes.swift */,
-				FA4A09D71D096932005753CE /* BlePackets.swift */,
-				FA270B041D0F12CD00CB0AE8 /* Characteristics.swift */,
-				FA270B061D0F12D800CB0AE8 /* Services.swift */,
-				FA0C963A1D11904900794D85 /* Conversion.swift */,
-				FAE8625F1CF48E530027539D /* Util.swift */,
-				FA0C96311D1183DB00794D85 /* JSONUtils.swift */,
+				FAFE004D1D14379B001CF20C /* Globals.swift */,
+				FAFE004C1D143737001CF20C /* backend */,
+				FAFE004A1D1436D1001CF20C /* classifiers */,
+				FAFE003D1D143496001CF20C /* containerClasses */,
+				FAFE004B1D14370A001CF20C /* protocol */,
+				FAFE00491D1436C5001CF20C /* util */,
 			);
 			path = BluenetLibIOS;
 			sourceTree = "<group>";
@@ -147,6 +155,58 @@
 				FA44BB171CF5A6B50018C9D0 /* PromiseTests.swift */,
 			);
 			path = BluenetLibIOSTests;
+			sourceTree = "<group>";
+		};
+		FAFE003D1D143496001CF20C /* containerClasses */ = {
+			isa = PBXGroup;
+			children = (
+				FAFE003E1D1434AD001CF20C /* AvailableDevice.swift */,
+				FAFE00411D1434D9001CF20C /* Advertisement.swift */,
+				FAFE00451D14363E001CF20C /* Fingerprint.swift */,
+				FAFE00471D14364B001CF20C /* iBeaconContainers.swift */,
+				FAFE00431D14350F001CF20C /* PromiseContainer.swift */,
+			);
+			name = containerClasses;
+			sourceTree = "<group>";
+		};
+		FAFE00491D1436C5001CF20C /* util */ = {
+			isa = PBXGroup;
+			children = (
+				FAE8625B1CF478E50027539D /* Eventbus.swift */,
+				FAE8625F1CF48E530027539D /* Util.swift */,
+				FA0C96311D1183DB00794D85 /* JSONUtils.swift */,
+				FA0C963A1D11904900794D85 /* Conversion.swift */,
+			);
+			name = util;
+			sourceTree = "<group>";
+		};
+		FAFE004A1D1436D1001CF20C /* classifiers */ = {
+			isa = PBXGroup;
+			children = (
+				FA086A821D0EB4AF005F2024 /* ClassifierWrapper.swift */,
+				FA086A801D0EB34F005F2024 /* NaiveBayes.swift */,
+			);
+			name = classifiers;
+			sourceTree = "<group>";
+		};
+		FAFE004B1D14370A001CF20C /* protocol */ = {
+			isa = PBXGroup;
+			children = (
+				FA270B061D0F12D800CB0AE8 /* Services.swift */,
+				FA270B041D0F12CD00CB0AE8 /* Characteristics.swift */,
+				FA4A09D71D096932005753CE /* BlePackets.swift */,
+				FA4A09D91D099D01005753CE /* BluenetTypes.swift */,
+			);
+			name = protocol;
+			sourceTree = "<group>";
+		};
+		FAFE004C1D143737001CF20C /* backend */ = {
+			isa = PBXGroup;
+			children = (
+				FA3C18991CBBDB9400A11CF7 /* BleMangager.swift */,
+				FA3C189A1CBBDB9400A11CF7 /* LocationManager.swift */,
+			);
+			name = backend;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -258,19 +318,25 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FA086A831D0EB4AF005F2024 /* LocationClassifier.swift in Sources */,
+				FA086A831D0EB4AF005F2024 /* ClassifierWrapper.swift in Sources */,
+				FAFE00441D14350F001CF20C /* PromiseContainer.swift in Sources */,
 				FA3C189D1CBBDB9400A11CF7 /* LocationManager.swift in Sources */,
 				FA086A811D0EB34F005F2024 /* NaiveBayes.swift in Sources */,
 				FA0C96321D1183DB00794D85 /* JSONUtils.swift in Sources */,
 				FAE8625C1CF478E50027539D /* Eventbus.swift in Sources */,
 				FA270B051D0F12CD00CB0AE8 /* Characteristics.swift in Sources */,
 				FAE862601CF48E530027539D /* Util.swift in Sources */,
+				FAFE004E1D14379B001CF20C /* Globals.swift in Sources */,
 				FA4A09DA1D099D01005753CE /* BluenetTypes.swift in Sources */,
 				FA4A09D81D096932005753CE /* BlePackets.swift in Sources */,
+				FAFE00421D1434D9001CF20C /* Advertisement.swift in Sources */,
 				FA3C189B1CBBDB9400A11CF7 /* BleMangager.swift in Sources */,
+				FAFE00461D14363E001CF20C /* Fingerprint.swift in Sources */,
 				FA270B071D0F12D800CB0AE8 /* Services.swift in Sources */,
 				FA0C963B1D11904900794D85 /* Conversion.swift in Sources */,
 				FA4E02991D0873CD0086E2BF /* BluenetLocalization.swift in Sources */,
+				FAFE003F1D1434AD001CF20C /* AvailableDevice.swift in Sources */,
+				FAFE00481D14364B001CF20C /* iBeaconContainers.swift in Sources */,
 				FAE862581CF4515A0027539D /* Bluenet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
