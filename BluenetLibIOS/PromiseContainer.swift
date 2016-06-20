@@ -13,6 +13,7 @@ import CoreBluetooth
 enum RequestType {
     case NONE
     case DISCONNECT
+    case CANCEL_PENDING_CONNECTION
     case CONNECT
     case GET_SERVICES
     case GET_CHARACTERISTICS
@@ -88,8 +89,8 @@ class promiseContainer {
         }
     }
     
-    func setTimeout(delayTimeInSeconds: Double) {
-        delay(delayTimeInSeconds, {_ in self.reject(BleError.TIMEOUT)})
+    func setTimeout(delayTimeInSeconds: Double, errorOnReject: BleError) {
+        delay(delayTimeInSeconds, {_ in self.reject(errorOnReject)})
     }
     
     

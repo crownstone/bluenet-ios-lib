@@ -14,7 +14,6 @@ import PromiseKit
 public enum BleError : ErrorType {
     case DISCONNECTED
     case CONNECTION_CANCELLED
-    case CONNECTION_TIMEOUT
     case NOT_CONNECTED
     case NO_SERVICES
     case NO_CHARACTERISTICS
@@ -25,6 +24,27 @@ public enum BleError : ErrorType {
     case NOT_INITIALIZED
     case CANNOT_SET_TIMEOUT_WITH_THIS_TYPE_OF_PROMISE
     case TIMEOUT
+    case DISCONNECT_TIMEOUT
+    case CANCEL_PENDING_CONNECTION_TIMEOUT
+    case CONNECT_TIMEOUT
+    case GET_SERVICES_TIMEOUT
+    case GET_CHARACTERISTICS_TIMEOUT
+    case READ_CHARACTERISTIC_TIMEOUT
+    case WRITE_CHARACTERISTIC_TIMEOUT
+    case ENABLE_NOTIFICATIONS_TIMEOUT
+    case DISABLE_NOTIFICATIONS_TIMEOUT
+}
+
+struct timeoutDurations {
+    static let disconnect              : Double = 2
+    static let cancelPendingConnection : Double = 2
+    static let connect                 : Double = 2
+    static let getServices             : Double = 2
+    static let getCharacteristics      : Double = 2
+    static let readCharacteristic      : Double = 2
+    static let writeCharacteristic     : Double = 2
+    static let enableNotifications     : Double = 2
+    static let disableNotifications    : Double = 2
 }
 
 public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
@@ -49,7 +69,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     // MARK: API
     
     /**
-     * This method will fulfill when the bleManager is ready. It polls itself every 0.25 seconds.
+     * This method will fulfill when the bleManager is ready. It polls itself every 0.25 seconds. Never rejects.
      *
      */
     public func isReady() -> Promise<Void> {
@@ -73,12 +93,16 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 reject(BleError.NOT_INITIALIZED)
             }
             else {
-                // cancel any connection attempt in progress.
-                if (connectingPeripheral != nil) {
-                    abortConnecting()
-                }
+                // start the connection
                 if (connectedPeripheral != nil) {
                     disconnect()
+                        .then({ _ in return self._connect(uuid)})
+                        .then({ _ in fulfill()})
+                        .error(reject)
+                }
+                // cancel any connection attempt in progress.
+                else if (connectingPeripheral != nil) {
+                    abortConnecting()
                         .then({ _ in return self._connect(uuid)})
                         .then({ _ in fulfill()})
                         .error(reject)
@@ -92,18 +116,31 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         };
     }
     
+    
+    
     /**
      *  Cancel a pending connection
      */
-    func abortConnecting() {
-        if (connectingPeripheral != nil) {
-            centralManager.cancelPeripheralConnection(connectingPeripheral!)
-            
-            // if there was a connection in progress, cancel it with an error
-            if (pendingPromise.type == .CONNECT) {
-               pendingPromise.reject(BleError.CONNECTION_CANCELLED)
+    func abortConnecting()  -> Promise<Void> {
+        return Promise<Void> { fulfill, reject in
+            if (connectingPeripheral != nil) {
+                // if there was a connection in progress, cancel it with an error
+                if (pendingPromise.type == .CONNECT) {
+                    pendingPromise.reject(BleError.CONNECTION_CANCELLED)
+                }
+                
+                // we set it to nil here regardless if the connection abortion fails or not.
+                connectingPeripheral = nil
+                
+                pendingPromise = promiseContainer(fulfill, reject, type: .CANCEL_PENDING_CONNECTION)
+                pendingPromise.setTimeout(timeoutDurations.cancelPendingConnection, errorOnReject: .CANCEL_PENDING_CONNECTION_TIMEOUT)
+                
+                centralManager.cancelPeripheralConnection(connectingPeripheral!)
             }
-        }
+            else {
+                fulfill()
+            }
+        };
     }
     
     /**
@@ -124,7 +161,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 
                 // setup the pending promise for connection
                 pendingPromise = promiseContainer(fulfill, reject, type: .CONNECT)
-                pendingPromise.setTimeout(3)
+                pendingPromise.setTimeout(timeoutDurations.connect, errorOnReject: .CONNECT_TIMEOUT)
                 // TODO: implement timeout.
                 centralManager.connectPeripheral(connectingPeripheral!, options: nil)
             }
@@ -141,7 +178,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             if (self.connectedPeripheral != nil) {
                 let disconnectPromise = Promise<Void> { success, failure in
                     self.pendingPromise = promiseContainer(success, failure, type: .DISCONNECT)
-                    self.pendingPromise.setTimeout(2)
+                    self.pendingPromise.setTimeout(timeoutDurations.disconnect, errorOnReject: .DISCONNECT_TIMEOUT)
                     self.centralManager.cancelPeripheralConnection(connectedPeripheral!)
                 }
                 // we clean up (self.connectedPeripheral = nil) inside the disconnect() method, thereby needing this inner promise
@@ -169,7 +206,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 }
                 else {
                     self.pendingPromise = promiseContainer(fulfill, reject, type: .GET_SERVICES)
-
+                    self.pendingPromise.setTimeout(timeoutDurations.getServices, errorOnReject: .GET_SERVICES_TIMEOUT)
                     // the fulfil and reject are handled in the peripheral delegate
                     connectedPeripheral!.discoverServices(nil) // then return services
                 }
@@ -227,7 +264,8 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 }
                 else {
                     self.pendingPromise = promiseContainer(fulfill, reject, type: .GET_CHARACTERISTICS)
-                    
+                    self.pendingPromise.setTimeout(timeoutDurations.getCharacteristics, errorOnReject: .GET_CHARACTERISTICS_TIMEOUT)
+
                     // the fulfil and reject are handled in the peripheral delegate
                     connectedPeripheral!.discoverCharacteristics(nil, forService: service)// then return services
                 }
@@ -289,6 +327,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             self.getChacteristic(serviceId, characteristicId)
                 .then({characteristic in
                     self.pendingPromise = promiseContainer(fulfill, reject, type: .READ_CHARACTERISTIC)
+                    self.pendingPromise.setTimeout(timeoutDurations.readCharacteristic, errorOnReject: .READ_CHARACTERISTIC_TIMEOUT)
                     
                     // the fulfil and reject are handled in the peripheral delegate
                     self.connectedPeripheral!.readValueForCharacteristic(characteristic)
@@ -304,9 +343,8 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             self.getChacteristic(serviceId, characteristicId)
                 .then({characteristic in
                     self.pendingPromise = promiseContainer(fulfill, reject, type: .WRITE_CHARACTERISTIC)
+                    self.pendingPromise.setTimeout(timeoutDurations.writeCharacteristic, errorOnReject: .WRITE_CHARACTERISTIC_TIMEOUT)
                     print ("writing \(data) ")
-                    
-                    self.pendingPromise.setTimeout(0.5)
                     
                     // the fulfil and reject are handled in the peripheral delegate
                     self.connectedPeripheral!.writeValue(data, forCharacteristic: characteristic, type: type)
@@ -330,6 +368,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                     return Promise<Void> { success, failure in
                         // the success and failure are handled in the peripheral delegate
                         self.pendingPromise = promiseContainer(success, failure, type: .ENABLE_NOTIFICATIONS)
+                        self.pendingPromise.setTimeout(timeoutDurations.enableNotifications, errorOnReject: .ENABLE_NOTIFICATIONS_TIMEOUT)
                         self.connectedPeripheral!.setNotifyValue(true, forCharacteristic: characteristic)
                     }
                 })
@@ -358,6 +397,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 self.getChacteristic(serviceId, characteristicId)
                     .then({characteristic in
                         self.pendingPromise = promiseContainer(fulfill, reject, type: .DISABLE_NOTIFICATIONS)
+                        self.pendingPromise.setTimeout(timeoutDurations.disableNotifications, errorOnReject: .DISABLE_NOTIFICATIONS_TIMEOUT)
                         
                         // the fulfil and reject are handled in the peripheral delegate
                         self.connectedPeripheral!.setNotifyValue(false, forCharacteristic: characteristic)
@@ -411,7 +451,6 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     }
     
     public func centralManager(central: CBCentralManager, didDiscoverPeripheral peripheral: CBPeripheral, advertisementData: [String : AnyObject], RSSI: NSNumber) {
-        
         var emitData = Advertisement(
             uuid: peripheral.identifier.UUIDString,
             name: peripheral.name,
@@ -443,17 +482,22 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     }
     
     public func centralManager(central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: NSError?) {
-        print("Disconnectd")
-        if (error != nil) {
-            pendingPromise.reject(error!)
+        if (pendingPromise.type == .CANCEL_PENDING_CONNECTION) {
+            pendingPromise.fulfill()
         }
         else {
-            // if the pending promise is NOT for disconnect, a disconnection event is a rejection.
-            if (pendingPromise.type != .DISCONNECT) {
-                pendingPromise.reject(BleError.DISCONNECTED)
+            print("Disconnected")
+            if (error != nil) {
+                pendingPromise.reject(error!)
             }
             else {
-                pendingPromise.fulfill()
+                // if the pending promise is NOT for disconnect, a disconnection event is a rejection.
+                if (pendingPromise.type != .DISCONNECT) {
+                    pendingPromise.reject(BleError.DISCONNECTED)
+                }
+                else {
+                    pendingPromise.fulfill()
+                }
             }
         }
     }
