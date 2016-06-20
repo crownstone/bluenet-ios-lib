@@ -118,18 +118,22 @@ public class BluenetLocalization {
      */
     public func startCollectingFingerprint() {
         self.collectingFingerprint = Fingerprint()
-        self.collectingCallbackId = self.eventBus.on("iBeaconAdvertisement", {ibeaconData in
-            if let data = ibeaconData as? [iBeaconPacket] {
-                if let Fingerprint = self.collectingFingerprint {
-                    Fingerprint.collect(data)
-                }
-                else {
-                    self._cleanupCollectingFingerprint()
-                }
-            }
-        });
+        self._registerFingerprintCollectionCallback();
     }
     
+    /**
+     * Pause collecting a fingerprint. Usually when something in the app would interrupt the user.
+     */
+    public func pauseCollectingFingerprint() {
+        self._removeFingerprintListener()
+    }
+    
+    /**
+     * Resume collecting a fingerprint.
+     */
+    public func resumeCollectingFingerprint() {
+        self._registerFingerprintCollectionCallback()
+    }
     
     /**
      * Stop collecting a fingerprint without loading it into the classifier.
@@ -155,10 +159,32 @@ public class BluenetLocalization {
     
     // MARK: UTIL
     
-    func _cleanupCollectingFingerprint() {
+    func _registerFingerprintCollectionCallback() {
+        // in case this method is called wrongly, clean up the last listener
+        self._removeFingerprintListener()
+        
+        // start listening to the event stream
+        self.collectingCallbackId = self.eventBus.on("iBeaconAdvertisement", {ibeaconData in
+            if let data = ibeaconData as? [iBeaconPacket] {
+                if let Fingerprint = self.collectingFingerprint {
+                    Fingerprint.collect(data)
+                }
+                else {
+                    self._cleanupCollectingFingerprint()
+                }
+            }
+        });
+    }
+    
+    func _removeFingerprintListener() {
         if let callbackId = self.collectingCallbackId {
             self.off(callbackId)
         }
+    }
+    
+    
+    func _cleanupCollectingFingerprint() {
+        self._removeFingerprintListener()
         self.collectingCallbackId = nil
         self.collectingFingerprint = nil
     }

@@ -119,6 +119,12 @@ The user is responsible for persistently storing and loading the fingerprints.
 ##### ```startCollectingFingerprint()```
 Start collecting a fingerprint.
 
+##### ```pauseCollectingFingerprint()```
+Pause collecting a fingerprint. Usually when something in the app would interrupt the user. Can be resumed later.
+
+##### ```resumeCollectingFingerprint()```
+Resume collecting the fingerprint that was put on pause before.
+
 ##### ```abortCollectingFingerprint()```
 Stop collecting a fingerprint without loading it into the classifier.
 ```getFingerprint(...)``` will not obtain this fingerprint as the results will be lost on abort.
