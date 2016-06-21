@@ -75,10 +75,10 @@ class NaiveBayes {
         if (totalMatches == 0) {
             return 0
         }
-        // we average to ensure missing datapoints will not influence the result.
-        let probability = totalProbability / totalMatches
+        // we should average to ensure missing datapoints will not influence the result.
+        let probability = totalProbability
         
-        return totalProbability / totalMatches
+        return probability
     }
     
     func _processFingerPrint(locationId: String, _ fingerprint: Fingerprint) {
