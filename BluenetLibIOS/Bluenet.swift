@@ -136,6 +136,22 @@ public class Bluenet {
         )
     }
     
+    /**
+     * Set the switch state. If 0 or 1, switch on or off. If 0 < x < 1 then dim.
+     * TODO: currently only relay is supported.
+     */
+    public func setSwitchStateDemo(state: NSNumber) -> Promise<Void> {
+        print ("switching to \(state)")
+        var roundedState = max(0, min(255, round(state.doubleValue)))
+        var switchState = UInt8(roundedState)
+        var packet : [UInt8] = [switchState]
+        return self.bleManager.writeToCharacteristic(
+            CSServices.PowerService,
+            characteristicId: PowerCharacteristics.Relay,
+            data: NSData(bytes: packet, length: packet.count),
+            type: CBCharacteristicWriteType.WithResponse
+        )
+    }
     
     /**
      * Subscribe to a topic with a callback. This method returns an Int which is used as identifier of the subscription.
