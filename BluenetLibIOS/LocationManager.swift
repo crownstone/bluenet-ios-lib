@@ -34,7 +34,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         
         // stop monitoring all previous regions
         for region in self.manager.monitoredRegions {
-            print ("INITIALIZATION: stop monitoring: \(region)")
+            print ("------ BLUENET_LIB_NAV: INITIALIZATION: stop monitoring: \(region)")
             self.manager.stopMonitoringForRegion(region)
         }
 
@@ -68,28 +68,28 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     public func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
         switch (CLLocationManager.authorizationStatus()) {
         case .NotDetermined:
-            print("location NotDetermined")
+            print("------ BLUENET_LIB_NAV: location NotDetermined")
             /*
              First you need to add NSLocationWhenInUseUsageDescription or NSLocationAlwaysUsageDescription(if you want to use in background) in your info.plist file OF THE PROGRAM THAT IMPLEMENTS THIS!
              */
             manager.requestAlwaysAuthorization()
         case .Restricted:
-            print("location Restricted")
+            print("------ BLUENET_LIB_NAV: location Restricted")
         case .Denied:
             showLocationAlert()
-            print("location Denied")
+            print("------ BLUENET_LIB_NAV: location Denied")
         case .AuthorizedAlways:
-            print("location AuthorizedAlways")
+            print("------ BLUENET_LIB_NAV: location AuthorizedAlways")
             start()
         case .AuthorizedWhenInUse:
-            print("location AuthorizedWhenInUse")
+            print("------ BLUENET_LIB_NAV: location AuthorizedWhenInUse")
             showLocationAlert()
         }
     }
     
     
     public func locationManager(manager : CLLocationManager, didStartMonitoringForRegion region : CLRegion) {
-        print("did start MONITORING \(region) \n");
+        print("------ BLUENET_LIB_NAV: did start MONITORING \(region) \n");
     }
     
     public func locationManager(manager : CLLocationManager, didRangeBeacons beacons : [CLBeacon], inRegion region: CLBeaconRegion) {
@@ -148,7 +148,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
      */
 
     public func locationManager(manager: CLLocationManager, rangingBeaconsDidFailForRegion region: CLBeaconRegion, withError error: NSError) {
-         print("did rangingBeaconsDidFailForRegion \(region)  withError: \(error) \n");
+         print("------ BLUENET_LIB_NAV: did rangingBeaconsDidFailForRegion \(region)  withError: \(error) \n");
     }
     
     
@@ -161,7 +161,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
      */
   
     public func locationManager(manager: CLLocationManager, didFailWithError error: NSError){
-        print("did didFailWithError withError: \(error) \n");
+        print("------ BLUENET_LIB_NAV: did didFailWithError withError: \(error) \n");
     }
     
     /*
@@ -172,7 +172,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
      */
  
     public func locationManager(manager: CLLocationManager, monitoringDidFailForRegion region: CLRegion?, withError error: NSError){
-        print("did monitoringDidFailForRegion \(region)  withError: \(error) \n");
+        print("------ BLUENET_LIB_NAV: did monitoringDidFailForRegion \(region)  withError: \(error) \n");
     }
     
 
@@ -197,9 +197,9 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         self.eventBus.emit("lowLevelEnterRegion", region.identifier)
         
         for element in self.trackingBeacons {
-            print ("region id \(region.identifier) vs elementId \(element.region.identifier) \n")
+            print ("------ BLUENET_LIB_NAV: region id \(region.identifier) vs elementId \(element.region.identifier) \n")
             if (element.region.identifier == region.identifier) {
-                print ("startRanging")
+                print ("------ BLUENET_LIB_NAV: startRanging")
                 self.manager.startRangingBeaconsInRegion(element.region)
             }
         }
@@ -209,9 +209,9 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         self.eventBus.emit("lowLevelExitRegion", region.identifier)
         
         for element in self.trackingBeacons {
-            print ("region id \(region.identifier) vs elementId \(element.region.identifier) \n")
+            print ("------ BLUENET_LIB_NAV: region id \(region.identifier) vs elementId \(element.region.identifier) \n")
             if (element.region.identifier == region.identifier) {
-                print ("stopRanging!")
+                print ("------ BLUENET_LIB_NAV: stopRanging!")
                 self.manager.stopRangingBeaconsInRegion(element.region)
             }
         }

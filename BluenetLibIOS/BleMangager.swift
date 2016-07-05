@@ -355,7 +355,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 .then({characteristic in
                     self.pendingPromise = promiseContainer(fulfill, reject, type: .WRITE_CHARACTERISTIC)
                     self.pendingPromise.setTimeout(timeoutDurations.writeCharacteristic, errorOnReject: .WRITE_CHARACTERISTIC_TIMEOUT)
-                    print ("writing \(data) ")
+                    print ("------ BLUENET_LIB: writing \(data) ")
                     
                     // the fulfil and reject are handled in the peripheral delegate
                     self.connectedPeripheral!.writeValue(data, forCharacteristic: characteristic, type: type)
@@ -435,7 +435,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     }
     
     public func stopScanning() {
-        print ("stopping scan")
+        print ("------ BLUENET_LIB: stopping scan")
         centralManager.stopScan()
     }
 
@@ -446,17 +446,17 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         self.BleState = central.state;
         switch (central.state) {
         case .Unsupported:
-            print("BLE is Unsupported")
+            print("------ BLUENET_LIB: BLE is Unsupported")
         case .Unauthorized:
-            print("BLE is Unauthorized")
+            print("------ BLUENET_LIB: BLE is Unauthorized")
         case .Unknown:
-            print("BLE is Unknown")
+            print("------ BLUENET_LIB: BLE is Unknown")
         case .Resetting:
-            print("BLE is Resetting")
+            print("------ BLUENET_LIB: BLE is Resetting")
         case .PoweredOff:
-            print("BLE is PoweredOff")
+            print("------ BLUENET_LIB: BLE is PoweredOff")
         case .PoweredOn:
-            print("BLE is PoweredOn, start scanning")
+            print("------ BLUENET_LIB: BLE is PoweredOn, start scanning")
             //self.startScanning()
         }
     }
@@ -474,7 +474,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     
     public func centralManager(central: CBCentralManager, didConnectPeripheral peripheral: CBPeripheral) {
         if (pendingPromise.type == .CONNECT) {
-            print("connected")
+            print("------ BLUENET_LIB: connected")
             connectedPeripheral = peripheral
             connectingPeripheral = nil
             pendingPromise.fulfill()
@@ -497,7 +497,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             pendingPromise.fulfill()
         }
         else {
-            print("Disconnected")
+            print("------ BLUENET_LIB: Disconnected")
             if (error != nil) {
                 pendingPromise.reject(error!)
             }
@@ -514,7 +514,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     }
     
     public func centralManager(central: CBCentralManager, willRestoreState dict: [String : AnyObject]) {
-        print("WILL RESTORE STATE",dict);
+        print("------ BLUENET_LIB: WILL RESTORE STATE",dict);
     }
 
     
@@ -580,7 +580,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     
     
     public func peripheral(peripheral: CBPeripheral, didWriteValueForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
-        print("written")
+        print("------ BLUENET_LIB: written")
         if (pendingPromise.type == .WRITE_CHARACTERISTIC) {
             if (error != nil) {
                 pendingPromise.reject(error!)

@@ -124,10 +124,10 @@ public class Bluenet {
      * TODO: currently only relay is supported.
      */
     public func setSwitchState(state: NSNumber) -> Promise<Void> {
-        print ("switching to \(state)")
-        var roundedState = max(0, min(255, round(state.doubleValue * 255)))
-        var switchState = UInt8(roundedState)
-        var packet : [UInt8] = [switchState]
+        print ("------ BLUENET_LIB: switching to \(state)")
+        let roundedState = max(0, min(255, round(state.doubleValue * 255)))
+        let switchState = UInt8(roundedState)
+        let packet : [UInt8] = [switchState]
         return self.bleManager.writeToCharacteristic(
             CSServices.PowerService,
             characteristicId: PowerCharacteristics.Relay,
@@ -141,10 +141,10 @@ public class Bluenet {
      * TODO: currently only relay is supported.
      */
     public func setSwitchStateDemo(state: NSNumber) -> Promise<Void> {
-        print ("switching to \(state)")
-        var roundedState = max(0, min(255, round(state.doubleValue)))
-        var switchState = UInt8(roundedState)
-        var packet : [UInt8] = [switchState]
+        print ("------ BLUENET_LIB: switching to \(state)")
+        let roundedState = max(0, min(255, round(state.doubleValue)))
+        let switchState = UInt8(roundedState)
+        let packet : [UInt8] = [switchState]
         return self.bleManager.writeToCharacteristic(
             CSServices.PowerService,
             characteristicId: PowerCharacteristics.Relay,
