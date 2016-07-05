@@ -88,6 +88,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
      *
      */
     public func connect(uuid: String) -> Promise<Void> {
+        print ("------ BLUENET_LIB: starting to connect")
         return Promise<Void> { fulfill, reject in
             if (self.BleState != .PoweredOn) {
                 reject(BleError.NOT_INITIALIZED)
@@ -95,6 +96,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             else {
                 // start the connection
                 if (connectedPeripheral != nil) {
+                    print ("------ BLUENET_LIB: Something is connected")
                     disconnect()
                         .then({ _ in return self._connect(uuid)})
                         .then({ _ in fulfill()})
@@ -102,13 +104,14 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 }
                 // cancel any connection attempt in progress.
                 else if (connectingPeripheral != nil) {
-                    print("abort the connection")
+                    print ("------ BLUENET_LIB: connection attempt in progress")
                     abortConnecting()
                         .then({ _ in return self._connect(uuid)})
                         .then({ _ in fulfill()})
                         .error(reject)
                 }
                 else {
+                    print ("------ BLUENET_LIB: connecting...")
                     self._connect(uuid)
                         .then({ _ in fulfill()})
                         .error(reject)
@@ -363,6 +366,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                     self.connectedPeripheral!.writeValue(data, forCharacteristic: characteristic, type: type)
                 })
                 .error({(error: ErrorType) -> Void in
+                    print ("------ BLUENET_LIB: FAILED writing to characteristic \(error)")
                     reject(error)
                 })
         }
