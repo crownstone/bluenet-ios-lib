@@ -133,14 +133,14 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                     pendingPromise.reject(BleError.CONNECTION_CANCELLED)
                 }
                 
-                // we set it to nil here regardless if the connection abortion fails or not.
-                connectingPeripheral = nil
-                
                 print ("------ BLUENET_LIB: Waiting to cancel connection....")
                 pendingPromise = promiseContainer(fulfill, reject, type: .CANCEL_PENDING_CONNECTION)
                 pendingPromise.setTimeout(timeoutDurations.cancelPendingConnection, errorOnReject: .CANCEL_PENDING_CONNECTION_TIMEOUT)
                 
                 centralManager.cancelPeripheralConnection(connectingPeripheral!)
+                
+                // we set it to nil here regardless if the connection abortion fails or not.
+                connectingPeripheral = nil
             }
             else {
                 fulfill()
