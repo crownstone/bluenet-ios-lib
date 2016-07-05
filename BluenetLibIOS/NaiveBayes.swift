@@ -18,6 +18,11 @@ class NBSummary {
     }
 }
 
+struct ProbabiltyReport {
+    let sampleSize : Int
+    let probability: Double
+}
+
 
 class NaiveBayes {
     var fingerprints = [String: Fingerprint]()
@@ -25,60 +30,60 @@ class NaiveBayes {
     
     init() {}
     
-    func loadFingerprint(locationId: String, _ fingerprint: Fingerprint) {
-//        print ("loaded fingerprint into naive bayes \(locationId) : \(fingerprint.getJSON())")
-        self.fingerprints[locationId] = fingerprint
-        self._processFingerPrint(locationId, fingerprint)
-    }
-    
-    func predict(inputVector: [iBeaconPacket]) -> String {
-//        print("asking for prediction")
-        var highestPrediction : Double = 0
-        var highestPredictionLabel = ""
-        
-        for (label, summary) in self.summaries {
-//            print ("evaluating \(label)")
-            var prediction = self._predict(inputVector, summary)
-//            print ("in prediction Loop \(prediction) , \(highestPrediction)")
-            if (highestPrediction < prediction) {
-                highestPrediction = prediction
-                highestPredictionLabel = label
-            }
-        }
-        
-        return highestPredictionLabel
-    }
-    
     func reset() {
         self.fingerprints = [String: Fingerprint]()
         self.summaries = [String: [String: NBSummary]]()
     }
     
-    func _predict(inputVector: [iBeaconPacket], _ summary: [String: NBSummary]) -> Double {
+    func loadFingerprint(locationId: String, _ fingerprint: Fingerprint) {
+        self.fingerprints[locationId] = fingerprint
+        self._processFingerPrint(locationId, fingerprint)
+    }
+    
+    func predict(inputVector: [iBeaconPacket]) -> ClassifierResult {
+        var highestPrediction : Double = 0
+        var highestPredictionLabel = ""
+        var valid = true
+        
+        for (label, summary) in self.summaries {
+            let evaluation = self._predict(inputVector, summary)
+            print("----------------- BLUENET_LIB_NAV: \(label) probability \(evaluation)");
+            // hack for demo
+            if (evaluation.sampleSize < 4) {
+                valid = false
+            }
+            if (highestPrediction < evaluation.probability) {
+                highestPrediction = evaluation.probability
+                highestPredictionLabel = label
+            }
+        }
+        
+        return ClassifierResult(valid: true, location: highestPredictionLabel)
+    }
+    
+    func _predict(inputVector: [iBeaconPacket], _ summary: [String: NBSummary]) -> ProbabiltyReport {
         var totalProbability : Double = 1
-        var totalMatches : Double = 0
+        var samples : Int = 0
         for packet in inputVector {
             let stoneId = packet.idString
             if (summary[stoneId] != nil) {
                 let RSSI = Double(packet.rssi);
                 let mean = summary[stoneId]!.mean
                 let std =  summary[stoneId]!.std
-                var exponent = exp(-(pow(RSSI - mean,2)/(2*pow(std,2))))
+                let exponent = exp(-(pow(RSSI - mean,2)/(2*pow(std,2))))
                 totalProbability *= exponent / (sqrt(2*M_PI) * std)
-                totalMatches += 1
+                samples += 1
             }
             else {
                 print("CANNOT LOAD SUMMARY FOR \(stoneId)")
             }
         }
-        
-        if (totalMatches == 0) {
-            return 0
+
+        if (samples == 0) {
+            totalProbability = 0
         }
-        // we should average to ensure missing datapoints will not influence the result.
-        let probability = totalProbability
         
-        return probability
+        return ProbabiltyReport(sampleSize: samples, probability: totalProbability)
     }
     
     func _processFingerPrint(locationId: String, _ fingerprint: Fingerprint) {

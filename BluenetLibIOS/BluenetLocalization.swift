@@ -197,20 +197,23 @@ public class BluenetLocalization {
                     self.classifier[self.activeGroupId!] = ClassifierWrapper()
                 }
                 
-                let currentlocation = self._getLocation(data)
-                if (self.activeLocationId != currentlocation) {
-                    if (self.lastMeasurement == currentlocation) {
-                        self.sameCounter += 1
-                        if (self.sameCounter == self.certainty) {
-                            self._moveToNewLocation(currentlocation)
+                let classificationResult = self._evaluateData(data)
+                if (classificationResult.valid == true) {
+                    let currentLocation = classificationResult.location
+                    if (self.activeLocationId != currentLocation) {
+                        if (self.lastMeasurement == currentLocation) {
+                            self.sameCounter += 1
+                            if (self.sameCounter == self.certainty) {
+                                self._moveToNewLocation(currentLocation)
+                                self.sameCounter = 0
+                            }
+                        }
+                        else {
                             self.sameCounter = 0
                         }
                     }
-                    else {
-                        self.sameCounter = 0
-                    }
+                    self.lastMeasurement = currentLocation
                 }
-                self.lastMeasurement = currentlocation
             }
         }
     }
@@ -231,7 +234,7 @@ public class BluenetLocalization {
     }
     
     func _handleRegionExit(regionId: AnyObject) {
-        if let regionString = regionId as? String {
+        if regionId is String {
             if (self.activeGroupId != nil) {
                 self.eventBus.emit("exitRegion", regionId)
             }
@@ -259,10 +262,12 @@ public class BluenetLocalization {
         }
     }    
     
-    func _getLocation(data : [iBeaconPacket]) -> String {
-        let location = self.classifier[self.activeGroupId!]!.predict(data)
-        self.eventBus.emit("currentLocation", location)
-        return location
+    func _evaluateData(data : [iBeaconPacket]) -> ClassifierResult {
+        let result = self.classifier[self.activeGroupId!]!.predict(data)
+        if (result.valid == true) {
+            self.eventBus.emit("currentLocation", result.location)
+        }
+        return result
     }
 
    

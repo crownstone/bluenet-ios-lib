@@ -12,6 +12,11 @@ enum Classifiers {
     case NAIVE_BAYES
 }
 
+struct ClassifierResult {
+    let valid : Bool
+    let location : String
+}
+
 
 public class ClassifierWrapper {
     var classifierType = Classifiers.NAIVE_BAYES
@@ -30,7 +35,7 @@ public class ClassifierWrapper {
         }
     }
     
-    func predict(inputVector: [iBeaconPacket]) -> String {
+    func predict(inputVector: [iBeaconPacket]) -> ClassifierResult {
         switch (self.classifierType) {
             case .NAIVE_BAYES:
                 return self.naiveBayes.predict(inputVector)
