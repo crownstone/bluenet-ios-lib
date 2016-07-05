@@ -501,15 +501,20 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     }
     
     public func centralManager(central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: NSError?) {
+        //self.connectingPeripheral = nil;
+        //self.connectedPeripheral = nil;
+        
+        print("------ BLUENET_LIB: in didDisconnectPeripheral")
         if (pendingPromise.type == .CANCEL_PENDING_CONNECTION) {
             pendingPromise.fulfill()
         }
         else {
-            print("------ BLUENET_LIB: Disconnected")
             if (error != nil) {
+                print("------ BLUENET_LIB: Disconnected with error \(error!)")
                 pendingPromise.reject(error!)
             }
             else {
+                print("------ BLUENET_LIB: Disconnected succesfully")
                 // if the pending promise is NOT for disconnect, a disconnection event is a rejection.
                 if (pendingPromise.type != .DISCONNECT) {
                     pendingPromise.reject(BleError.DISCONNECTED)
