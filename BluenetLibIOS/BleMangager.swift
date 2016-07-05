@@ -366,7 +366,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                     self.connectedPeripheral!.writeValue(data, forCharacteristic: characteristic, type: type)
                 })
                 .error({(error: ErrorType) -> Void in
-                    print ("------ BLUENET_LIB: FAILED writing to characteristic \(error)")
+                    print ("~~~~~~ BLUENET_LIB: FAILED writing to characteristic \(error)")
                     reject(error)
                 })
         }
@@ -501,8 +501,9 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     }
     
     public func centralManager(central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: NSError?) {
-        //self.connectingPeripheral = nil;
-        //self.connectedPeripheral = nil;
+        // since we disconnected, we must set the connected peripherals to nil.
+        self.connectingPeripheral = nil;
+        self.connectedPeripheral = nil;
         
         print("------ BLUENET_LIB: in didDisconnectPeripheral")
         if (pendingPromise.type == .CANCEL_PENDING_CONNECTION) {
