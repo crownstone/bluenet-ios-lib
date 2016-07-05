@@ -124,9 +124,11 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
      */
     func abortConnecting()  -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
+            print ("------ BLUENET_LIB: starting to abort pending connection request")
             if (connectingPeripheral != nil) {
                 // if there was a connection in progress, cancel it with an error
                 if (pendingPromise.type == .CONNECT) {
+                    print ("------ BLUENET_LIB: rejecting the connection promise")
                     pendingPromise.reject(BleError.CONNECTION_CANCELLED)
                 }
                 
@@ -177,12 +179,14 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     public func disconnect() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             if (self.connectingPeripheral != nil) {
+                print ("------ BLUENET_LIB: disconnecting from connecting peripheral")
                 abortConnecting()
                     .then({ _ in fulfill()})
             }
             
             // only disconnect if we are actually connected!
             if (self.connectedPeripheral != nil) {
+                print ("------ BLUENET_LIB: disconnecting from connected peripheral")
                 let disconnectPromise = Promise<Void> { success, failure in
                     self.pendingPromise = promiseContainer(success, failure, type: .DISCONNECT)
                     self.pendingPromise.setTimeout(timeoutDurations.disconnect, errorOnReject: .DISCONNECT_TIMEOUT)
@@ -458,7 +462,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     }
     
     public func centralManager(central: CBCentralManager, didDiscoverPeripheral peripheral: CBPeripheral, advertisementData: [String : AnyObject], RSSI: NSNumber) {
-        var emitData = Advertisement(
+        let emitData = Advertisement(
             uuid: peripheral.identifier.UUIDString,
             name: peripheral.name,
             rssi: RSSI,
