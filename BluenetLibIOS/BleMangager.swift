@@ -183,12 +183,23 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
      */
     public func disconnect() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
+            
+            // cancel any pending connections
             if (self.connectingPeripheral != nil) {
                 print ("------ BLUENET_LIB: disconnecting from connecting peripheral")
                 abortConnecting()
-                    .then({ _ in fulfill()})
+                    .then({ _ in return self._disconnect() })
+                    .then(fulfill)
+                    .error(reject)
             }
-            
+            else {
+                self._disconnect().then(fulfill).error(reject)
+            }
+        }
+    }
+    
+    func _disconnect() -> Promise<Void> {
+        return Promise<Void> { fulfill, reject in
             // only disconnect if we are actually connected!
             if (self.connectedPeripheral != nil) {
                 print ("------ BLUENET_LIB: disconnecting from connected peripheral")
@@ -208,7 +219,8 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 fulfill()
             }
         }
-    }	
+    }
+
     
     /**
      *  Get the services from a connected device
