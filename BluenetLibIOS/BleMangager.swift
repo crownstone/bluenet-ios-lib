@@ -102,6 +102,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 }
                 // cancel any connection attempt in progress.
                 else if (connectingPeripheral != nil) {
+                    print("abort the connection")
                     abortConnecting()
                         .then({ _ in return self._connect(uuid)})
                         .then({ _ in fulfill()})
@@ -162,6 +163,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 // setup the pending promise for connection
                 pendingPromise = promiseContainer(fulfill, reject, type: .CONNECT)
                 pendingPromise.setTimeout(timeoutDurations.connect, errorOnReject: .CONNECT_TIMEOUT)
+                
                 // TODO: implement timeout.
                 centralManager.connectPeripheral(connectingPeripheral!, options: nil)
             }
@@ -174,6 +176,11 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
      */
     public func disconnect() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
+            if (self.connectingPeripheral != nil) {
+                abortConnecting()
+                    .then({ _ in fulfill()})
+            }
+            
             // only disconnect if we are actually connected!
             if (self.connectedPeripheral != nil) {
                 let disconnectPromise = Promise<Void> { success, failure in
