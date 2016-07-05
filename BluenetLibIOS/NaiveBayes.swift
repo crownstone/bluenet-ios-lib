@@ -58,7 +58,7 @@ class NaiveBayes {
             }
         }
         
-        return ClassifierResult(valid: true, location: highestPredictionLabel)
+        return ClassifierResult(valid: valid, location: highestPredictionLabel)
     }
     
     func _predict(inputVector: [iBeaconPacket], _ summary: [String: NBSummary]) -> ProbabiltyReport {
