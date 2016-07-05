@@ -38,11 +38,11 @@ public enum BleError : ErrorType {
 struct timeoutDurations {
     static let disconnect              : Double = 2
     static let cancelPendingConnection : Double = 2
-    static let connect                 : Double = 2
+    static let connect                 : Double = 3
     static let getServices             : Double = 2
     static let getCharacteristics      : Double = 2
     static let readCharacteristic      : Double = 2
-    static let writeCharacteristic     : Double = 2
+    static let writeCharacteristic     : Double = 4
     static let enableNotifications     : Double = 2
     static let disableNotifications    : Double = 2
 }
@@ -126,6 +126,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         return Promise<Void> { fulfill, reject in
             print ("------ BLUENET_LIB: starting to abort pending connection request")
             if (connectingPeripheral != nil) {
+                print ("------ BLUENET_LIB: pending connection detected")
                 // if there was a connection in progress, cancel it with an error
                 if (pendingPromise.type == .CONNECT) {
                     print ("------ BLUENET_LIB: rejecting the connection promise")
@@ -135,6 +136,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 // we set it to nil here regardless if the connection abortion fails or not.
                 connectingPeripheral = nil
                 
+                print ("------ BLUENET_LIB: Waiting to cancel connection....")
                 pendingPromise = promiseContainer(fulfill, reject, type: .CANCEL_PENDING_CONNECTION)
                 pendingPromise.setTimeout(timeoutDurations.cancelPendingConnection, errorOnReject: .CANCEL_PENDING_CONNECTION_TIMEOUT)
                 
@@ -473,6 +475,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     }
     
     public func centralManager(central: CBCentralManager, didConnectPeripheral peripheral: CBPeripheral) {
+        print("------ BLUENET_LIB: in didConnectPeripheral")
         if (pendingPromise.type == .CONNECT) {
             print("------ BLUENET_LIB: connected")
             connectedPeripheral = peripheral
@@ -482,6 +485,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     }
     
     public func centralManager(central: CBCentralManager, didFailToConnectPeripheral peripheral: CBPeripheral, error: NSError?) {
+        print("------ BLUENET_LIB: in didFailToConnectPeripheral")
         if (error != nil) {
             pendingPromise.reject(error!)
         }
