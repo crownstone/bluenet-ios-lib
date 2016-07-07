@@ -29,12 +29,14 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         self.manager = CLLocationManager()
         self.manager.delegate = self;
         
-        //print("location services enabled: \(CLLocationManager.locationServicesEnabled())");
-        //print("ranging services enabled: \(CLLocationManager.isRangingAvailable())");
+        CLLocationManager.locationServicesEnabled()
+        
+        print("------ BLUENET_LIB_NAV: location services enabled: \(CLLocationManager.locationServicesEnabled())");
+        print("------ BLUENET_LIB_NAV: ranging services enabled: \(CLLocationManager.isRangingAvailable())");
         
         // stop monitoring all previous regions
         for region in self.manager.monitoredRegions {
-            print ("------ BLUENET_LIB_NAV: INITIALIZATION: stop monitoring: \(region)")
+            print ("------ BLUENET_LIB_NAV: INITIALIZATION: stop monitoring old region: \(region)")
             self.manager.stopMonitoringForRegion(region)
         }
 
