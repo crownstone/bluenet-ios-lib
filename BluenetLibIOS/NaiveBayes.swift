@@ -47,11 +47,11 @@ class NaiveBayes {
         
         for (label, summary) in self.summaries {
             let evaluation = self._predict(inputVector, summary)
-            print("----------------- BLUENET_LIB_NAV: \(label) probability \(evaluation)");
+            //print("----------------- BLUENET_LIB_NAV: \(label) probability \(evaluation)");
             // hack for demo
-            if (evaluation.sampleSize < 4) {
-                valid = false
-            }
+//            if (evaluation.sampleSize < 4) {
+//                valid = false
+//            }
             if (highestPrediction < evaluation.probability) {
                 highestPrediction = evaluation.probability
                 highestPredictionLabel = label
@@ -117,7 +117,7 @@ class NaiveBayes {
         for measurement in measurements {
             total += pow(Double(measurement) - mean, 2)
         }
-        var variance = total / Double(measurements.count)
+        let variance = total / Double(measurements.count)
         return sqrt(variance)
     }
 }
