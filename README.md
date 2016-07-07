@@ -28,7 +28,10 @@ carthage update --platform ios
 
 All dependencies will then be downloaded, built and placed in a Carthage/Build folder. You then drag the frameworks into your XCode project and you're good to go!
 
+## IMPORTANT
 
+If you want to be able to receive location updates (iBeaconPackets or the room events) you NEED to add the "Location updates" to the "Background Modes" in the capabilities. Keep in mind that doing so may
+complicate the acceptance process in the App Store if you cannot prove that using the background location benefits the end user.
 
 # API
 
