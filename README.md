@@ -28,6 +28,10 @@ carthage update --platform ios
 
 All dependencies will then be downloaded, built and placed in a Carthage/Build folder. You then drag the frameworks into your XCode project and you're good to go!
 
+#### If you're more of a copy-paste starter
+There is an example app available that has the library implemented:
+https://github.com/crownstone/bluenet-example-ios
+
 ## IMPORTANT
 
 If you want to be able to receive location updates (iBeaconPackets or the room events) you NEED to add the "Location updates" to the "Background Modes" in the capabilities. Keep in mind that doing so may
