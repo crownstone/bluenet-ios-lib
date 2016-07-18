@@ -47,11 +47,12 @@ class NaiveBayes {
         
         for (label, summary) in self.summaries {
             let evaluation = self._predict(inputVector, summary)
-            //print("----------------- BLUENET_LIB_NAV: \(label) probability \(evaluation)");
-            // hack for demo
-//            if (evaluation.sampleSize < 4) {
-//                valid = false
-//            }
+
+            // Minimum requirement for good prediction.
+            // When connecting for switching, the crownstone is not broadcasting iBeacon packets.
+            if (evaluation.sampleSize < 3) {
+                valid = false
+            }
             if (highestPrediction < evaluation.probability) {
                 highestPrediction = evaluation.probability
                 highestPredictionLabel = label

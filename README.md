@@ -124,13 +124,19 @@ You input locations by providing their fingerprints or training them.
 ## Events
 This lib broadcasts the following data:
 
+Will only be emitted after using registering an iBeacon UUID using the trackUUID method:
 | topic                    | dataType       | when  |
 | :-------------           |:-------------  | :-----|
-| "iBeaconAdvertisement"      | [iBeaconPacket]  | Once a second when the iBeacon's are ranged   (array of iBeaconPacket objects) |
-| "enterRegion"     | String  | When a region (denoted by groupId) is entered (data is the groupId as String) |
-| "exitRegion"      | String  | When a region (denoted by groupId) is no longer detected (data is the groupId as String) |
-| "enterLocation"   | String  | When the classifier determines the user has entered a new location (data is the locationId as String) |
-| "exitLocation"    | String  | When the classifier determines the user has left his location in favor of a new one. Not triggered when region is left (data is the locationId as String) |
+| "iBeaconAdvertisement"      | [iBeaconPacket]  | Once a second when the iBeacon's are ranged   (array of iBeaconPacket objects). |
+| "enterRegion"     | String  | When a region (denoted by groupId) is entered (data is the groupId as String). Will only be emitted after using the trackUUID method. |
+| "exitRegion"      | String  | When a region (denoted by groupId) is no longer detected (data is the groupId as String). Will only be emitted after using the trackUUID method.  |
+
+
+Will only be emitted after a fingerprint is loaded using loadFingerprint or finalized after collection. When there are less than 3 iBeacons in range, there will not be a prediction. 
+| topic                    | dataType       | when  |
+| :-------------           |:-------------  | :-----|
+| "enterLocation"   | String  | When the classifier determines the user has entered a new location (data is the locationId as String). Will only be emitted after a fingerprint is loaded or finalized.  |
+| "exitLocation"    | String  | When the classifier determines the user has left his location in favor of a new one. Not triggered when region is left (data is the locationId as String).  |
 | "currentLocation" | String  | Once a second when the iBeacon's are ranged and the classifier makes a prediction (data is the locationId as String) |
 
 
