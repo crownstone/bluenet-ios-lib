@@ -61,7 +61,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     
     func start() {
         self.manager.startUpdatingLocation()
-        if (self.manager.respondsToSelector("allowsBackgroundLocationUpdates")) {
+        if (self.manager.respondsToSelector(Selector("allowsBackgroundLocationUpdates"))) {
             self.manager.allowsBackgroundLocationUpdates = true
         }
         self.started = true
@@ -118,13 +118,13 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         }
     }
     
-    public func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
+    public func locationManager(manager: CLLocationManager, didEnterRegion region: CLRegion) {
         print("did enter region \(region) \n");
         self._startRanging(region);
     }
     
     
-    public func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
+    public func locationManager(manager: CLLocationManager, didExitRegion region: CLRegion) {
         print("did exit region \(region) \n");
         self._stopRanging(region);
     }

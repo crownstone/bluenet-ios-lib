@@ -23,7 +23,6 @@
 		FA4A09DA1D099D01005753CE /* BluenetTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4A09D91D099D01005753CE /* BluenetTypes.swift */; };
 		FA4E02991D0873CD0086E2BF /* BluenetLocalization.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4E02981D0873CD0086E2BF /* BluenetLocalization.swift */; };
 		FAA048231D072AE5000D333A /* CryptoSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAA0481F1D072AE5000D333A /* CryptoSwift.framework */; };
-		FAA048241D072AE5000D333A /* OMGHTTPURLRQ.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAA048201D072AE5000D333A /* OMGHTTPURLRQ.framework */; };
 		FAA048251D072AE5000D333A /* PromiseKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAA048211D072AE5000D333A /* PromiseKit.framework */; };
 		FAA048261D072AE5000D333A /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAA048221D072AE5000D333A /* SwiftyJSON.framework */; };
 		FAE862581CF4515A0027539D /* Bluenet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE862571CF4515A0027539D /* Bluenet.swift */; };
@@ -68,7 +67,6 @@
 		FA4A09D91D099D01005753CE /* BluenetTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluenetTypes.swift; sourceTree = "<group>"; };
 		FA4E02981D0873CD0086E2BF /* BluenetLocalization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluenetLocalization.swift; sourceTree = "<group>"; };
 		FAA0481F1D072AE5000D333A /* CryptoSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoSwift.framework; path = Carthage/Build/iOS/CryptoSwift.framework; sourceTree = "<group>"; };
-		FAA048201D072AE5000D333A /* OMGHTTPURLRQ.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OMGHTTPURLRQ.framework; path = Carthage/Build/iOS/OMGHTTPURLRQ.framework; sourceTree = "<group>"; };
 		FAA048211D072AE5000D333A /* PromiseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PromiseKit.framework; path = Carthage/Build/iOS/PromiseKit.framework; sourceTree = "<group>"; };
 		FAA048221D072AE5000D333A /* SwiftyJSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftyJSON.framework; path = Carthage/Build/iOS/SwiftyJSON.framework; sourceTree = "<group>"; };
 		FAE862571CF4515A0027539D /* Bluenet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bluenet.swift; sourceTree = "<group>"; };
@@ -92,7 +90,6 @@
 				FAA048261D072AE5000D333A /* SwiftyJSON.framework in Frameworks */,
 				FAA048251D072AE5000D333A /* PromiseKit.framework in Frameworks */,
 				FAA048231D072AE5000D333A /* CryptoSwift.framework in Frameworks */,
-				FAA048241D072AE5000D333A /* OMGHTTPURLRQ.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -110,7 +107,6 @@
 			isa = PBXGroup;
 			children = (
 				FAA0481F1D072AE5000D333A /* CryptoSwift.framework */,
-				FAA048201D072AE5000D333A /* OMGHTTPURLRQ.framework */,
 				FAA048211D072AE5000D333A /* PromiseKit.framework */,
 				FAA048221D072AE5000D333A /* SwiftyJSON.framework */,
 				FAE862611CF4B3830027539D /* Cartfile */,
