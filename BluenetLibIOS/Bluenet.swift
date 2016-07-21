@@ -27,6 +27,7 @@ import CoreBluetooth
 public class Bluenet {
     // todo: set back to private, currently public for DEBUG
     public let bleManager : BleManager!
+    var settings : BluenetSettings!
     let eventBus : EventBus!
     var deviceList = [String: AvailableDevice]()
     
@@ -38,11 +39,20 @@ public class Bluenet {
      * permissions are set correctly.
      */
     public init() {
+        self.settings = BluenetSettings()
         self.eventBus = EventBus()
         self.bleManager = BleManager(eventBus: self.eventBus)
         
         self.eventBus.on("advertisementData", self._parseAdvertisement)
-
+    }
+    
+    
+    /**
+     * Load a settings object into Bluenet
+     */
+    public func setSettings(settings: BluenetSettings) {
+        self.settings = settings
+        self.bleManager.setSettings(settings)
     }
     
     

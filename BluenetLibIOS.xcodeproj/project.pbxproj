@@ -29,6 +29,9 @@
 		FAE8625C1CF478E50027539D /* Eventbus.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE8625B1CF478E50027539D /* Eventbus.swift */; };
 		FAE862601CF48E530027539D /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE8625F1CF48E530027539D /* Util.swift */; };
 		FAE862621CF4B3830027539D /* Cartfile in Resources */ = {isa = PBXBuildFile; fileRef = FAE862611CF4B3830027539D /* Cartfile */; };
+		FAFD06BC1D40D8D8008EDC85 /* EncryptionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD06BB1D40D8D8008EDC85 /* EncryptionHandler.swift */; };
+		FAFD06BE1D40E719008EDC85 /* BluenetSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD06BD1D40E719008EDC85 /* BluenetSettings.swift */; };
+		FAFD06C01D412020008EDC85 /* EncryptedPackage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFD06BF1D412020008EDC85 /* EncryptedPackage.swift */; };
 		FAFE003F1D1434AD001CF20C /* AvailableDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE003E1D1434AD001CF20C /* AvailableDevice.swift */; };
 		FAFE00421D1434D9001CF20C /* Advertisement.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE00411D1434D9001CF20C /* Advertisement.swift */; };
 		FAFE00441D14350F001CF20C /* PromiseContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFE00431D14350F001CF20C /* PromiseContainer.swift */; };
@@ -74,6 +77,9 @@
 		FAE8625F1CF48E530027539D /* Util.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		FAE862611CF4B3830027539D /* Cartfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Cartfile; sourceTree = "<group>"; };
 		FAE9371D1D14453000945989 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		FAFD06BB1D40D8D8008EDC85 /* EncryptionHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptionHandler.swift; sourceTree = "<group>"; };
+		FAFD06BD1D40E719008EDC85 /* BluenetSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluenetSettings.swift; sourceTree = "<group>"; };
+		FAFD06BF1D412020008EDC85 /* EncryptedPackage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptedPackage.swift; sourceTree = "<group>"; };
 		FAFE003E1D1434AD001CF20C /* AvailableDevice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AvailableDevice.swift; sourceTree = "<group>"; };
 		FAFE00411D1434D9001CF20C /* Advertisement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Advertisement.swift; sourceTree = "<group>"; };
 		FAFE00431D14350F001CF20C /* PromiseContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseContainer.swift; sourceTree = "<group>"; };
@@ -106,14 +112,14 @@
 		FA3C186F1CBBDA6B00A11CF7 = {
 			isa = PBXGroup;
 			children = (
-				FAA0481F1D072AE5000D333A /* CryptoSwift.framework */,
-				FAA048211D072AE5000D333A /* PromiseKit.framework */,
-				FAA048221D072AE5000D333A /* SwiftyJSON.framework */,
-				FAE862611CF4B3830027539D /* Cartfile */,
-				FAE9371D1D14453000945989 /* README.md */,
 				FA3C187B1CBBDA6B00A11CF7 /* BluenetLibIOS */,
 				FA3C18871CBBDA6B00A11CF7 /* BluenetLibIOSTests */,
 				FA3C187A1CBBDA6B00A11CF7 /* Products */,
+				FAE862611CF4B3830027539D /* Cartfile */,
+				FAA0481F1D072AE5000D333A /* CryptoSwift.framework */,
+				FAA048211D072AE5000D333A /* PromiseKit.framework */,
+				FAE9371D1D14453000945989 /* README.md */,
+				FAA048221D072AE5000D333A /* SwiftyJSON.framework */,
 			);
 			sourceTree = "<group>";
 		};
@@ -129,16 +135,17 @@
 		FA3C187B1CBBDA6B00A11CF7 /* BluenetLibIOS */ = {
 			isa = PBXGroup;
 			children = (
-				FA3C187E1CBBDA6B00A11CF7 /* Info.plist */,
-				FA3C187C1CBBDA6B00A11CF7 /* BluenetLibIOS.h */,
-				FAE862571CF4515A0027539D /* Bluenet.swift */,
-				FA4E02981D0873CD0086E2BF /* BluenetLocalization.swift */,
-				FAFE004D1D14379B001CF20C /* Globals.swift */,
 				FAFE004C1D143737001CF20C /* backend */,
 				FAFE004A1D1436D1001CF20C /* classifiers */,
 				FAFE003D1D143496001CF20C /* containerClasses */,
+				FAFD06BA1D40D8B2008EDC85 /* encryption */,
 				FAFE004B1D14370A001CF20C /* protocol */,
 				FAFE00491D1436C5001CF20C /* util */,
+				FAE862571CF4515A0027539D /* Bluenet.swift */,
+				FA3C187C1CBBDA6B00A11CF7 /* BluenetLibIOS.h */,
+				FA4E02981D0873CD0086E2BF /* BluenetLocalization.swift */,
+				FAFE004D1D14379B001CF20C /* Globals.swift */,
+				FA3C187E1CBBDA6B00A11CF7 /* Info.plist */,
 			);
 			path = BluenetLibIOS;
 			sourceTree = "<group>";
@@ -153,27 +160,37 @@
 			path = BluenetLibIOSTests;
 			sourceTree = "<group>";
 		};
+		FAFD06BA1D40D8B2008EDC85 /* encryption */ = {
+			isa = PBXGroup;
+			children = (
+				FAFD06BB1D40D8D8008EDC85 /* EncryptionHandler.swift */,
+			);
+			path = encryption;
+			sourceTree = "<group>";
+		};
 		FAFE003D1D143496001CF20C /* containerClasses */ = {
 			isa = PBXGroup;
 			children = (
-				FAFE003E1D1434AD001CF20C /* AvailableDevice.swift */,
 				FAFE00411D1434D9001CF20C /* Advertisement.swift */,
+				FAFE003E1D1434AD001CF20C /* AvailableDevice.swift */,
+				FAFD06BD1D40E719008EDC85 /* BluenetSettings.swift */,
+				FAFD06BF1D412020008EDC85 /* EncryptedPackage.swift */,
 				FAFE00451D14363E001CF20C /* Fingerprint.swift */,
-				FAFE00471D14364B001CF20C /* iBeaconContainers.swift */,
 				FAFE00431D14350F001CF20C /* PromiseContainer.swift */,
+				FAFE00471D14364B001CF20C /* iBeaconContainers.swift */,
 			);
-			name = containerClasses;
+			path = containerClasses;
 			sourceTree = "<group>";
 		};
 		FAFE00491D1436C5001CF20C /* util */ = {
 			isa = PBXGroup;
 			children = (
-				FAE8625B1CF478E50027539D /* Eventbus.swift */,
-				FAE8625F1CF48E530027539D /* Util.swift */,
-				FA0C96311D1183DB00794D85 /* JSONUtils.swift */,
 				FA0C963A1D11904900794D85 /* Conversion.swift */,
+				FAE8625B1CF478E50027539D /* Eventbus.swift */,
+				FA0C96311D1183DB00794D85 /* JSONUtils.swift */,
+				FAE8625F1CF48E530027539D /* Util.swift */,
 			);
-			name = util;
+			path = util;
 			sourceTree = "<group>";
 		};
 		FAFE004A1D1436D1001CF20C /* classifiers */ = {
@@ -182,18 +199,18 @@
 				FA086A821D0EB4AF005F2024 /* ClassifierWrapper.swift */,
 				FA086A801D0EB34F005F2024 /* NaiveBayes.swift */,
 			);
-			name = classifiers;
+			path = classifiers;
 			sourceTree = "<group>";
 		};
 		FAFE004B1D14370A001CF20C /* protocol */ = {
 			isa = PBXGroup;
 			children = (
-				FA270B061D0F12D800CB0AE8 /* Services.swift */,
-				FA270B041D0F12CD00CB0AE8 /* Characteristics.swift */,
 				FA4A09D71D096932005753CE /* BlePackets.swift */,
 				FA4A09D91D099D01005753CE /* BluenetTypes.swift */,
+				FA270B041D0F12CD00CB0AE8 /* Characteristics.swift */,
+				FA270B061D0F12D800CB0AE8 /* Services.swift */,
 			);
-			name = protocol;
+			path = protocol;
 			sourceTree = "<group>";
 		};
 		FAFE004C1D143737001CF20C /* backend */ = {
@@ -202,7 +219,7 @@
 				FA3C18991CBBDB9400A11CF7 /* BleMangager.swift */,
 				FA3C189A1CBBDB9400A11CF7 /* LocationManager.swift */,
 			);
-			name = backend;
+			path = backend;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -314,10 +331,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAFD06BE1D40E719008EDC85 /* BluenetSettings.swift in Sources */,
 				FA086A831D0EB4AF005F2024 /* ClassifierWrapper.swift in Sources */,
 				FAFE00441D14350F001CF20C /* PromiseContainer.swift in Sources */,
 				FA3C189D1CBBDB9400A11CF7 /* LocationManager.swift in Sources */,
 				FA086A811D0EB34F005F2024 /* NaiveBayes.swift in Sources */,
+				FAFD06C01D412020008EDC85 /* EncryptedPackage.swift in Sources */,
+				FAFD06BC1D40D8D8008EDC85 /* EncryptionHandler.swift in Sources */,
 				FA0C96321D1183DB00794D85 /* JSONUtils.swift in Sources */,
 				FAE8625C1CF478E50027539D /* Eventbus.swift in Sources */,
 				FA270B051D0F12CD00CB0AE8 /* Characteristics.swift in Sources */,

@@ -29,4 +29,12 @@ class BluenetLibIOSTests: XCTestCase {
         XCTAssertEqual(Conversion.uint8_array_to_uint32(uint8Array32), UInt32(33562634))
         XCTAssertEqual(Conversion.uint32_to_int32(UInt32(3147483647)), Int32(-1147483649))
     }
+    
+    func testSwift() {
+        for (index,element) in [Int](0...5).enumerate() {
+            print(index,element)
+        }
+        
+        print (0xcafebabe)
+    }
 }

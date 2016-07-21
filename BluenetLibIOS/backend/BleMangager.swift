@@ -33,6 +33,17 @@ public enum BleError : ErrorType {
     case WRITE_CHARACTERISTIC_TIMEOUT
     case ENABLE_NOTIFICATIONS_TIMEOUT
     case DISABLE_NOTIFICATIONS_TIMEOUT
+    
+    // encryption errors
+    case DO_NOT_HAVE_ENCRYPTION_KEY
+    case INVALID_PACKAGE_FOR_ENCRYPTION_TOO_SHORT
+    case INVALID_KEY_FOR_ENCRYPTION
+    case COULD_NOT_ENCRYPT
+    case COULD_NOT_ENCRYPT_KEYS_NOT_SET
+    case COULD_NOT_DECRYPT_KEYS_NOT_SET
+    case COULD_NOT_DECRYPT
+    case CAN_NOT_GET_PAYLOAD
+    case INVALID_SIZE_FOR_ENCRYPTED_PAYLOAD
 }
 
 struct timeoutDurations {
@@ -55,15 +66,21 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     var BleState : CBCentralManagerState = .Unknown
     var pendingPromise : promiseContainer!
     var eventBus : EventBus!
+    var settings : BluenetSettings!
 
     public init(eventBus: EventBus) {
         super.init();
         
-        self.eventBus = eventBus;
+        self.settings = BluenetSettings()
+        self.eventBus = eventBus
         self.centralManager = CBCentralManager(delegate: self, queue: nil)
         
         // initialize the pending promise containers
         pendingPromise = promiseContainer()
+    }
+    
+    public func setSettings(settings: BluenetSettings) {
+        self.settings = settings
     }
     
     // MARK: API
@@ -375,7 +392,14 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                     print ("------ BLUENET_LIB: writing \(data) ")
                     
                     // the fulfil and reject are handled in the peripheral delegate
-                    self.connectedPeripheral!.writeValue(data, forCharacteristic: characteristic, type: type)
+                    if (self.settings.encryptionEnabled) {
+                        // TODO: encrypt
+                        self.connectedPeripheral!.writeValue(data, forCharacteristic: characteristic, type: type)
+                    }
+                    else {
+                        self.connectedPeripheral!.writeValue(data, forCharacteristic: characteristic, type: type)
+                    }
+
                 })
                 .error({(error: ErrorType) -> Void in
                     print ("~~~~~~ BLUENET_LIB: FAILED writing to characteristic \(error)")
@@ -589,7 +613,13 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         let characteristicId = characteristic.UUID.UUIDString;
         if (self.eventBus.hasListeners(serviceId + "_" + characteristicId)) {
             if let data = characteristic.value {
-                self.eventBus.emit(serviceId + "_" + characteristicId, data)
+                if (self.settings.encryptionEnabled) {
+                    // TODO: decrypt
+                    self.eventBus.emit(serviceId + "_" + characteristicId, data)
+                }
+                else {
+                    self.eventBus.emit(serviceId + "_" + characteristicId, data)
+                }
             }
         }
         
