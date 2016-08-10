@@ -12,7 +12,11 @@
 		FA0C96321D1183DB00794D85 /* JSONUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0C96311D1183DB00794D85 /* JSONUtils.swift */; };
 		FA0C963B1D11904900794D85 /* Conversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0C963A1D11904900794D85 /* Conversion.swift */; };
 		FA0C963C1D11906700794D85 /* Conversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0C963A1D11904900794D85 /* Conversion.swift */; };
-		FA19B5891D5B7A15001CC25F /* BluenetCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA19B5881D5B7A15001CC25F /* BluenetCore.swift */; };
+		FA19B58C1D5B809E001CC25F /* DfuHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA19B58B1D5B809E001CC25F /* DfuHandler.swift */; };
+		FA19B58E1D5B824E001CC25F /* CommandHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA19B58D1D5B824E001CC25F /* CommandHandler.swift */; };
+		FA19B5921D5B82A2001CC25F /* ConfigHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA19B58F1D5B82A2001CC25F /* ConfigHandler.swift */; };
+		FA19B5931D5B82A2001CC25F /* ControlHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA19B5901D5B82A2001CC25F /* ControlHandler.swift */; };
+		FA19B5941D5B82A2001CC25F /* SetupHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA19B5911D5B82A2001CC25F /* SetupHandler.swift */; };
 		FA270B051D0F12CD00CB0AE8 /* Characteristics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA270B041D0F12CD00CB0AE8 /* Characteristics.swift */; };
 		FA270B071D0F12D800CB0AE8 /* Services.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA270B061D0F12D800CB0AE8 /* Services.swift */; };
 		FA3C187D1CBBDA6B00A11CF7 /* BluenetLibIOS.h in Headers */ = {isa = PBXBuildFile; fileRef = FA3C187C1CBBDA6B00A11CF7 /* BluenetLibIOS.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -60,11 +64,15 @@
 		FA086A821D0EB4AF005F2024 /* ClassifierWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassifierWrapper.swift; sourceTree = "<group>"; };
 		FA0C96311D1183DB00794D85 /* JSONUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONUtils.swift; sourceTree = "<group>"; };
 		FA0C963A1D11904900794D85 /* Conversion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversion.swift; sourceTree = "<group>"; };
-		FA19B5881D5B7A15001CC25F /* BluenetCore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BluenetCore.swift; path = ../BluenetCore.swift; sourceTree = "<group>"; };
+		FA19B58B1D5B809E001CC25F /* DfuHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DfuHandler.swift; sourceTree = "<group>"; };
+		FA19B58D1D5B824E001CC25F /* CommandHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandHandler.swift; sourceTree = "<group>"; };
+		FA19B58F1D5B82A2001CC25F /* ConfigHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigHandler.swift; sourceTree = "<group>"; };
+		FA19B5901D5B82A2001CC25F /* ControlHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ControlHandler.swift; sourceTree = "<group>"; };
+		FA19B5911D5B82A2001CC25F /* SetupHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetupHandler.swift; sourceTree = "<group>"; };
 		FA270B041D0F12CD00CB0AE8 /* Characteristics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Characteristics.swift; sourceTree = "<group>"; };
 		FA270B061D0F12D800CB0AE8 /* Services.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Services.swift; sourceTree = "<group>"; };
 		FA3C18791CBBDA6B00A11CF7 /* BluenetLibIOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BluenetLibIOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		FA3C187C1CBBDA6B00A11CF7 /* BluenetLibIOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BluenetLibIOS.h; path = ../BluenetLibIOS.h; sourceTree = "<group>"; };
+		FA3C187C1CBBDA6B00A11CF7 /* BluenetLibIOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BluenetLibIOS.h; sourceTree = "<group>"; };
 		FA3C187E1CBBDA6B00A11CF7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FA3C18831CBBDA6B00A11CF7 /* BluenetLibIOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BluenetLibIOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA3C18881CBBDA6B00A11CF7 /* BluenetLibIOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluenetLibIOSTests.swift; sourceTree = "<group>"; };
@@ -119,6 +127,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FA19B58A1D5B808C001CC25F /* serviceImplementations */ = {
+			isa = PBXGroup;
+			children = (
+				FA19B58D1D5B824E001CC25F /* CommandHandler.swift */,
+				FA19B58F1D5B82A2001CC25F /* ConfigHandler.swift */,
+				FA19B5901D5B82A2001CC25F /* ControlHandler.swift */,
+				FA19B58B1D5B809E001CC25F /* DfuHandler.swift */,
+				FA19B5911D5B82A2001CC25F /* SetupHandler.swift */,
+			);
+			path = serviceImplementations;
+			sourceTree = "<group>";
+		};
 		FA3C186F1CBBDA6B00A11CF7 = {
 			isa = PBXGroup;
 			children = (
@@ -147,13 +167,13 @@
 			children = (
 				FAE862571CF4515A0027539D /* Bluenet.swift */,
 				FA4E02981D0873CD0086E2BF /* BluenetLocalization.swift */,
-				FAFE004D1D14379B001CF20C /* Globals.swift */,
 				FAFE004C1D143737001CF20C /* backend */,
 				FAFE004A1D1436D1001CF20C /* classifiers */,
 				FAFE003D1D143496001CF20C /* containerClasses */,
 				FAFD06BA1D40D8B2008EDC85 /* encryption */,
 				FAFE004B1D14370A001CF20C /* protocol */,
 				FAFE00491D1436C5001CF20C /* util */,
+				FAFE004D1D14379B001CF20C /* Globals.swift */,
 				FA3C187E1CBBDA6B00A11CF7 /* Info.plist */,
 			);
 			path = BluenetLibIOS;
@@ -163,9 +183,9 @@
 			isa = PBXGroup;
 			children = (
 				FA3C18881CBBDA6B00A11CF7 /* BluenetLibIOSTests.swift */,
+				FA71E49D1D4761D900D93A2F /* EncryptionTests.swift */,
 				FA3C188A1CBBDA6B00A11CF7 /* Info.plist */,
 				FA44BB171CF5A6B50018C9D0 /* PromiseTests.swift */,
-				FA71E49D1D4761D900D93A2F /* EncryptionTests.swift */,
 			);
 			path = BluenetLibIOSTests;
 			sourceTree = "<group>";
@@ -227,7 +247,7 @@
 		FAFE004C1D143737001CF20C /* backend */ = {
 			isa = PBXGroup;
 			children = (
-				FA19B5881D5B7A15001CC25F /* BluenetCore.swift */,
+				FA19B58A1D5B808C001CC25F /* serviceImplementations */,
 				FA3C18991CBBDB9400A11CF7 /* BleMangager.swift */,
 				FA3C189A1CBBDB9400A11CF7 /* LocationManager.swift */,
 			);
@@ -347,11 +367,14 @@
 				FA086A831D0EB4AF005F2024 /* ClassifierWrapper.swift in Sources */,
 				FAFE00441D14350F001CF20C /* PromiseContainer.swift in Sources */,
 				FA3C189D1CBBDB9400A11CF7 /* LocationManager.swift in Sources */,
+				FA19B5921D5B82A2001CC25F /* ConfigHandler.swift in Sources */,
+				FA19B58E1D5B824E001CC25F /* CommandHandler.swift in Sources */,
 				FA086A811D0EB34F005F2024 /* NaiveBayes.swift in Sources */,
 				FAFD06C01D412020008EDC85 /* EncryptedPackage.swift in Sources */,
 				FAFD06BC1D40D8D8008EDC85 /* EncryptionHandler.swift in Sources */,
 				FA0C96321D1183DB00794D85 /* JSONUtils.swift in Sources */,
 				FAE8625C1CF478E50027539D /* Eventbus.swift in Sources */,
+				FA19B58C1D5B809E001CC25F /* DfuHandler.swift in Sources */,
 				FA270B051D0F12CD00CB0AE8 /* Characteristics.swift in Sources */,
 				FAE862601CF48E530027539D /* Util.swift in Sources */,
 				FAFE004E1D14379B001CF20C /* Globals.swift in Sources */,
@@ -361,11 +384,12 @@
 				FA3C189B1CBBDB9400A11CF7 /* BleMangager.swift in Sources */,
 				FAFE00461D14363E001CF20C /* Fingerprint.swift in Sources */,
 				FA270B071D0F12D800CB0AE8 /* Services.swift in Sources */,
+				FA19B5941D5B82A2001CC25F /* SetupHandler.swift in Sources */,
 				FA0C963B1D11904900794D85 /* Conversion.swift in Sources */,
 				FA4E02991D0873CD0086E2BF /* BluenetLocalization.swift in Sources */,
-				FA19B5891D5B7A15001CC25F /* BluenetCore.swift in Sources */,
 				FAFE003F1D1434AD001CF20C /* AvailableDevice.swift in Sources */,
 				FAFE00481D14364B001CF20C /* iBeaconContainers.swift in Sources */,
+				FA19B5931D5B82A2001CC25F /* ControlHandler.swift in Sources */,
 				FAE862581CF4515A0027539D /* Bluenet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -10,7 +10,7 @@ import Foundation
 
 
 public class BluenetSettings {
-    public var encryptionEnabled = true
+    public var encryptionEnabled = false
     public var adminKey : [UInt8]?
     public var userKey  : [UInt8]?
     public var guestKey : [UInt8]?
