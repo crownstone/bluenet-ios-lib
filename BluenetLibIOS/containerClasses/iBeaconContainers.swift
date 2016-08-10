@@ -13,13 +13,29 @@ import SwiftyJSON
 public class iBeaconContainer {
     var UUID : NSUUID;
     var groupId = ""
-    var region : CLBeaconRegion;
+    var region : CLBeaconRegion
+    var major  : CLBeaconMajorValue?
+    var minor  : CLBeaconMinorValue?
     
     public init(groupId: String, uuid: String) {
-        self.UUID = NSUUID(UUIDString : uuid)!;
-        self.groupId = groupId;
-        self.region = CLBeaconRegion(proximityUUID: self.UUID, identifier: groupId);
+        self.UUID = NSUUID(UUIDString : uuid)!
+        self.groupId = groupId
+        self.region = CLBeaconRegion(proximityUUID: self.UUID, identifier: groupId)
     }
+    public init(groupId: String, uuid: String, major: NSNumber) {
+        self.UUID = NSUUID(UUIDString : uuid)!
+        self.groupId = groupId
+        self.major = major.unsignedShortValue
+        self.region = CLBeaconRegion(proximityUUID: self.UUID, major: self.major!, identifier: groupId)
+    }
+    public init(groupId: String, uuid: String, major: NSNumber, minor: NSNumber) {
+        self.UUID = NSUUID(UUIDString : uuid)!
+        self.groupId = groupId
+        self.major = major.unsignedShortValue
+        self.minor = minor.unsignedShortValue
+        self.region = CLBeaconRegion(proximityUUID: self.UUID, major: self.major!, minor: self.minor!, identifier: groupId)
+    }
+ 
 }
 
 public class iBeaconPacket {

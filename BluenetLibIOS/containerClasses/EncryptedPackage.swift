@@ -9,7 +9,7 @@
 import Foundation
 
 /**
- *
+ * This class unwraps an encrypted NSData package according to Protocol V5
  *
  */
 class EncryptedPackage {
@@ -18,12 +18,13 @@ class EncryptedPackage {
     var payload : [UInt8]?
     
     init(data: NSData) throws {
-        nonce = [UInt8](count: 8, repeatedValue: 0);
+        nonce = [UInt8](count: PACKET_NONCE_LENGTH, repeatedValue: 0);
         var dataArray = data.arrayOfBytes();
-        var payloadData = [UInt8](count: dataArray.count - 9, repeatedValue:0)
+        let prefixLength = PACKET_NONCE_LENGTH + PACKET_USERLEVEL_LENGTH
+        var payloadData = [UInt8](count: dataArray.count - prefixLength, repeatedValue:0)
         
-        // 25 is the minimal size of a packet (8+1+16)
-        if (dataArray.count >= 25) {
+        // 20 is the minimal size of a packet (3+1+16)
+        if (dataArray.count < 20) {
             throw BleError.INVALID_PACKAGE_FOR_ENCRYPTION_TOO_SHORT
         }
         
@@ -34,16 +35,16 @@ class EncryptedPackage {
         
         
         // only allow 0, 1, 2 for Admin, User, Guest
-        if (dataArray[8] > 2) {
+        if (dataArray[PACKET_NONCE_LENGTH] > 2) {
             throw BleError.INVALID_KEY_FOR_ENCRYPTION
         }
         
         // get the key from the data
-        userLevel = UserLevel(rawValue: Int(dataArray[8]))!
+        userLevel = UserLevel(rawValue: Int(dataArray[PACKET_NONCE_LENGTH]))!
         
         // copy the nonce over to the class var
-        for (index,element) in dataArray.enumerate() {
-            payloadData[index+9] = element
+        for i in (0...payloadData.count - 1) {
+            payloadData[i] = dataArray[i + prefixLength]
         }
         
         if (payloadData.count % 16 != 0) {

@@ -60,3 +60,8 @@ public struct MeshCharacteristics {
     public static let MeshData         = "2a1e0004-fd51-d882-8ba8-b98c0000cd1e"
     public static let Value            = "2a1e0005-fd51-d882-8ba8-b98c0000cd1e"
 }
+
+public struct DFUCharacteristics {
+    public static let ControlPoint   = "00001531-1212-efde-1523-785feabcd123"
+    public static let Packet         = "00001532-1212-efde-1523-785feabcd123"
+}

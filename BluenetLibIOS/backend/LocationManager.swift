@@ -34,11 +34,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         print("------ BLUENET_LIB_NAV: location services enabled: \(CLLocationManager.locationServicesEnabled())");
         print("------ BLUENET_LIB_NAV: ranging services enabled: \(CLLocationManager.isRangingAvailable())");
         
-        // stop monitoring all previous regions
-        for region in self.manager.monitoredRegions {
-            print ("------ BLUENET_LIB_NAV: INITIALIZATION: stop monitoring old region: \(region)")
-            self.manager.stopMonitoringForRegion(region)
-        }
+        self.stopTrackingAllRegions()
 
         self.check()
     }
@@ -46,8 +42,10 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     public func trackBeacon(beacon: iBeaconContainer) {
         if (!self._beaconInList(beacon, list: self.trackingBeacons)) {
             trackingBeacons.append(beacon);
-            self.manager.startMonitoringForRegion(beacon.region)
-            self.manager.requestStateForRegion(beacon.region)
+            if (self.started == true) {
+                self.manager.startMonitoringForRegion(beacon.region)
+                self.manager.requestStateForRegion(beacon.region)
+            }
         }
         
         self.start();
@@ -57,13 +55,48 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         self.locationManager(self.manager, didChangeAuthorizationStatus: CLLocationManager.authorizationStatus())
     }
     
+    public func stopTrackingAllRegions() {
+        // stop monitoring all previous regions
+        for region in self.manager.monitoredRegions {
+            print ("------ BLUENET_LIB_NAV: INITIALIZATION: stop monitoring old region: \(region)")
+            self.manager.stopMonitoringForRegion(region)
+        }
+    }
     
+    public func stopTrackingIBeacons() {
+        // stop monitoring all becons
+        for beacon in self.trackingBeacons {
+            self.manager.stopMonitoringForRegion(beacon.region)
+        }
+    }
+    
+    public func startTrackingIBeacons() {
+        // reinitialize
+        for beacon in self.trackingBeacons {
+            self.manager.startMonitoringForRegion(beacon.region)
+            self.manager.requestStateForRegion(beacon.region)
+        }
+    }
+    
+    func resetBeaconRanging() {
+        print ("------ BLUENET_LIB_NAV: Resetting ibeacon tracking")
+        self.stopTrackingIBeacons()
+        self.startTrackingIBeacons()        
+    }
     
     func start() {
         self.manager.startUpdatingLocation()
         if (self.manager.respondsToSelector(Selector("allowsBackgroundLocationUpdates"))) {
             self.manager.allowsBackgroundLocationUpdates = true
         }
+        
+        self.resetBeaconRanging();
+        self.started = true
+    }
+    
+    func startWithoutBackground() {
+        self.manager.startUpdatingLocation()
+        self.resetBeaconRanging();
         self.started = true
     }
     

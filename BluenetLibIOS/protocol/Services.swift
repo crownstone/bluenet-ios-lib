@@ -27,3 +27,7 @@ public struct CSServices {
     public static let ScheduleService           = "24f50000-7d10-4805-bfc1-7663a01c3bff"
     public static let MeshService               = "0000fee4-0000-1000-8000-00805f9b34fb"
 }
+
+public struct DFUServices {
+    public static let DFU   = "00001530-1212-efde-1523-785feabcd123"
+}

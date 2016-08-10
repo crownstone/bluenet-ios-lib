@@ -10,11 +10,11 @@ import Foundation
 
 
 public class BluenetSettings {
-    var encryptionEnabled = true
-    var adminKey : [UInt8]?
-    var userKey  : [UInt8]?
-    var guestKey : [UInt8]?
-    var initializedKeys = false
+    public var encryptionEnabled = true
+    public var adminKey : [UInt8]?
+    public var userKey  : [UInt8]?
+    public var guestKey : [UInt8]?
+    public var initializedKeys = false
     
     init() {
 

@@ -66,11 +66,27 @@ public class BluenetLocalization {
      * This method configures an ibeacon with the ibeaconUUID you provide. The groupId is used to notify
      * you when this region is entered as well as to keep track of which classifiers belong to which group.
      */
-    public func trackUUID(uuid: String, groupId: String) {
+    public func trackIBeacon(uuid: String, groupId: String) {
         let trackStone = iBeaconContainer(groupId: groupId, uuid: uuid)
         self.locationManager.trackBeacon(trackStone)
     }
     
+    /**
+     *  This will stop listening to any and all updates from the iBeacon tracking. Your app may fall asleep.
+     */
+    public func stopTracking() {
+        self.locationManager.stopTrackingIBeacons()
+    }
+    
+    /**
+     *  Continue tracking iBeacons. Will trigger enterRegion and enterLocation again.
+     */
+    public func resumeTracking() {
+        activeGroupId = nil
+        activeLocationId = nil
+
+        self.locationManager.startTrackingIBeacons()
+    }
     
     /**
      * Subscribe to a topic with a callback. This method returns an Int which is used as identifier of the subscription.
