@@ -30,6 +30,7 @@ enum PromiseType {
     case SERVICELIST
     case CHARACTERISTICLIST
     case CHARACTERISTIC
+    case DATA
 }
 
 
@@ -39,11 +40,11 @@ class promiseContainer {
     private var _fulfillServiceListPromise      : ([CBService]) -> Void         = {_ in }
     private var _fulfillCharacteristicListPromise : ([CBCharacteristic]) -> Void = {_ in }
     private var _fulfillCharacteristicPromise   : (CBCharacteristic) -> Void    = {_ in }
+    private var _fulfillDataPromise             : ([UInt8]) -> Void    = {_ in }
     private var _rejectPromise                  : (ErrorType) -> Void           = {_ in }
     var type = RequestType.NONE
     var promiseType = PromiseType.NONE
     var completed = false
-    
     
     init(_ fulfill: (Void) -> Void, _ reject: (ErrorType) -> Void, type: RequestType) {
         _fulfillVoidPromise = fulfill
@@ -75,12 +76,19 @@ class promiseContainer {
         initShared(reject, type)
     }
     
+    
+    init(_ fulfill: ([UInt8]) -> Void, _ reject: (ErrorType) -> Void, type: RequestType) {
+        _fulfillDataPromise = fulfill
+        promiseType = .DATA
+        initShared(reject, type)
+    }
+    
     func initShared(reject: (ErrorType) -> Void, _ type: RequestType) {
         _rejectPromise = reject
         self.type = type
     }
     
-    func setFulfillOnTimeout(delayTimeInSeconds: Double) {
+    func setDelayedFulfill(delayTimeInSeconds: Double) {
         if (promiseType == .VOID) {
             delay(delayTimeInSeconds, {_ in self.fulfill()})
         }
@@ -89,7 +97,7 @@ class promiseContainer {
         }
     }
     
-    func setTimeout(delayTimeInSeconds: Double, errorOnReject: BleError) {
+    func setDelayedReject(delayTimeInSeconds: Double, errorOnReject: BleError) {
         delay(delayTimeInSeconds, {_ in self.reject(errorOnReject)})
     }
     
@@ -173,6 +181,20 @@ class promiseContainer {
         }
         clear()
     }
+    
+    func fulfill(data: [UInt8]) {
+        if (self.completed == false) {
+            self.completed = true
+            if (promiseType == .DATA) {
+                _fulfillDataPromise(data)
+            }
+            else {
+                _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
+            }
+        }
+        clear()
+    }
+
     
     func reject(error: ErrorType) {
         if (self.completed == false) {

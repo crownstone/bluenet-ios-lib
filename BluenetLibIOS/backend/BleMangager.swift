@@ -33,6 +33,7 @@ public enum BleError : ErrorType {
     case WRITE_CHARACTERISTIC_TIMEOUT
     case ENABLE_NOTIFICATIONS_TIMEOUT
     case DISABLE_NOTIFICATIONS_TIMEOUT
+    case CANNOT_WRITE_AND_VERIFY
     
     // encryption errors
     case INVALID_SESSION_DATA
@@ -57,8 +58,10 @@ struct timeoutDurations {
     static let getCharacteristics      : Double = 2
     static let readCharacteristic      : Double = 2
     static let writeCharacteristic     : Double = 4
+    static let writeCharacteristicWithout : Double = 0.5
     static let enableNotifications     : Double = 2
     static let disableNotifications    : Double = 2
+    static let waitForBond             : Double = 120
 }
 
 public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
@@ -70,6 +73,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     var pendingPromise : promiseContainer!
     var eventBus : EventBus!
     var settings : BluenetSettings!
+    var disableReadEncryption = false
 
     public init(eventBus: EventBus) {
         super.init();
@@ -85,9 +89,9 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     public func setSettings(settings: BluenetSettings) {
         self.settings = settings
     }
+   
     
     // MARK: API
-    
     /**
      * This method will fulfill when the bleManager is ready. It polls itself every 0.25 seconds. Never rejects.
      *
@@ -144,6 +148,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     
     /**
      *  Cancel a pending connection
+     *
      */
     func abortConnecting()  -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
@@ -158,7 +163,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 
                 print ("------ BLUENET_LIB: Waiting to cancel connection....")
                 pendingPromise = promiseContainer(fulfill, reject, type: .CANCEL_PENDING_CONNECTION)
-                pendingPromise.setTimeout(timeoutDurations.cancelPendingConnection, errorOnReject: .CANCEL_PENDING_CONNECTION_TIMEOUT)
+                pendingPromise.setDelayedReject(timeoutDurations.cancelPendingConnection, errorOnReject: .CANCEL_PENDING_CONNECTION_TIMEOUT)
                 
                 centralManager.cancelPeripheralConnection(connectingPeripheral!)
                 
@@ -189,7 +194,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 
                 // setup the pending promise for connection
                 pendingPromise = promiseContainer(fulfill, reject, type: .CONNECT)
-                pendingPromise.setTimeout(timeoutDurations.connect, errorOnReject: .CONNECT_TIMEOUT)
+                pendingPromise.setDelayedReject(timeoutDurations.connect, errorOnReject: .CONNECT_TIMEOUT)
                 
                 // TODO: implement timeout.
                 centralManager.connectPeripheral(connectingPeripheral!, options: nil)
@@ -225,7 +230,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 print ("------ BLUENET_LIB: disconnecting from connected peripheral")
                 let disconnectPromise = Promise<Void> { success, failure in
                     self.pendingPromise = promiseContainer(success, failure, type: .DISCONNECT)
-                    self.pendingPromise.setTimeout(timeoutDurations.disconnect, errorOnReject: .DISCONNECT_TIMEOUT)
+                    self.pendingPromise.setDelayedReject(timeoutDurations.disconnect, errorOnReject: .DISCONNECT_TIMEOUT)
                     self.centralManager.cancelPeripheralConnection(connectedPeripheral!)
                 }
                 // we clean up (self.connectedPeripheral = nil) inside the disconnect() method, thereby needing this inner promise
@@ -254,7 +259,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 }
                 else {
                     self.pendingPromise = promiseContainer(fulfill, reject, type: .GET_SERVICES)
-                    self.pendingPromise.setTimeout(timeoutDurations.getServices, errorOnReject: .GET_SERVICES_TIMEOUT)
+                    self.pendingPromise.setDelayedReject(timeoutDurations.getServices, errorOnReject: .GET_SERVICES_TIMEOUT)
                     // the fulfil and reject are handled in the peripheral delegate
                     connectedPeripheral!.discoverServices(nil) // then return services
                 }
@@ -312,7 +317,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 }
                 else {
                     self.pendingPromise = promiseContainer(fulfill, reject, type: .GET_CHARACTERISTICS)
-                    self.pendingPromise.setTimeout(timeoutDurations.getCharacteristics, errorOnReject: .GET_CHARACTERISTICS_TIMEOUT)
+                    self.pendingPromise.setDelayedReject(timeoutDurations.getCharacteristics, errorOnReject: .GET_CHARACTERISTICS_TIMEOUT)
 
                     // the fulfil and reject are handled in the peripheral delegate
                     connectedPeripheral!.discoverCharacteristics(nil, forService: service)// then return services
@@ -370,12 +375,39 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     
     
     
-    public func readCharacteristic(serviceId: String, characteristicId: String) -> Promise<CBCharacteristic> {
-        return Promise<CBCharacteristic> { fulfill, reject in
+    public func readCharacteristicWithBonding(serviceId: String, characteristicId: String, disableEncryptionOnce: Bool = false) -> Promise<[UInt8]> {
+        return self._readCharacteristic(serviceId, characteristicId: characteristicId, timeout: timeoutDurations.waitForBond, disableEncryptionOnce: disableEncryptionOnce)
+    }
+    
+    
+    
+    public func readCharacteristic(serviceId: String, characteristicId: String, disableEncryptionOnce: Bool = false) -> Promise<[UInt8]> {
+        return self._readCharacteristic(serviceId, characteristicId: characteristicId, timeout: timeoutDurations.readCharacteristic, disableEncryptionOnce: disableEncryptionOnce)
+    }
+    
+    
+    
+    public func _readCharacteristic(serviceId: String, characteristicId: String, timeout: Double, disableEncryptionOnce: Bool = false) -> Promise<[UInt8]> {
+        return Promise<[UInt8]> { fulfill, reject in
             self.getChacteristic(serviceId, characteristicId)
                 .then({characteristic in
-                    self.pendingPromise = promiseContainer(fulfill, reject, type: .READ_CHARACTERISTIC)
-                    self.pendingPromise.setTimeout(timeoutDurations.readCharacteristic, errorOnReject: .READ_CHARACTERISTIC_TIMEOUT)
+                    // in the case where you disable the encyrption for this once read event, we alter the fulfill and rejects to restore the state once they fire
+                    if (disableEncryptionOnce) {
+                        self.disableReadEncryption = true
+                        let fulfillRestore = {(data: [UInt8]) -> Void in
+                            self.disableReadEncryption = false
+                            fulfill(data)
+                        }
+                        let rejectRestore = {(err: ErrorType) -> Void in
+                            self.disableReadEncryption = false
+                            reject(err)
+                        }
+                        self.pendingPromise = promiseContainer(fulfillRestore, rejectRestore, type: .READ_CHARACTERISTIC)
+                    }
+                    else {
+                        self.pendingPromise = promiseContainer(fulfill, reject, type: .READ_CHARACTERISTIC)
+                    }
+                    self.pendingPromise.setDelayedReject(timeout, errorOnReject: .READ_CHARACTERISTIC_TIMEOUT)
                     
                     // the fulfil and reject are handled in the peripheral delegate
                     self.connectedPeripheral!.readValueForCharacteristic(characteristic)
@@ -386,16 +418,24 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         }
     }
     
-    public func writeToCharacteristic(serviceId: String, characteristicId: String, data: NSData, type: CBCharacteristicWriteType) -> Promise<Void> {
+    public func writeToCharacteristic(serviceId: String, characteristicId: String, data: NSData, type: CBCharacteristicWriteType, disableEncryptionOnce: Bool = false) -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             self.getChacteristic(serviceId, characteristicId)
                 .then({characteristic in
                     self.pendingPromise = promiseContainer(fulfill, reject, type: .WRITE_CHARACTERISTIC)
-                    self.pendingPromise.setTimeout(timeoutDurations.writeCharacteristic, errorOnReject: .WRITE_CHARACTERISTIC_TIMEOUT)
+                    
+                    if (type == .WithResponse) {
+                        self.pendingPromise.setDelayedReject(timeoutDurations.writeCharacteristic, errorOnReject: .WRITE_CHARACTERISTIC_TIMEOUT)
+                    }
+                    else {
+                        // if we write without notification, the delegate will not be invoked.
+                        self.pendingPromise.setDelayedFulfill(timeoutDurations.writeCharacteristicWithout)
+                    }
+                    
                     print ("------ BLUENET_LIB: writing \(data) ")
                     
                     // the fulfil and reject are handled in the peripheral delegate
-                    if (self.settings.encryptionEnabled) {
+                    if (self.settings.encryptionEnabled && disableEncryptionOnce == false) {
                         // TODO: encrypt
                         self.connectedPeripheral!.writeValue(data, forCharacteristic: characteristic, type: type)
                     }
@@ -424,7 +464,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                     return Promise<Void> { success, failure in
                         // the success and failure are handled in the peripheral delegate
                         self.pendingPromise = promiseContainer(success, failure, type: .ENABLE_NOTIFICATIONS)
-                        self.pendingPromise.setTimeout(timeoutDurations.enableNotifications, errorOnReject: .ENABLE_NOTIFICATIONS_TIMEOUT)
+                        self.pendingPromise.setDelayedReject(timeoutDurations.enableNotifications, errorOnReject: .ENABLE_NOTIFICATIONS_TIMEOUT)
                         self.connectedPeripheral!.setNotifyValue(true, forCharacteristic: characteristic)
                     }
                 })
@@ -453,7 +493,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 self.getChacteristic(serviceId, characteristicId)
                     .then({characteristic in
                         self.pendingPromise = promiseContainer(fulfill, reject, type: .DISABLE_NOTIFICATIONS)
-                        self.pendingPromise.setTimeout(timeoutDurations.disableNotifications, errorOnReject: .DISABLE_NOTIFICATIONS_TIMEOUT)
+                        self.pendingPromise.setDelayedReject(timeoutDurations.disableNotifications, errorOnReject: .DISABLE_NOTIFICATIONS_TIMEOUT)
                         
                         // the fulfil and reject are handled in the peripheral delegate
                         self.connectedPeripheral!.setNotifyValue(false, forCharacteristic: characteristic)
@@ -511,9 +551,9 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             uuid: peripheral.identifier.UUIDString,
             name: peripheral.name,
             rssi: RSSI,
-            serviceData: advertisementData["kCBAdvDataServiceData"]
+            serviceData: advertisementData["kCBAdvDataServiceData"],
+            serviceUUID: advertisementData["kCBAdvDataServiceUUIDs"]
         );
-        
         self.eventBus.emit("advertisementData",emitData)
     }
     
@@ -611,6 +651,15 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     * This is the reaction to read characteristic AND notifications!
     */
     public func peripheral(peripheral: CBPeripheral, didUpdateValueForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
+        // handle the case for failed bonding
+        if (error != nil) {
+            if (pendingPromise.type == .READ_CHARACTERISTIC) {
+                pendingPromise.reject(error!)
+            }
+            return
+        }
+        
+        
         // in case of notifications:
         let serviceId = characteristic.service.UUID.UUIDString;
         let characteristicId = characteristic.UUID.UUIDString;
@@ -631,7 +680,18 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 pendingPromise.reject(error!)
             }
             else {
-                pendingPromise.fulfill(characteristic)
+                if (characteristic.value != nil) {
+                    if (self.settings.encryptionEnabled && disableReadEncryption == false) {
+                        // TODO: decrypt
+                        pendingPromise.fulfill(characteristic.value!.arrayOfBytes())
+                    }
+                    else {
+                        pendingPromise.fulfill(characteristic.value!.arrayOfBytes())
+                    }
+                }
+                else {
+                    pendingPromise.fulfill([UInt8]())
+                }
             }
         }
     }

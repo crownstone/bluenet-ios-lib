@@ -56,6 +56,21 @@ public class ControlHandler {
             type: CBCharacteristicWriteType.WithResponse
         )
     }
+    
+  
+    
+    public func putInDFU() -> Promise<Void> {
+        print ("------ BLUENET_LIB: switching to DFU")
+        
+        let packet = ControlPacket(type: .GOTO_DFU).getPacket()
+        return self.bleManager.writeToCharacteristic(
+            CSServices.CrownstoneService,
+            characteristicId: CrownstoneCharacteristics.Control,
+            data: NSData(bytes: packet, length: packet.count),
+            type: CBCharacteristicWriteType.WithResponse
+        )
+    }
+
 
     
 }

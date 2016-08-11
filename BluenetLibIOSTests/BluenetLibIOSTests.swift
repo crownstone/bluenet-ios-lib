@@ -35,6 +35,10 @@ class BluenetLibIOSTests: XCTestCase {
             print(index,element)
         }
         
-        print (0xcafebabe)
+        XCTAssertEqual(3405691582,0xcafebabe)
+    }
+    
+    func testHexString() {
+        XCTAssertEqual("FF",String(format:"%2X", 255))
     }
 }

@@ -27,7 +27,9 @@ public struct CrownstoneCharacteristics {
 
 public struct SetupCharacteristics {
     public static let Control          = "24f10001-7d10-4805-bfc1-7663a01c3bff"
-    public static let MAC              = "24f10002-7d10-4805-bfc1-7663a01c3bff"
+    public static let MacAddress       = "24f10002-7d10-4805-bfc1-7663a01c3bff"
+    public static let ConfigControl    = "24f10004-7d10-4805-bfc1-7663a01c3bff"
+    public static let ConfigRead       = "24f10005-7d10-4805-bfc1-7663a01c3bff"
 }
 
 public struct GeneralCharacteristics {

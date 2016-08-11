@@ -54,14 +54,27 @@ class PromiseTests: XCTestCase{
             fulfill()
         }
     }
+   
+        
     
-    
-    func promiseSleepReturningBool(duration: Double, _ message:Bool = false) -> Promise<Bool> {
-        print(message)
+    func promiseSleepReturningBool(duration: Double) -> Promise<Bool> {
         return Promise<Bool> { fulfill, reject in
             self.sleep(duration);
             fulfill(true)
         }
+    }
+    
+    
+    func returnThen() -> Promise<Void> {
+        return self.promiseSleepReturningBool(0.5)
+            .then({_ -> Promise<Bool> in
+                print(1)
+                return self.promiseSleepReturningBool(0.5)
+            })
+            .then({_ in
+                print(2)
+                return self.promiseSleep(0.5)
+            })
     }
     
     func testPromisesFormats() {
@@ -89,11 +102,11 @@ class PromiseTests: XCTestCase{
         })
         
         firstly ({
-            return self.promiseSleepReturningBool(0.1, false)
+            return self.promiseSleepReturningBool(0.1)
         }).then ({ value in
-            return self.promiseSleepReturningBool(0.1, value)
+            return self.promiseSleepReturningBool(0.1)
         }).then ({ value in
-            return self.promiseSleepReturningBool(0.1, value)
+            return self.promiseSleepReturningBool(0.1)
         }).then({ _ in
             response.fulfill()
         })
@@ -182,6 +195,43 @@ class PromiseTests: XCTestCase{
             print("timeout");
         }
     }
+    
+    func testPromisesWithErrorHandling2() {
+        let response = self.expectationWithDescription("wait for promises")
+        
+        self.promiseNightmare(0.1,1)
+            .then({print("after the first promise")})
+            .error({error in print("I'm the error that has been fired")})
+        
+        
+        firstly ({ _ -> Promise<Void> in
+            print("1")
+            return self.promiseNightmare(0.1, 2)
+        })
+        .recover({Error -> Promise<Void> in
+            print("error: \(Error)")
+            return Promise<Void> { fulfill, reject in  fulfill()}
+        })
+        .then ({ _ -> Promise<Void> in
+            print("2")
+            return self.promiseSleep(0.1)
+        }).then ({ _ -> Promise<Void> in
+            print("3")
+            return self.promiseNightmare(0.1, 1)
+        }).then({ _ in
+            print("4")
+        }).always({
+            print("I always get here regardless of Errors")
+        }).error({error in
+            print(error)
+        })
+
+        //wait for asynchronous call to complete before running assertions
+        self.waitForExpectationsWithTimeout(2.0) { _ -> Void in
+            print("timeout");
+        }
+    }
+    
     
     func testPromisesWithErrorHandlingInThreads() {
         let response = self.expectationWithDescription("wait for promises")
@@ -325,6 +375,19 @@ class PromiseTests: XCTestCase{
                 dispatch_semaphore_signal(syncSemaphore);
             })
         })
+        
+        self.waitForExpectationsWithTimeout(20.0) { _ -> Void in
+            print("timeout");
+        }
+    }
+    
+    func testReturningPromises() {
+        let response = self.expectationWithDescription("wait for promises")
+        firstly({_ -> Promise<Void> in returnThen()})
+            .then({_ in
+                print("COMPLETED SUCCESSFULLY")
+                response.fulfill()
+            })
         
         self.waitForExpectationsWithTimeout(20.0) { _ -> Void in
             print("timeout");

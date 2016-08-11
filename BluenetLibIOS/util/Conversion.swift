@@ -37,6 +37,18 @@ public class Conversion {
         return arr
     }
     
+    public static func uint8_array_to_string(data: [UInt8]) -> String {
+        var stringResult = ""
+        for byte in data {
+            stringResult += Conversion.uint8_to_hex_string(byte)
+        }
+        return stringResult
+    }
+    
+    public static func uint8_to_hex_string(byte: UInt8) -> String {
+        return String(format:"%2X", byte)
+    }
+    
     public static func uint8_array_to_uint16(arr8: [UInt8]) -> UInt16 {
         return (UInt16(arr8[1]) << 8) + UInt16(arr8[0])
     }
@@ -54,4 +66,9 @@ public class Conversion {
         return ns.intValue
     }
     
+    
+    public static func uint8_to_int8(val: UInt8) -> Int8 {
+        var ns = NSNumber(unsignedChar: val)
+        return ns.charValue
+    }
 }

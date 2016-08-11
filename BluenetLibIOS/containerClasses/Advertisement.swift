@@ -10,15 +10,19 @@ import Foundation
 import CoreBluetooth
 import SwiftyJSON
 
-
+/**
+ * Wrapper for all relevant data of the object
+ *
+ */
 public class Advertisement {
     public var uuid : String
     public var name : String
     public var rssi : NSNumber
     public var serviceData = [String: [UInt8]]()
     public var serviceDataAvailable : Bool
+    public var serviceUUID : String?
     
-    init(uuid: String, name: String?, rssi: NSNumber, serviceData: AnyObject?) {
+    init(uuid: String, name: String?, rssi: NSNumber, serviceData: AnyObject?, serviceUUID: AnyObject?) {
         if (name != nil) {
             self.name = name!
         }
@@ -28,6 +32,10 @@ public class Advertisement {
         self.uuid = uuid
         self.rssi = rssi
         self.serviceDataAvailable = false
+
+        if let castData = serviceUUID as? [CBUUID] {
+            self.serviceUUID = castData[0].UUIDString // assuming only one service data uuid
+        }
         
         if let castData = serviceData as? [CBUUID: NSData] {
             for (serviceCUUID, data) in castData {
@@ -72,6 +80,10 @@ public class Advertisement {
         dataDict["name"] = self.name
         dataDict["rssi"] = self.rssi
         
+        if (self.serviceUUID != nil) {
+            dataDict["serviceUUID"] = self.serviceUUID
+        }
+      
         var dataJSON = JSON(dataDict)
         dataJSON["serviceData"] = self.getServiceDataJSON()
         return dataJSON

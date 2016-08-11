@@ -167,6 +167,10 @@ public class Bluenet  {
         self.eventBus.off(id);
     }
     
+    public func wait() -> Promise<Void> {
+        return Promise<Void> { fulfill, reject in delay(2,fulfill) }
+    }
+    
     // MARK: util
     func _parseAdvertisement(data: AnyObject) {
         if let castData = data as? Advertisement {
