@@ -167,8 +167,12 @@ public class Bluenet  {
         self.eventBus.off(id);
     }
     
-    public func wait() -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in delay(2,fulfill) }
+    public func waitToReconnect() -> Promise<Void> {
+        return self.bleManager.waitToReconnect()
+    }
+    
+    public func waitToWrite() -> Promise<Void> {
+        return self.bleManager.waitToWrite()
     }
     
     // MARK: util

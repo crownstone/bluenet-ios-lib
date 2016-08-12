@@ -61,7 +61,7 @@ struct timeoutDurations {
     static let writeCharacteristicWithout : Double = 0.5
     static let enableNotifications     : Double = 2
     static let disableNotifications    : Double = 2
-    static let waitForBond             : Double = 120
+    static let waitForBond             : Double = 12
 }
 
 public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
@@ -105,6 +105,15 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                 fulfill()
             }
         }
+    }
+    
+    public func waitToReconnect()  -> Promise<Void> {
+        return Promise<Void> { fulfill, reject in delay(1, fulfill) }
+    }
+    
+    // this delay is set up for calls that need to write to storage.
+    public func waitToWrite() -> Promise<Void> {
+        return Promise<Void> { fulfill, reject in delay(0.2, fulfill) }
     }
     
     /**

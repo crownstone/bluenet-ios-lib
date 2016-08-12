@@ -49,6 +49,29 @@ public class Conversion {
         return String(format:"%2X", byte)
     }
     
+    public static func hex_string_to_uint8_array(input: String) -> [UInt8] {
+        var hexNumber = ""
+        var result = [UInt8]()
+        for letter in input.characters {
+            hexNumber += String(letter)
+            if (hexNumber.characters.count == 2) {
+                result.append(UInt8(hexNumber,radix:16)!)
+                hexNumber = ""
+            }
+        }
+        return result
+    }
+    
+    public static func ibeaconUUIDString_to_uint8_array(input:String) -> [UInt8] {
+        let check = NSUUID(UUIDString: input)
+        if (check != nil) {
+            var stripped = input.stringByReplacingOccurrencesOfString("-", withString: "")
+            stripped  = stripped.stringByReplacingOccurrencesOfString(":", withString: "")
+            return Conversion.hex_string_to_uint8_array(stripped)
+        }
+        return []
+    }
+    
     public static func uint8_array_to_uint16(arr8: [UInt8]) -> UInt16 {
         return (UInt16(arr8[1]) << 8) + UInt16(arr8[0])
     }
@@ -62,13 +85,13 @@ public class Conversion {
     }
     
     public static func uint32_to_int32(val: UInt32) -> Int32 {
-        var ns = NSNumber(unsignedInt: val)
+        let ns = NSNumber(unsignedInt: val)
         return ns.intValue
     }
     
     
     public static func uint8_to_int8(val: UInt8) -> Int8 {
-        var ns = NSNumber(unsignedChar: val)
+        let ns = NSNumber(unsignedChar: val)
         return ns.charValue
     }
 }
