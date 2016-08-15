@@ -11,7 +11,7 @@ import CryptoSwift
 
 enum UserLevel: Int {
     case Admin   = 0
-    case User    = 1
+    case Member  = 1
     case Guest   = 2
     case UNKNOWN = 255
 }
@@ -126,13 +126,21 @@ class EncryptionHandler {
         return NSData(bytes:result)
     }
     
-    
-    
+    static func decryptAdvertisement(input: [UInt8], key: [UInt8]) -> [UInt8]? {
+        print ("input count: \(input.count) \(input), key count: \(key) \(key.count)")
+        do {
+            let result = try! AES(key: key, blockMode: CipherBlockMode.ECB, padding: zeroPadding()).decrypt(input)
+            return result
+        }
+        catch is ErrorType {
+            print ("error")
+            return nil
+        }
+    }
     
     static func decrypt(input: NSData, sessionData: SessionData, settings: BluenetSettings) throws -> NSData {
         // decrypt data
         let decrypted = try _decrypt(input, sessionData, settings)
-        print (decrypted)
         // verify decryption success and strip checksum
         let result = try _verifyDecryption(decrypted, sessionData)
         
@@ -174,8 +182,8 @@ class EncryptionHandler {
         switch (userLevel) {
         case .Admin:
             key = settings.adminKey
-        case .User:
-            key = settings.userKey
+        case .Member:
+            key = settings.memberKey
         case .Guest:
             key = settings.guestKey
         default:

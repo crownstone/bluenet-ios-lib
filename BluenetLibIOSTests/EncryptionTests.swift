@@ -18,9 +18,9 @@ class EncryptionTests: XCTestCase {
         
         // Put setup code here. This method is called before the invocation of each test method in the class.
         settings = BluenetSettings()
-        settings.adminKey = Conversion.string_to_uint8_array("AdminKeyOf16Byte")
-        settings.userKey  = Conversion.string_to_uint8_array("UserKeyOf16Bytes")
-        settings.guestKey = Conversion.string_to_uint8_array("GuestKeyOf16Byte")
+        settings.adminKey = Conversion.string_to_uint8_array(  "AdminKeyOf16Byte")
+        settings.memberKey  = Conversion.string_to_uint8_array("MemberKeyOf16Byt")
+        settings.guestKey = Conversion.string_to_uint8_array(  "GuestKeyOf16Byte")
         settings.initializedKeys = true
         
         BLUENET_ENCRYPTION_TESTING = true
@@ -34,12 +34,12 @@ class EncryptionTests: XCTestCase {
     
     func testKeys() {
         let adminKey = try! EncryptionHandler._getKey(UserLevel.Admin, settings)
-        let userKey  = try! EncryptionHandler._getKey(UserLevel.User, settings)
+        let memberKey  = try! EncryptionHandler._getKey(UserLevel.Member, settings)
         let guestKey = try! EncryptionHandler._getKey(UserLevel.Guest, settings)
 
-        XCTAssertEqual(adminKey, settings.adminKey!)
-        XCTAssertEqual(userKey,  settings.userKey!)
-        XCTAssertEqual(guestKey, settings.guestKey!)
+        XCTAssertEqual(adminKey,  settings.adminKey!)
+        XCTAssertEqual(memberKey, settings.memberKey!)
+        XCTAssertEqual(guestKey,  settings.guestKey!)
 
     }
 
@@ -110,5 +110,14 @@ class EncryptionTests: XCTestCase {
         let key : [UInt8] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
         let encryptedData = try! AES(key: key, blockMode: CipherBlockMode.ECB, padding: zeroPadding()).encrypt(payload)
         print(encryptedData)
+    }
+    
+    func testECBEncryptionAndDecryption() {
+        let payload  : [UInt8]  = [0, 0, 100, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        let key : [UInt8] = [103, 117, 101, 115, 116, 75, 101, 121, 70, 111, 114, 71, 105, 114, 108, 115];
+        let encryptedData = try! AES(key: key, blockMode: CipherBlockMode.ECB, padding: zeroPadding()).encrypt(payload)
+        print(encryptedData)
+        let decryptedData = try! AES(key: key, blockMode: CipherBlockMode.ECB, padding: zeroPadding()).decrypt(payload)
+        print(decryptedData)
     }
 }

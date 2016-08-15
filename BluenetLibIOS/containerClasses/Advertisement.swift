@@ -21,6 +21,7 @@ public class Advertisement {
     public var serviceData = [String: [UInt8]]()
     public var serviceDataAvailable : Bool
     public var serviceUUID : String?
+    public var scanResponse : ScanResponcePacket?
     
     init(uuid: String, name: String?, rssi: NSNumber, serviceData: AnyObject?, serviceUUID: AnyObject?) {
         if (name != nil) {
@@ -45,6 +46,13 @@ public class Advertisement {
                 self.serviceDataAvailable = true
             }
         }
+        
+        for (id, data) in self.serviceData {
+            if (id == "C001") {
+                self.scanResponse = ScanResponcePacket(data)
+            }
+        }
+
     }
     
     func getNumberArray(data: [UInt8]) -> [NSNumber] {
@@ -59,9 +67,8 @@ public class Advertisement {
         if (self.serviceDataAvailable) {
             var serviceData = [String: JSON]()
             for (id, data) in self.serviceData {
-                if (id == "C001") {
-                    let crownstoneScanResponse = ScanResponcePacket(data)
-                    serviceData[id] = crownstoneScanResponse.getJSON()
+                if (id == "C001" && self.scanResponse != nil) {
+                    serviceData[id] = self.scanResponse!.getJSON()
                 }
                 else {
                     serviceData[id] = JSON(self.getNumberArray(data))
@@ -76,7 +83,7 @@ public class Advertisement {
     
     public func getJSON() -> JSON {
         var dataDict = [String : AnyObject]()
-        dataDict["id"] = self.uuid
+        dataDict["uuid"] = self.uuid
         dataDict["name"] = self.name
         dataDict["rssi"] = self.rssi
         
@@ -92,5 +99,21 @@ public class Advertisement {
     public func stringify() -> String {
         return JSONUtils.stringify(self.getJSON())
     }
+    
+    public func isSetupPackage() -> Bool {
+        if (serviceDataAvailable && self.scanResponse != nil) {
+            return self.scanResponse!.isSetupPackage();
+        }
+        
+        return false
+    }
+    
+    public func decrypt(key: [UInt8]) {
+        if (serviceDataAvailable && self.scanResponse != nil) {
+            self.scanResponse!.decrypt(key)
+        }
+    }
+    
+    
     
 }

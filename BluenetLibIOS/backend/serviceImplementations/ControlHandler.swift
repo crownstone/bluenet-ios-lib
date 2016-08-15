@@ -70,6 +70,18 @@ public class ControlHandler {
             type: CBCharacteristicWriteType.WithResponse
         )
     }
+    
+    public func disconnect() -> Promise<Void> {
+        print ("------ BLUENET_LIB: REQUESTING IMMEDIATE DISCONNECT")
+        
+        let packet = ControlPacket(type: .DISCONNECT).getPacket()
+        return self.bleManager.writeToCharacteristic(
+            CSServices.CrownstoneService,
+            characteristicId: CrownstoneCharacteristics.Control,
+            data: NSData(bytes: packet, length: packet.count),
+            type: CBCharacteristicWriteType.WithResponse
+        )
+    }
 
 
     

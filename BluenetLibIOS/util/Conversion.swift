@@ -89,6 +89,21 @@ public class Conversion {
         return ns.intValue
     }
     
+    public static func uint8_to_bit_array(val: UInt8) -> [Bool] {
+        var result = [Bool](count: 8, repeatedValue: false)
+        
+        let bitString = String(val, radix: 2)
+        let stringLength = bitString.characters.count
+        let padding = 8-stringLength
+        
+        var index = padding
+        for char in bitString.characters {
+            result[index] = char == "1"
+            index += 1
+        }
+        return result
+    }
+    
     
     public static func uint8_to_int8(val: UInt8) -> Int8 {
         let ns = NSNumber(unsignedChar: val)

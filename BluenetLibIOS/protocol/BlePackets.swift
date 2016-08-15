@@ -8,10 +8,11 @@
 
 import Foundation
 import SwiftyJSON
+import CryptoSwift
 /*
  *
  *
- *  These are valid for SDK 0.4.1
+ *  These are valid for SDK 0.5.1
  *
  *
  */
@@ -170,16 +171,25 @@ class NotificationStatePacket : ReadStatePacket {
 
 
 public class ScanResponcePacket {
-    var firmwareVersion     : UInt8
-    var crownstoneId        : UInt16
-    var switchState         : UInt8
-    var eventBitmask        : UInt8
-    var temperature         : Int8
-    var powerUsage          : Int32
-    var accumulatedEnergy   : Int32
-    var random              : String
+    var firmwareVersion     : UInt8!
+    var crownstoneId        : UInt16!
+    var switchState         : UInt8!
+    var eventBitmask        : UInt8!
+    var temperature         : Int8!
+    var powerUsage          : Int32!
+    var accumulatedEnergy   : Int32!
+    var random              : String!
+    var newDataAvailable    : Bool!
+    var setupMode           : Bool!
+    var stateOfExternalCrownstone : Bool!
+    var data : [UInt8]!
     
     init(_ data: [UInt8]) {
+        self.data = data
+        self.parse()
+    }
+    
+    func parse() {
         self.firmwareVersion   = data[0]
         self.crownstoneId      = Conversion.uint8_array_to_uint16([data[1], data[2]])
         self.switchState       = data[3]
@@ -191,7 +201,7 @@ public class ScanResponcePacket {
                 data[7],
                 data[8],
                 data[9]
-            ])
+                ])
         )
         self.accumulatedEnergy = Conversion.uint32_to_int32(
             Conversion.uint8_array_to_uint32([
@@ -199,9 +209,15 @@ public class ScanResponcePacket {
                 data[11],
                 data[12],
                 data[13]
-            ])
+                ])
         )
         self.random = Conversion.uint8_array_to_string([data[14],data[15],data[16]])
+        
+        // bitmask states
+        let bitmaskArray = Conversion.uint8_to_bit_array(self.eventBitmask)
+        newDataAvailable = bitmaskArray[0]
+        stateOfExternalCrownstone = bitmaskArray[1]
+        setupMode = bitmaskArray[7]
     }
     
     public func getJSON() -> JSON {
@@ -213,12 +229,49 @@ public class ScanResponcePacket {
         returnDict["temperature"] = NSNumber(char: self.temperature)
         returnDict["powerUsage"] = NSNumber(int: self.powerUsage)
         returnDict["accumulatedEnergy"] = NSNumber(int: self.accumulatedEnergy)
+        // bitmask flags:
+        returnDict["newDataAvailable"] = NSNumber(bool: self.newDataAvailable)
+        returnDict["stateOfExternalCrownstone"] = NSNumber(bool: self.stateOfExternalCrownstone)
+        returnDict["setupMode"] = NSNumber(bool: self.setupMode)
         
         return JSON(returnDict)
     }
     
     public func stringify() -> String {
         return JSONUtils.stringify(self.getJSON())
+    }
+    
+    public func isSetupPackage() -> Bool {
+        if (crownstoneId == 0 && switchState == 0 && powerUsage == 0 && accumulatedEnergy == 0 && random == Conversion.uint8_array_to_string([0,0,0]) && setupMode == true) {
+            return true
+        }
+        return false
+    }
+    
+    public func decrypt(key: [UInt8]) {
+        var encryptedData = [UInt8]()
+        
+        // copy the data we want to encrypt into a buffer
+        for i in [Int](1...data.count-1) {
+            encryptedData.append(data[i])
+        }
+        print ("key \(key) enc \(encryptedData.decrypt(<#T##cipher: CipherProtocol##CipherProtocol#>))")
+        // try to decrypt
+        do {
+            let x = try AES(key: key, blockMode: CipherBlockMode.ECB, padding: zeroPadding()).decrypt(encryptedData)
+        }
+        catch {
+            print ("uhoh")
+        }
+
+//        if let result = try EncryptionHandler.decryptAdvertisement(encryptedData, key: key) {
+//            for i in [Int](0...result.count-1) {
+//                self.data[i+1] = result[i]
+//            }
+//            // parse the data again based on the decrypted result
+//            self.parse()
+//        }
+  
     }
 }
 

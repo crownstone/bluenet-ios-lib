@@ -33,7 +33,6 @@ public class Bluenet  {
     
     // declare the classes handling the library protocol
     public let dfu      : DfuHandler!
-    public let command  : CommandHandler!
     public let config   : ConfigHandler!
     public let setup    : SetupHandler!
     public let control  : ControlHandler!
@@ -55,7 +54,6 @@ public class Bluenet  {
         
         // pass on the shared objects to the worker classes
         self.dfu     = DfuHandler(    bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
-        self.command = CommandHandler(bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.config  = ConfigHandler( bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.setup   = SetupHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.control = ControlHandler(bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);

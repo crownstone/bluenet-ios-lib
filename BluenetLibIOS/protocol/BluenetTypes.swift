@@ -28,6 +28,7 @@ enum ControlType : UInt8 {
     case RELAY = 16
     case VALIDATE_SETUP = 17
     case REQUEST_SERVICE_DATA = 18
+    case DISCONNECT = 19
 }
 
 enum ConfigurationType : UInt8 {

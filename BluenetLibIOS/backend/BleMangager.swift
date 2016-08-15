@@ -563,7 +563,14 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             serviceData: advertisementData["kCBAdvDataServiceData"],
             serviceUUID: advertisementData["kCBAdvDataServiceUUIDs"]
         );
-        self.eventBus.emit("advertisementData",emitData)
+        if (self.settings.encryptionEnabled && emitData.isSetupPackage() == false && settings.guestKey != nil) {
+            emitData.decrypt(settings.guestKey!)
+            self.eventBus.emit("advertisementData",emitData)
+        }
+        else {
+            self.eventBus.emit("advertisementData",emitData)
+
+        }
     }
     
     public func centralManager(central: CBCentralManager, didConnectPeripheral peripheral: CBPeripheral) {
@@ -667,7 +674,6 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             }
             return
         }
-        
         
         // in case of notifications:
         let serviceId = characteristic.service.UUID.UUIDString;

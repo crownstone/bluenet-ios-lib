@@ -13,7 +13,6 @@
 		FA0C963B1D11904900794D85 /* Conversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0C963A1D11904900794D85 /* Conversion.swift */; };
 		FA0C963C1D11906700794D85 /* Conversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0C963A1D11904900794D85 /* Conversion.swift */; };
 		FA19B58C1D5B809E001CC25F /* DfuHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA19B58B1D5B809E001CC25F /* DfuHandler.swift */; };
-		FA19B58E1D5B824E001CC25F /* CommandHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA19B58D1D5B824E001CC25F /* CommandHandler.swift */; };
 		FA19B5921D5B82A2001CC25F /* ConfigHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA19B58F1D5B82A2001CC25F /* ConfigHandler.swift */; };
 		FA19B5931D5B82A2001CC25F /* ControlHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA19B5901D5B82A2001CC25F /* ControlHandler.swift */; };
 		FA19B5941D5B82A2001CC25F /* SetupHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA19B5911D5B82A2001CC25F /* SetupHandler.swift */; };
@@ -28,13 +27,10 @@
 		FA4A09D81D096932005753CE /* BlePackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4A09D71D096932005753CE /* BlePackets.swift */; };
 		FA4A09DA1D099D01005753CE /* BluenetTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4A09D91D099D01005753CE /* BluenetTypes.swift */; };
 		FA4E02991D0873CD0086E2BF /* BluenetLocalization.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4E02981D0873CD0086E2BF /* BluenetLocalization.swift */; };
+		FA6EC2FD1D62028E0081EAFE /* IDZSwiftCommonCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6EC2FA1D62028E0081EAFE /* IDZSwiftCommonCrypto.framework */; };
+		FA6EC2FE1D62028E0081EAFE /* PromiseKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6EC2FB1D62028E0081EAFE /* PromiseKit.framework */; };
+		FA6EC2FF1D62028E0081EAFE /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6EC2FC1D62028E0081EAFE /* SwiftyJSON.framework */; };
 		FA71E49E1D4761D900D93A2F /* EncryptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA71E49D1D4761D900D93A2F /* EncryptionTests.swift */; };
-		FA71E49F1D47856E00D93A2F /* CryptoSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAA0481F1D072AE5000D333A /* CryptoSwift.framework */; };
-		FA71E4A01D47857100D93A2F /* PromiseKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAA048211D072AE5000D333A /* PromiseKit.framework */; };
-		FA71E4A11D47857500D93A2F /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAA048221D072AE5000D333A /* SwiftyJSON.framework */; };
-		FAA048231D072AE5000D333A /* CryptoSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAA0481F1D072AE5000D333A /* CryptoSwift.framework */; };
-		FAA048251D072AE5000D333A /* PromiseKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAA048211D072AE5000D333A /* PromiseKit.framework */; };
-		FAA048261D072AE5000D333A /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAA048221D072AE5000D333A /* SwiftyJSON.framework */; };
 		FAE862581CF4515A0027539D /* Bluenet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE862571CF4515A0027539D /* Bluenet.swift */; };
 		FAE8625C1CF478E50027539D /* Eventbus.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE8625B1CF478E50027539D /* Eventbus.swift */; };
 		FAE862601CF48E530027539D /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE8625F1CF48E530027539D /* Util.swift */; };
@@ -66,7 +62,6 @@
 		FA0C96311D1183DB00794D85 /* JSONUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONUtils.swift; sourceTree = "<group>"; };
 		FA0C963A1D11904900794D85 /* Conversion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversion.swift; sourceTree = "<group>"; };
 		FA19B58B1D5B809E001CC25F /* DfuHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DfuHandler.swift; sourceTree = "<group>"; };
-		FA19B58D1D5B824E001CC25F /* CommandHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandHandler.swift; sourceTree = "<group>"; };
 		FA19B58F1D5B82A2001CC25F /* ConfigHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigHandler.swift; sourceTree = "<group>"; };
 		FA19B5901D5B82A2001CC25F /* ControlHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ControlHandler.swift; sourceTree = "<group>"; };
 		FA19B5911D5B82A2001CC25F /* SetupHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetupHandler.swift; sourceTree = "<group>"; };
@@ -85,10 +80,10 @@
 		FA4A09D71D096932005753CE /* BlePackets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlePackets.swift; sourceTree = "<group>"; };
 		FA4A09D91D099D01005753CE /* BluenetTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluenetTypes.swift; sourceTree = "<group>"; };
 		FA4E02981D0873CD0086E2BF /* BluenetLocalization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluenetLocalization.swift; sourceTree = "<group>"; };
+		FA6EC2FA1D62028E0081EAFE /* IDZSwiftCommonCrypto.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IDZSwiftCommonCrypto.framework; path = Carthage/Build/iOS/IDZSwiftCommonCrypto.framework; sourceTree = "<group>"; };
+		FA6EC2FB1D62028E0081EAFE /* PromiseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PromiseKit.framework; path = Carthage/Build/iOS/PromiseKit.framework; sourceTree = "<group>"; };
+		FA6EC2FC1D62028E0081EAFE /* SwiftyJSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftyJSON.framework; path = Carthage/Build/iOS/SwiftyJSON.framework; sourceTree = "<group>"; };
 		FA71E49D1D4761D900D93A2F /* EncryptionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptionTests.swift; sourceTree = "<group>"; };
-		FAA0481F1D072AE5000D333A /* CryptoSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoSwift.framework; path = Carthage/Build/iOS/CryptoSwift.framework; sourceTree = "<group>"; };
-		FAA048211D072AE5000D333A /* PromiseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PromiseKit.framework; path = Carthage/Build/iOS/PromiseKit.framework; sourceTree = "<group>"; };
-		FAA048221D072AE5000D333A /* SwiftyJSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftyJSON.framework; path = Carthage/Build/iOS/SwiftyJSON.framework; sourceTree = "<group>"; };
 		FAE862571CF4515A0027539D /* Bluenet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bluenet.swift; sourceTree = "<group>"; };
 		FAE8625B1CF478E50027539D /* Eventbus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Eventbus.swift; sourceTree = "<group>"; };
 		FAE8625F1CF48E530027539D /* Util.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
@@ -110,9 +105,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FAA048261D072AE5000D333A /* SwiftyJSON.framework in Frameworks */,
-				FAA048251D072AE5000D333A /* PromiseKit.framework in Frameworks */,
-				FAA048231D072AE5000D333A /* CryptoSwift.framework in Frameworks */,
+				FA6EC2FD1D62028E0081EAFE /* IDZSwiftCommonCrypto.framework in Frameworks */,
+				FA6EC2FE1D62028E0081EAFE /* PromiseKit.framework in Frameworks */,
+				FA6EC2FF1D62028E0081EAFE /* SwiftyJSON.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -120,9 +115,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FA71E49F1D47856E00D93A2F /* CryptoSwift.framework in Frameworks */,
-				FA71E4A01D47857100D93A2F /* PromiseKit.framework in Frameworks */,
-				FA71E4A11D47857500D93A2F /* SwiftyJSON.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,7 +124,6 @@
 		FA19B58A1D5B808C001CC25F /* serviceImplementations */ = {
 			isa = PBXGroup;
 			children = (
-				FA19B58D1D5B824E001CC25F /* CommandHandler.swift */,
 				FA19B58F1D5B82A2001CC25F /* ConfigHandler.swift */,
 				FA19B5901D5B82A2001CC25F /* ControlHandler.swift */,
 				FA19B58B1D5B809E001CC25F /* DfuHandler.swift */,
@@ -147,11 +138,11 @@
 				FA3C187B1CBBDA6B00A11CF7 /* BluenetLibIOS */,
 				FA3C18871CBBDA6B00A11CF7 /* BluenetLibIOSTests */,
 				FA3C187A1CBBDA6B00A11CF7 /* Products */,
+				FA6EC2FA1D62028E0081EAFE /* IDZSwiftCommonCrypto.framework */,
+				FA6EC2FB1D62028E0081EAFE /* PromiseKit.framework */,
+				FA6EC2FC1D62028E0081EAFE /* SwiftyJSON.framework */,
 				FAE862611CF4B3830027539D /* Cartfile */,
-				FAA0481F1D072AE5000D333A /* CryptoSwift.framework */,
-				FAA048211D072AE5000D333A /* PromiseKit.framework */,
 				FAE9371D1D14453000945989 /* README.md */,
-				FAA048221D072AE5000D333A /* SwiftyJSON.framework */,
 			);
 			sourceTree = "<group>";
 		};
@@ -371,7 +362,6 @@
 				FAFE00441D14350F001CF20C /* PromiseContainer.swift in Sources */,
 				FA3C189D1CBBDB9400A11CF7 /* LocationManager.swift in Sources */,
 				FA19B5921D5B82A2001CC25F /* ConfigHandler.swift in Sources */,
-				FA19B58E1D5B824E001CC25F /* CommandHandler.swift in Sources */,
 				FA086A811D0EB34F005F2024 /* NaiveBayes.swift in Sources */,
 				FAFD06C01D412020008EDC85 /* EncryptedPackage.swift in Sources */,
 				FAFD06BC1D40D8D8008EDC85 /* EncryptionHandler.swift in Sources */,

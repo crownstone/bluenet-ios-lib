@@ -26,30 +26,16 @@ public class SetupHandler {
     /**
      * This will handle the complete setup. We expect bonding has already been done by now.
      */
-    public func setup(uuid: String) -> Promise<Void> {
-        var random16 = NSNumber(unsignedInt: arc4random_uniform(50000))
-        var randomString = Conversion.uint8_to_hex_string(NSNumber(unsignedInt: arc4random_uniform(120)+100).unsignedCharValue)
-        randomString += Conversion.uint8_to_hex_string(NSNumber(unsignedInt: arc4random_uniform(120)+100).unsignedCharValue)
-        randomString += Conversion.uint8_to_hex_string(NSNumber(unsignedInt: arc4random_uniform(120)+100).unsignedCharValue)
-        randomString += Conversion.uint8_to_hex_string(NSNumber(unsignedInt: arc4random_uniform(120)+100).unsignedCharValue)
-        var startTime = NSDate()
-        return self.bleManager.isReady()
-            .then({(_) -> Promise<Void> in return self.bleManager.connect(uuid)})
-            .then({(_) -> Promise<Void> in
-                startTime = NSDate()
-                return self.writeCrownstoneId(random16)
-            })
-            .then({(_) -> Promise<Void> in return self.writeAdminKey(randomString + "90ABCDEF")})
-            .then({(_) -> Promise<Void> in return self.writeMemberKey(randomString + "90ABCDEF")})
-            .then({(_) -> Promise<Void> in return self.writeGuestKey(randomString + "90ABCDEF")})
-            .then({(_) -> Promise<Void> in return self.writeMeshAccessAddress(randomString)})
-            .then({(_) -> Promise<Void> in return self.writeIBeaconUUID(randomString + "-4af0-4af0-a2e4-31e32f729a8a")})
-            .then({(_) -> Promise<Void> in return self.writeIBeaconMajor(random16)})
-            .then({(_) -> Promise<Void> in return self.writeIBeaconMinor(random16)})
-            .then({(_) -> Promise<Void> in
-                print ("TOOK TIME: \(NSDate().timeIntervalSinceDate(startTime))")
-                return self.bleManager.disconnect()})
-          //  .then({(_) -> Promise<Void> in return self.finalizeSetup()})
+    public func setup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: UInt32, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
+        return self.writeCrownstoneId(crownstoneId)
+            .then({(_) -> Promise<Void> in return self.writeAdminKey(adminKey)})
+            .then({(_) -> Promise<Void> in return self.writeMemberKey(memberKey)})
+            .then({(_) -> Promise<Void> in return self.writeGuestKey(guestKey)})
+            .then({(_) -> Promise<Void> in return self.writeMeshAccessAddress(meshAccessAddress)})
+            .then({(_) -> Promise<Void> in return self.writeIBeaconUUID(ibeaconUUID)})
+            .then({(_) -> Promise<Void> in return self.writeIBeaconMajor(ibeaconMajor)})
+            .then({(_) -> Promise<Void> in return self.writeIBeaconMinor(ibeaconMinor)})
+            .then({(_) -> Promise<Void> in return self.finalizeSetup()})
     }
     
     /**
@@ -75,9 +61,9 @@ public class SetupHandler {
         }
     }
     
-    public func writeCrownstoneId(id: NSNumber) -> Promise<Void> {
+    public func writeCrownstoneId(id: UInt16) -> Promise<Void> {
         print ("writing ID")
-        return self._writeAndVerify(.CROWNSTONE_IDENTIFIER, payload: Conversion.uint16_to_uint8_array(id.unsignedShortValue))
+        return self._writeAndVerify(.CROWNSTONE_IDENTIFIER, payload: Conversion.uint16_to_uint8_array(id))
     }
     public func writeAdminKey(key: String) -> Promise<Void> {
         print ("writing writeAdminKey")
@@ -91,21 +77,21 @@ public class SetupHandler {
         print ("writing writeGuestKey")
         return self._writeAndVerify(.GUEST_ENCRYPTION_KEY, payload: Conversion.string_to_uint8_array(key))
     }
-    public func writeMeshAccessAddress(key: String) -> Promise<Void> {
+    public func writeMeshAccessAddress(address: UInt32) -> Promise<Void> {
         print ("writing writeMeshAccessAddress")
-        return self._writeAndVerify(.MESH_ACCESS_ADDRESS, payload: Conversion.hex_string_to_uint8_array(key))
+        return self._writeAndVerify(.MESH_ACCESS_ADDRESS, payload: Conversion.uint32_to_uint8_array(address))
     }
     public func writeIBeaconUUID(uuid: String) -> Promise<Void> {
         print ("writing writeIBeaconUUID")
         return self._writeAndVerify(.IBEACON_UUID, payload: Conversion.ibeaconUUIDString_to_uint8_array(uuid))
     }
-    public func writeIBeaconMajor(major: NSNumber) -> Promise<Void> {
+    public func writeIBeaconMajor(major: UInt16) -> Promise<Void> {
         print ("writing ID")
-        return self._writeAndVerify(.IBEACON_MAJOR, payload: Conversion.uint16_to_uint8_array(major.unsignedShortValue))
+        return self._writeAndVerify(.IBEACON_MAJOR, payload: Conversion.uint16_to_uint8_array(major))
     }
-    public func writeIBeaconMinor(minor: NSNumber) -> Promise<Void> {
+    public func writeIBeaconMinor(minor: UInt16) -> Promise<Void> {
         print ("writing writeIBeaconMinor")
-        return self._writeAndVerify(.IBEACON_MINOR, payload: Conversion.uint16_to_uint8_array(minor.unsignedShortValue))
+        return self._writeAndVerify(.IBEACON_MINOR, payload: Conversion.uint16_to_uint8_array(minor))
     }
     
     public func finalizeSetup() -> Promise<Void> {
@@ -185,4 +171,5 @@ public class SetupHandler {
                 .error({(error: ErrorType) -> Void in reject(error)})
         }
     }
+
 }
