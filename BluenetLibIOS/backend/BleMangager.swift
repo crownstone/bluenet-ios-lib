@@ -563,13 +563,13 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             serviceData: advertisementData["kCBAdvDataServiceData"],
             serviceUUID: advertisementData["kCBAdvDataServiceUUIDs"]
         );
+
         if (self.settings.encryptionEnabled && emitData.isSetupPackage() == false && settings.guestKey != nil) {
             emitData.decrypt(settings.guestKey!)
             self.eventBus.emit("advertisementData",emitData)
         }
         else {
             self.eventBus.emit("advertisementData",emitData)
-
         }
     }
     

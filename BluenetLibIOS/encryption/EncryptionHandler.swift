@@ -126,16 +126,8 @@ class EncryptionHandler {
         return NSData(bytes:result)
     }
     
-    static func decryptAdvertisement(input: [UInt8], key: [UInt8]) -> [UInt8]? {
-        print ("input count: \(input.count) \(input), key count: \(key) \(key.count)")
-        do {
-            let result = try AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: zeroPadding()).decrypt(input)
-            return result
-        }
-        catch let unknownError {
-            print ("error \(unknownError)")
-            return nil
-        }
+    static func decryptAdvertisement(input: [UInt8], key: [UInt8]) -> [UInt8] {
+        return try! AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: zeroPadding()).decrypt(input)
     }
     
     static func decrypt(input: NSData, sessionData: SessionData, settings: BluenetSettings) throws -> NSData {

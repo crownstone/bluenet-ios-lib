@@ -7,7 +7,7 @@
 //
 
 import XCTest
-
+import CryptoSwift
 @testable import BluenetLibIOS
 
 class EncryptionTests: XCTestCase {
@@ -34,9 +34,9 @@ class EncryptionTests: XCTestCase {
     
        
     func testKeys() {
-        let adminKey = try! EncryptionHandler._getKey(UserLevel.Admin, settings)
+        let adminKey   = try! EncryptionHandler._getKey(UserLevel.Admin, settings)
         let memberKey  = try! EncryptionHandler._getKey(UserLevel.Member, settings)
-        let guestKey = try! EncryptionHandler._getKey(UserLevel.Guest, settings)
+        let guestKey   = try! EncryptionHandler._getKey(UserLevel.Guest, settings)
 
         XCTAssertEqual(adminKey,  settings.adminKey!)
         XCTAssertEqual(memberKey, settings.memberKey!)
@@ -60,13 +60,13 @@ class EncryptionTests: XCTestCase {
         let validation : [UInt8]     = [81,  82,  83,  84]
         let payloadPart1  : [UInt8]  = [1,  2,  3,  4, 5, 6, 7, 8, 9, 10, 11, 12]
         let encryptionLoadPart1      = validation + payloadPart1
-        var encryptedDataPart1       = try! AES(key: key!, blockMode: CipherBlockMode.ECB, padding: zeroPadding()).encrypt(iv)
+        var encryptedDataPart1       = try! AES(key: key!, blockMode: CryptoSwift.BlockMode.ECB, padding: zeroPadding()).encrypt(iv)
         for i in [Int](0...15) { encryptedDataPart1[i] ^= encryptionLoadPart1[i] } // perform XOR
         
         // second part
         iv[iv.count-1] += 1
         let payloadPart2  : [UInt8]  = [13,  0,   0,   0,  0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0]
-        var encryptedDataPart2       = try! AES(key: key!, blockMode: CipherBlockMode.ECB, padding: zeroPadding()).encrypt(iv)
+        var encryptedDataPart2       = try! AES(key: key!, blockMode: CryptoSwift.BlockMode.ECB, padding: zeroPadding()).encrypt(iv)
         for i in [Int](0...15) { encryptedDataPart2[i] ^= payloadPart2[i] } // perform XOR
         
         // this prefix contains the "random" numbers and the user level access.
@@ -109,16 +109,16 @@ class EncryptionTests: XCTestCase {
     func testECBEncryptionOnChip() {
         let payload  : [UInt8]  = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
         let key : [UInt8] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-        let encryptedData = try! AES(key: key, blockMode: CipherBlockMode.ECB, padding: zeroPadding()).encrypt(payload)
+        let encryptedData = try! AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: zeroPadding()).encrypt(payload)
         print(encryptedData)
     }
     
     func testECBEncryptionAndDecryption() {
         let payload  : [UInt8]  = [0, 0, 100, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         let key : [UInt8] = [103, 117, 101, 115, 116, 75, 101, 121, 70, 111, 114, 71, 105, 114, 108, 115];
-        let encryptedData = try! AES(key: key, blockMode: CipherBlockMode.ECB, padding: zeroPadding()).encrypt(payload)
+        let encryptedData = try! AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: zeroPadding()).encrypt(payload)
         print(encryptedData)
-        let decryptedData = try! AES(key: key, blockMode: CipherBlockMode.ECB, padding: zeroPadding()).decrypt(payload)
+        let decryptedData = try! AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: zeroPadding()).decrypt(payload)
         print(decryptedData)
     }
 }
