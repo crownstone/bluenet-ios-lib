@@ -106,7 +106,7 @@ class EncryptionHandler {
         
         
         // do the actual encryption
-        let encryptedPayload = try AES(key: key, iv: IV, blockMode: CipherBlockMode.CTR, padding: zeroPadding()).encrypt(paddedPayload)
+        let encryptedPayload = try AES(key: key, iv: IV, blockMode: CryptoSwift.BlockMode.CTR, padding: zeroPadding()).encrypt(paddedPayload)
         var result = [UInt8](count: PACKET_NONCE_LENGTH+PACKET_USERLEVEL_LENGTH + encryptedPayload.count, repeatedValue: 0)
         
         // copy nonce into result
@@ -129,11 +129,11 @@ class EncryptionHandler {
     static func decryptAdvertisement(input: [UInt8], key: [UInt8]) -> [UInt8]? {
         print ("input count: \(input.count) \(input), key count: \(key) \(key.count)")
         do {
-            let result = try! AES(key: key, blockMode: CipherBlockMode.ECB, padding: zeroPadding()).decrypt(input)
+            let result = try AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: zeroPadding()).decrypt(input)
             return result
         }
-        catch is ErrorType {
-            print ("error")
+        catch let unknownError {
+            print ("error \(unknownError)")
             return nil
         }
     }
@@ -168,7 +168,7 @@ class EncryptionHandler {
         let key = try _getKey(package.userLevel, settings)
         let IV = try generateIV(package.nonce, sessionData: sessionData.nonce)
         
-        let decrypted = try AES(key: key, iv: IV, blockMode: CipherBlockMode.CTR).decrypt(package.getPayload())
+        let decrypted = try AES(key: key, iv: IV, blockMode: CryptoSwift.BlockMode.CTR).decrypt(package.getPayload())
         
         return decrypted
     }

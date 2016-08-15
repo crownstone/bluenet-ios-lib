@@ -8,7 +8,7 @@
 
 import Foundation
 import SwiftyJSON
-import CryptoSwift
+
 /*
  *
  *
@@ -249,20 +249,20 @@ public class ScanResponcePacket {
     }
     
     public func decrypt(key: [UInt8]) {
-        var encryptedData = [UInt8]()
-        
-        // copy the data we want to encrypt into a buffer
-        for i in [Int](1...data.count-1) {
-            encryptedData.append(data[i])
-        }
-        print ("key \(key) enc \(encryptedData.decrypt(<#T##cipher: CipherProtocol##CipherProtocol#>))")
-        // try to decrypt
-        do {
-            let x = try AES(key: key, blockMode: CipherBlockMode.ECB, padding: zeroPadding()).decrypt(encryptedData)
-        }
-        catch {
-            print ("uhoh")
-        }
+//        var encryptedData = [UInt8]()
+//        
+//        // copy the data we want to encrypt into a buffer
+//        for i in [Int](1...data.count-1) {
+//            encryptedData.append(data[i])
+//        }
+//        print ("key \(key) enc \(encryptedData.decrypt(<#T##cipher: CipherProtocol##CipherProtocol#>))")
+//        // try to decrypt
+//        do {
+////            let x = try AES(key: key, blockMode: CipherBlockMode.ECB, padding: zeroPadding()).decrypt(encryptedData)
+//        }
+//        catch {
+//            print ("uhoh")
+//        }
 
 //        if let result = try EncryptionHandler.decryptAdvertisement(encryptedData, key: key) {
 //            for i in [Int](0...result.count-1) {

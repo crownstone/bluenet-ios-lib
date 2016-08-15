@@ -27,9 +27,9 @@
 		FA4A09D81D096932005753CE /* BlePackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4A09D71D096932005753CE /* BlePackets.swift */; };
 		FA4A09DA1D099D01005753CE /* BluenetTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4A09D91D099D01005753CE /* BluenetTypes.swift */; };
 		FA4E02991D0873CD0086E2BF /* BluenetLocalization.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4E02981D0873CD0086E2BF /* BluenetLocalization.swift */; };
-		FA6EC2FD1D62028E0081EAFE /* IDZSwiftCommonCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6EC2FA1D62028E0081EAFE /* IDZSwiftCommonCrypto.framework */; };
 		FA6EC2FE1D62028E0081EAFE /* PromiseKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6EC2FB1D62028E0081EAFE /* PromiseKit.framework */; };
 		FA6EC2FF1D62028E0081EAFE /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6EC2FC1D62028E0081EAFE /* SwiftyJSON.framework */; };
+		FA6EC3011D620CAD0081EAFE /* CryptoSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6EC3001D620CAD0081EAFE /* CryptoSwift.framework */; };
 		FA71E49E1D4761D900D93A2F /* EncryptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA71E49D1D4761D900D93A2F /* EncryptionTests.swift */; };
 		FAE862581CF4515A0027539D /* Bluenet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE862571CF4515A0027539D /* Bluenet.swift */; };
 		FAE8625C1CF478E50027539D /* Eventbus.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE8625B1CF478E50027539D /* Eventbus.swift */; };
@@ -80,9 +80,9 @@
 		FA4A09D71D096932005753CE /* BlePackets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlePackets.swift; sourceTree = "<group>"; };
 		FA4A09D91D099D01005753CE /* BluenetTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluenetTypes.swift; sourceTree = "<group>"; };
 		FA4E02981D0873CD0086E2BF /* BluenetLocalization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluenetLocalization.swift; sourceTree = "<group>"; };
-		FA6EC2FA1D62028E0081EAFE /* IDZSwiftCommonCrypto.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IDZSwiftCommonCrypto.framework; path = Carthage/Build/iOS/IDZSwiftCommonCrypto.framework; sourceTree = "<group>"; };
 		FA6EC2FB1D62028E0081EAFE /* PromiseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PromiseKit.framework; path = Carthage/Build/iOS/PromiseKit.framework; sourceTree = "<group>"; };
 		FA6EC2FC1D62028E0081EAFE /* SwiftyJSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftyJSON.framework; path = Carthage/Build/iOS/SwiftyJSON.framework; sourceTree = "<group>"; };
+		FA6EC3001D620CAD0081EAFE /* CryptoSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoSwift.framework; path = Carthage/Build/iOS/CryptoSwift.framework; sourceTree = "<group>"; };
 		FA71E49D1D4761D900D93A2F /* EncryptionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptionTests.swift; sourceTree = "<group>"; };
 		FAE862571CF4515A0027539D /* Bluenet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bluenet.swift; sourceTree = "<group>"; };
 		FAE8625B1CF478E50027539D /* Eventbus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Eventbus.swift; sourceTree = "<group>"; };
@@ -105,7 +105,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FA6EC2FD1D62028E0081EAFE /* IDZSwiftCommonCrypto.framework in Frameworks */,
+				FA6EC3011D620CAD0081EAFE /* CryptoSwift.framework in Frameworks */,
 				FA6EC2FE1D62028E0081EAFE /* PromiseKit.framework in Frameworks */,
 				FA6EC2FF1D62028E0081EAFE /* SwiftyJSON.framework in Frameworks */,
 			);
@@ -138,7 +138,7 @@
 				FA3C187B1CBBDA6B00A11CF7 /* BluenetLibIOS */,
 				FA3C18871CBBDA6B00A11CF7 /* BluenetLibIOSTests */,
 				FA3C187A1CBBDA6B00A11CF7 /* Products */,
-				FA6EC2FA1D62028E0081EAFE /* IDZSwiftCommonCrypto.framework */,
+				FA6EC3001D620CAD0081EAFE /* CryptoSwift.framework */,
 				FA6EC2FB1D62028E0081EAFE /* PromiseKit.framework */,
 				FA6EC2FC1D62028E0081EAFE /* SwiftyJSON.framework */,
 				FAE862611CF4B3830027539D /* Cartfile */,

@@ -696,12 +696,13 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             }
             else {
                 if (characteristic.value != nil) {
+                    let data = Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(characteristic.value!.bytes), count: characteristic.value!.length))
                     if (self.settings.encryptionEnabled && disableReadEncryption == false) {
                         // TODO: decrypt
-                        pendingPromise.fulfill(characteristic.value!.arrayOfBytes())
+                        pendingPromise.fulfill(data)
                     }
                     else {
-                        pendingPromise.fulfill(characteristic.value!.arrayOfBytes())
+                        pendingPromise.fulfill(data)
                     }
                 }
                 else {

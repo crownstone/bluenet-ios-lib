@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import CryptoSwift
+
 @testable import BluenetLibIOS
 
 class EncryptionTests: XCTestCase {
@@ -32,6 +32,7 @@ class EncryptionTests: XCTestCase {
         super.tearDown()
     }
     
+       
     func testKeys() {
         let adminKey = try! EncryptionHandler._getKey(UserLevel.Admin, settings)
         let memberKey  = try! EncryptionHandler._getKey(UserLevel.Member, settings)

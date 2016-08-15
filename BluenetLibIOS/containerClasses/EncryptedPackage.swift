@@ -19,7 +19,7 @@ class EncryptedPackage {
     
     init(data: NSData) throws {
         nonce = [UInt8](count: PACKET_NONCE_LENGTH, repeatedValue: 0);
-        var dataArray = data.arrayOfBytes();
+        var dataArray = Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(data.bytes), count: data.length))
         let prefixLength = PACKET_NONCE_LENGTH + PACKET_USERLEVEL_LENGTH
         var payloadData = [UInt8](count: dataArray.count - prefixLength, repeatedValue:0)
         
