@@ -34,9 +34,12 @@ public enum BleError : ErrorType {
     case ENABLE_NOTIFICATIONS_TIMEOUT
     case DISABLE_NOTIFICATIONS_TIMEOUT
     case CANNOT_WRITE_AND_VERIFY
+    case CAN_NOT_CONNECT_TO_UUID
     
     // encryption errors
     case INVALID_SESSION_DATA
+    case NO_SESSION_NONCE_SET
+    case COULD_NOT_VALIDATE_SESSION_NONCE
     case INVALID_SIZE_FOR_ENCRYPTED_PAYLOAD
     case INVALID_SIZE_FOR_SESSION_NONCE_PACKET
     case INVALID_PACKAGE_FOR_ENCRYPTION_TOO_SHORT
@@ -47,22 +50,27 @@ public enum BleError : ErrorType {
     case COULD_NOT_DECRYPT_KEYS_NOT_SET
     case COULD_NOT_DECRYPT
     case CAN_NOT_GET_PAYLOAD
+    case USERLEVEL_IN_READ_PACKET_INVALID
 
 }
 
 struct timeoutDurations {
-    static let disconnect              : Double = 2
-    static let cancelPendingConnection : Double = 2
-    static let connect                 : Double = 3
-    static let getServices             : Double = 2
-    static let getCharacteristics      : Double = 2
-    static let readCharacteristic      : Double = 2
+    static let disconnect              : Double = 3
+    static let cancelPendingConnection : Double = 3
+    static let connect                 : Double = 10
+    static let getServices             : Double = 3
+    static let getCharacteristics      : Double = 3
+    static let readCharacteristic      : Double = 3
     static let writeCharacteristic     : Double = 4
     static let writeCharacteristicWithout : Double = 0.5
     static let enableNotifications     : Double = 2
     static let disableNotifications    : Double = 2
     static let waitForBond             : Double = 12
+    static let waitForWrite            : Double = 0.5
+    static let waitForReconnect        : Double = 0.5
 }
+
+
 
 public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     var centralManager : CBCentralManager!
@@ -72,8 +80,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     var BleState : CBCentralManagerState = .Unknown
     var pendingPromise : promiseContainer!
     var eventBus : EventBus!
-    var settings : BluenetSettings!
-    var disableReadEncryption = false
+    public var settings : BluenetSettings!
 
     public init(eventBus: EventBus) {
         super.init();
@@ -108,12 +115,13 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     }
     
     public func waitToReconnect()  -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in delay(1, fulfill) }
+        return Promise<Void> { fulfill, reject in delay(timeoutDurations.waitForReconnect, fulfill) }
     }
     
     // this delay is set up for calls that need to write to storage.
     public func waitToWrite() -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in delay(0.2, fulfill) }
+        print ("waiting for \(timeoutDurations.waitForWrite) second")
+        return Promise<Void> { fulfill, reject in delay(timeoutDurations.waitForWrite, fulfill) }
     }
     
     /**
@@ -182,7 +190,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             else {
                 fulfill()
             }
-        };
+        }
     }
     
     /**
@@ -197,16 +205,23 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             }
             else {
                 // get a peripheral from the known list (TODO: check what happens if it requests an unknown one)
-                let peripheral = centralManager.retrievePeripheralsWithIdentifiers([nsUuid!])[0];
-                connectingPeripheral = peripheral
-                connectingPeripheral!.delegate = self
-                
-                // setup the pending promise for connection
-                pendingPromise = promiseContainer(fulfill, reject, type: .CONNECT)
-                pendingPromise.setDelayedReject(timeoutDurations.connect, errorOnReject: .CONNECT_TIMEOUT)
-                
-                // TODO: implement timeout.
-                centralManager.connectPeripheral(connectingPeripheral!, options: nil)
+                let peripherals = centralManager.retrievePeripheralsWithIdentifiers([nsUuid!]);
+                if (peripherals.count == 0) {
+                    reject(BleError.CAN_NOT_CONNECT_TO_UUID)
+                }
+                else {
+                    let peripheral = peripherals[0]
+                    connectingPeripheral = peripheral
+                    connectingPeripheral!.delegate = self
+                    
+                    // setup the pending promise for connection
+                    pendingPromise = promiseContainer(fulfill, reject, type: .CONNECT)
+                    pendingPromise.setDelayedReject(timeoutDurations.connect, errorOnReject: .CONNECT_TIMEOUT)
+                    
+                    
+                    centralManager.connectPeripheral(connectingPeripheral!, options: nil)
+
+                }
             }
         }
     }
@@ -217,7 +232,6 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
      */
     public func disconnect() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
-            
             // cancel any pending connections
             if (self.connectingPeripheral != nil) {
                 print ("------ BLUENET_LIB: disconnecting from connecting peripheral")
@@ -382,41 +396,28 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         }
     }
     
-    
-    
-    public func readCharacteristicWithBonding(serviceId: String, characteristicId: String, disableEncryptionOnce: Bool = false) -> Promise<[UInt8]> {
-        return self._readCharacteristic(serviceId, characteristicId: characteristicId, timeout: timeoutDurations.waitForBond, disableEncryptionOnce: disableEncryptionOnce)
+    public func readCharacteristicWithoutEncryption(service: String, characteristic: String) -> Promise<[UInt8]> {
+        return Promise<[UInt8]> { fulfill, reject in
+            self.settings.disableEncryptionTemporarily()
+            self.readCharacteristic(service, characteristicId: characteristic)
+                .then({data -> Void in
+                    self.settings.restoreEncryption()
+                    fulfill(data)
+                })
+                .error({(error: ErrorType) -> Void in
+                    self.settings.restoreEncryption()
+                    reject(error)
+                })
+        }
     }
     
-    
-    
-    public func readCharacteristic(serviceId: String, characteristicId: String, disableEncryptionOnce: Bool = false) -> Promise<[UInt8]> {
-        return self._readCharacteristic(serviceId, characteristicId: characteristicId, timeout: timeoutDurations.readCharacteristic, disableEncryptionOnce: disableEncryptionOnce)
-    }
-    
-    
-    
-    public func _readCharacteristic(serviceId: String, characteristicId: String, timeout: Double, disableEncryptionOnce: Bool = false) -> Promise<[UInt8]> {
+    public func readCharacteristic(serviceId: String, characteristicId: String) -> Promise<[UInt8]> {
         return Promise<[UInt8]> { fulfill, reject in
             self.getChacteristic(serviceId, characteristicId)
                 .then({characteristic in
-                    // in the case where you disable the encyrption for this once read event, we alter the fulfill and rejects to restore the state once they fire
-                    if (disableEncryptionOnce) {
-                        self.disableReadEncryption = true
-                        let fulfillRestore = {(data: [UInt8]) -> Void in
-                            self.disableReadEncryption = false
-                            fulfill(data)
-                        }
-                        let rejectRestore = {(err: ErrorType) -> Void in
-                            self.disableReadEncryption = false
-                            reject(err)
-                        }
-                        self.pendingPromise = promiseContainer(fulfillRestore, rejectRestore, type: .READ_CHARACTERISTIC)
-                    }
-                    else {
-                        self.pendingPromise = promiseContainer(fulfill, reject, type: .READ_CHARACTERISTIC)
-                    }
-                    self.pendingPromise.setDelayedReject(timeout, errorOnReject: .READ_CHARACTERISTIC_TIMEOUT)
+                    
+                    self.pendingPromise = promiseContainer(fulfill, reject, type: .READ_CHARACTERISTIC)
+                    self.pendingPromise.setDelayedReject(timeoutDurations.readCharacteristic, errorOnReject: .READ_CHARACTERISTIC_TIMEOUT)
                     
                     // the fulfil and reject are handled in the peripheral delegate
                     self.connectedPeripheral!.readValueForCharacteristic(characteristic)
@@ -427,7 +428,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         }
     }
     
-    public func writeToCharacteristic(serviceId: String, characteristicId: String, data: NSData, type: CBCharacteristicWriteType, disableEncryptionOnce: Bool = false) -> Promise<Void> {
+    public func writeToCharacteristic(serviceId: String, characteristicId: String, data: NSData, type: CBCharacteristicWriteType) -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             self.getChacteristic(serviceId, characteristicId)
                 .then({characteristic in
@@ -441,14 +442,18 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                         self.pendingPromise.setDelayedFulfill(timeoutDurations.writeCharacteristicWithout)
                     }
                     
-                    print ("------ BLUENET_LIB: writing \(data) ")
-                    
                     // the fulfil and reject are handled in the peripheral delegate
-                    if (self.settings.encryptionEnabled && disableEncryptionOnce == false) {
-                        // TODO: encrypt
-                        self.connectedPeripheral!.writeValue(data, forCharacteristic: characteristic, type: type)
+                    if (self.settings.isEncryptionEnabled()) {
+                        do {
+                            let encryptedData = try EncryptionHandler.encrypt(data, settings: self.settings)
+                            self.connectedPeripheral!.writeValue(encryptedData, forCharacteristic: characteristic, type: type)
+                        }
+                        catch let err {
+                            self.pendingPromise.reject(err)
+                        }
                     }
                     else {
+                        print ("------ BLUENET_LIB: writing \(data) ")
                         self.connectedPeripheral!.writeValue(data, forCharacteristic: characteristic, type: type)
                     }
 
@@ -564,7 +569,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             serviceUUID: advertisementData["kCBAdvDataServiceUUIDs"]
         );
 
-        if (self.settings.encryptionEnabled && emitData.isSetupPackage() == false && settings.guestKey != nil) {
+        if (self.settings.isEncryptionEnabled() && emitData.isSetupPackage() == false && settings.guestKey != nil) {
             emitData.decrypt(settings.guestKey!)
             self.eventBus.emit("advertisementData",emitData)
         }
@@ -599,6 +604,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         // since we disconnected, we must set the connected peripherals to nil.
         self.connectingPeripheral = nil;
         self.connectedPeripheral = nil;
+        self.settings.invalidateSessionNonce()
         
         print("------ BLUENET_LIB: in didDisconnectPeripheral")
         if (pendingPromise.type == .CANCEL_PENDING_CONNECTION) {
@@ -680,7 +686,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         let characteristicId = characteristic.UUID.UUIDString;
         if (self.eventBus.hasListeners(serviceId + "_" + characteristicId)) {
             if let data = characteristic.value {
-                if (self.settings.encryptionEnabled) {
+                if (self.settings.isEncryptionEnabled()) {
                     // TODO: decrypt
                     self.eventBus.emit(serviceId + "_" + characteristicId, data)
                 }
@@ -696,13 +702,19 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             }
             else {
                 if (characteristic.value != nil) {
-                    let data = Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(characteristic.value!.bytes), count: characteristic.value!.length))
-                    if (self.settings.encryptionEnabled && disableReadEncryption == false) {
-                        // TODO: decrypt
-                        pendingPromise.fulfill(data)
+                    let data = characteristic.value!
+                    if (self.settings.isEncryptionEnabled()) {
+                        do {
+                            print("incoming \(data.arrayOfBytes())")
+                            let decryptedData = try EncryptionHandler.decrypt(data, settings: self.settings)
+                            pendingPromise.fulfill(decryptedData.arrayOfBytes())
+                        }
+                        catch let err {
+                            pendingPromise.reject(err)
+                        }
                     }
                     else {
-                        pendingPromise.fulfill(data)
+                        pendingPromise.fulfill(data.arrayOfBytes())
                     }
                 }
                 else {

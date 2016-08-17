@@ -27,7 +27,7 @@ import CoreBluetooth
 public class Bluenet  {
     // todo: set back to private, currently public for DEBUG
     public let bleManager : BleManager!
-    var settings : BluenetSettings!
+    public var settings : BluenetSettings!
     let eventBus : EventBus!
     var deviceList = [String: AvailableDevice]()
     
@@ -71,6 +71,8 @@ public class Bluenet  {
         self.settings = settings
         self.bleManager.setSettings(settings)
     }
+    
+    
     
     
     /**
@@ -126,6 +128,14 @@ public class Bluenet  {
      */
     public func connect(uuid: String) -> Promise<Void> {
         return self.bleManager.connect(uuid)
+            .then({_ -> Promise<Void> in
+                if (self.settings.isEncryptionEnabled()) {
+                    return self.control.getAndSetSessionNonce()
+                }
+                else {
+                    return Promise <Void> { fulfill, reject in fulfill() }
+                }
+            });
     }
     
     
@@ -178,6 +188,9 @@ public class Bluenet  {
         if let castData = data as? Advertisement {
             if deviceList[castData.uuid] != nil {
                 deviceList[castData.uuid]!.update(castData)
+                if (deviceList[castData.uuid]!.verified) {
+                    self.eventBus.emit("verifiedAdvertisementData",castData)
+                }
             }
             else {
                 deviceList[castData.uuid] = AvailableDevice(castData, {_ in self.deviceList.removeValueForKey(castData.uuid)})

@@ -11,7 +11,7 @@ import Foundation
 /*
  *
  *
- *  These are valid for SDK 0.4.1
+ *  These are valid for SDK 0.6.0
  *
  *
  */
@@ -23,13 +23,16 @@ public struct CrownstoneCharacteristics {
     public static let ConfigRead       = "24f00005-7d10-4805-bfc1-7663a01c3bff"
     public static let StateControl     = "24f00006-7d10-4805-bfc1-7663a01c3bff"
     public static let StateRead        = "24f00007-7d10-4805-bfc1-7663a01c3bff"
+    public static let SessionNonce     = "24f00008-7d10-4805-bfc1-7663a01c3bff"
 }
 
 public struct SetupCharacteristics {
     public static let Control          = "24f10001-7d10-4805-bfc1-7663a01c3bff"
     public static let MacAddress       = "24f10002-7d10-4805-bfc1-7663a01c3bff"
+    public static let SessionKey       = "24f10003-7d10-4805-bfc1-7663a01c3bff"
     public static let ConfigControl    = "24f10004-7d10-4805-bfc1-7663a01c3bff"
     public static let ConfigRead       = "24f10005-7d10-4805-bfc1-7663a01c3bff"
+    public static let SessionNonce     = "24f10008-7d10-4805-bfc1-7663a01c3bff"
 }
 
 public struct GeneralCharacteristics {

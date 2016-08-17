@@ -182,7 +182,7 @@ public class ScanResponcePacket {
     var newDataAvailable    : Bool!
     var setupMode           : Bool!
     var stateOfExternalCrownstone : Bool!
-    var data : [UInt8]!
+    var data                : [UInt8]!
     
     init(_ data: [UInt8]) {
         self.data = data
@@ -211,7 +211,7 @@ public class ScanResponcePacket {
                 data[13]
                 ])
         )
-        self.random = Conversion.uint8_array_to_string([data[14],data[15],data[16]])
+        self.random = Conversion.uint8_array_to_hex_string([data[14],data[15],data[16]])
         
         // bitmask states
         let bitmaskArray = Conversion.uint8_to_bit_array(self.eventBitmask)
@@ -242,7 +242,7 @@ public class ScanResponcePacket {
     }
     
     public func isSetupPackage() -> Bool {
-        if (crownstoneId == 0 && switchState == 0 && powerUsage == 0 && accumulatedEnergy == 0 && random == Conversion.uint8_array_to_string([0,0,0]) && setupMode == true) {
+        if (crownstoneId == 0 && switchState == 0 && powerUsage == 0 && accumulatedEnergy == 0 && random == Conversion.uint8_array_to_hex_string([0,0,0]) && setupMode == true) {
             return true
         }
         return false
@@ -254,13 +254,17 @@ public class ScanResponcePacket {
         for i in [Int](1...data.count-1) {
             encryptedData[i-1] = data[i]
         }
-        let result = EncryptionHandler.decryptAdvertisement(encryptedData, key: key)
         
-        for i in [Int](0...result.count-1) {
-            self.data[i+1] = result[i]
+        do {
+            let result = try EncryptionHandler.decryptAdvertisement(encryptedData, key: key)
+            
+            for i in [Int](0...result.count-1) {
+                self.data[i+1] = result[i]
+            }
+            // parse the data again based on the decrypted result
+            self.parse()
         }
-        // parse the data again based on the decrypted result
-        self.parse()
+        catch {}
     }
 }
 

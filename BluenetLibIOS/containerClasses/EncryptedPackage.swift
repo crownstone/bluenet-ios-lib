@@ -34,13 +34,20 @@ class EncryptedPackage {
         }
         
         
-        // only allow 0, 1, 2 for Admin, User, Guest
-        if (dataArray[PACKET_NONCE_LENGTH] > 2) {
+        // only allow 0, 1, 2 for Admin, User, Guest and 100 for Setup
+        if (dataArray[PACKET_NONCE_LENGTH] > 2 && dataArray[PACKET_NONCE_LENGTH] != UInt8(UserLevel.Setup.rawValue)) {
             throw BleError.INVALID_KEY_FOR_ENCRYPTION
         }
         
         // get the key from the data
-        userLevel = UserLevel(rawValue: Int(dataArray[PACKET_NONCE_LENGTH]))!
+        let packageLevel = UserLevel(rawValue: Int(dataArray[PACKET_NONCE_LENGTH]))
+        
+        if (packageLevel != nil) {
+            userLevel = packageLevel!
+        }
+        else {
+            throw BleError.USERLEVEL_IN_READ_PACKET_INVALID
+        }
         
         // copy the nonce over to the class var
         for i in (0...payloadData.count - 1) {

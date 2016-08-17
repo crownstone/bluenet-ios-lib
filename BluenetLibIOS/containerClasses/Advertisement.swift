@@ -18,6 +18,7 @@ public class Advertisement {
     public var uuid : String
     public var name : String
     public var rssi : NSNumber
+    public var isCrownstone : Bool = false
     public var serviceData = [String: [UInt8]]()
     public var serviceDataAvailable : Bool
     public var serviceUUID : String?
@@ -50,6 +51,7 @@ public class Advertisement {
         for (id, data) in self.serviceData {
             if (id == "C001") {
                 self.scanResponse = ScanResponcePacket(data)
+                self.isCrownstone = true
             }
         }
 

@@ -37,7 +37,7 @@ public class Conversion {
         return arr
     }
     
-    public static func uint8_array_to_string(data: [UInt8]) -> String {
+    public static func uint8_array_to_hex_string(data: [UInt8]) -> String {
         var stringResult = ""
         for byte in data {
             stringResult += Conversion.uint8_to_hex_string(byte)
@@ -45,8 +45,14 @@ public class Conversion {
         return stringResult
     }
     
+    
+    
     public static func uint8_to_hex_string(byte: UInt8) -> String {
-        return String(format:"%2X", byte)
+        var hex = String(format:"%2X", byte)
+        if (hex.characters.count == 1) {
+            hex = "0" + hex
+        }
+        return hex
     }
     
     public static func hex_string_to_uint8_array(input: String) -> [UInt8] {
@@ -60,6 +66,20 @@ public class Conversion {
             }
         }
         return result
+    }
+    
+    public static func uint8_array_to_macAddress(input:[UInt8]) -> String {
+        var string = ""
+        for i in [Int](0...input.count-1) {
+            // due to little endian, we read it out in the reverse order.
+            string +=  Conversion.uint8_to_hex_string(input[input.count-1-i])
+            
+            // add colons to the string
+            if (i < input.count-1) {
+                string += ":"
+            }
+        }
+        return string
     }
     
     public static func ibeaconUUIDString_to_uint8_array(input:String) -> [UInt8] {

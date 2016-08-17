@@ -27,37 +27,93 @@ public class SetupHandler {
      * This will handle the complete setup. We expect bonding has already been done by now.
      */
     public func setup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: UInt32, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
-        return self.writeCrownstoneId(crownstoneId)
-            .then({(_) -> Promise<Void> in return self.writeAdminKey(adminKey)})
-            .then({(_) -> Promise<Void> in return self.writeMemberKey(memberKey)})
-            .then({(_) -> Promise<Void> in return self.writeGuestKey(guestKey)})
-            .then({(_) -> Promise<Void> in return self.writeMeshAccessAddress(meshAccessAddress)})
-            .then({(_) -> Promise<Void> in return self.writeIBeaconUUID(ibeaconUUID)})
-            .then({(_) -> Promise<Void> in return self.writeIBeaconMajor(ibeaconMajor)})
-            .then({(_) -> Promise<Void> in return self.writeIBeaconMinor(ibeaconMinor)})
-            .then({(_) -> Promise<Void> in return self.finalizeSetup()})
+        return Promise<Void> { fulfill, reject in
+            self.bleManager.settings.disableEncryptionTemporarily()
+            self.getSessionKey()
+                .then({(key: [UInt8]) -> Promise<[UInt8]> in
+                    self.bleManager.settings.loadSetupKey(key)
+                    return self.getSessionNonce()
+                })
+                .then({(nonce: [UInt8]) ->  Void in
+                    self.bleManager.settings.setSessionNonce(nonce)
+                    self.bleManager.settings.restoreEncryption()
+                    
+                })
+                .then({(_) -> Promise<Void> in return self.writeCrownstoneId(crownstoneId)})
+                .then({(_) -> Promise<Void> in return self.writeAdminKey(adminKey)})
+                .then({(_) -> Promise<Void> in return self.writeMemberKey(memberKey)})
+                .then({(_) -> Promise<Void> in return self.writeGuestKey(guestKey)})
+                .then({(_) -> Promise<Void> in return self.writeMeshAccessAddress(meshAccessAddress)})
+                .then({(_) -> Promise<Void> in return self.writeIBeaconUUID(ibeaconUUID)})
+                .then({(_) -> Promise<Void> in return self.writeIBeaconMajor(ibeaconMajor)})
+                .then({(_) -> Promise<Void> in return self.writeIBeaconMinor(ibeaconMinor)})
+                .then({(_) -> Promise<Void> in return self.finalizeSetup()})
+                .then({(_) -> Promise<Void> in return self.bleManager.disconnect()})
+                .then({(_) -> Void in
+                    print("DONE")
+                    self.bleManager.settings.exitSetup()
+                    fulfill()
+                })
+                .error({(err: ErrorType) -> Void in
+                    self.bleManager.settings.exitSetup()
+                    self.bleManager.disconnect()
+                    reject(err)
+                })
+        }
+        
+        
+//        return self.writeCrownstoneId(crownstoneId)
+//            .then({(_) -> Promise<Void> in return self.writeAdminKey(adminKey)})
+
+
     }
+    
+    public func getSessionKey() -> Promise<[UInt8]> {
+        print ("getting session key")
+        return self.bleManager.readCharacteristicWithoutEncryption(CSServices.SetupService, characteristic: SetupCharacteristics.SessionKey)
+    }
+        
+    public func getSessionNonce() -> Promise<[UInt8]> {
+        print ("getting session Nonce")
+        return self.bleManager.readCharacteristicWithoutEncryption(CSServices.SetupService, characteristic: SetupCharacteristics.SessionNonce)
+    }
+    
+//    public func getMACAddressAndBond(uuid: String, attempt: Int = 0, max: Int = 3) -> Promise<String> {
+//        // start the scanning
+//        return self.bleManager.isReady() // first check if the bluenet lib is ready before using it for BLE things.
+//            .then({_ -> Promise<Void>   in self.bleManager.connect(uuid)})
+//            .then({_ -> Promise<String> in self.getMACAddress()})
+//            .recover({err -> Promise<String> in
+//                if (err._domain == "CBATTErrorDomain" && err._code == 15) {
+//                    if (attempt == max) {
+//                        return Promise<String> { fulfill, reject in reject(err) }
+//                    }
+//                    return self._evalError(err, uuid: uuid, attempt: attempt + 1, max: max)
+//                }
+//                else {
+//                    return Promise<String> { fulfill, reject in reject(err) }
+//                }
+//            })
+//    }
+    
+//    func _evalError(err: ErrorType, uuid: String, attempt: Int, max: Int) -> Promise<String> {
+//        return Promise<String> { fulfill, reject in
+//            self.bleManager.disconnect()
+//                .then({_ in self.bleManager.waitToReconnect()})
+//                .then({_ in self.getMACAddressAndBond(uuid, attempt: attempt, max: max)})
+//                .then({MACAddress -> Void in fulfill(MACAddress)})
+//                .error({err in reject(err)})
+//        }
+//    }
     
     /**
      * Get the MAC address as a F3:D4:A1:CC:FF:32 String
      */
     public func getMACAddress() -> Promise<String> {
         return Promise<String> { fulfill, reject in
-            self.bleManager.readCharacteristicWithBonding(CSServices.SetupService, characteristicId: SetupCharacteristics.MacAddress, disableEncryptionOnce: true)
-                .then({data -> Void in
-                    var string = ""
-                    for i in [Int](0...data.count-1) {
-                        // due to little endian, we read it out in the reverse order.
-                        string +=  Conversion.uint8_to_hex_string(data[data.count-1-i])
-                        
-                        // add colons to the string
-                        if (i < data.count-1) {
-                            string += ":"
-                        }
-                    }
-                    fulfill(string)
-                })
-                .error({(error: ErrorType) -> Void in reject(error)})
+            self.bleManager.readCharacteristicWithoutEncryption(CSServices.SetupService, characteristic: SetupCharacteristics.MacAddress)
+                .then({data -> Void in print(data); fulfill(Conversion.uint8_array_to_macAddress(data))})
+                .error(reject)
         }
     }
     
@@ -66,7 +122,7 @@ public class SetupHandler {
         return self._writeAndVerify(.CROWNSTONE_IDENTIFIER, payload: Conversion.uint16_to_uint8_array(id))
     }
     public func writeAdminKey(key: String) -> Promise<Void> {
-        print ("writing writeAdminKey")
+        print ("writing writeAdminKey \(Conversion.uint8_array_to_hex_string(Conversion.string_to_uint8_array(key)))")
         return self._writeAndVerify(.ADMIN_ENCRYPTION_KEY, payload: Conversion.string_to_uint8_array(key))
     }
     public func writeMemberKey(key: String) -> Promise<Void> {
@@ -97,12 +153,12 @@ public class SetupHandler {
     public func finalizeSetup() -> Promise<Void> {
         print ("writing finalizeSetup")
         let packet = ControlPacket(type: .VALIDATE_SETUP).getPacket()
+        print (packet)
         return self.bleManager.writeToCharacteristic(
             CSServices.SetupService,
             characteristicId: SetupCharacteristics.Control,
             data: NSData(bytes: packet, length: packet.count),
-            type: CBCharacteristicWriteType.WithResponse,
-            disableEncryptionOnce: true
+            type: CBCharacteristicWriteType.WithResponse
         )
     }
     public func factoryReset() -> Promise<Void> {
@@ -111,8 +167,7 @@ public class SetupHandler {
             CSServices.SetupService,
             characteristicId: SetupCharacteristics.Control,
             data: NSData(bytes: packet, length: packet.count),
-            type: CBCharacteristicWriteType.WithResponse,
-            disableEncryptionOnce: true
+            type: CBCharacteristicWriteType.WithResponse
         )
     }
     
@@ -135,7 +190,7 @@ public class SetupHandler {
                     return Promise<Void> { fulfill, reject in fulfill() }
                 }
                 else {
-                    if (iteration > 1) {
+                    if (iteration > 2) {
                         return Promise<Void> { fulfill, reject in reject(BleError.CANNOT_WRITE_AND_VERIFY) }
                     }
                     return self._writeAndVerify(type, payload:payload, iteration: iteration+1)
@@ -148,20 +203,20 @@ public class SetupHandler {
             CSServices.SetupService,
             characteristicId: SetupCharacteristics.ConfigControl,
             data: NSData(bytes: packet, length: packet.count),
-            type: CBCharacteristicWriteType.WithResponse,
-            disableEncryptionOnce: true
+            type: CBCharacteristicWriteType.WithResponse
         )
     }
     
     func _verifyResult(target: [UInt8]) -> Promise<Bool> {
         return Promise<Bool> { fulfill, reject in
-            self.bleManager.readCharacteristic(CSServices.SetupService, characteristicId: SetupCharacteristics.ConfigRead, disableEncryptionOnce: true)
+            self.bleManager.readCharacteristic(CSServices.SetupService, characteristicId: SetupCharacteristics.ConfigRead)
                 .then({data -> Void in
-                    var match = data.count == target.count
-                    var prefixLength = 4
-                    if (match == true && data.count > prefixLength) {
-                        for i in [Int](prefixLength...data.count-1) {
-                            if (data[i] != target[i]){
+                    let prefixLength = 4
+                    let dataLength = Int(Conversion.uint8_array_to_uint16([data[2],data[3]]))
+                    var match = (data.count >= prefixLength + dataLength && target.count >= prefixLength + dataLength)
+                    if (match == true) {
+                        for i in [Int](0...dataLength-1) {
+                            if (data[i+prefixLength] != target[i+prefixLength]){
                                 match = false
                             }
                         }
@@ -171,5 +226,7 @@ public class SetupHandler {
                 .error({(error: ErrorType) -> Void in reject(error)})
         }
     }
+    
+    
 
 }
