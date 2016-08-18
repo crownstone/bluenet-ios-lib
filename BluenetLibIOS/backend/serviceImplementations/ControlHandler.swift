@@ -40,6 +40,10 @@ public class ControlHandler {
         )
     }
     
+    public func recoverByFactoryReset() -> Promise<Void> {
+        return self._writeConfigPacket(FactoryResetPacket().getPacket())
+    }
+    
     public func reset() -> Promise<Void> {
         print ("------ BLUENET_LIB: requesting reset")
         return self._writeConfigPacket(ControlPacket(type: .RESET).getPacket())

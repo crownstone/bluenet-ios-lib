@@ -50,7 +50,7 @@ public class SetupHandler {
                 .then({(_) -> Promise<Void> in return self.finalizeSetup()})
                 .then({(_) -> Promise<Void> in return self.bleManager.disconnect()})
                 .then({(_) -> Void in
-                    print("DONE")
+                    print("------ BLUENET_LIB: Setup Finished")
                     self.bleManager.settings.exitSetup()
                     fulfill()
                 })
@@ -60,51 +60,15 @@ public class SetupHandler {
                     reject(err)
                 })
         }
-        
-        
-//        return self.writeCrownstoneId(crownstoneId)
-//            .then({(_) -> Promise<Void> in return self.writeAdminKey(adminKey)})
-
-
     }
     
     public func getSessionKey() -> Promise<[UInt8]> {
-        print ("getting session key")
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.SetupService, characteristic: SetupCharacteristics.SessionKey)
     }
         
     public func getSessionNonce() -> Promise<[UInt8]> {
-        print ("getting session Nonce")
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.SetupService, characteristic: SetupCharacteristics.SessionNonce)
     }
-    
-//    public func getMACAddressAndBond(uuid: String, attempt: Int = 0, max: Int = 3) -> Promise<String> {
-//        // start the scanning
-//        return self.bleManager.isReady() // first check if the bluenet lib is ready before using it for BLE things.
-//            .then({_ -> Promise<Void>   in self.bleManager.connect(uuid)})
-//            .then({_ -> Promise<String> in self.getMACAddress()})
-//            .recover({err -> Promise<String> in
-//                if (err._domain == "CBATTErrorDomain" && err._code == 15) {
-//                    if (attempt == max) {
-//                        return Promise<String> { fulfill, reject in reject(err) }
-//                    }
-//                    return self._evalError(err, uuid: uuid, attempt: attempt + 1, max: max)
-//                }
-//                else {
-//                    return Promise<String> { fulfill, reject in reject(err) }
-//                }
-//            })
-//    }
-    
-//    func _evalError(err: ErrorType, uuid: String, attempt: Int, max: Int) -> Promise<String> {
-//        return Promise<String> { fulfill, reject in
-//            self.bleManager.disconnect()
-//                .then({_ in self.bleManager.waitToReconnect()})
-//                .then({_ in self.getMACAddressAndBond(uuid, attempt: attempt, max: max)})
-//                .then({MACAddress -> Void in fulfill(MACAddress)})
-//                .error({err in reject(err)})
-//        }
-//    }
     
     /**
      * Get the MAC address as a F3:D4:A1:CC:FF:32 String
@@ -118,51 +82,31 @@ public class SetupHandler {
     }
     
     public func writeCrownstoneId(id: UInt16) -> Promise<Void> {
-        print ("writing ID")
         return self._writeAndVerify(.CROWNSTONE_IDENTIFIER, payload: Conversion.uint16_to_uint8_array(id))
     }
     public func writeAdminKey(key: String) -> Promise<Void> {
-        print ("writing writeAdminKey \(Conversion.uint8_array_to_hex_string(Conversion.string_to_uint8_array(key)))")
         return self._writeAndVerify(.ADMIN_ENCRYPTION_KEY, payload: Conversion.string_to_uint8_array(key))
     }
     public func writeMemberKey(key: String) -> Promise<Void> {
-        print ("writing writeMemberKey")
         return self._writeAndVerify(.MEMBER_ENCRYPTION_KEY, payload: Conversion.string_to_uint8_array(key))
     }
     public func writeGuestKey(key: String) -> Promise<Void> {
-        print ("writing writeGuestKey")
         return self._writeAndVerify(.GUEST_ENCRYPTION_KEY, payload: Conversion.string_to_uint8_array(key))
     }
     public func writeMeshAccessAddress(address: UInt32) -> Promise<Void> {
-        print ("writing writeMeshAccessAddress")
         return self._writeAndVerify(.MESH_ACCESS_ADDRESS, payload: Conversion.uint32_to_uint8_array(address))
     }
     public func writeIBeaconUUID(uuid: String) -> Promise<Void> {
-        print ("writing writeIBeaconUUID")
         return self._writeAndVerify(.IBEACON_UUID, payload: Conversion.ibeaconUUIDString_to_uint8_array(uuid))
     }
     public func writeIBeaconMajor(major: UInt16) -> Promise<Void> {
-        print ("writing ID")
         return self._writeAndVerify(.IBEACON_MAJOR, payload: Conversion.uint16_to_uint8_array(major))
     }
     public func writeIBeaconMinor(minor: UInt16) -> Promise<Void> {
-        print ("writing writeIBeaconMinor")
         return self._writeAndVerify(.IBEACON_MINOR, payload: Conversion.uint16_to_uint8_array(minor))
     }
-    
     public func finalizeSetup() -> Promise<Void> {
-        print ("writing finalizeSetup")
         let packet = ControlPacket(type: .VALIDATE_SETUP).getPacket()
-        print (packet)
-        return self.bleManager.writeToCharacteristic(
-            CSServices.SetupService,
-            characteristicId: SetupCharacteristics.Control,
-            data: NSData(bytes: packet, length: packet.count),
-            type: CBCharacteristicWriteType.WithResponse
-        )
-    }
-    public func factoryReset() -> Promise<Void> {
-        let packet = FactoryResetPacket().getPacket()
         return self.bleManager.writeToCharacteristic(
             CSServices.SetupService,
             characteristicId: SetupCharacteristics.Control,
@@ -171,6 +115,7 @@ public class SetupHandler {
         )
     }
     
+    // MARK : Support functions
     
     func _writeAndVerify(type: ConfigurationType, payload: [UInt8], iteration: UInt8 = 0) -> Promise<Void> {
         let initialPacket = WriteConfigPacket(type: type, payloadArray: payload).getPacket()
@@ -186,7 +131,6 @@ public class SetupHandler {
             })
             .then({match -> Promise<Void> in
                 if (match) {
-                    print ("verified!")
                     return Promise<Void> { fulfill, reject in fulfill() }
                 }
                 else {

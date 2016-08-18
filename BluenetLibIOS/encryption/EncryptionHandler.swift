@@ -183,8 +183,6 @@ class EncryptionHandler {
     
     static func _decrypt(input: NSData, _ sessionData: SessionData, _ settings: BluenetSettings) throws -> [UInt8] {
         let package = try EncryptedPackage(data: input)
-        let x = try package.getPayload()
-        print("package: nonce \(package.nonce) level: \(package.userLevel) payload: \(x)")
         let key = try _getKey(package.userLevel, settings)
         let IV = try generateIV(package.nonce, sessionData: sessionData.sessionNonce)
         

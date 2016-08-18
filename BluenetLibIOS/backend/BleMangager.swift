@@ -68,6 +68,7 @@ struct timeoutDurations {
     static let waitForBond             : Double = 12
     static let waitForWrite            : Double = 0.5
     static let waitForReconnect        : Double = 0.5
+    static let waitForRestart          : Double = 2
 }
 
 
@@ -116,6 +117,10 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     
     public func waitToReconnect()  -> Promise<Void> {
         return Promise<Void> { fulfill, reject in delay(timeoutDurations.waitForReconnect, fulfill) }
+    }
+    
+    public func waitForRestart()  -> Promise<Void> {
+        return Promise<Void> { fulfill, reject in delay(timeoutDurations.waitForRestart, fulfill) }
     }
     
     // this delay is set up for calls that need to write to storage.
@@ -705,7 +710,6 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                     let data = characteristic.value!
                     if (self.settings.isEncryptionEnabled()) {
                         do {
-                            print("incoming \(data.arrayOfBytes())")
                             let decryptedData = try EncryptionHandler.decrypt(data, settings: self.settings)
                             pendingPromise.fulfill(decryptedData.arrayOfBytes())
                         }
