@@ -41,6 +41,16 @@ public class ControlHandler {
     }
     
     public func recoverByFactoryReset() -> Promise<Void> {
+        let packet = FactoryResetPacket().getPacket();
+        return self.bleManager.writeToCharacteristic(
+            CSServices.CrownstoneService,
+            characteristicId: CrownstoneCharacteristics.FactoryReset,
+            data: NSData(bytes: packet, length: packet.count),
+            type: CBCharacteristicWriteType.WithResponse
+        )
+    }
+    
+    public func commandFactoryReset() -> Promise<Void> {
         return self._writeConfigPacket(FactoryResetPacket().getPacket())
     }
     
@@ -78,7 +88,6 @@ public class ControlHandler {
                 }
             })
             .recover({(err: ErrorType) -> Promise<Void> in
-                print ("error \(err)")
                 return Promise <Void> { fulfill, reject in fulfill() }
             })
     }

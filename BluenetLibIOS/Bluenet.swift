@@ -129,11 +129,14 @@ public class Bluenet  {
     public func connect(uuid: String) -> Promise<Void> {
         return self.bleManager.connect(uuid)
             .then({_ -> Promise<Void> in
-                if (self.settings.isEncryptionEnabled()) {
-                    return self.control.getAndSetSessionNonce()
-                }
-                else {
-                    return Promise <Void> { fulfill, reject in fulfill() }
+                return Promise<Void> {fulfill, reject in
+                    if (self.settings.isEncryptionEnabled()) {
+                        self.control.getAndSetSessionNonce()
+                            .then({_ in fulfill()})
+                    }
+                    else {
+                        fulfill()
+                    }
                 }
             });
     }
