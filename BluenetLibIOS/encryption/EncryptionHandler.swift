@@ -139,15 +139,20 @@ class EncryptionHandler {
     }
     
     static func decryptSessionNonce(input: [UInt8], key: [UInt8]) throws -> [UInt8] {
-        let result = try AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: zeroPadding()).decrypt(input)
-        let checksum = Conversion.uint8_array_to_uint32(result)
-        if (Int(checksum) == CHECKSUM) {
-            return [result[4], result[5], result[6], result[7], result[8]]
+        if (input.count == 16) {
+            let result = try AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: zeroPadding()).decrypt(input)
+            let checksum = Conversion.uint8_array_to_uint32(result)
+            if (Int(checksum) == CHECKSUM) {
+                return [result[4], result[5], result[6], result[7], result[8]]
+            }
+            else {
+                throw BleError.COULD_NOT_VALIDATE_SESSION_NONCE
+            }
+            return result
         }
         else {
-            throw BleError.COULD_NOT_VALIDATE_SESSION_NONCE
+            throw BleError.READ_SESSION_NONCE_ZERO_MAYBE_ENCRYPTION_DISABLED
         }
-        return result
     }
     
     static func decrypt(input: NSData, settings: BluenetSettings) throws -> NSData {

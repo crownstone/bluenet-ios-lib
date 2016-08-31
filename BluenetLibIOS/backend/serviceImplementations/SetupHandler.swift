@@ -63,10 +63,12 @@ public class SetupHandler {
     }
     
     public func getSessionKey() -> Promise<[UInt8]> {
+        print ("getSessionKey")
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.SetupService, characteristic: SetupCharacteristics.SessionKey)
     }
         
     public func getSessionNonce() -> Promise<[UInt8]> {
+        print ("getSessionNonce")
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.SetupService, characteristic: SetupCharacteristics.SessionNonce)
     }
     
@@ -82,30 +84,39 @@ public class SetupHandler {
     }
     
     public func writeCrownstoneId(id: UInt16) -> Promise<Void> {
+        print ("writeCrownstoneId")
         return self._writeAndVerify(.CROWNSTONE_IDENTIFIER, payload: Conversion.uint16_to_uint8_array(id))
     }
     public func writeAdminKey(key: String) -> Promise<Void> {
+        print ("writeAdminKey")
         return self._writeAndVerify(.ADMIN_ENCRYPTION_KEY, payload: Conversion.string_to_uint8_array(key))
     }
     public func writeMemberKey(key: String) -> Promise<Void> {
+        print ("writeMemberKey")
         return self._writeAndVerify(.MEMBER_ENCRYPTION_KEY, payload: Conversion.string_to_uint8_array(key))
     }
     public func writeGuestKey(key: String) -> Promise<Void> {
+        print ("writeGuestKey")
         return self._writeAndVerify(.GUEST_ENCRYPTION_KEY, payload: Conversion.string_to_uint8_array(key))
     }
     public func writeMeshAccessAddress(address: UInt32) -> Promise<Void> {
+        print ("writeMeshAccessAddress")
         return self._writeAndVerify(.MESH_ACCESS_ADDRESS, payload: Conversion.uint32_to_uint8_array(address))
     }
     public func writeIBeaconUUID(uuid: String) -> Promise<Void> {
+        print ("writeIBeaconUUID")
         return self._writeAndVerify(.IBEACON_UUID, payload: Conversion.ibeaconUUIDString_to_uint8_array(uuid))
     }
     public func writeIBeaconMajor(major: UInt16) -> Promise<Void> {
+        print ("writeIBeaconMajor")
         return self._writeAndVerify(.IBEACON_MAJOR, payload: Conversion.uint16_to_uint8_array(major))
     }
     public func writeIBeaconMinor(minor: UInt16) -> Promise<Void> {
+        print ("writeIBeaconMinor")
         return self._writeAndVerify(.IBEACON_MINOR, payload: Conversion.uint16_to_uint8_array(minor))
     }
     public func finalizeSetup() -> Promise<Void> {
+        print ("finalizeSetup")
         let packet = ControlPacket(type: .VALIDATE_SETUP).getPacket()
         return self.bleManager.writeToCharacteristic(
             CSServices.SetupService,

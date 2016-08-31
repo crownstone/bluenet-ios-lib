@@ -51,6 +51,7 @@ public enum BleError : ErrorType {
     case COULD_NOT_DECRYPT
     case CAN_NOT_GET_PAYLOAD
     case USERLEVEL_IN_READ_PACKET_INVALID
+    case READ_SESSION_NONCE_ZERO_MAYBE_ENCRYPTION_DISABLED
 
 }
 
@@ -66,7 +67,7 @@ struct timeoutDurations {
     static let enableNotifications     : Double = 2
     static let disableNotifications    : Double = 2
     static let waitForBond             : Double = 12
-    static let waitForWrite            : Double = 0.25
+    static let waitForWrite            : Double = 0.35
     static let waitForReconnect        : Double = 2.0
     static let waitForRestart          : Double = 2
 }
@@ -476,7 +477,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             self.getChacteristic(serviceId, characteristicId)
                 // then we subscribe to the feed before we know it works to miss no data.
                 .then({(characteristic: CBCharacteristic) -> Promise<Void> in
-                    subscriptionId = self.eventBus.on(serviceId + "_" + characteristicId, callback)
+                    subscriptionId = self.eventBus.on(characteristic.service.UUID.UUIDString + "_" + characteristic.UUID.UUIDString, callback)
                     
                     // we now tell the device to notify us.
                     return Promise<Void> { success, failure in
@@ -685,18 +686,15 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             return
         }
         
+        
         // in case of notifications:
-        let serviceId = characteristic.service.UUID.UUIDString;
-        let characteristicId = characteristic.UUID.UUIDString;
-        if (self.eventBus.hasListeners(serviceId + "_" + characteristicId)) {
+        let serviceId = characteristic.service.UUID.UUIDString
+        let characteristicId = characteristic.UUID.UUIDString
+        let topicString = serviceId + "_" + characteristicId
+        if (self.eventBus.hasListeners(topicString)) {
             if let data = characteristic.value {
-                if (self.settings.isEncryptionEnabled()) {
-                    // TODO: decrypt
-                    self.eventBus.emit(serviceId + "_" + characteristicId, data)
-                }
-                else {
-                    self.eventBus.emit(serviceId + "_" + characteristicId, data)
-                }
+                // notifications are a chopped up encrypted message. We leave decryption for the handling methods.
+                self.eventBus.emit(topicString, data)
             }
         }
         

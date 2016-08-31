@@ -7,6 +7,7 @@
 //
 
 import XCTest
+@testable import BluenetLibIOS
 
 class BluenetLibIOSTests: XCTestCase {
     
@@ -43,5 +44,9 @@ class BluenetLibIOSTests: XCTestCase {
     
     func testHexString() {
         XCTAssertEqual("FF",String(format:"%2X", 255))
+    }
+    
+    func testPowerSamples() {
+//        let x = PowerSamples(data: [2,41,4,5,1,3])
     }
 }

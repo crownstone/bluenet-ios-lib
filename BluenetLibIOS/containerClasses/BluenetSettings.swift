@@ -10,7 +10,7 @@ import Foundation
 
 
 public class BluenetSettings {
-    public var encryptionsEnabled = false
+    public var encryptionEnabled = false
     public var temporaryDisable = false
     public var adminKey : [UInt8]?
     public var memberKey  : [UInt8]?
@@ -24,7 +24,7 @@ public class BluenetSettings {
     init() {}
     
     public init(encryptionEnabled: Bool, adminKey: String, memberKey: String, guestKey: String) {
-        self.encryptionsEnabled = encryptionEnabled
+        self.encryptionEnabled = encryptionEnabled
         self.adminKey = Conversion.string_to_uint8_array(adminKey)
         self.memberKey = Conversion.string_to_uint8_array(memberKey)
         self.guestKey = Conversion.string_to_uint8_array(guestKey)
@@ -79,6 +79,6 @@ public class BluenetSettings {
         if (temporaryDisable == true) {
             return false
         }
-        return encryptionsEnabled
+        return encryptionEnabled
     }
 }

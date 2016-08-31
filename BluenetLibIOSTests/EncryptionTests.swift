@@ -50,7 +50,7 @@ class EncryptionTests: XCTestCase {
         let sessionData = try! SessionData([81,82,83,84,85])
         let payload : [UInt8] = [1,2,3,4,5,6,7,8,9,10,11,12,13]
         let payloadData = NSData(bytes: payload)
-        let data = try! EncryptionHandler.encrypt(payloadData, userLevel: UserLevel.Admin, sessionData: sessionData, settings: settings)
+        let data = try! EncryptionHandler.encrypt(payloadData, settings: settings)
         
         // key we use above
         let key = settings.adminKey
@@ -75,7 +75,7 @@ class EncryptionTests: XCTestCase {
         
         XCTAssertEqual(data.arrayOfBytes(), emulatedCTRResult, "ctr mode not the same as expected ecb emulation")
         
-        let decryptedData = try! EncryptionHandler.decrypt(data, sessionData: sessionData, settings: settings)
+        let decryptedData = try! EncryptionHandler.decrypt(data, settings: settings)
         
         XCTAssertEqual(decryptedData.arrayOfBytes(), payloadPart1+payloadPart2, "decryption failed")
         // we slice both the decrypted data and the payload so both are of type ArraySlice in order to match the contents
@@ -89,7 +89,7 @@ class EncryptionTests: XCTestCase {
         let payload : [UInt8] = [2,2,2,2]
         settings.adminKey = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
         let payloadData = NSData(bytes: payload)
-        let data = try! EncryptionHandler.encrypt(payloadData, userLevel: UserLevel.Admin, sessionData: sessionData, settings: settings)
+        let data = try! EncryptionHandler.encrypt(payloadData, settings: settings)
         
         print(data.arrayOfBytes())
         print(Conversion.uint32_to_uint8_array(0xcafebabe))
@@ -101,7 +101,7 @@ class EncryptionTests: XCTestCase {
         let payload : [UInt8] = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]
         settings.adminKey = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
         let payloadData = NSData(bytes: payload)
-        let data = try! EncryptionHandler.encrypt(payloadData, userLevel: UserLevel.Admin, sessionData: sessionData, settings: settings)
+        let data = try! EncryptionHandler.encrypt(payloadData, settings: settings)
         
         print(data.arrayOfBytes())
     }

@@ -36,6 +36,7 @@ public class Bluenet  {
     public let config   : ConfigHandler!
     public let setup    : SetupHandler!
     public let control  : ControlHandler!
+    public let power    : PowerHandler!
 
     
     // MARK: API
@@ -50,13 +51,12 @@ public class Bluenet  {
         self.eventBus = EventBus()
         self.bleManager = BleManager(eventBus: self.eventBus)
         
-        
-        
         // pass on the shared objects to the worker classes
         self.dfu     = DfuHandler(    bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.config  = ConfigHandler( bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.setup   = SetupHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.control = ControlHandler(bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
+        self.power   = PowerHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
 
         
         // subscribe to BLE advertisements (TODO: add encryption)

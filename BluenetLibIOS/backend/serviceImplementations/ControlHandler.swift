@@ -23,22 +23,6 @@ public class ControlHandler {
         self.deviceList = deviceList
     }
     
-    /**
-     * Set the switch state. If 0 or 1, switch on or off. If 0 < x < 1 then dim.
-     * TODO: currently only relay is supported.
-     */
-    public func setSwitchState(state: NSNumber) -> Promise<Void> {
-        print ("------ BLUENET_LIB: switching to \(state)")
-        let roundedState = max(0, min(255, round(state.doubleValue * 255)))
-        let switchState = UInt8(roundedState)
-        let packet : [UInt8] = [switchState]
-        return self.bleManager.writeToCharacteristic(
-            CSServices.PowerService,
-            characteristicId: PowerCharacteristics.Relay,
-            data: NSData(bytes: packet, length: packet.count),
-            type: CBCharacteristicWriteType.WithResponse
-        )
-    }
     
     public func recoverByFactoryReset() -> Promise<Void> {
         let packet = FactoryResetPacket().getPacket();
@@ -51,29 +35,44 @@ public class ControlHandler {
     }
     
     public func commandFactoryReset() -> Promise<Void> {
-        return self._writeConfigPacket(FactoryResetPacket().getPacket())
+        return self._writeControlPacket(FactoryResetPacket().getPacket())
+    }
+    
+    
+    /**
+     * Switches power intelligently.
+     * State has to be between 0 and 1
+     */
+    public func switchPower(state: Float) -> Promise<Void> {
+        var switchState = min(1,max(0,state))*100
+        
+        // temporary to disable dimming
+        switchState = ceil(switchState)
+        
+        let packet = ControlPacket(type: .SWITCH, payload8: NSNumber(float:switchState).unsignedCharValue)
+        return self._writeControlPacket(packet.getPacket())
     }
     
     public func reset() -> Promise<Void> {
         print ("------ BLUENET_LIB: requesting reset")
-        return self._writeConfigPacket(ControlPacket(type: .RESET).getPacket())
+        return self._writeControlPacket(ControlPacket(type: .RESET).getPacket())
     }
     
     public func putInDFU() -> Promise<Void> {
         print ("------ BLUENET_LIB: switching to DFU")
-        return self._writeConfigPacket(ControlPacket(type: .GOTO_DFU).getPacket())
+        return self._writeControlPacket(ControlPacket(type: .GOTO_DFU).getPacket())
     }
     
     public func disconnect() -> Promise<Void> {
         print ("------ BLUENET_LIB: REQUESTING IMMEDIATE DISCONNECT")
-        return self._writeConfigPacket(ControlPacket(type: .DISCONNECT).getPacket()).then({_ in self.bleManager.disconnect()})
+        return self._writeControlPacket(ControlPacket(type: .DISCONNECT).getPacket()).then({_ in self.bleManager.disconnect()})
     }
     
     /**
      * The session nonce is the only char that is ECB encrypted. We therefore read it without the libraries decryption (AES CTR) and decrypt it ourselves.
      **/
     public func getAndSetSessionNonce() -> Promise<Void> {
-        print ("------ BLUENET_LIB: Get Session Nonce")
+//        print ("------ BLUENET_LIB: Get Session Nonce")
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.CrownstoneService, characteristic: CrownstoneCharacteristics.SessionNonce)
             .then({(sessionNonce : [UInt8]) -> Promise<Void> in
                 return Promise <Void> { fulfill, reject in
@@ -93,7 +92,7 @@ public class ControlHandler {
     }
 
     
-    func _writeConfigPacket(packet: [UInt8]) -> Promise<Void> {
+    func _writeControlPacket(packet: [UInt8]) -> Promise<Void> {
         return self.bleManager.writeToCharacteristic(
             CSServices.CrownstoneService,
             characteristicId: CrownstoneCharacteristics.Control,
