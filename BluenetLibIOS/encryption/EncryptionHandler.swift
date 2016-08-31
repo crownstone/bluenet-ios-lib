@@ -22,7 +22,7 @@ let SESSION_DATA_LENGTH     = 5
 let SESSION_KEY_LENGTH      = 4
 let PACKET_USERLEVEL_LENGTH = 1
 let PACKET_NONCE_LENGTH     = 3
-let CHECKSUM                = 0xcafebabe
+let CHECKSUM                : UInt32 = 0xcafebabe
 
 var BLUENET_ENCRYPTION_TESTING = false
 
