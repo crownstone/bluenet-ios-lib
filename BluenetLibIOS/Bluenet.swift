@@ -200,6 +200,7 @@ public class Bluenet  {
                         self._emitNearestSetupCrownstone()
                     }
                     else {
+                        self._emitNearestCrownstone();
                         self.setupList.removeValueForKey(castData.uuid)
                     }
                 }
@@ -225,8 +226,19 @@ public class Bluenet  {
         }
     }
     
-    // TODO: returning device list
-    // TODO: other charactertics and services
+    func _emitNearestCrownstone() {
+        var nearest = -1000
+        var nearestId = ""
+        for (stoneId, device) in self.deviceList {
+            if (device.rssi > nearest) {
+                nearest = device.rssi
+                nearestId = stoneId
+            }
+        }
+        if (nearestId != "") {
+            self.eventBus.emit("nearestCrownstone", nearestId)
+        }
+    }
     
     
 }
