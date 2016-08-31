@@ -142,7 +142,7 @@ class EncryptionHandler {
         if (input.count == 16) {
             let result = try AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: zeroPadding()).decrypt(input)
             let checksum = Conversion.uint8_array_to_uint32(result)
-            if (Int(checksum) == CHECKSUM) {
+            if (checksum == CHECKSUM) {
                 return [result[4], result[5], result[6], result[7], result[8]]
             }
             else {
