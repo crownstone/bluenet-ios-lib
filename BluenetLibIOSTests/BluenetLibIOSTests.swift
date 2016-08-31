@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import SwiftyJSON
 @testable import BluenetLibIOS
 
 class BluenetLibIOSTests: XCTestCase {
@@ -46,7 +47,8 @@ class BluenetLibIOSTests: XCTestCase {
         XCTAssertEqual("FF",String(format:"%2X", 255))
     }
     
-    func testPowerSamples() {
-//        let x = PowerSamples(data: [2,41,4,5,1,3])
+    func testJSON() {
+        let a = JSON.parse("{\"a\":null}")
+        print(a["a"].string)
     }
 }

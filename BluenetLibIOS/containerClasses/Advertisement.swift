@@ -89,6 +89,7 @@ public class Advertisement {
         dataDict["name"] = self.name
         dataDict["rssi"] = self.rssi
         dataDict["setupPackage"] = self.isSetupPackage()
+        dataDict["isCrownstone"] = self.isCrownstone
         
         if (self.serviceUUID != nil) {
             dataDict["serviceUUID"] = self.serviceUUID

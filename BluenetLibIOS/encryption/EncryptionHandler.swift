@@ -83,6 +83,10 @@ class EncryptionHandler {
             throw BleError.NO_SESSION_NONCE_SET
         }
         
+        if (settings.userLevel == .UNKNOWN) {
+            throw BleError.DO_NOT_HAVE_ENCRYPTION_KEY
+        }
+        
         // unpack the session data
         let sessionData = try SessionData(settings.sessionNonce!)
         

@@ -142,11 +142,17 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
             else {
                 // start the connection
                 if (connectedPeripheral != nil) {
-                    print ("------ BLUENET_LIB: Something is connected")
-                    disconnect()
-                        .then({ _ in return self._connect(uuid)})
-                        .then({ _ in fulfill()})
-                        .error(reject)
+                    if (connectedPeripheral!.identifier.UUIDString == uuid) {
+                        print ("------ BLUENET_LIB: Already connected to this peripheral")
+                        fulfill();
+                    }
+                    else {
+                        print ("------ BLUENET_LIB: Something is connected")
+                        disconnect()
+                            .then({ _ in return self._connect(uuid)})
+                            .then({ _ in fulfill()})
+                            .error(reject)
+                    }
                 }
                 // cancel any connection attempt in progress.
                 else if (connectingPeripheral != nil) {

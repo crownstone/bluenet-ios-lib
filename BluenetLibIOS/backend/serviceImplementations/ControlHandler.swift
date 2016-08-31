@@ -65,7 +65,7 @@ public class ControlHandler {
      * Switches power intelligently.
      * State has to be between 0 and 1
      */
-    public func switchPower(state: Float) -> Promise<Void> {
+    public func setSwitchState(state: Float) -> Promise<Void> {
         var switchState = min(1,max(0,state))*100
         
         // temporary to disable dimming

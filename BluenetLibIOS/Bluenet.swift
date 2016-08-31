@@ -30,6 +30,7 @@ public class Bluenet  {
     public var settings : BluenetSettings!
     let eventBus : EventBus!
     var deviceList = [String: AvailableDevice]()
+    var setupList = [String: NSNumber]()
     
     // declare the classes handling the library protocol
     public let dfu      : DfuHandler!
@@ -193,11 +194,34 @@ public class Bluenet  {
                 deviceList[castData.uuid]!.update(castData)
                 if (deviceList[castData.uuid]!.verified) {
                     self.eventBus.emit("verifiedAdvertisementData",castData)
+                    
+                    if (castData.isSetupPackage()) {
+                        self.setupList[castData.uuid] = castData.rssi
+                        self._emitNearestSetupCrownstone()
+                    }
+                    else {
+                        self.setupList.removeValueForKey(castData.uuid)
+                    }
                 }
             }
             else {
                 deviceList[castData.uuid] = AvailableDevice(castData, {_ in self.deviceList.removeValueForKey(castData.uuid)})
             }
+        }
+    }
+    
+    func _emitNearestSetupCrownstone() {
+        var nearest = -1000
+        var nearestId = ""
+        for (stoneId, rssi) in self.setupList {
+            let rssiInt = rssi.integerValue
+            if (rssiInt > nearest) {
+                nearest = rssiInt
+                nearestId = stoneId
+            }
+        }
+        if (nearestId != "") {
+            self.eventBus.emit("nearestSetupCrownstone", nearestId)
         }
     }
     

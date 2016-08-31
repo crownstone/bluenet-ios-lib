@@ -80,12 +80,15 @@ public class BluenetLocalization {
     
     /**
      *  Continue tracking iBeacons. Will trigger enterRegion and enterLocation again.
+     *  Can be called multiple times without duplicate events.
      */
     public func resumeTracking() {
-        activeGroupId = nil
-        activeLocationId = nil
-
-        self.locationManager.startTrackingIBeacons()
+        if (self.locationManager.isTracking() == false) {
+            activeGroupId = nil
+            activeLocationId = nil
+            
+            self.locationManager.startTrackingIBeacons()
+        }
     }
     
     /**

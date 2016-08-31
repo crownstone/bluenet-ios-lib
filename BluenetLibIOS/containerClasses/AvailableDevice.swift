@@ -10,6 +10,7 @@ import Foundation
 
 let AMOUNT_OF_REQUIRED_MATCHES = 3
 
+
 public class AvailableDevice {
     var rssiHistory = [Double: Int]()
     var rssi : Int!

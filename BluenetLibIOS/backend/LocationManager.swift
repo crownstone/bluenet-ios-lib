@@ -17,7 +17,8 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     var eventBus : EventBus!
     var trackingBeacons = [iBeaconContainer]()
     var appName = "Crownstone"
-    var started = false;
+    var started = false
+    var trackingState = false
 
     
     public init(eventBus: EventBus) {
@@ -68,6 +69,11 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         for beacon in self.trackingBeacons {
             self.manager.stopMonitoringForRegion(beacon.region)
         }
+        self.trackingState = false
+    }
+    
+    public func isTracking() -> Bool {
+        return self.trackingState
     }
     
     public func startTrackingIBeacons() {
@@ -81,7 +87,8 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     func resetBeaconRanging() {
         print ("------ BLUENET_LIB_NAV: Resetting ibeacon tracking")
         self.stopTrackingIBeacons()
-        self.startTrackingIBeacons()        
+        self.startTrackingIBeacons()
+        self.trackingState = true
     }
     
     func start() {
