@@ -23,8 +23,30 @@ public class ControlHandler {
         self.deviceList = deviceList
     }
     
+    public func recoverByFactoryReset(uuid: String) -> Promise<Void> {
+        self.bleManager.settings.disableEncryptionTemporarily()
+        return Promise<Void> { fulfill, reject in
+            self.bleManager.isReady() // first check if the bluenet lib is ready before using it for BLE things.
+                .then({(_) -> Promise<Void> in return self.bleManager.connect(uuid)})
+                .then({(_) -> Promise<Void> in return self._recoverByFactoryReset()})
+                .then({(_) -> Promise<Void> in return self.bleManager.disconnect()})
+                .then({(_) -> Promise<Void> in return self.bleManager.waitToReconnect()})
+                .then({(_) -> Promise<Void> in return self.bleManager.connect(uuid)})
+                .then({(_) -> Promise<Void> in return self._recoverByFactoryReset()})
+                .then({(_) -> Promise<Void> in
+                    self.bleManager.settings.restoreEncryption()
+                    return self.bleManager.disconnect()
+                })
+                .then({(_) -> Void in fulfill()})
+                .error({(err) -> Void in
+                    self.bleManager.settings.restoreEncryption()
+                    reject(err)
+                })
+        }
+    }
+
     
-    public func recoverByFactoryReset() -> Promise<Void> {
+    func _recoverByFactoryReset() -> Promise<Void> {
         let packet = FactoryResetPacket().getPacket();
         return self.bleManager.writeToCharacteristic(
             CSServices.CrownstoneService,
