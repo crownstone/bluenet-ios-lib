@@ -133,9 +133,9 @@ class PromiseTests: XCTestCase{
         }).then(on: queue, { _ in
             return self.promiseSleep(0.2)
         })
-            .then(on: dispatch_get_main_queue(), {
-                response.fulfill()
-            })
+        .then(on: dispatch_get_main_queue(), {
+            response.fulfill()
+        })
         
         self.waitForExpectationsWithTimeout(3.0) { _ -> Void in
             print("timeout");
