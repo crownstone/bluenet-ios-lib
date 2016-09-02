@@ -34,6 +34,7 @@
 		FA6EC2FF1D62028E0081EAFE /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6EC2FC1D62028E0081EAFE /* SwiftyJSON.framework */; };
 		FA6EC3011D620CAD0081EAFE /* CryptoSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6EC3001D620CAD0081EAFE /* CryptoSwift.framework */; };
 		FA71E49E1D4761D900D93A2F /* EncryptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA71E49D1D4761D900D93A2F /* EncryptionTests.swift */; };
+		FAC6EC751D79F8F100545E48 /* NearestItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC6EC741D79F8F100545E48 /* NearestItem.swift */; };
 		FAE862581CF4515A0027539D /* Bluenet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE862571CF4515A0027539D /* Bluenet.swift */; };
 		FAE8625C1CF478E50027539D /* Eventbus.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE8625B1CF478E50027539D /* Eventbus.swift */; };
 		FAE862601CF48E530027539D /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE8625F1CF48E530027539D /* Util.swift */; };
@@ -90,6 +91,7 @@
 		FA6EC2FC1D62028E0081EAFE /* SwiftyJSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftyJSON.framework; path = Carthage/Build/iOS/SwiftyJSON.framework; sourceTree = "<group>"; };
 		FA6EC3001D620CAD0081EAFE /* CryptoSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoSwift.framework; path = Carthage/Build/iOS/CryptoSwift.framework; sourceTree = "<group>"; };
 		FA71E49D1D4761D900D93A2F /* EncryptionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptionTests.swift; sourceTree = "<group>"; };
+		FAC6EC741D79F8F100545E48 /* NearestItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearestItem.swift; sourceTree = "<group>"; };
 		FAE862571CF4515A0027539D /* Bluenet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bluenet.swift; sourceTree = "<group>"; };
 		FAE8625B1CF478E50027539D /* Eventbus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Eventbus.swift; sourceTree = "<group>"; };
 		FAE8625F1CF48E530027539D /* Util.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
@@ -211,6 +213,7 @@
 				FAFE00471D14364B001CF20C /* iBeaconContainers.swift */,
 				FA19B5951D5B8F8E001CC25F /* Firmware.swift */,
 				FA6D3A271D6AF00E00DFF113 /* PowerSamples.swift */,
+				FAC6EC741D79F8F100545E48 /* NearestItem.swift */,
 			);
 			path = containerClasses;
 			sourceTree = "<group>";
@@ -379,6 +382,7 @@
 				FAE8625C1CF478E50027539D /* Eventbus.swift in Sources */,
 				FA6D3A281D6AF00E00DFF113 /* PowerSamples.swift in Sources */,
 				FA19B58C1D5B809E001CC25F /* DfuHandler.swift in Sources */,
+				FAC6EC751D79F8F100545E48 /* NearestItem.swift in Sources */,
 				FA6D3A2A1D6B076700DFF113 /* NotificationMerger.swift in Sources */,
 				FA270B051D0F12CD00CB0AE8 /* Characteristics.swift in Sources */,
 				FAE862601CF48E530027539D /* Util.swift in Sources */,

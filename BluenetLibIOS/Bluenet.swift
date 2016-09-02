@@ -212,30 +212,32 @@ public class Bluenet  {
     }
     
     func _emitNearestSetupCrownstone() {
-        var nearest = -1000
+        var nearestRSSI = -1000
         var nearestId = ""
         for (stoneId, rssi) in self.setupList {
             let rssiInt = rssi.integerValue
-            if (rssiInt > nearest) {
-                nearest = rssiInt
+            if (rssiInt > nearestRSSI) {
+                nearestRSSI = rssiInt
                 nearestId = stoneId
             }
         }
         if (nearestId != "") {
+            let data = NearestItem(handle: nearestId, rssi: nearestRSSI, setupMode: true)
             self.eventBus.emit("nearestSetupCrownstone", nearestId)
         }
     }
     
     func _emitNearestCrownstone() {
-        var nearest = -1000
+        var nearestRSSI = -1000
         var nearestId = ""
         for (stoneId, device) in self.deviceList {
-            if (device.rssi > nearest) {
-                nearest = device.rssi
+            if (device.rssi > nearestRSSI) {
+                nearestRSSI = device.rssi
                 nearestId = stoneId
             }
         }
         if (nearestId != "") {
+            let data = NearestItem(handle: nearestId, rssi: nearestRSSI, setupMode: false)
             self.eventBus.emit("nearestCrownstone", nearestId)
         }
     }
