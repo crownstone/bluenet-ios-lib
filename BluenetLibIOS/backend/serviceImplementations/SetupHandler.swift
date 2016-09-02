@@ -89,15 +89,15 @@ public class SetupHandler {
     }
     public func writeAdminKey(key: String) -> Promise<Void> {
         print ("writeAdminKey")
-        return self._writeAndVerify(.ADMIN_ENCRYPTION_KEY, payload: Conversion.string_to_uint8_array(key))
+        return self._writeAndVerify(.ADMIN_ENCRYPTION_KEY, payload: Conversion.hex_string_to_uint8_array(key))
     }
     public func writeMemberKey(key: String) -> Promise<Void> {
         print ("writeMemberKey")
-        return self._writeAndVerify(.MEMBER_ENCRYPTION_KEY, payload: Conversion.string_to_uint8_array(key))
+        return self._writeAndVerify(.MEMBER_ENCRYPTION_KEY, payload: Conversion.hex_string_to_uint8_array(key))
     }
     public func writeGuestKey(key: String) -> Promise<Void> {
         print ("writeGuestKey")
-        return self._writeAndVerify(.GUEST_ENCRYPTION_KEY, payload: Conversion.string_to_uint8_array(key))
+        return self._writeAndVerify(.GUEST_ENCRYPTION_KEY, payload: Conversion.hex_string_to_uint8_array(key))
     }
     public func writeMeshAccessAddress(address: UInt32) -> Promise<Void> {
         print ("writeMeshAccessAddress")
