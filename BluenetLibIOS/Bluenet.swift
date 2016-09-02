@@ -223,7 +223,7 @@ public class Bluenet  {
         }
         if (nearestId != "") {
             let data = NearestItem(handle: nearestId, rssi: nearestRSSI, setupMode: true)
-            self.eventBus.emit("nearestSetupCrownstone", nearestId)
+            self.eventBus.emit("nearestSetupCrownstone", data)
         }
     }
     
@@ -238,7 +238,7 @@ public class Bluenet  {
         }
         if (nearestId != "") {
             let data = NearestItem(handle: nearestId, rssi: nearestRSSI, setupMode: false)
-            self.eventBus.emit("nearestCrownstone", nearestId)
+            self.eventBus.emit("nearestCrownstone", data)
         }
     }
     
