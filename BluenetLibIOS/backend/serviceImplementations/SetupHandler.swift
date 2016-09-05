@@ -105,7 +105,7 @@ public class SetupHandler {
     }
     public func writeIBeaconUUID(uuid: String) -> Promise<Void> {
         print ("writeIBeaconUUID")
-        return self._writeAndVerify(.IBEACON_UUID, payload: Conversion.ibeaconUUIDString_to_uint8_array(uuid))
+        return self._writeAndVerify(.IBEACON_UUID, payload: Conversion.ibeaconUUIDString_to_reversed_uint8_array(uuid))
     }
     public func writeIBeaconMajor(major: UInt16) -> Promise<Void> {
         print ("writeIBeaconMajor")

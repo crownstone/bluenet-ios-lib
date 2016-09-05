@@ -82,6 +82,10 @@ public class Conversion {
         return string
     }
     
+    public static func reverse(input: [UInt8]) -> [UInt8] {
+        return input.reverse() as [UInt8]
+    }
+    
     public static func ibeaconUUIDString_to_uint8_array(input:String) -> [UInt8] {
         let check = NSUUID(UUIDString: input)
         if (check != nil) {
@@ -90,6 +94,11 @@ public class Conversion {
             return Conversion.hex_string_to_uint8_array(stripped)
         }
         return []
+    }
+    
+    public static func ibeaconUUIDString_to_reversed_uint8_array(input:String) -> [UInt8] {
+        let byteArray = Conversion.ibeaconUUIDString_to_uint8_array(input)
+        return Conversion.reverse(byteArray)
     }
     
     public static func uint8_array_to_uint16(arr8: [UInt8]) -> UInt16 {

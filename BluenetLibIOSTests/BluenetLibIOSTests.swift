@@ -51,4 +51,11 @@ class BluenetLibIOSTests: XCTestCase {
         let a = JSON.parse("{\"a\":null}")
         print(a["a"].string)
     }
+    
+    func testIBeacon() {
+        var a = Conversion.ibeaconUUIDString_to_reversed_uint8_array("782995c1-4f88-47dc-8cc1-426a520ec57f")
+        print(a)
+        var aInv = a.reverse() as [UInt8]
+        print(Conversion.uint8_array_to_hex_string(aInv))
+    }
 }
