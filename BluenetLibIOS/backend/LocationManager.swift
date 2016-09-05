@@ -72,6 +72,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     public func stopTrackingIBeacons() {
         // stop monitoring all becons
         for beacon in self.trackingBeacons {
+            self.manager.stopRangingBeaconsInRegion(beacon.region)
             self.manager.stopMonitoringForRegion(beacon.region)
         }
         self.trackingState = false
