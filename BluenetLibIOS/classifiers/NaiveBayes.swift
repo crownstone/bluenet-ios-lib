@@ -45,6 +45,10 @@ class NaiveBayes {
         var highestPredictionLabel = ""
         var valid = true
         
+        if self.summaries.count == 0 {
+            return ClassifierResult(valid: false, location: "")
+        }
+        
         for (label, summary) in self.summaries {
             let evaluation = self._predict(inputVector, summary)
 
