@@ -42,7 +42,6 @@ public class Bluenet  {
     
     // MARK: API
     
-    
     /**
      * We use the appname in the popup messages that can be generated to check if the bluetooth is on and
      * permissions are set correctly.

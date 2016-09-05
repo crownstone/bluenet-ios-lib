@@ -245,7 +245,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         self.eventBus.emit("lowLevelEnterRegion", region.identifier)
         
         for element in self.trackingBeacons {
-            print ("------ BLUENET_LIB_NAV: region id \(region.identifier) vs elementId \(element.region.identifier) \n")
+//            print ("------ BLUENET_LIB_NAV: region id \(region.identifier) vs elementId \(element.region.identifier) \n")
             if (element.region.identifier == region.identifier) {
                 print ("------ BLUENET_LIB_NAV: startRanging")
                 self.manager.startRangingBeaconsInRegion(element.region)
@@ -257,7 +257,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         self.eventBus.emit("lowLevelExitRegion", region.identifier)
         
         for element in self.trackingBeacons {
-            print ("------ BLUENET_LIB_NAV: region id \(region.identifier) vs elementId \(element.region.identifier) \n")
+//            print ("------ BLUENET_LIB_NAV: region id \(region.identifier) vs elementId \(element.region.identifier) \n")
             if (element.region.identifier == region.identifier) {
                 print ("------ BLUENET_LIB_NAV: stopRanging!")
                 self.manager.stopRangingBeaconsInRegion(element.region)
