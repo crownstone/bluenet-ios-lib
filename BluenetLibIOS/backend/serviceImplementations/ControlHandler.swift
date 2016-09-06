@@ -47,7 +47,7 @@ public class ControlHandler {
 
     
     func _recoverByFactoryReset() -> Promise<Void> {
-        let packet = FactoryResetPacket().getPacket();
+        let packet = Conversion.reverse(Conversion.hex_string_to_uint8_array("deadbeef"));
         return self.bleManager.writeToCharacteristic(
             CSServices.CrownstoneService,
             characteristicId: CrownstoneCharacteristics.FactoryReset,
