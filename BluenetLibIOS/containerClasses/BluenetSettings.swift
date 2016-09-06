@@ -27,19 +27,19 @@ public class BluenetSettings {
         self.encryptionEnabled = encryptionEnabled
         
         if (adminKey != nil) {
-            self.adminKey = Conversion.string_to_uint8_array(adminKey!)
+            self.adminKey = Conversion.hex_string_to_uint8_array(adminKey!)
         }
         else {
             self.adminKey = [0];
         }
         if (memberKey != nil) {
-            self.memberKey = Conversion.string_to_uint8_array(memberKey!)
+            self.memberKey = Conversion.hex_string_to_uint8_array(memberKey!)
         }
         else {
             self.memberKey = [0];
         }
         if (guestKey != nil) {
-            self.guestKey = Conversion.string_to_uint8_array(guestKey!)
+            self.guestKey = Conversion.hex_string_to_uint8_array(guestKey!)
         }
         else {
             self.guestKey = [0];

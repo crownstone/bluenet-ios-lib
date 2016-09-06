@@ -109,7 +109,16 @@ public class ControlHandler {
                 }
             })
             .recover({(err: ErrorType) -> Promise<Void> in
-                return Promise <Void> { fulfill, reject in fulfill() }
+                return Promise <Void> { fulfill, reject in
+                    // we only want to pass this to the main promise of connect if we successfully received the nonce, but cant decrypt it.
+                    if let bleErr = err as? BleError {
+                        if bleErr == BleError.COULD_NOT_VALIDATE_SESSION_NONCE {
+                            reject(err)
+                            return
+                        }
+                    }
+                    fulfill()
+                }
             })
     }
 
