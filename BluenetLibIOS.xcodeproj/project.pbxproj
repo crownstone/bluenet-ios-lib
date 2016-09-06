@@ -174,8 +174,8 @@
 				FAFE004B1D14370A001CF20C /* protocol */,
 				FAFE00491D1436C5001CF20C /* util */,
 				FAE862571CF4515A0027539D /* Bluenet.swift */,
-				FA3C187C1CBBDA6B00A11CF7 /* BluenetLibIOS.h */,
 				FA4E02981D0873CD0086E2BF /* BluenetLocalization.swift */,
+				FA3C187C1CBBDA6B00A11CF7 /* BluenetLibIOS.h */,
 				FAFE004D1D14379B001CF20C /* Globals.swift */,
 				FA3C187E1CBBDA6B00A11CF7 /* Info.plist */,
 			);

@@ -130,6 +130,7 @@ public class Bluenet  {
         return self.bleManager.connect(uuid)
             .then({_ -> Promise<Void> in
                 return Promise<Void> {fulfill, reject in
+                    print ("------- BLUENET CONNETING using encryption:\(self.settings.isEncryptionEnabled()) ")
                     if (self.settings.isEncryptionEnabled()) {
                         self.control.getAndSetSessionNonce()
                             .then({_ in fulfill()})
