@@ -52,6 +52,10 @@ public enum BleError : ErrorType {
     case CAN_NOT_GET_PAYLOAD
     case USERLEVEL_IN_READ_PACKET_INVALID
     case READ_SESSION_NONCE_ZERO_MAYBE_ENCRYPTION_DISABLED
+    
+    // recovery error
+    case NOT_IN_RECOVERY_MODE
+    case CANNOT_READ_FACTORY_RESET_CHARACTERISTIC
 
 }
 

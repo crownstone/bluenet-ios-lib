@@ -29,9 +29,11 @@ public class ControlHandler {
             self.bleManager.isReady() // first check if the bluenet lib is ready before using it for BLE things.
                 .then({(_) -> Promise<Void> in return self.bleManager.connect(uuid)})
                 .then({(_) -> Promise<Void> in return self._recoverByFactoryReset()})
+                .then({(_) -> Promise<Void> in return self._checkRecoveryProcess()})
                 .then({(_) -> Promise<Void> in return self.bleManager.disconnect()})
                 .then({(_) -> Promise<Void> in return self.bleManager.waitToReconnect()})
                 .then({(_) -> Promise<Void> in return self.bleManager.connect(uuid)})
+                .then({(_) -> Promise<Void> in return self._checkRecoveryProcess()})
                 .then({(_) -> Promise<Void> in return self._recoverByFactoryReset()})
                 .then({(_) -> Promise<Void> in
                     self.bleManager.settings.restoreEncryption()
@@ -45,6 +47,23 @@ public class ControlHandler {
         }
     }
 
+    
+    func _checkRecoveryProcess() -> Promise<Void> {
+        return Promise<Void> { fulfill, reject in
+            self.bleManager.readCharacteristic(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.FactoryReset)
+                .then({(result: [UInt8]) -> Void in
+                    if (result[0] == 1) {
+                        fulfill()
+                    }
+                    else {
+                        reject(BleError.NOT_IN_RECOVERY_MODE)
+                    }
+                })
+                .error({(err) -> Void in
+                    reject(BleError.CANNOT_READ_FACTORY_RESET_CHARACTERISTIC)
+                })
+        }
+    }
     
     func _recoverByFactoryReset() -> Promise<Void> {
         let packet = Conversion.reverse(Conversion.hex_string_to_uint8_array("deadbeef"));
