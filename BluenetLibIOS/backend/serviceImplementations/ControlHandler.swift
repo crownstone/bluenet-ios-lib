@@ -33,8 +33,8 @@ public class ControlHandler {
                 .then({(_) -> Promise<Void> in return self.bleManager.disconnect()})
                 .then({(_) -> Promise<Void> in return self.bleManager.waitToReconnect()})
                 .then({(_) -> Promise<Void> in return self.bleManager.connect(uuid)})
-                .then({(_) -> Promise<Void> in return self._checkRecoveryProcess()})
                 .then({(_) -> Promise<Void> in return self._recoverByFactoryReset()})
+                .then({(_) -> Promise<Void> in return self._checkRecoveryProcess()})
                 .then({(_) -> Promise<Void> in
                     self.bleManager.settings.restoreEncryption()
                     return self.bleManager.disconnect()
