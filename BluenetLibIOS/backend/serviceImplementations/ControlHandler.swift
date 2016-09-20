@@ -42,7 +42,7 @@ public class ControlHandler {
                 .then({(_) -> Void in fulfill()})
                 .error({(err) -> Void in
                     self.bleManager.settings.restoreEncryption()
-                    reject(err)
+                    self.bleManager.disconnect().then({_ in reject(err)}).error({_ in reject(err)})
                 })
         }
     }

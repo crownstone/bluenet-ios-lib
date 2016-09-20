@@ -197,7 +197,7 @@ Returns a stringified JSON representation of the data in this object
 Data in the JSON if it is a Crownstone:
 ```js
 {
-  uuid: String,
+  handle: String,
   name: String,
   rssi: NSNumber,
   serviceData: {
