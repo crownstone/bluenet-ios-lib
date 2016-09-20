@@ -16,7 +16,7 @@ public class AvailableDevice {
     var rssiHistory = [Double: Int]()
     var rssi : Int!
     var name : String?
-    var uuid : String
+    var handle : String
     var crownstoneId : UInt16 = 0
     var lastUpdate : Double = 0
     var cleanupCallback : () -> Void
@@ -30,7 +30,7 @@ public class AvailableDevice {
     
     init(_ data: Advertisement, _ cleanupCallback: () -> Void) {
         self.name = data.name
-        self.uuid = data.uuid
+        self.handle = data.handle
         self.cleanupCallback = cleanupCallback
         self.avgRssi = data.rssi.doubleValue
         if (data.isCrownstone) {

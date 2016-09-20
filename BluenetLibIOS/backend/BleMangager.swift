@@ -577,7 +577,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     
     public func centralManager(central: CBCentralManager, didDiscoverPeripheral peripheral: CBPeripheral, advertisementData: [String : AnyObject], RSSI: NSNumber) {
         let emitData = Advertisement(
-            uuid: peripheral.identifier.UUIDString,
+            handle: peripheral.identifier.UUIDString,
             name: peripheral.name,
             rssi: RSSI,
             serviceData: advertisementData["kCBAdvDataServiceData"],

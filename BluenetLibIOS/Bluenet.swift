@@ -190,25 +190,25 @@ public class Bluenet  {
     // MARK: util
     func _parseAdvertisement(data: AnyObject) {
         if let castData = data as? Advertisement {
-            if deviceList[castData.uuid] != nil {
-                deviceList[castData.uuid]!.update(castData)
-                if (deviceList[castData.uuid]!.verified) {
+            if deviceList[castData.handle] != nil {
+                deviceList[castData.handle]!.update(castData)
+                if (deviceList[castData.handle]!.verified) {
                     self.eventBus.emit("verifiedAdvertisementData",castData)
                     
                     if (castData.rssi.integerValue < 0) {
                         if (castData.isSetupPackage()) {
-                            self.setupList[castData.uuid] = castData.rssi
+                            self.setupList[castData.handle] = castData.rssi
                             self._emitNearestSetupCrownstone()
                         }
                         else {
                             self._emitNearestCrownstone();
-                            self.setupList.removeValueForKey(castData.uuid)
+                            self.setupList.removeValueForKey(castData.handle)
                         }
                     }
                 }
             }
             else {
-                deviceList[castData.uuid] = AvailableDevice(castData, {_ in self.deviceList.removeValueForKey(castData.uuid)})
+                deviceList[castData.handle] = AvailableDevice(castData, {_ in self.deviceList.removeValueForKey(castData.handle)})
             }
         }
     }

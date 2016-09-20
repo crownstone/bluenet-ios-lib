@@ -15,7 +15,7 @@ import SwiftyJSON
  *
  */
 public class Advertisement {
-    public var uuid : String
+    public var handle : String
     public var name : String
     public var rssi : NSNumber
     public var isCrownstone : Bool = false
@@ -24,14 +24,14 @@ public class Advertisement {
     public var serviceUUID : String?
     public var scanResponse : ScanResponcePacket?
     
-    init(uuid: String, name: String?, rssi: NSNumber, serviceData: AnyObject?, serviceUUID: AnyObject?) {
+    init(handle: String, name: String?, rssi: NSNumber, serviceData: AnyObject?, serviceUUID: AnyObject?) {
         if (name != nil) {
             self.name = name!
         }
         else {
             self.name = ""
         }
-        self.uuid = uuid
+        self.handle = handle
         self.rssi = rssi
         self.serviceDataAvailable = false
 
@@ -85,7 +85,7 @@ public class Advertisement {
     
     public func getJSON() -> JSON {
         var dataDict = [String : AnyObject]()
-        dataDict["uuid"] = self.uuid
+        dataDict["handle"] = self.handle
         dataDict["name"] = self.name
         dataDict["rssi"] = self.rssi
         dataDict["setupPackage"] = self.isSetupPackage()
