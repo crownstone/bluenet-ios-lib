@@ -195,13 +195,15 @@ public class Bluenet  {
                 if (deviceList[castData.uuid]!.verified) {
                     self.eventBus.emit("verifiedAdvertisementData",castData)
                     
-                    if (castData.isSetupPackage()) {
-                        self.setupList[castData.uuid] = castData.rssi
-                        self._emitNearestSetupCrownstone()
-                    }
-                    else {
-                        self._emitNearestCrownstone();
-                        self.setupList.removeValueForKey(castData.uuid)
+                    if (castData.rssi.integerValue < 0) {
+                        if (castData.isSetupPackage()) {
+                            self.setupList[castData.uuid] = castData.rssi
+                            self._emitNearestSetupCrownstone()
+                        }
+                        else {
+                            self._emitNearestCrownstone();
+                            self.setupList.removeValueForKey(castData.uuid)
+                        }
                     }
                 }
             }
@@ -221,7 +223,7 @@ public class Bluenet  {
                 nearestId = stoneId
             }
         }
-        if (nearestId != "") {
+        if (nearestId != "" && nearestRSSI < 0) {
             let data = NearestItem(handle: nearestId, rssi: nearestRSSI, setupMode: true)
             self.eventBus.emit("nearestSetupCrownstone", data)
         }
@@ -236,7 +238,7 @@ public class Bluenet  {
                 nearestId = stoneId
             }
         }
-        if (nearestId != "") {
+        if (nearestId != "" && nearestRSSI < 0) {
             let data = NearestItem(handle: nearestId, rssi: nearestRSSI, setupMode: false)
             self.eventBus.emit("nearestCrownstone", data)
         }
