@@ -67,8 +67,13 @@ public class BluenetLocalization {
      * you when this region is entered as well as to keep track of which classifiers belong to which group.
      */
     public func trackIBeacon(uuid: String, groupId: String) {
-        let trackStone = iBeaconContainer(groupId: groupId, uuid: uuid)
-        self.locationManager.trackBeacon(trackStone)
+        if (uuid.characters.count < 30) {
+            print("BLUENET LOCALIZATION ---- Cannot track group \(groupId) with UUID \(uuid)")
+        }
+        else {
+            let trackStone = iBeaconContainer(groupId: groupId, uuid: uuid)
+            self.locationManager.trackBeacon(trackStone)
+        }
     }
    
     /**
