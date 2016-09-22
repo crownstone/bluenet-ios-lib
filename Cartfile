@@ -5,4 +5,4 @@ github "krzyzanowskim/CryptoSwift" "0.5.2"
 github "mxcl/PromiseKit" "3.5.0"
 
 # JSON Parser
-github "SwiftyJSON/SwiftyJSON"
+github "SwiftyJSON/SwiftyJSON" "2.3.3"
