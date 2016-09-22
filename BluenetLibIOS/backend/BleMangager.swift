@@ -56,6 +56,7 @@ public enum BleError : ErrorType {
     // recovery error
     case NOT_IN_RECOVERY_MODE
     case CANNOT_READ_FACTORY_RESET_CHARACTERISTIC
+    case RECOVER_MODE_DISABLED
 
 }
 

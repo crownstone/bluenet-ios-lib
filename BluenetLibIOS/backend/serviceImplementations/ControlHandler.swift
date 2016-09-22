@@ -55,6 +55,9 @@ public class ControlHandler {
                     if (result[0] == 1) {
                         fulfill()
                     }
+                    else if (result[0] == 2) {
+                        reject(BleError.RECOVER_MODE_DISABLED)
+                    }
                     else {
                         reject(BleError.NOT_IN_RECOVERY_MODE)
                     }
