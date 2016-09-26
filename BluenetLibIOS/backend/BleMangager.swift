@@ -549,6 +549,11 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         centralManager.scanForPeripheralsWithServices([service], options:[CBCentralManagerScanOptionAllowDuplicatesKey:true])
     }
     
+    public func startScanningForServiceUniqueOnly(serviceUUID: String) {
+        let service = CBUUID(string: serviceUUID)
+        centralManager.scanForPeripheralsWithServices([service], options:[CBCentralManagerScanOptionAllowDuplicatesKey:false])
+    }
+    
     public func stopScanning() {
         print ("------ BLUENET_LIB: stopping scan")
         centralManager.stopScan()

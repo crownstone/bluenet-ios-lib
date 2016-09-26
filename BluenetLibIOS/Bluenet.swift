@@ -94,11 +94,34 @@ public class Bluenet  {
     
     
     /**
+     * Start actively scanning for Crownstones based on the scan response service uuid.
+     * Scan results will be broadcasted on the "advertisementData" topic.
+     *
+     * This is the battery saving variant, only unique messages are shown.
+     */
+    public func startScanningForCrownstonesUniqueOnly() {
+        self.startScanningForServiceUniqueOnly(CrownstoneAdvertisementServiceUUID)
+    }
+    
+    
+    /**
      * Start actively scanning for BLE devices containing a specific serviceUUID.
      * Scan results will be broadcasted on the "advertisementData" topic.
      */
     public func startScanningForService(serviceUUID: String) {
         self.bleManager.startScanningForService(serviceUUID)
+    }
+    
+    
+    
+    /**
+     * Start actively scanning for BLE devices containing a specific serviceUUID.
+     * Scan results will be broadcasted on the "advertisementData" topic. 
+     *
+     * This is the battery saving variant, only unique messages are shown.
+     */
+    public func startScanningForServiceUniqueOnly(serviceUUID: String) {
+        self.bleManager.startScanningForServiceUniqueOnly(serviceUUID)
     }
     
     

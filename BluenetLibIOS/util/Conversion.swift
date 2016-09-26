@@ -48,11 +48,12 @@ public class Conversion {
     
     
     public static func uint8_to_hex_string(byte: UInt8) -> String {
-        var hex = String(format:"%2X", byte)
-        if (hex.characters.count == 1) {
-            hex = "0" + hex
+        if (byte < 0xf) {
+            return "0" + String(format:"%1X", byte)
         }
-        return hex
+        else {
+            return String(format:"%2X", byte)
+        }
     }
     
     public static func hex_string_to_uint8_array(input: String) -> [UInt8] {

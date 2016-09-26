@@ -229,12 +229,17 @@ public class ScanResponcePacket {
         returnDict["temperature"] = NSNumber(char: self.temperature)
         returnDict["powerUsage"] = NSNumber(int: self.powerUsage)
         returnDict["accumulatedEnergy"] = NSNumber(int: self.accumulatedEnergy)
+
         // bitmask flags:
         returnDict["newDataAvailable"] = NSNumber(bool: self.newDataAvailable)
         returnDict["stateOfExternalCrownstone"] = NSNumber(bool: self.stateOfExternalCrownstone)
         returnDict["setupMode"] = NSNumber(bool: self.setupMode)
         
-        return JSON(returnDict)
+        // random flag:
+        var dataJSON = JSON(returnDict)
+        dataJSON["random"] = JSON(self.random)
+        
+        return dataJSON
     }
     
     public func stringify() -> String {
@@ -242,7 +247,7 @@ public class ScanResponcePacket {
     }
     
     public func isSetupPackage() -> Bool {
-        if (crownstoneId == 0 && switchState == 0 && powerUsage == 0 && accumulatedEnergy == 0 && random == Conversion.uint8_array_to_hex_string([0,0,0]) && setupMode == true) {
+        if (crownstoneId == 0 && switchState == 0 && powerUsage == 0 && accumulatedEnergy == 0 && setupMode == true) {
             return true
         }
         return false
