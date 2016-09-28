@@ -22,6 +22,7 @@ public class AvailableDevice {
     var cleanupCallback : () -> Void
     var avgRssi : Double!
     var verified = false
+    var dfu = false
     
     // config
     let timeout : Double = 5 //seconds
@@ -36,6 +37,9 @@ public class AvailableDevice {
         if (data.isCrownstone) {
             if (data.isSetupPackage()) {
                 self.verified = true;
+            }
+            else if (data.isDFUPackage()) {
+                self.dfu = true;
             }
             else {
                 self.crownstoneId = data.scanResponse!.crownstoneId
@@ -60,6 +64,7 @@ public class AvailableDevice {
         self.rssi = data.rssi.integerValue
         self.lastUpdate = NSDate().timeIntervalSince1970
         self.rssiHistory[self.lastUpdate] = self.rssi;
+        
         self.verify(data.scanResponse)
         self.calculateRssiAverage()
         
@@ -72,6 +77,10 @@ public class AvailableDevice {
     func verify(data: ScanResponcePacket?) {
         if let response = data {
             if (response.isSetupPackage()) {
+                self.verified = true
+                self.consecutiveMatches = 0
+            }
+            else if (response.isDFUPackage()) {
                 self.verified = true
                 self.consecutiveMatches = 0
             }
@@ -93,6 +102,10 @@ public class AvailableDevice {
                     self.crownstoneId = response.crownstoneId
                 }
             }
+        }
+        else {
+            self.consecutiveMatches = 0
+            self.verified = false;
         }
     }
     

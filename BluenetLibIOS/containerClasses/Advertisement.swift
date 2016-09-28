@@ -106,10 +106,20 @@ public class Advertisement {
     
     public func isSetupPackage() -> Bool {
         if (serviceDataAvailable && self.scanResponse != nil) {
-            return self.scanResponse!.isSetupPackage();
+            return self.scanResponse!.isSetupPackage()
         }
-        
         return false
+    }
+    
+    public func isDFUPackage() -> Bool {
+        if (serviceDataAvailable && self.scanResponse != nil) {
+            return self.scanResponse!.isDFUPackage()
+        }
+        return false
+    }
+    
+    public func hasScanResponse() -> Bool {
+        return (serviceDataAvailable && self.scanResponse != nil)
     }
     
     public func decrypt(key: [UInt8]) {
@@ -117,7 +127,118 @@ public class Advertisement {
             self.scanResponse!.decrypt(key)
         }
     }
+}
+
+
+
+
+public class ScanResponcePacket {
+    var firmwareVersion     : UInt8!
+    var crownstoneId        : UInt16!
+    var switchState         : UInt8!
+    var eventBitmask        : UInt8!
+    var temperature         : Int8!
+    var powerUsage          : Int32!
+    var accumulatedEnergy   : Int32!
+    var random              : String!
+    var newDataAvailable    : Bool!
+    var setupFlag           : Bool!
+    var dfuMode             : Bool!
+    var stateOfExternalCrownstone : Bool!
+    var data                : [UInt8]!
     
+    init(_ data: [UInt8]) {
+        self.data = data
+        self.parse()
+    }
     
+    func parse() {
+        self.firmwareVersion   = data[0]
+        self.crownstoneId      = Conversion.uint8_array_to_uint16([data[1], data[2]])
+        self.switchState       = data[3]
+        self.eventBitmask      = data[4]
+        self.temperature       = Conversion.uint8_to_int8(data[5])
+        self.powerUsage        = Conversion.uint32_to_int32(
+            Conversion.uint8_array_to_uint32([
+                data[6],
+                data[7],
+                data[8],
+                data[9]
+                ])
+        )
+        self.accumulatedEnergy = Conversion.uint32_to_int32(
+            Conversion.uint8_array_to_uint32([
+                data[10],
+                data[11],
+                data[12],
+                data[13]
+                ])
+        )
+        self.random = Conversion.uint8_array_to_hex_string([data[14],data[15],data[16]])
+        
+        // bitmask states
+        let bitmaskArray = Conversion.uint8_to_bit_array(self.eventBitmask)
+        newDataAvailable = bitmaskArray[0]
+        stateOfExternalCrownstone = bitmaskArray[1]
+        setupFlag = bitmaskArray[7]
+        dfuMode = false;
+    }
     
+    public func getJSON() -> JSON {
+        var returnDict = [String: NSNumber]()
+        returnDict["firmwareVersion"] = NSNumber(unsignedChar: self.firmwareVersion)
+        returnDict["crownstoneId"] = NSNumber(unsignedShort: self.crownstoneId)
+        returnDict["switchState"] = NSNumber(unsignedChar: self.switchState)
+        returnDict["eventBitmask"] = NSNumber(unsignedChar: self.eventBitmask)
+        returnDict["temperature"] = NSNumber(char: self.temperature)
+        returnDict["powerUsage"] = NSNumber(int: self.powerUsage)
+        returnDict["accumulatedEnergy"] = NSNumber(int: self.accumulatedEnergy)
+        
+        // bitmask flags:
+        returnDict["newDataAvailable"] = NSNumber(bool: self.newDataAvailable)
+        returnDict["stateOfExternalCrownstone"] = NSNumber(bool: self.stateOfExternalCrownstone)
+        returnDict["setupMode"] = NSNumber(bool: self.isSetupPackage())
+        returnDict["dfuMode"] = NSNumber(bool: self.isDFUPackage())
+        
+        // random flag:
+        var dataJSON = JSON(returnDict)
+        dataJSON["random"] = JSON(self.random)
+        
+        return dataJSON
+    }
+    
+    public func stringify() -> String {
+        return JSONUtils.stringify(self.getJSON())
+    }
+    
+    public func isSetupPackage() -> Bool {
+        if (crownstoneId == 0 && switchState == 0 && powerUsage == 0 && accumulatedEnergy == 0 && setupFlag == true) {
+            return true
+        }
+        return false
+    }
+    
+    public func isDFUPackage() -> Bool {
+        // TODO: define.
+        return false
+    }
+    
+    public func decrypt(key: [UInt8]) {
+        var encryptedData = [UInt8](count: 16, repeatedValue:0)
+        // copy the data we want to encrypt into a buffer
+        for i in [Int](1...data.count-1) {
+            encryptedData[i-1] = data[i]
+        }
+        
+        do {
+            let result = try EncryptionHandler.decryptAdvertisement(encryptedData, key: key)
+            
+            for i in [Int](0...result.count-1) {
+                self.data[i+1] = result[i]
+            }
+            // parse the data again based on the decrypted result
+            self.parse()
+        }
+        catch {}
+    }
 }

@@ -21,8 +21,15 @@ import CoreBluetooth
  * With this lib you can setup, pair, configure and control the Crownstone family of products.
  
  * This lib broadcasts the following data:
-     topic:                      dataType:             when:
-     "advertisementData"         Advertisement         When an advertisment packet is received
+   |  topic:                        |     dataType:        |     when:
+   |  --------------------------------------------------------------------------------------------------------
+   |  "advertisementData"           |     Advertisement    |     When an advertisement packet is received
+   |  "verifiedAdvertisementData"   |     Advertisement    |     When an advertisement has been decrypted successfully 3 consecutive times it is verified.
+   |                                |                      |     Setup and DFU are also included since they dont need to be decrypted. This sorts out only your Crownstones.
+   |  "nearestSetupCrownstone"      |     NearestItem      |     When a verified advertisement packet in setup mode is received, we check the list
+   |                                |                      |     of available stones in setup mode and return the closest.
+   |  "nearestCrownstone"           |     NearestItem      |     When a verified advertisement packet in setup mode is received, we check the list
+   |                                |                      |     of available stones in setup mode and return the closest.
  */
 public class Bluenet  {
     // todo: set back to private, currently public for DEBUG
