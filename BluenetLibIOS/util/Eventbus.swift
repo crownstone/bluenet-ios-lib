@@ -11,10 +11,9 @@ import Foundation
 public class EventBus {
     init() {}
     
-    typealias callbackType = (AnyObject) -> Void
     var idCounter : Int = 0
     var subscribers = [Int:    String]()
-    var topics      = [String: [Int: callbackType]]()
+    var topics      = [String: [Int: eventCallback]]()
     
     func emit(topic: String, _ data: AnyObject) {
         if (self.topics[topic] != nil) {
@@ -24,9 +23,9 @@ public class EventBus {
         }
     }
     
-    func on(topic: String, _ callback: (notification: AnyObject) -> Void) -> () -> Void {
+    func on(topic: String, _ callback: (notification: AnyObject) -> Void) -> voidCallback {
         if (self.topics[topic] == nil) {
-            self.topics[topic] = [Int: callbackType]()
+            self.topics[topic] = [Int: eventCallback]()
         }
         let id = self._getId()
 
@@ -46,7 +45,7 @@ public class EventBus {
     }
     
     func reset() {
-        self.topics = [String: [Int: callbackType]]()
+        self.topics = [String: [Int: eventCallback]]()
         self.subscribers = [Int: String]()
     }
     

@@ -40,7 +40,7 @@ public class PowerHandler {
     
     
     
-    public func notifyPowersamples() -> Promise<() -> Promise<Void>> {
+    public func notifyPowersamples() -> Promise<voidPromiseCallback> {
         let successCallback = {(data: [UInt8]) -> Void in
             let samples = PowerSamples(data: data)
             if (samples.valid) {

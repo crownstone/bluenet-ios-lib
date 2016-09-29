@@ -19,7 +19,7 @@ public class AvailableDevice {
     var handle : String
     var crownstoneId : UInt16 = 0
     var lastUpdate : Double = 0
-    var cleanupCallback : () -> Void
+    var cleanupCallback : voidCallback
     var avgRssi : Double!
     var verified = false
     var dfu = false
@@ -29,7 +29,7 @@ public class AvailableDevice {
     let rssiTimeout : Double = 2 //seconds
     var consecutiveMatches : Int = 0
     
-    init(_ data: Advertisement, _ cleanupCallback: () -> Void) {
+    init(_ data: Advertisement, _ cleanupCallback: voidCallback) {
         self.name = data.name
         self.handle = data.handle
         self.cleanupCallback = cleanupCallback

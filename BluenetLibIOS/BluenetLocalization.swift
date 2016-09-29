@@ -40,7 +40,7 @@ public class BluenetLocalization {
     
     var classifier = [String: ClassifierWrapper]()
     var collectingFingerprint : Fingerprint?
-    var collectingCallback : (() -> Void)?
+    var collectingCallback : voidCallback?
     var activeGroupId : String?
     var activeLocationId : String?
     var indoorLocalizationConsecutiveMatchesThreshold = 2
@@ -124,7 +124,7 @@ public class BluenetLocalization {
      * Subscribe to a topic with a callback. This method returns an Int which is used as identifier of the subscription.
      * This identifier is supplied to the off method to unsubscribe.
      */
-    public func on(topic: String, _ callback: (AnyObject) -> Void) -> () -> Void {
+    public func on(topic: String, _ callback: eventCallback) -> voidCallback {
         return self.eventBus.on(topic, callback)
     }
     

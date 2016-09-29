@@ -481,15 +481,15 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         }
     }
     
-    public func enableNotifications(serviceId: String, characteristicId: String, callback: (AnyObject) -> Void) -> Promise<() -> Promise<Void>> {
-        var unsubscribeCallback : (() -> Void)? = nil
-        return Promise<() -> Promise<Void> > { fulfill, reject in
+    public func enableNotifications(serviceId: String, characteristicId: String, callback: eventCallback) -> Promise<voidPromiseCallback> {
+        var unsubscribeCallback : voidCallback? = nil
+        return Promise<voidPromiseCallback> { fulfill, reject in
             // if there is already a listener on this topic, we assume notifications are already enabled. We just add another listener
             if (self.eventBus.hasListeners(serviceId + "_" + characteristicId)) {
                 unsubscribeCallback = self.eventBus.on(serviceId + "_" + characteristicId, callback)
                 
                 // create the cleanup callback and return it.
-                let cleanupCallback : () -> Promise<Void> = { _ in
+                let cleanupCallback : voidPromiseCallback = { _ in
                     return self.disableNotifications(serviceId, characteristicId: characteristicId, unsubscribeCallback: unsubscribeCallback!)
                 }
                 fulfill(cleanupCallback)
@@ -510,7 +510,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
                         }
                     })
                     .then({_ in
-                        let cleanupCallback : () -> Promise<Void> = { _ in return self.disableNotifications(serviceId, characteristicId: characteristicId, unsubscribeCallback: unsubscribeCallback!) }
+                        let cleanupCallback : voidPromiseCallback = { _ in return self.disableNotifications(serviceId, characteristicId: characteristicId, unsubscribeCallback: unsubscribeCallback!) }
                         fulfill(cleanupCallback)
                     })
                     .error({(error: ErrorType) -> Void in
@@ -524,7 +524,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         }
     }
     
-    func disableNotifications(serviceId: String, characteristicId: String, unsubscribeCallback: () -> Void) -> Promise<Void> {
+    func disableNotifications(serviceId: String, characteristicId: String, unsubscribeCallback: voidCallback) -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             // remove the callback
             unsubscribeCallback()

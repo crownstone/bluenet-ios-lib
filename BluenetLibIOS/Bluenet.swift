@@ -11,6 +11,9 @@ import PromiseKit
 import CoreBluetooth
 
 
+public typealias voidCallback = () -> Void
+public typealias voidPromiseCallback = () -> Promise<Void>
+public typealias eventCallback = (AnyObject) -> Void
 
 /**
  * Bluenet.
@@ -195,7 +198,7 @@ public class Bluenet  {
      * Subscribe to a topic with a callback. This method returns an Int which is used as identifier of the subscription.
      * This identifier is supplied to the off method to unsubscribe.
      */
-    public func on(topic: String, _ callback: (AnyObject) -> Void) -> () -> Void {
+    public func on(topic: String, _ callback: eventCallback) -> voidCallback {
         return self.eventBus.on(topic, callback)
     }
     
