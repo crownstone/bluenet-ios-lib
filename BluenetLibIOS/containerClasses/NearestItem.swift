@@ -33,4 +33,14 @@ public class NearestItem {
     public func stringify() -> String {
         return JSONUtils.stringify(self.getJSON())
     }
+    
+    public func getDictionary() -> NSDictionary {
+        var returnDict : [String: AnyObject] = [
+            "handle" : self.handle,
+            "rssi" : self.rssi,
+            "setupMode" : self.setupMode
+        ]
+        
+        return returnDict
+    }
 }

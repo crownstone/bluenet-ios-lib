@@ -154,7 +154,8 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
                     uuid: beacon.proximityUUID.UUIDString,
                     major: beacon.major,
                     minor: beacon.minor,
-                    rssi: beacon.rssi
+                    rssi: beacon.rssi,
+                    referenceId: region.identifier
                 ))
             }
         }

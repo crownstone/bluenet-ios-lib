@@ -56,6 +56,7 @@ public class SetupHandler {
                 })
                 .error({(err: ErrorType) -> Void in
                     self.bleManager.settings.exitSetup()
+                    self.bleManager.settings.restoreEncryption()
                     self.bleManager.disconnect()
                     reject(err)
                 })

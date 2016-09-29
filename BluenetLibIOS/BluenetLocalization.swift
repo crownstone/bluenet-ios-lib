@@ -64,15 +64,15 @@ public class BluenetLocalization {
     
     
     /**
-     * This method configures an ibeacon with the ibeaconUUID you provide. The groupId is used to notify
-     * you when this region is entered as well as to keep track of which classifiers belong to which group.
+     * This method configures an ibeacon with the ibeaconUUID you provide. The dataId is used to notify
+     * you when this region is entered as well as to keep track of which classifiers belong to which datapoint in your reference.
      */
-    public func trackIBeacon(uuid: String, groupId: String) {
+    public func trackIBeacon(uuid: String, referenceId: String) {
         if (uuid.characters.count < 30) {
-            print("BLUENET LOCALIZATION ---- Cannot track group \(groupId) with UUID \(uuid)")
+            print("BLUENET LOCALIZATION ---- Cannot track \(referenceId) with UUID \(uuid)")
         }
         else {
-            let trackStone = iBeaconContainer(groupId: groupId, uuid: uuid)
+            let trackStone = iBeaconContainer(referenceId: referenceId, uuid: uuid)
             self.locationManager.trackBeacon(trackStone)
         }
     }

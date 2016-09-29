@@ -74,7 +74,8 @@ public class Bluenet  {
     /**
      * Load a settings object into Bluenet
      */
-    public func setSettings(settings: BluenetSettings) {
+    public func setSettings(encryptionEnabled encryptionEnabled: Bool, adminKey: String?, memberKey: String?, guestKey: String) {
+        let settings = BluenetSettings(encryptionEnabled: encryptionEnabled, adminKey: adminKey, memberKey: memberKey, guestKey: guestKey)
         self.settings = settings
         self.bleManager.setSettings(settings)
     }
