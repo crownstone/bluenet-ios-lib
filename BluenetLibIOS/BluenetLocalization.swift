@@ -40,7 +40,7 @@ public class BluenetLocalization {
     
     var classifier = [String: ClassifierWrapper]()
     var collectingFingerprint : Fingerprint?
-    var collectingCallbackId : Int?
+    var collectingCallback : (() -> Void)?
     var activeGroupId : String?
     var activeLocationId : String?
     var indoorLocalizationConsecutiveMatchesThreshold = 2
@@ -57,9 +57,9 @@ public class BluenetLocalization {
     public init() {
         self.eventBus = EventBus()
         self.locationManager = LocationManager(eventBus: self.eventBus)
-        self.eventBus.on("iBeaconAdvertisement", self._updateState);
-        self.eventBus.on("lowLevelEnterRegion",  self._handleRegionEnter);
-        self.eventBus.on("lowLevelExitRegion",   self._handleRegionExit);
+        _ = self.eventBus.on("iBeaconAdvertisement", self._updateState);
+        _ = self.eventBus.on("lowLevelEnterRegion",  self._handleRegionEnter);
+        _ = self.eventBus.on("lowLevelExitRegion",   self._handleRegionExit);
     }
     
     
@@ -124,19 +124,9 @@ public class BluenetLocalization {
      * Subscribe to a topic with a callback. This method returns an Int which is used as identifier of the subscription.
      * This identifier is supplied to the off method to unsubscribe.
      */
-    public func on(topic: String, _ callback: (AnyObject) -> Void) -> Int {
+    public func on(topic: String, _ callback: (AnyObject) -> Void) -> () -> Void {
         return self.eventBus.on(topic, callback)
     }
-    
-    
-    /**
-     * Unsubscribe from a subscription.
-     * This identifier is obtained as a return of the on() method.
-     */
-    public func off(id: Int) {
-        self.eventBus.off(id);
-    }
-    
     
     /**
      * Load a fingerprint into the classifier(s) for the specified groupId and locationId.
@@ -212,7 +202,7 @@ public class BluenetLocalization {
         self._removeFingerprintListener()
         
         // start listening to the event stream
-        self.collectingCallbackId = self.eventBus.on("iBeaconAdvertisement", {ibeaconData in
+        self.collectingCallback = self.eventBus.on("iBeaconAdvertisement", {ibeaconData in
             if let data = ibeaconData as? [iBeaconPacket] {
                 if let Fingerprint = self.collectingFingerprint {
                     Fingerprint.collect(data)
@@ -225,15 +215,15 @@ public class BluenetLocalization {
     }
     
     func _removeFingerprintListener() {
-        if let callbackId = self.collectingCallbackId {
-            self.off(callbackId)
+        if let unsubscribe = self.collectingCallback {
+            unsubscribe()
         }
     }
     
     
     func _cleanupCollectingFingerprint() {
         self._removeFingerprintListener()
-        self.collectingCallbackId = nil
+        self.collectingCallback = nil
         self.collectingFingerprint = nil
     }
     

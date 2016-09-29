@@ -24,7 +24,7 @@ public class EventBus {
         }
     }
     
-    func on(topic: String, _ callback: (notification: AnyObject) -> Void) -> Int {
+    func on(topic: String, _ callback: (notification: AnyObject) -> Void) -> () -> Void {
         if (self.topics[topic] == nil) {
             self.topics[topic] = [Int: callbackType]()
         }
@@ -33,10 +33,27 @@ public class EventBus {
         self.subscribers[id] = topic;
         self.topics[topic]![id] = callback
         
-        return id
+        return { _ in
+            self._off(id);
+        }
     }
     
-    func off(id: Int) {
+   
+    
+    
+    func hasListeners(topic: String) -> Bool {
+        return (self.topics[topic] != nil)
+    }
+    
+    func reset() {
+        self.topics = [String: [Int: callbackType]]()
+        self.subscribers = [Int: String]()
+    }
+    
+    
+    // MARK: Util
+    
+    func _off(id: Int) {
         if (self.subscribers[id] != nil) {
             let topic = self.subscribers[id]!;
             if (self.topics[topic] != nil) {
@@ -53,19 +70,6 @@ public class EventBus {
             }
         }
     }
-    
-    
-    func hasListeners(topic: String) -> Bool {
-        return (self.topics[topic] != nil)
-    }
-    
-    func reset() {
-        self.topics = [String: [Int: callbackType]]()
-        self.subscribers = [Int: String]()
-    }
-    
-    
-    // MARK: Util
     
     func _getId() -> Int {
         self.idCounter += 1

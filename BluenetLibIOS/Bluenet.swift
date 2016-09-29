@@ -67,7 +67,7 @@ public class Bluenet  {
 
         
         // subscribe to BLE advertisements (TODO: add encryption)
-        self.eventBus.on("advertisementData", self._parseAdvertisement)
+        _ = self.eventBus.on("advertisementData", self._parseAdvertisement)
     }
     
     
@@ -191,24 +191,14 @@ public class Bluenet  {
     }
     
     
-        
-    
     /**
      * Subscribe to a topic with a callback. This method returns an Int which is used as identifier of the subscription.
      * This identifier is supplied to the off method to unsubscribe.
      */
-    public func on(topic: String, _ callback: (AnyObject) -> Void) -> Int {
+    public func on(topic: String, _ callback: (AnyObject) -> Void) -> () -> Void {
         return self.eventBus.on(topic, callback)
     }
     
-    
-    /**
-     * Unsubscribe from a subscription.
-     * This identifier is obtained as a return of the on() method.
-     */
-    public func off(id: Int) {
-        self.eventBus.off(id);
-    }
     
     public func waitToReconnect() -> Promise<Void> {
         return self.bleManager.waitToReconnect()
