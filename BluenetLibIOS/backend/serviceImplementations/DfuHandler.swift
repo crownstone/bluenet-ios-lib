@@ -30,7 +30,7 @@ public class DfuHandler {
     let eventBus : EventBus!
     var deviceList : [String: AvailableDevice]!
     
-    var cccdNotificationId : Int?
+    var unsubscribeCccdNotification : (() -> Promise<Void>)?
     var notificationPacket : NotifcationPacket
     
     
@@ -46,14 +46,14 @@ public class DfuHandler {
     public func processFirmware(firmware: Firmware) -> Promise<Void> {
         return self.enableCccdNotifications()
             .then({notificationSubscription -> Promise<Void> in
-                self.cccdNotificationId = notificationSubscription
+                self.unsubscribeCccdNotification = notificationSubscription
                 return self.sendOpcode(1)
             })
             .then({_ in self.writeImageSize(firmware)})
             .then({_ in self.writeImageSize(firmware)})
     }
     
-    func enableCccdNotifications() -> Promise<Int> {
+    func enableCccdNotifications() -> Promise<() -> Promise<Void>> {
         let callback = {result in print(result)}
         return self.bleManager.enableNotifications(
             DFUServices.DFU,

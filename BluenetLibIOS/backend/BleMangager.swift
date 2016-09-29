@@ -481,38 +481,53 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
         }
     }
     
-    public func enableNotifications(serviceId: String, characteristicId: String, callback: (AnyObject) -> Void) -> Promise<Int> {
-        var subscriptionId : Int? = nil;
-        return Promise<Int> { fulfill, reject in
-            // we first get the characteristic from the device
-            self.getChacteristic(serviceId, characteristicId)
-                // then we subscribe to the feed before we know it works to miss no data.
-                .then({(characteristic: CBCharacteristic) -> Promise<Void> in
-                    subscriptionId = self.eventBus.on(characteristic.service.UUID.UUIDString + "_" + characteristic.UUID.UUIDString, callback)
-                    
-                    // we now tell the device to notify us.
-                    return Promise<Void> { success, failure in
-                        // the success and failure are handled in the peripheral delegate
-                        self.pendingPromise = promiseContainer(success, failure, type: .ENABLE_NOTIFICATIONS)
-                        self.pendingPromise.setDelayedReject(timeoutDurations.enableNotifications, errorOnReject: .ENABLE_NOTIFICATIONS_TIMEOUT)
-                        self.connectedPeripheral!.setNotifyValue(true, forCharacteristic: characteristic)
-                    }
-                })
-                .then({_ in fulfill(subscriptionId!)})
-                .error({(error: ErrorType) -> Void in
-                    // if something went wrong, we make sure the callback will not be fired.
-                    if (subscriptionId != nil) {
-                        self.eventBus.off(subscriptionId!)
-                    }
-                    reject(error)
-                })
+    public func enableNotifications(serviceId: String, characteristicId: String, callback: (AnyObject) -> Void) -> Promise<() -> Promise<Void>> {
+        var unsubscribeCallback : (() -> Void)? = nil
+        return Promise<() -> Promise<Void> > { fulfill, reject in
+            // if there is already a listener on this topic, we assume notifications are already enabled. We just add another listener
+            if (self.eventBus.hasListeners(serviceId + "_" + characteristicId)) {
+                unsubscribeCallback = self.eventBus.on(serviceId + "_" + characteristicId, callback)
+                
+                // create the cleanup callback and return it.
+                let cleanupCallback : () -> Promise<Void> = { _ in
+                    return self.disableNotifications(serviceId, characteristicId: characteristicId, unsubscribeCallback: unsubscribeCallback!)
+                }
+                fulfill(cleanupCallback)
+            }
+            else {
+                // we first get the characteristic from the device
+                self.getChacteristic(serviceId, characteristicId)
+                    // then we subscribe to the feed before we know it works to miss no data.
+                    .then({(characteristic: CBCharacteristic) -> Promise<Void> in
+                        unsubscribeCallback = self.eventBus.on(characteristic.service.UUID.UUIDString + "_" + characteristic.UUID.UUIDString, callback)
+                        
+                        // we now tell the device to notify us.
+                        return Promise<Void> { success, failure in
+                            // the success and failure are handled in the peripheral delegate
+                            self.pendingPromise = promiseContainer(success, failure, type: .ENABLE_NOTIFICATIONS)
+                            self.pendingPromise.setDelayedReject(timeoutDurations.enableNotifications, errorOnReject: .ENABLE_NOTIFICATIONS_TIMEOUT)
+                            self.connectedPeripheral!.setNotifyValue(true, forCharacteristic: characteristic)
+                        }
+                    })
+                    .then({_ in
+                        let cleanupCallback : () -> Promise<Void> = { _ in return self.disableNotifications(serviceId, characteristicId: characteristicId, unsubscribeCallback: unsubscribeCallback!) }
+                        fulfill(cleanupCallback)
+                    })
+                    .error({(error: ErrorType) -> Void in
+                        // if something went wrong, we make sure the callback will not be fired.
+                        if (unsubscribeCallback != nil) {
+                            unsubscribeCallback!()
+                        }
+                        reject(error)
+                    })
+            }
         }
     }
     
-    public func disableNotifications(serviceId: String, characteristicId: String, callbackId: Int) -> Promise<Void> {
+    func disableNotifications(serviceId: String, characteristicId: String, unsubscribeCallback: () -> Void) -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             // remove the callback
-            self.eventBus.off(callbackId)
+            unsubscribeCallback()
             
             // if there are still other callbacks listening, we're done!
             if (self.eventBus.hasListeners(serviceId + "_" + characteristicId)) {
