@@ -91,6 +91,7 @@ public class Bluenet  {
      * Scan results will be broadcasted on the "advertisementData" topic.
      */
     public func startScanning() {
+        self.bleManager.stopScanning()
         self.bleManager.startScanning()
     }
     
@@ -120,6 +121,7 @@ public class Bluenet  {
      * Scan results will be broadcasted on the "advertisementData" topic.
      */
     public func startScanningForService(serviceUUID: String) {
+        self.bleManager.stopScanning()
         self.bleManager.startScanningForService(serviceUUID)
     }
     
@@ -132,6 +134,7 @@ public class Bluenet  {
      * This is the battery saving variant, only unique messages are shown.
      */
     public func startScanningForServiceUniqueOnly(serviceUUID: String) {
+        self.bleManager.stopScanning()
         self.bleManager.startScanningForServiceUniqueOnly(serviceUUID)
     }
     
