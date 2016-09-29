@@ -10,6 +10,8 @@ import Foundation
 import CoreBluetooth
 import SwiftyJSON
 
+let CROWNSTONE_SERVICEDATA_UUID = "C001"
+
 /**
  * Wrapper for all relevant data of the object
  *
@@ -44,12 +46,13 @@ public class Advertisement {
                 // convert data to uint8 array
                 let uint8Arr = Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(data.bytes), count: data.length))
                 self.serviceData[serviceCUUID.UUIDString] = uint8Arr
+                self.serviceUUID = serviceCUUID.UUIDString
                 self.serviceDataAvailable = true
             }
         }
         
         for (id, data) in self.serviceData {
-            if (id == "C001") {
+            if (id == CROWNSTONE_SERVICEDATA_UUID) {
                 self.scanResponse = ScanResponcePacket(data)
                 self.isCrownstone = true
             }
@@ -67,20 +70,17 @@ public class Advertisement {
     
     func getServiceDataJSON() -> JSON {
         if (self.serviceDataAvailable) {
-            var serviceData = [String: JSON]()
             for (id, data) in self.serviceData {
-                if (id == "C001" && self.scanResponse != nil) {
-                    serviceData[id] = self.scanResponse!.getJSON()
+                if (id == CROWNSTONE_SERVICEDATA_UUID && self.scanResponse != nil) {
+                    return self.scanResponse!.getJSON()
                 }
                 else {
-                    serviceData[id] = JSON(self.getNumberArray(data))
+                    return JSON(self.getNumberArray(data))
                 }
             }
-            return JSON(serviceData);
         }
-        else {
-            return JSON([])
-        }
+
+        return JSON([])
     }
     
     public func getJSON() -> JSON {
@@ -88,7 +88,6 @@ public class Advertisement {
         dataDict["handle"] = self.handle
         dataDict["name"] = self.name
         dataDict["rssi"] = self.rssi
-        dataDict["setupPackage"] = self.isSetupPackage()
         dataDict["isCrownstone"] = self.isCrownstone
         
         if (self.serviceUUID != nil) {
@@ -96,9 +95,42 @@ public class Advertisement {
         }
       
         var dataJSON = JSON(dataDict)
-        dataJSON["serviceData"] = self.getServiceDataJSON()
+        if (self.serviceDataAvailable) {
+            if (self.isCrownstone) {
+                dataJSON["serviceData"] = self.scanResponse!.getJSON()
+            }
+            else {
+                dataJSON["serviceData"] = JSON(self.getNumberArray(self.serviceData[self.serviceUUID!]!))
+            }
+        }
+        
         return dataJSON
     }
+    
+    public func getDictionary() -> NSDictionary {
+        var returnDict : [String: AnyObject] = [
+            "handle" : self.handle,
+            "name" : self.name,
+            "rssi" : self.rssi,
+            "isCrownstone" : self.isCrownstone
+        ]
+        
+        if (self.serviceUUID != nil) {
+            returnDict["serviceUUID"] = self.serviceUUID!
+        }
+        
+        if (self.serviceDataAvailable) {
+            if (self.isCrownstone) {
+                returnDict["serviceData"] = self.scanResponse!.getDictionary()
+            }
+            else {
+                returnDict["serviceData"] = self.getNumberArray(self.serviceData[self.serviceUUID!]!)
+            }
+        }
+        
+        return returnDict
+    }
+
     
     public func stringify() -> String {
         return JSONUtils.stringify(self.getJSON())
@@ -164,7 +196,7 @@ public class ScanResponcePacket {
                 data[7],
                 data[8],
                 data[9]
-                ])
+            ])
         )
         self.accumulatedEnergy = Conversion.uint32_to_int32(
             Conversion.uint8_array_to_uint32([
@@ -172,7 +204,7 @@ public class ScanResponcePacket {
                 data[11],
                 data[12],
                 data[13]
-                ])
+            ])
         )
         self.random = Conversion.uint8_array_to_hex_string([data[14],data[15],data[16]])
         
@@ -205,6 +237,24 @@ public class ScanResponcePacket {
         dataJSON["random"] = JSON(self.random)
         
         return dataJSON
+    }
+    
+    public func getDictionary() -> NSDictionary {
+        var returnDict : [String: AnyObject] = [
+            "firmwareVersion" : NSNumber(unsignedChar: self.firmwareVersion),
+            "crownstoneId" : NSNumber(unsignedShort: self.crownstoneId),
+            "switchState" : NSNumber(unsignedChar: self.switchState),
+            "eventBitmask" : NSNumber(unsignedChar: self.eventBitmask),
+            "temperature" : NSNumber(char: self.temperature),
+            "powerUsage" : NSNumber(int: self.powerUsage),
+            "accumulatedEnergy" : NSNumber(int: self.accumulatedEnergy),
+            "newDataAvailable" : self.newDataAvailable,
+            "stateOfExternalCrownstone" : self.stateOfExternalCrownstone,
+            "setupMode" : self.isSetupPackage(),
+            "dfuMode" : self.isDFUPackage()
+        ]
+        
+        return returnDict
     }
     
     public func stringify() -> String {

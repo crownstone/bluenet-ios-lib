@@ -27,6 +27,7 @@ struct ProbabiltyReport {
 class NaiveBayes {
     var fingerprints = [String: Fingerprint]()
     var summaries = [String: [String: NBSummary]]() // classId: observableId: summary
+    let minimumNumberOfSamples = 3
     
     init() {}
     
@@ -54,7 +55,7 @@ class NaiveBayes {
 
             // Minimum requirement for good prediction.
             // When connecting for switching, the crownstone is not broadcasting iBeacon packets.
-            if (evaluation.sampleSize < 3) {
+            if (evaluation.sampleSize < self.minimumNumberOfSamples) {
                 valid = false
             }
             if (highestPrediction < evaluation.probability) {

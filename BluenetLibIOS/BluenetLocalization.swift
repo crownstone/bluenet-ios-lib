@@ -43,8 +43,9 @@ public class BluenetLocalization {
     var collectingCallbackId : Int?
     var activeGroupId : String?
     var activeLocationId : String?
-    var certainty = 2
-    var sameCounter = 0
+    var indoorLocalizationConsecutiveMatchesThreshold = 2
+    var indoorLocalizationEnabled : Bool = false;
+    var indoorLocalizationConsecutiveMatches = 0
     var lastMeasurement = ""
     var fingerprintData = [String : [String : Fingerprint]]() // groupId: locationId: Fingerprint
     
@@ -102,6 +103,21 @@ public class BluenetLocalization {
             
             self.locationManager.startTrackingIBeacons()
         }
+    }
+    
+    
+    /**
+     * This will enable the classifier. It requires the fingerprints to be setup and will trigger the current/enter/exitRoom events
+     * This should be used if the user is sure the fingerprinting process has been finished.
+     */
+    public func startIndoorLocalization() {
+        self.indoorLocalizationEnabled = true;
+    }
+    /**
+     * This will disable the classifier. The current/enter/exitRoom events will no longer be fired.
+     */
+    public func stopIndoorLocalization() {
+        self.indoorLocalizationEnabled = false;
     }
     
     /**
@@ -229,22 +245,30 @@ public class BluenetLocalization {
                     self.classifier[self.activeGroupId!] = ClassifierWrapper()
                 }
                 
-                let classificationResult = self._evaluateData(data)
-                if (classificationResult.valid == true) {
-                    let currentLocation = classificationResult.location
-                    if (self.activeLocationId != currentLocation) {
-                        if (self.lastMeasurement == currentLocation) {
-                            self.sameCounter += 1
-                            if (self.sameCounter == self.certainty) {
-                                self._moveToNewLocation(currentLocation)
-                                self.sameCounter = 0
+                // check if we are using the indoor localization.
+                if (self.indoorLocalizationEnabled) {
+                    let classificationResult = self._evaluateData(data)
+                    
+                    // the result is valid if there are at least 3 samples and if there is atleast fingerprints loaded.
+                    if (classificationResult.valid == true) {
+                        let currentLocation = classificationResult.location
+                        // check if we are moving to a new location.
+                        if (self.activeLocationId != currentLocation) {
+                            
+                            // we require that we measure the same location at least indoorLocalizationConsecutiveMatchesThreshold times.
+                            if (self.lastMeasurement == currentLocation) {
+                                self.indoorLocalizationConsecutiveMatches += 1
+                                if (self.indoorLocalizationConsecutiveMatches == self.indoorLocalizationConsecutiveMatchesThreshold) {
+                                    self._moveToNewLocation(currentLocation)
+                                    self.indoorLocalizationConsecutiveMatches = 0
+                                }
+                            }
+                            else {
+                                self.indoorLocalizationConsecutiveMatches = 0
                             }
                         }
-                        else {
-                            self.sameCounter = 0
-                        }
+                        self.lastMeasurement = currentLocation
                     }
-                    self.lastMeasurement = currentLocation
                 }
             }
         }
