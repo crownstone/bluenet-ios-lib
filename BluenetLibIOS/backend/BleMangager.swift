@@ -553,6 +553,7 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     // MARK: scanning
     
     public func startScanning() {
+        print ("------ BLUENET_LIB: start scanning everything")
         //        let generalService = CBUUID(string: "f5f90000-f5f9-11e4-aa15-123b93f75cba")
         //let generalService = CBUUID(string: "5432")
         // centralManager.scanForPeripheralsWithServices([generalService], options:nil)//, options:[CBCentralManagerScanOptionAllowDuplicatesKey:false])
@@ -560,11 +561,13 @@ public class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegat
     }
     
     public func startScanningForService(serviceUUID: String) {
+        print ("------ BLUENET_LIB: start scanning for services")
         let service = CBUUID(string: serviceUUID)
         centralManager.scanForPeripheralsWithServices([service], options:[CBCentralManagerScanOptionAllowDuplicatesKey:true])
     }
     
     public func startScanningForServiceUniqueOnly(serviceUUID: String) {
+        print ("------ BLUENET_LIB: start scanning for services unique only")
         let service = CBUUID(string: serviceUUID)
         centralManager.scanForPeripheralsWithServices([service], options:[CBCentralManagerScanOptionAllowDuplicatesKey:false])
     }
