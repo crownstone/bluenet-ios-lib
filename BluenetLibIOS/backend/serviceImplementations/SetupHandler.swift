@@ -31,30 +31,34 @@ public class SetupHandler {
             self.bleManager.settings.disableEncryptionTemporarily()
             self.getSessionKey()
                 .then({(key: [UInt8]) -> Promise<[UInt8]> in
+                    self.eventBus.emit("setupProgress", 1);
                     self.bleManager.settings.loadSetupKey(key)
                     return self.getSessionNonce()
                 })
                 .then({(nonce: [UInt8]) ->  Void in
+                    self.eventBus.emit("setupProgress", 2)
                     self.bleManager.settings.setSessionNonce(nonce)
                     self.bleManager.settings.restoreEncryption()
                     
                 })
-                .then({(_) -> Promise<Void> in return self.writeCrownstoneId(crownstoneId)})
-                .then({(_) -> Promise<Void> in return self.writeAdminKey(adminKey)})
-                .then({(_) -> Promise<Void> in return self.writeMemberKey(memberKey)})
-                .then({(_) -> Promise<Void> in return self.writeGuestKey(guestKey)})
-                .then({(_) -> Promise<Void> in return self.writeMeshAccessAddress(meshAccessAddress)})
-                .then({(_) -> Promise<Void> in return self.writeIBeaconUUID(ibeaconUUID)})
-                .then({(_) -> Promise<Void> in return self.writeIBeaconMajor(ibeaconMajor)})
-                .then({(_) -> Promise<Void> in return self.writeIBeaconMinor(ibeaconMinor)})
-                .then({(_) -> Promise<Void> in return self.finalizeSetup()})
-                .then({(_) -> Promise<Void> in return self.bleManager.disconnect()})
+                .then({(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 3); return self.writeCrownstoneId(crownstoneId)})
+                .then({(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 4); return self.writeAdminKey(adminKey)})
+                .then({(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 5); return self.writeMemberKey(memberKey)})
+                .then({(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 6); return self.writeGuestKey(guestKey)})
+                .then({(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 7); return self.writeMeshAccessAddress(meshAccessAddress)})
+                .then({(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 8); return self.writeIBeaconUUID(ibeaconUUID)})
+                .then({(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 9); return self.writeIBeaconMajor(ibeaconMajor)})
+                .then({(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 10); return self.writeIBeaconMinor(ibeaconMinor)})
+                .then({(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 11); return self.finalizeSetup()})
+                .then({(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 12); return self.bleManager.disconnect()})
                 .then({(_) -> Void in
                     print("------ BLUENET_LIB: Setup Finished")
+                    self.eventBus.emit("setupProgress", 13);
                     self.bleManager.settings.exitSetup()
                     fulfill()
                 })
                 .error({(err: ErrorType) -> Void in
+                    self.eventBus.emit("setupProgress", 0);
                     self.bleManager.settings.exitSetup()
                     self.bleManager.settings.restoreEncryption()
                     self.bleManager.disconnect()

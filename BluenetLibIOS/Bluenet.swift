@@ -26,6 +26,7 @@ public typealias eventCallback = (AnyObject) -> Void
  * This lib broadcasts the following data:
    |  topic:                        |     dataType:        |     when:
    |  --------------------------------------------------------------------------------------------------------
+   |  "setupProgress"               |     NSNumber         |     Phases in the setup process, numbers from 1 - 13, 0 for error.
    |  "advertisementData"           |     Advertisement    |     When an advertisement packet is received
    |  "verifiedAdvertisementData"   |     Advertisement    |     When an advertisement has been decrypted successfully 3 consecutive times it is verified.
    |                                |                      |     Setup and DFU are also included since they dont need to be decrypted. This sorts out only your Crownstones.
