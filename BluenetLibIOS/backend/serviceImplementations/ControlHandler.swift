@@ -81,8 +81,15 @@ public class ControlHandler {
     public func commandFactoryReset() -> Promise<Void> {
         return self._writeControlPacket(FactoryResetPacket().getPacket())
             .then({(_) -> Promise<[UInt8]> in return self._readControlPacket()})
-            .then({(response: [UInt8]) -> Void in
-                print("GOT RESPONSE CODE: \(response)");
+            .then({(response: [UInt8]) -> Promise<Void> in
+                return Promise<Void> {fulfill, reject in
+                    if (response[0] == 0) {
+                        fulfill()
+                    }
+                    else {
+                        reject(BleError.COULD_NOT_FACTORY_RESET)
+                    }
+                }
             })
     }
     

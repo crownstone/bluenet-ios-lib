@@ -35,6 +35,7 @@ public enum BleError : ErrorType {
     case DISABLE_NOTIFICATIONS_TIMEOUT
     case CANNOT_WRITE_AND_VERIFY
     case CAN_NOT_CONNECT_TO_UUID
+    case COULD_NOT_FACTORY_RESET
     
     // encryption errors
     case INVALID_SESSION_DATA
