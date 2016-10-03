@@ -80,6 +80,10 @@ public class ControlHandler {
     
     public func commandFactoryReset() -> Promise<Void> {
         return self._writeControlPacket(FactoryResetPacket().getPacket())
+            .then({(_) -> Promise<[UInt8]> in return self._readControlPacket()})
+            .then({(response: [UInt8]) -> Void in
+                print("GOT RESPONSE CODE: \(response)");
+            })
     }
     
     
@@ -151,6 +155,14 @@ public class ControlHandler {
             characteristicId: CrownstoneCharacteristics.Control,
             data: NSData(bytes: packet, length: packet.count),
             type: CBCharacteristicWriteType.WithResponse
+        )
+    }
+    
+    
+    func _readControlPacket() -> Promise<[UInt8]> {
+        return self.bleManager.readCharacteristic(
+            CSServices.CrownstoneService,
+            characteristicId: CrownstoneCharacteristics.Control
         )
     }
     
