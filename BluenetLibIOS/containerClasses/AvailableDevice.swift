@@ -62,14 +62,18 @@ public class AvailableDevice {
     
     func update(data: Advertisement) {
         self.rssi = data.rssi.integerValue
-        self.lastUpdate = NSDate().timeIntervalSince1970
+        
+        // make a local copy for the closures.
+        let updatetime = NSDate().timeIntervalSince1970
+        self.lastUpdate = updatetime
+        
         self.rssiHistory[self.lastUpdate] = self.rssi;
         
         self.verify(data.scanResponse)
         self.calculateRssiAverage()
         
-        delay(self.timeout, {_ in self.checkTimeout(self.lastUpdate)});
-        delay(self.rssiTimeout, {_ in self.clearRSSI(self.lastUpdate)});
+        delay(self.timeout, {_ in self.checkTimeout(updatetime)});
+        delay(self.rssiTimeout, {_ in self.clearRSSI(updatetime)});
     }
     
     
