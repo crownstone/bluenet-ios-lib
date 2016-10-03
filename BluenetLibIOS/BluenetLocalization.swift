@@ -85,6 +85,10 @@ public class BluenetLocalization {
         self.locationManager.clearTrackedBeacons()
     }
     
+    public func stopTrackingIBeacon(uuid: String) {
+        self.locationManager.stopTrackingIBeacon(uuid);
+    }
+    
     /**
      *  This will stop listening to any and all updates from the iBeacon tracking. Your app may fall asleep.
      */

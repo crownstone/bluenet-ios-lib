@@ -42,7 +42,7 @@ public class Bluenet  {
     let eventBus : EventBus!
     var deviceList = [String: AvailableDevice]()
     var setupList = [String: NSNumber]()
-    
+
     // declare the classes handling the library protocol
     public let dfu      : DfuHandler!
     public let config   : ConfigHandler!

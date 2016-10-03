@@ -69,6 +69,25 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         self.trackingBeacons.removeAll()
     }
     
+    
+    public func stopTrackingIBeacon(uuid: String) {
+        // stop monitoring all becons
+        var index = 0;
+        for beacon in self.trackingBeacons {
+            if (beacon.UUID.UUIDString == uuid) {
+                self.manager.stopRangingBeaconsInRegion(beacon.region)
+                self.manager.stopMonitoringForRegion(beacon.region)
+                break
+            }
+            index += 1;
+        }
+        
+        self.trackingBeacons.removeAtIndex(index)
+        if (self.trackingBeacons.count == 0) {
+            self.trackingState = false
+        }
+    }
+    
     public func stopTrackingIBeacons() {
         // stop monitoring all becons
         for beacon in self.trackingBeacons {
