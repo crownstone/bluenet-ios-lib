@@ -79,7 +79,10 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
                 self.manager.stopMonitoringForRegion(beacon.region)
                 break
             }
-            index += 1;
+            else {
+                index += 1;
+            }
+            
         }
         
         self.trackingBeacons.removeAtIndex(index)
