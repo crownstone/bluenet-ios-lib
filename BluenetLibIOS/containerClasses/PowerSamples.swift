@@ -24,12 +24,12 @@ import SwiftyJSON
  * Wrapper for all relevant data of the object
  *
  */
-public class PowerSamples {
-    public var current = [UInt16]()
-    public var voltage = [UInt16]()
-    public var currentTimes = [UInt32]()
-    public var voltageTimes = [UInt32]()
-    public var valid = false
+open class PowerSamples {
+    open var current = [UInt16]()
+    open var voltage = [UInt16]()
+    open var currentTimes = [UInt32]()
+    open var voltageTimes = [UInt32]()
+    open var valid = false
     
     init(data: [UInt8]) {
         if (self.parse(data)) {
@@ -40,12 +40,12 @@ public class PowerSamples {
         }
     }
     
-    func parse(data: [UInt8]) -> Bool {
+    func parse(_ data: [UInt8]) -> Bool {
         let length = data.count
         
         // 24 is the length of all the fixed length elementes.
         if (length < 24) { return false }
-        let numCurrentSamples = NSNumber(unsignedShort: Conversion.uint8_array_to_uint16([data[0], data[1]])).integerValue
+        let numCurrentSamples = NSNumber(value: Conversion.uint8_array_to_uint16([data[0], data[1]]) as UInt16).intValue
         var offset : Int = 2
         
         // check if the length of the data is sufficient and get the current samples
@@ -57,7 +57,7 @@ public class PowerSamples {
         
         // check if the length of the data is sufficient and get amount of voltage samples
         if (length < offset + 2) { return false }
-        let numVoltageSamples = NSNumber(unsignedShort: Conversion.uint8_array_to_uint16([data[offset], data[offset+1]])).integerValue
+        let numVoltageSamples = NSNumber(value: Conversion.uint8_array_to_uint16([data[offset], data[offset+1]]) as UInt16).intValue
         offset += 2
         
         // check if the length of the data is sufficient and get the voltage samples
@@ -68,7 +68,7 @@ public class PowerSamples {
         offset += numVoltageSamples*2
         
         if (length < offset + 10) { return false }
-        let numCurrentTimestamps = NSNumber(unsignedShort: Conversion.uint8_array_to_uint16([data[offset], data[offset+1]])).integerValue
+        let numCurrentTimestamps = NSNumber(value: Conversion.uint8_array_to_uint16([data[offset], data[offset+1]]) as UInt16).intValue
         offset += 2
         let firstCurrentTimestamp = Conversion.uint8_array_to_uint32([data[offset], data[offset+1], data[offset+2], data[offset+3]])
         offset += 4
@@ -79,7 +79,7 @@ public class PowerSamples {
         if (length < offset + numCurrentTimestamps-1) { return false }
         var lastTime = firstCurrentTimestamp
         for i in [Int](0...numCurrentTimestamps-2) {
-            lastTime += NSNumber(unsignedChar: data[i + offset]).unsignedIntValue
+            lastTime += NSNumber(value: data[i + offset] as UInt8).uint32Value
             currentTimes.append(lastTime)
         }
         offset += numCurrentTimestamps-1
@@ -89,7 +89,7 @@ public class PowerSamples {
         }
         
         if (length < offset + 10) { return false }
-        let numVoltageTimestamps = NSNumber(unsignedShort: Conversion.uint8_array_to_uint16([data[offset], data[offset+1]])).integerValue
+        let numVoltageTimestamps = NSNumber(value: Conversion.uint8_array_to_uint16([data[offset], data[offset+1]]) as UInt16).intValue
         offset += 2
         let firstVoltageTimestamp = Conversion.uint8_array_to_uint32([data[offset], data[offset+1], data[offset+2], data[offset+3]])
         offset += 4
@@ -100,7 +100,7 @@ public class PowerSamples {
         if (length < offset + numVoltageTimestamps-2) { return false }
         lastTime = firstVoltageTimestamp
         for i in [Int](0...numVoltageTimestamps-2) {
-            lastTime += NSNumber(unsignedChar: data[i + offset]).unsignedIntValue
+            lastTime += NSNumber(value: data[i + offset] as UInt8).uint32Value
             voltageTimes.append(lastTime)
         }
         

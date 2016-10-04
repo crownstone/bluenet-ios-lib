@@ -9,17 +9,17 @@
 import Foundation
 
 
-public class BluenetSettings {
-    public var encryptionEnabled = false
-    public var temporaryDisable = false
-    public var adminKey : [UInt8]?
-    public var memberKey  : [UInt8]?
-    public var guestKey : [UInt8]?
-    public var setupKey  : [UInt8]?
-    public var initializedKeys = false
-    public var sessionNonce : [UInt8]?
+open class BluenetSettings {
+    open var encryptionEnabled = false
+    open var temporaryDisable = false
+    open var adminKey : [UInt8]?
+    open var memberKey  : [UInt8]?
+    open var guestKey : [UInt8]?
+    open var setupKey  : [UInt8]?
+    open var initializedKeys = false
+    open var sessionNonce : [UInt8]?
     
-    public var userLevel : UserLevel = .UNKNOWN
+    open var userLevel : UserLevel = .unknown
     
     init() {}
     
@@ -52,47 +52,47 @@ public class BluenetSettings {
     
     func detemineUserLevel() {
         if (self.adminKey!.count == 16) {
-            userLevel = .Admin
+            userLevel = .admin
         }
         else if (self.memberKey!.count == 16) {
-            userLevel = .Member
+            userLevel = .member
         }
         else if (self.guestKey!.count == 16) {
-            userLevel = .Guest
+            userLevel = .guest
         }
         else {
-            userLevel = .UNKNOWN
+            userLevel = .unknown
             self.initializedKeys = false
         }
     }
     
-    public func invalidateSessionNonce() {
+    open func invalidateSessionNonce() {
         self.sessionNonce = nil
     }
     
-    public func setSessionNonce(sessionNonce: [UInt8]) {
+    open func setSessionNonce(_ sessionNonce: [UInt8]) {
         self.sessionNonce = sessionNonce
     }
     
-    public func loadSetupKey(setupKey: [UInt8]) {
+    open func loadSetupKey(_ setupKey: [UInt8]) {
         self.setupKey = setupKey
-        userLevel = .Setup
+        userLevel = .setup
     }
     
-    public func exitSetup() {
+    open func exitSetup() {
         self.setupKey = nil
         detemineUserLevel()
     }
     
-    public func disableEncryptionTemporarily() {
+    open func disableEncryptionTemporarily() {
         self.temporaryDisable = true
     }
     
-    public func restoreEncryption() {
+    open func restoreEncryption() {
         self.temporaryDisable = false
     }
     
-    public func isEncryptionEnabled() -> Bool {
+    open func isEncryptionEnabled() -> Bool {
         if (temporaryDisable == true) {
             return false
         }

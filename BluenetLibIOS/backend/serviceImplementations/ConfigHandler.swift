@@ -10,7 +10,7 @@ import Foundation
 import PromiseKit
 import CoreBluetooth
 
-public class ConfigHandler {
+open class ConfigHandler {
     let bleManager : BleManager!
     var settings : BluenetSettings!
     let eventBus : EventBus!
@@ -23,14 +23,14 @@ public class ConfigHandler {
         self.deviceList = deviceList
     }
     
-    public func setIBeaconUUID(uuid: String) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.IBEACON_UUID, payload: uuid)
+    open func setIBeaconUUID(_ uuid: String) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.ibeacon_UUID, payload: uuid)
         let packet = data.getPacket();
         return self.bleManager.writeToCharacteristic(
             CSServices.CrownstoneService,
             characteristicId: CrownstoneCharacteristics.ConfigControl,
-            data: NSData(bytes: packet, length: packet.count),
-            type: CBCharacteristicWriteType.WithResponse
+            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+            type: CBCharacteristicWriteType.withResponse
         )
     }
 

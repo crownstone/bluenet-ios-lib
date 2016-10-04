@@ -35,60 +35,60 @@ enum PromiseType {
 
 
 class promiseContainer {
-    private var _fulfillVoidPromise             : (Void) -> Void                = {_ in }
-    private var _fulfillIntPromise              : (Int) -> Void                 = {_ in }
-    private var _fulfillServiceListPromise      : ([CBService]) -> Void         = {_ in }
-    private var _fulfillCharacteristicListPromise : ([CBCharacteristic]) -> Void = {_ in }
-    private var _fulfillCharacteristicPromise   : (CBCharacteristic) -> Void    = {_ in }
-    private var _fulfillDataPromise             : ([UInt8]) -> Void    = {_ in }
-    private var _rejectPromise                  : (ErrorType) -> Void           = {_ in }
+    fileprivate var _fulfillVoidPromise             : (Void) -> Void                = {_ in }
+    fileprivate var _fulfillIntPromise              : (Int) -> Void                 = {_ in }
+    fileprivate var _fulfillServiceListPromise      : ([CBService]) -> Void         = {_ in }
+    fileprivate var _fulfillCharacteristicListPromise : ([CBCharacteristic]) -> Void = {_ in }
+    fileprivate var _fulfillCharacteristicPromise   : (CBCharacteristic) -> Void    = {_ in }
+    fileprivate var _fulfillDataPromise             : ([UInt8]) -> Void    = {_ in }
+    fileprivate var _rejectPromise                  : (Error) -> Void           = {_ in }
     var type = RequestType.NONE
     var promiseType = PromiseType.NONE
     var completed = false
     
-    init(_ fulfill: (Void) -> Void, _ reject: (ErrorType) -> Void, type: RequestType) {
+    init(_ fulfill: @escaping (Void) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
         _fulfillVoidPromise = fulfill
         promiseType = .VOID
         initShared(reject, type)
     }
     
-    init(_ fulfill: (Int) -> Void, _ reject: (ErrorType) -> Void, type: RequestType) {
+    init(_ fulfill: @escaping (Int) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
         _fulfillIntPromise = fulfill
         promiseType = .INT
         initShared(reject, type)
     }
     
-    init(_ fulfill: ([CBService]) -> Void, _ reject: (ErrorType) -> Void, type: RequestType) {
+    init(_ fulfill: @escaping ([CBService]) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
         _fulfillServiceListPromise = fulfill
         promiseType = .SERVICELIST
         initShared(reject, type)
     }
     
-    init(_ fulfill: ([CBCharacteristic]) -> Void, _ reject: (ErrorType) -> Void, type: RequestType) {
+    init(_ fulfill: @escaping ([CBCharacteristic]) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
         _fulfillCharacteristicListPromise = fulfill
         promiseType = .CHARACTERISTICLIST
         initShared(reject, type)
     }
     
-    init(_ fulfill: (CBCharacteristic) -> Void, _ reject: (ErrorType) -> Void, type: RequestType) {
+    init(_ fulfill: @escaping (CBCharacteristic) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
         _fulfillCharacteristicPromise = fulfill
         promiseType = .CHARACTERISTIC
         initShared(reject, type)
     }
     
     
-    init(_ fulfill: ([UInt8]) -> Void, _ reject: (ErrorType) -> Void, type: RequestType) {
+    init(_ fulfill: @escaping ([UInt8]) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
         _fulfillDataPromise = fulfill
         promiseType = .DATA
         initShared(reject, type)
     }
     
-    func initShared(reject: (ErrorType) -> Void, _ type: RequestType) {
+    func initShared(_ reject: @escaping (Error) -> Void, _ type: RequestType) {
         _rejectPromise = reject
         self.type = type
     }
     
-    func setDelayedFulfill(delayTimeInSeconds: Double) {
+    func setDelayedFulfill(_ delayTimeInSeconds: Double) {
         if (promiseType == .VOID) {
             delay(delayTimeInSeconds, {_ in self.fulfill()})
         }
@@ -97,8 +97,8 @@ class promiseContainer {
         }
     }
     
-    func setDelayedReject(delayTimeInSeconds: Double, errorOnReject: BleError) {
-        delay(delayTimeInSeconds, {_ in self.reject(errorOnReject)})
+    func setDelayedReject(_ delayTimeInSeconds: Double, errorOnReject: BleError) {
+        delay(delayTimeInSeconds, {_ in self.reject(errorOnReject as! Error)})
     }
     
     
@@ -117,7 +117,7 @@ class promiseContainer {
         _rejectPromise = {_ in }
     }
     
-    func fulfill(data: Void) {
+    func fulfill(_ data: Void) {
         if (self.completed == false) {
             self.completed = true
             if (promiseType == .VOID) {
@@ -130,7 +130,7 @@ class promiseContainer {
         }
     }
     
-    func fulfill(data: Int) {
+    func fulfill(_ data: Int) {
         if (self.completed == false) {
             self.completed = true
             if (promiseType == .INT) {
@@ -143,7 +143,7 @@ class promiseContainer {
         clear()
     }
     
-    func fulfill(data: [CBService]) {
+    func fulfill(_ data: [CBService]) {
         if (self.completed == false) {
             self.completed = true
             if (promiseType == .SERVICELIST) {
@@ -156,7 +156,7 @@ class promiseContainer {
         clear()
     }
     
-    func fulfill(data: [CBCharacteristic]) {
+    func fulfill(_ data: [CBCharacteristic]) {
         if (self.completed == false) {
             self.completed = true
             if (promiseType == .CHARACTERISTICLIST) {
@@ -169,7 +169,7 @@ class promiseContainer {
         clear()
     }
     
-    func fulfill(data: CBCharacteristic) {
+    func fulfill(_ data: CBCharacteristic) {
         if (self.completed == false) {
             self.completed = true
             if (promiseType == .CHARACTERISTIC) {
@@ -182,7 +182,7 @@ class promiseContainer {
         clear()
     }
     
-    func fulfill(data: [UInt8]) {
+    func fulfill(_ data: [UInt8]) {
         if (self.completed == false) {
             self.completed = true
             if (promiseType == .DATA) {
@@ -196,7 +196,7 @@ class promiseContainer {
     }
 
     
-    func reject(error: ErrorType) {
+    func reject(_ error: Error) {
         if (self.completed == false) {
             self.completed = true
             _rejectPromise(error)

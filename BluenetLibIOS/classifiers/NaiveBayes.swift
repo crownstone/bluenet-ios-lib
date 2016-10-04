@@ -36,12 +36,12 @@ class NaiveBayes {
         self.summaries = [String: [String: NBSummary]]()
     }
     
-    func loadFingerprint(locationId: String, _ fingerprint: Fingerprint) {
+    func loadFingerprint(_ locationId: String, _ fingerprint: Fingerprint) {
         self.fingerprints[locationId] = fingerprint
         self._processFingerPrint(locationId, fingerprint)
     }
     
-    func predict(inputVector: [iBeaconPacket]) -> ClassifierResult {
+    func predict(_ inputVector: [iBeaconPacket]) -> ClassifierResult {
         var highestPrediction : Double = 0
         var highestPredictionLabel = ""
         var valid = true
@@ -67,7 +67,7 @@ class NaiveBayes {
         return ClassifierResult(valid: valid, location: highestPredictionLabel)
     }
     
-    func _predict(inputVector: [iBeaconPacket], _ summary: [String: NBSummary]) -> ProbabiltyReport {
+    func _predict(_ inputVector: [iBeaconPacket], _ summary: [String: NBSummary]) -> ProbabiltyReport {
         var totalProbability : Double = 1
         var samples : Int = 0
         for packet in inputVector {
@@ -92,7 +92,7 @@ class NaiveBayes {
         return ProbabiltyReport(sampleSize: samples, probability: totalProbability)
     }
     
-    func _processFingerPrint(locationId: String, _ fingerprint: Fingerprint) {
+    func _processFingerPrint(_ locationId: String, _ fingerprint: Fingerprint) {
         for (stoneId, measurements) in fingerprint.data {
             let mean = self._getMean(measurements)
             let std = self._getSTD(mean, measurements)
@@ -102,7 +102,7 @@ class NaiveBayes {
         }
     }
     
-    func _addToSummary(locationId: String, stoneId: String, summary: NBSummary) {
+    func _addToSummary(_ locationId: String, stoneId: String, summary: NBSummary) {
         // we clear the existing summery if it existed
         if (self.summaries[locationId] == nil) {
             self.summaries[locationId] = [String: NBSummary]()
@@ -110,7 +110,7 @@ class NaiveBayes {
         self.summaries[locationId]![stoneId] = summary
     }
     
-    func _getMean(measurements: [NSNumber]) -> Double {
+    func _getMean(_ measurements: [NSNumber]) -> Double {
         var total : Double = 0
         for measurement in measurements {
             total += Double(measurement)
@@ -118,7 +118,7 @@ class NaiveBayes {
         return (total / Double(measurements.count))
     }
     
-    func _getSTD(mean: Double, _ measurements: [NSNumber]) -> Double {
+    func _getSTD(_ mean: Double, _ measurements: [NSNumber]) -> Double {
         var total : Double = 0
         for measurement in measurements {
             total += pow(Double(measurement) - mean, 2)

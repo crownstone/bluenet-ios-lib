@@ -9,8 +9,8 @@
 import Foundation
 import SwiftyJSON
 
-public class Fingerprint {
-    public var data = [String: [NSNumber]]()
+open class Fingerprint {
+    open var data = [String: [NSNumber]]()
     
     public init() {}
     public init(stringifiedData: String) {
@@ -24,9 +24,9 @@ public class Fingerprint {
         }
     }
     
-    func collect(ibeaconData: [iBeaconPacket]) {
+    func collect(_ ibeaconData: [iBeaconPacket]) {
         for point in ibeaconData {
-            if (data.indexForKey(point.idString) == nil) {
+            if (data.index(forKey: point.idString) == nil) {
                 data[point.idString] = [NSNumber]()
             }
             
@@ -34,11 +34,11 @@ public class Fingerprint {
         }
     }
     
-    public func getJSON() -> JSON {
+    open func getJSON() -> JSON {
         return JSON(self.data)
     }
     
-    public func stringify() -> String {
+    open func stringify() -> String {
         return JSONUtils.stringify(JSON(self.data))
     }
 }

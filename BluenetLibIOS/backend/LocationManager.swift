@@ -11,7 +11,7 @@ import CoreLocation
 import SwiftyJSON
 import UIKit
 
-public class LocationManager : NSObject, CLLocationManagerDelegate {
+open class LocationManager : NSObject, CLLocationManagerDelegate {
     var manager : CLLocationManager!
     
     var eventBus : EventBus!
@@ -40,56 +40,56 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         self.check()
     }
     
-    public func trackBeacon(beacon: iBeaconContainer) {
+    open func trackBeacon(_ beacon: iBeaconContainer) {
         if (!self._beaconInList(beacon, list: self.trackingBeacons)) {
             trackingBeacons.append(beacon);
             if (self.started == true) {
-                self.manager.startMonitoringForRegion(beacon.region)
-                self.manager.requestStateForRegion(beacon.region)
+                self.manager.startMonitoring(for: beacon.region)
+                self.manager.requestState(for: beacon.region)
             }
         }
         
         self.start();
     }
     
-    public func check() {
-        self.locationManager(self.manager, didChangeAuthorizationStatus: CLLocationManager.authorizationStatus())
+    open func check() {
+        self.locationManager(self.manager, didChangeAuthorization: CLLocationManager.authorizationStatus())
     }
     
-    public func stopTrackingAllRegions() {
+    open func stopTrackingAllRegions() {
         // stop monitoring all previous regions
         for region in self.manager.monitoredRegions {
             print ("------ BLUENET_LIB_NAV: INITIALIZATION: stop monitoring old region: \(region)")
-            self.manager.stopMonitoringForRegion(region)
+            self.manager.stopMonitoring(for: region)
         }
     }
     
-    public func clearTrackedBeacons() {
+    open func clearTrackedBeacons() {
         self.stopTrackingIBeacons()
         self.trackingBeacons.removeAll()
     }
     
     
-    public func stopTrackingIBeacon(uuid: String) {
+    open func stopTrackingIBeacon(_ uuid: String) {
         // stop monitoring all becons
         var targetIndex : Int? = nil;
-        var uuidObject = NSUUID(UUIDString : uuid)
+        let uuidObject = UUID(uuidString : uuid)
         if (uuidObject == nil) {
             return
         }
         
-        var uuidString = uuidObject!.UUIDString
-        for (index, beacon) in self.trackingBeacons.enumerate() {
-            if (beacon.UUID.UUIDString == uuidString) {
-                self.manager.stopRangingBeaconsInRegion(beacon.region)
-                self.manager.stopMonitoringForRegion(beacon.region)
+        let uuidString = uuidObject!.uuidString
+        for (index, beacon) in self.trackingBeacons.enumerated() {
+            if (beacon.UUID.uuidString == uuidString) {
+                self.manager.stopRangingBeacons(in: beacon.region)
+                self.manager.stopMonitoring(for: beacon.region)
                 targetIndex = index;
                 break
             }
         }
 
         if (targetIndex != nil) {
-            self.trackingBeacons.removeAtIndex(targetIndex!)
+            self.trackingBeacons.remove(at: targetIndex!)
             if (self.trackingBeacons.count == 0) {
                 self.trackingState = false
             }
@@ -97,24 +97,24 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         
     }
     
-    public func stopTrackingIBeacons() {
+    open func stopTrackingIBeacons() {
         // stop monitoring all becons
         for beacon in self.trackingBeacons {
-            self.manager.stopRangingBeaconsInRegion(beacon.region)
-            self.manager.stopMonitoringForRegion(beacon.region)
+            self.manager.stopRangingBeacons(in: beacon.region)
+            self.manager.stopMonitoring(for: beacon.region)
         }
         self.trackingState = false
     }
     
-    public func isTracking() -> Bool {
+    open func isTracking() -> Bool {
         return self.trackingState
     }
     
-    public func startTrackingIBeacons() {
+    open func startTrackingIBeacons() {
         // reinitialize
         for beacon in self.trackingBeacons {
-            self.manager.startMonitoringForRegion(beacon.region)
-            self.manager.requestStateForRegion(beacon.region)
+            self.manager.startMonitoring(for: beacon.region)
+            self.manager.requestState(for: beacon.region)
         }
     }
     
@@ -127,7 +127,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     
     func start() {
         self.manager.startUpdatingLocation()
-        if (self.manager.respondsToSelector(Selector("allowsBackgroundLocationUpdates"))) {
+        if (self.manager.responds(to: #selector(getter: CLLocationManager.allowsBackgroundLocationUpdates))) {
             self.manager.allowsBackgroundLocationUpdates = true
         }
         
@@ -141,34 +141,34 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         self.started = true
     }
     
-    public func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
+    open func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         switch (CLLocationManager.authorizationStatus()) {
-        case .NotDetermined:
+        case .notDetermined:
             print("------ BLUENET_LIB_NAV: location NotDetermined")
             /*
              First you need to add NSLocationWhenInUseUsageDescription or NSLocationAlwaysUsageDescription(if you want to use in background) in your info.plist file OF THE PROGRAM THAT IMPLEMENTS THIS!
              */
             manager.requestAlwaysAuthorization()
-        case .Restricted:
+        case .restricted:
             print("------ BLUENET_LIB_NAV: location Restricted")
-        case .Denied:
+        case .denied:
             showLocationAlert()
             print("------ BLUENET_LIB_NAV: location Denied")
-        case .AuthorizedAlways:
+        case .authorizedAlways:
             print("------ BLUENET_LIB_NAV: location AuthorizedAlways")
             start()
-        case .AuthorizedWhenInUse:
+        case .authorizedWhenInUse:
             print("------ BLUENET_LIB_NAV: location AuthorizedWhenInUse")
             showLocationAlert()
         }
     }
     
     
-    public func locationManager(manager : CLLocationManager, didStartMonitoringForRegion region : CLRegion) {
+    open func locationManager(_ manager : CLLocationManager, didStartMonitoringFor region : CLRegion) {
         print("------ BLUENET_LIB_NAV: did start MONITORING \(region) \n");
     }
     
-    public func locationManager(manager : CLLocationManager, didRangeBeacons beacons : [CLBeacon], inRegion region: CLBeaconRegion) {
+    open func locationManager(_ manager : CLLocationManager, didRangeBeacons beacons : [CLBeacon], in region: CLBeaconRegion) {
 //        print ("Did Range:")
 //        for beacon in beacons {
 //            print("\(beacon)")
@@ -179,10 +179,10 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         for beacon in beacons {
             if (beacon.rssi < -1) {
                 iBeacons.append(iBeaconPacket(
-                    uuid: beacon.proximityUUID.UUIDString,
+                    uuid: beacon.proximityUUID.uuidString,
                     major: beacon.major,
                     minor: beacon.minor,
-                    rssi: beacon.rssi,
+                    rssi: NSNumber(value: beacon.rssi),
                     referenceId: region.identifier
                 ))
             }
@@ -193,19 +193,19 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         }
     }
     
-    public func locationManager(manager: CLLocationManager, didEnterRegion region: CLRegion) {
+    open func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
         print("did enter region \(region) \n");
         self._startRanging(region);
     }
     
     
-    public func locationManager(manager: CLLocationManager, didExitRegion region: CLRegion) {
+    open func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
         print("did exit region \(region) \n");
         self._stopRanging(region);
     }
     
     // this is a fallback mechanism because the enter and exit do not always fire.
-    public func locationManager(manager: CLLocationManager, didDetermineState state: CLRegionState, forRegion region: CLRegion) {
+    open func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
         print("State change \(state.rawValue) , \(region)")
         if (state.rawValue == 1) {
             self._startRanging(region)
@@ -224,7 +224,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
      *    Invoked when an error has occurred ranging beacons in a region. Error types are defined in "CLError.h".
      */
 
-    public func locationManager(manager: CLLocationManager, rangingBeaconsDidFailForRegion region: CLBeaconRegion, withError error: NSError) {
+    open func locationManager(_ manager: CLLocationManager, rangingBeaconsDidFailFor region: CLBeaconRegion, withError error: Error) {
          print("------ BLUENET_LIB_NAV: did rangingBeaconsDidFailForRegion \(region)  withError: \(error) \n");
     }
     
@@ -237,7 +237,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
      *    Invoked when an error has occurred. Error types are defined in "CLError.h".
      */
   
-    public func locationManager(manager: CLLocationManager, didFailWithError error: NSError){
+    open func locationManager(_ manager: CLLocationManager, didFailWithError error: Error){
         print("------ BLUENET_LIB_NAV: did didFailWithError withError: \(error) \n");
     }
     
@@ -248,7 +248,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
      *    Invoked when a region monitoring error has occurred. Error types are defined in "CLError.h".
      */
  
-    public func locationManager(manager: CLLocationManager, monitoringDidFailForRegion region: CLRegion?, withError error: NSError){
+    open func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error){
         print("------ BLUENET_LIB_NAV: did monitoringDidFailForRegion \(region)  withError: \(error) \n");
     }
     
@@ -261,7 +261,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     // -------------------- UITL -------------------------//
     
     
-    func _beaconInList(beacon: iBeaconContainer, list: [iBeaconContainer]) -> Bool {
+    func _beaconInList(_ beacon: iBeaconContainer, list: [iBeaconContainer]) -> Bool {
         for element in list {
             if (element.UUID == beacon.UUID) {
                 return true;
@@ -270,26 +270,26 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         return false;
     }
 
-    func _startRanging(region: CLRegion) {
+    func _startRanging(_ region: CLRegion) {
         self.eventBus.emit("lowLevelEnterRegion", region.identifier)
         
         for element in self.trackingBeacons {
 //            print ("------ BLUENET_LIB_NAV: region id \(region.identifier) vs elementId \(element.region.identifier) \n")
             if (element.region.identifier == region.identifier) {
                 print ("------ BLUENET_LIB_NAV: startRanging")
-                self.manager.startRangingBeaconsInRegion(element.region)
+                self.manager.startRangingBeacons(in: element.region)
             }
         }
     }
     
-    func _stopRanging(region: CLRegion) {
+    func _stopRanging(_ region: CLRegion) {
         self.eventBus.emit("lowLevelExitRegion", region.identifier)
         
         for element in self.trackingBeacons {
 //            print ("------ BLUENET_LIB_NAV: region id \(region.identifier) vs elementId \(element.region.identifier) \n")
             if (element.region.identifier == region.identifier) {
                 print ("------ BLUENET_LIB_NAV: stopRanging!")
-                self.manager.stopRangingBeaconsInRegion(element.region)
+                self.manager.stopRangingBeacons(in: element.region)
             }
         }
     }

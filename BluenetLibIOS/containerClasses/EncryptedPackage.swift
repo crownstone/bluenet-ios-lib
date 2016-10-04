@@ -17,11 +17,11 @@ class EncryptedPackage {
     var userLevel : UserLevel
     var payload : [UInt8]?
     
-    init(data: NSData) throws {
-        nonce = [UInt8](count: PACKET_NONCE_LENGTH, repeatedValue: 0);
-        var dataArray = Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(data.bytes), count: data.length))
+    init(data: Data) throws {
+        nonce = [UInt8](repeating: 0, count: PACKET_NONCE_LENGTH);
+        var dataArray = Array(UnsafeBufferPointer(start: (data as NSData).bytes.bindMemory(to: UInt8.self, capacity: data.count), count: data.count))
         let prefixLength = PACKET_NONCE_LENGTH + PACKET_USERLEVEL_LENGTH
-        var payloadData = [UInt8](count: dataArray.count - prefixLength, repeatedValue:0)
+        var payloadData = [UInt8](repeating: 0, count: dataArray.count - prefixLength)
         
         // 20 is the minimal size of a packet (3+1+16)
         if (dataArray.count < 20) {
@@ -35,7 +35,7 @@ class EncryptedPackage {
         
         
         // only allow 0, 1, 2 for Admin, User, Guest and 100 for Setup
-        if (dataArray[PACKET_NONCE_LENGTH] > 2 && dataArray[PACKET_NONCE_LENGTH] != UInt8(UserLevel.Setup.rawValue)) {
+        if (dataArray[PACKET_NONCE_LENGTH] > 2 && dataArray[PACKET_NONCE_LENGTH] != UInt8(UserLevel.setup.rawValue)) {
             throw BleError.INVALID_KEY_FOR_ENCRYPTION
         }
         

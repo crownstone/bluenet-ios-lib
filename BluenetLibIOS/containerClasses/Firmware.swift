@@ -9,11 +9,11 @@
 import Foundation
 
 
-public class Firmware {
-    public var softdeviceSize: NSNumber
-    public var bootloaderSize: NSNumber
-    public var applicationSize: NSNumber
-    public var data: [UInt8]
+open class Firmware {
+    open var softdeviceSize: NSNumber
+    open var bootloaderSize: NSNumber
+    open var applicationSize: NSNumber
+    open var data: [UInt8]
     
     init(softdeviceSize: NSNumber, bootloaderSize: NSNumber, applicationSize: NSNumber, data: [UInt8]) {
         self.softdeviceSize = softdeviceSize
@@ -22,12 +22,12 @@ public class Firmware {
         self.data = data
     }
     
-    public func getSizePacket() -> [UInt8] {
+    open func getSizePacket() -> [UInt8] {
         var result = [UInt8]()
         
-        result += Conversion.uint32_to_uint8_array(softdeviceSize.unsignedIntValue)
-        result += Conversion.uint32_to_uint8_array(bootloaderSize.unsignedIntValue)
-        result += Conversion.uint32_to_uint8_array(applicationSize.unsignedIntValue)
+        result += Conversion.uint32_to_uint8_array(softdeviceSize.uint32Value)
+        result += Conversion.uint32_to_uint8_array(bootloaderSize.uint32Value)
+        result += Conversion.uint32_to_uint8_array(applicationSize.uint32Value)
         
         return result
     }

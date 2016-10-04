@@ -12,7 +12,7 @@ let AMOUNT_OF_REQUIRED_MATCHES = 3
 
 
 
-public class AvailableDevice {
+open class AvailableDevice {
     var rssiHistory = [Double: Int]()
     var rssi : Int!
     var name : String?
@@ -29,7 +29,7 @@ public class AvailableDevice {
     let rssiTimeout : Double = 2 //seconds
     var consecutiveMatches : Int = 0
     
-    init(_ data: Advertisement, _ cleanupCallback: voidCallback) {
+    init(_ data: Advertisement, _ cleanupCallback: @escaping voidCallback) {
         self.name = data.name
         self.handle = data.handle
         self.cleanupCallback = cleanupCallback
@@ -48,23 +48,23 @@ public class AvailableDevice {
         self.update(data)
     }
     
-    func checkTimeout(referenceTime : Double) {
+    func checkTimeout(_ referenceTime : Double) {
         // if they are equal, no update has happened since the scheduling of this check.
         if (self.lastUpdate == referenceTime) {
             self.cleanupCallback()
         }
     }
     
-    func clearRSSI(referenceTime : Double) {
-        self.rssiHistory.removeValueForKey(referenceTime)
+    func clearRSSI(_ referenceTime : Double) {
+        self.rssiHistory.removeValue(forKey: referenceTime)
         self.calculateRssiAverage()
     }
     
-    func update(data: Advertisement) {
-        self.rssi = data.rssi.integerValue
+    func update(_ data: Advertisement) {
+        self.rssi = data.rssi.intValue
         
         // make a local copy for the closures.
-        let updatetime = NSDate().timeIntervalSince1970
+        let updatetime = Date().timeIntervalSince1970
         self.lastUpdate = updatetime
         
         self.rssiHistory[self.lastUpdate] = self.rssi;
@@ -78,7 +78,7 @@ public class AvailableDevice {
     
     
     // check if we consistently get the ID of this crownstone.
-    func verify(data: ScanResponcePacket?) {
+    func verify(_ data: ScanResponcePacket?) {
         if let response = data {
             if (response.isSetupPackage()) {
                 self.verified = true

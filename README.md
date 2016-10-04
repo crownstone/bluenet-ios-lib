@@ -23,7 +23,7 @@ github "crownstone/bluenet-lib-ios"
 Once this is finished, run the following command in your terminal (in the same folder as the Cartfile)
 
 ```
-carthage update --platform ios
+carthage bootstrap --platform iOS --no-use-binaries
 ```
 
 All dependencies will then be downloaded, built and placed in a Carthage/Build folder. You then drag the frameworks into your XCode project and you're good to go!

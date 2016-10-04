@@ -9,7 +9,7 @@
 import Foundation
 
 enum Classifiers {
-    case NAIVE_BAYES
+    case naive_BAYES
 }
 
 struct ClassifierResult {
@@ -18,8 +18,8 @@ struct ClassifierResult {
 }
 
 
-public class ClassifierWrapper {
-    var classifierType = Classifiers.NAIVE_BAYES
+open class ClassifierWrapper {
+    var classifierType = Classifiers.naive_BAYES
     var naiveBayes = NaiveBayes()
     
     init() {}
@@ -28,16 +28,16 @@ public class ClassifierWrapper {
         self.classifierType = classifier
     }
     
-    func loadFingerprint(locationId: String, fingerprint: Fingerprint) {
+    func loadFingerprint(_ locationId: String, fingerprint: Fingerprint) {
         switch (self.classifierType) {
-            case .NAIVE_BAYES:
+            case .naive_BAYES:
                 self.naiveBayes.loadFingerprint(locationId, fingerprint)
         }
     }
     
-    func predict(inputVector: [iBeaconPacket]) -> ClassifierResult {
+    func predict(_ inputVector: [iBeaconPacket]) -> ClassifierResult {
         switch (self.classifierType) {
-            case .NAIVE_BAYES:
+            case .naive_BAYES:
                 return self.naiveBayes.predict(inputVector)
         }
     }

@@ -16,17 +16,17 @@ let CROWNSTONE_SERVICEDATA_UUID = "C001"
  * Wrapper for all relevant data of the object
  *
  */
-public class Advertisement {
-    public var handle : String
-    public var name : String
-    public var rssi : NSNumber
-    public var isCrownstone : Bool = false
-    public var serviceData = [String: [UInt8]]()
-    public var serviceDataAvailable : Bool
-    public var serviceUUID : String?
-    public var scanResponse : ScanResponcePacket?
+open class Advertisement {
+    open var handle : String
+    open var name : String
+    open var rssi : NSNumber
+    open var isCrownstone : Bool = false
+    open var serviceData = [String: [UInt8]]()
+    open var serviceDataAvailable : Bool
+    open var serviceUUID : String?
+    open var scanResponse : ScanResponcePacket?
     
-    init(handle: String, name: String?, rssi: NSNumber, serviceData: AnyObject?, serviceUUID: AnyObject?) {
+    init(handle: String, name: String?, rssi: NSNumber, serviceData: Any, serviceUUID: Any) {
         if (name != nil) {
             self.name = name!
         }
@@ -38,15 +38,15 @@ public class Advertisement {
         self.serviceDataAvailable = false
 
         if let castData = serviceUUID as? [CBUUID] {
-            self.serviceUUID = castData[0].UUIDString // assuming only one service data uuid
+            self.serviceUUID = castData[0].uuidString // assuming only one service data uuid
         }
         
-        if let castData = serviceData as? [CBUUID: NSData] {
+        if let castData = serviceData as? [CBUUID: Data] {
             for (serviceCUUID, data) in castData {
                 // convert data to uint8 array
-                let uint8Arr = Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(data.bytes), count: data.length))
-                self.serviceData[serviceCUUID.UUIDString] = uint8Arr
-                self.serviceUUID = serviceCUUID.UUIDString
+                let uint8Arr = Array(UnsafeBufferPointer(start: (data as NSData).bytes.bindMemory(to: UInt8.self, capacity: data.count), count: data.count))
+                self.serviceData[serviceCUUID.uuidString] = uint8Arr
+                self.serviceUUID = serviceCUUID.uuidString
                 self.serviceDataAvailable = true
             }
         }
@@ -60,10 +60,10 @@ public class Advertisement {
 
     }
     
-    func getNumberArray(data: [UInt8]) -> [NSNumber] {
+    func getNumberArray(_ data: [UInt8]) -> [NSNumber] {
         var numberArray = [NSNumber]()
         for uint8 in data {
-            numberArray.append(NSNumber(unsignedChar: uint8))
+            numberArray.append(NSNumber(value: uint8))
         }
         return numberArray
     }
@@ -83,8 +83,8 @@ public class Advertisement {
         return JSON([])
     }
     
-    public func getJSON() -> JSON {
-        var dataDict = [String : AnyObject]()
+    open func getJSON() -> JSON {
+        var dataDict = [String : Any]()
         dataDict["handle"] = self.handle
         dataDict["name"] = self.name
         dataDict["rssi"] = self.rssi
@@ -107,8 +107,8 @@ public class Advertisement {
         return dataJSON
     }
     
-    public func getDictionary() -> NSDictionary {
-        var returnDict : [String: AnyObject] = [
+    open func getDictionary() -> NSDictionary {
+        var returnDict : [String: Any] = [
             "handle" : self.handle,
             "name" : self.name,
             "rssi" : self.rssi,
@@ -128,33 +128,33 @@ public class Advertisement {
             }
         }
         
-        return returnDict
+        return returnDict as NSDictionary
     }
 
     
-    public func stringify() -> String {
+    open func stringify() -> String {
         return JSONUtils.stringify(self.getJSON())
     }
     
-    public func isSetupPackage() -> Bool {
+    open func isSetupPackage() -> Bool {
         if (serviceDataAvailable && self.scanResponse != nil) {
             return self.scanResponse!.isSetupPackage()
         }
         return false
     }
     
-    public func isDFUPackage() -> Bool {
+    open func isDFUPackage() -> Bool {
         if (serviceDataAvailable && self.scanResponse != nil) {
             return self.scanResponse!.isDFUPackage()
         }
         return false
     }
     
-    public func hasScanResponse() -> Bool {
+    open func hasScanResponse() -> Bool {
         return (serviceDataAvailable && self.scanResponse != nil)
     }
     
-    public func decrypt(key: [UInt8]) {
+    open func decrypt(_ key: [UInt8]) {
         if (serviceDataAvailable && self.scanResponse != nil) {
             self.scanResponse!.decrypt(key)
         }
@@ -164,7 +164,7 @@ public class Advertisement {
 
 
 
-public class ScanResponcePacket {
+open class ScanResponcePacket {
     var firmwareVersion     : UInt8!
     var crownstoneId        : UInt16!
     var switchState         : UInt8!
@@ -216,21 +216,21 @@ public class ScanResponcePacket {
         dfuMode = false;
     }
     
-    public func getJSON() -> JSON {
+    open func getJSON() -> JSON {
         var returnDict = [String: NSNumber]()
-        returnDict["firmwareVersion"] = NSNumber(unsignedChar: self.firmwareVersion)
-        returnDict["crownstoneId"] = NSNumber(unsignedShort: self.crownstoneId)
-        returnDict["switchState"] = NSNumber(unsignedChar: self.switchState)
-        returnDict["eventBitmask"] = NSNumber(unsignedChar: self.eventBitmask)
-        returnDict["temperature"] = NSNumber(char: self.temperature)
-        returnDict["powerUsage"] = NSNumber(int: self.powerUsage)
-        returnDict["accumulatedEnergy"] = NSNumber(int: self.accumulatedEnergy)
+        returnDict["firmwareVersion"] = NSNumber(value: self.firmwareVersion)
+        returnDict["crownstoneId"] = NSNumber(value: self.crownstoneId)
+        returnDict["switchState"] = NSNumber(value: self.switchState)
+        returnDict["eventBitmask"] = NSNumber(value: self.eventBitmask)
+        returnDict["temperature"] = NSNumber(value: self.temperature)
+        returnDict["powerUsage"] = NSNumber(value: self.powerUsage)
+        returnDict["accumulatedEnergy"] = NSNumber(value: self.accumulatedEnergy)
         
         // bitmask flags:
-        returnDict["newDataAvailable"] = NSNumber(bool: self.newDataAvailable)
-        returnDict["stateOfExternalCrownstone"] = NSNumber(bool: self.stateOfExternalCrownstone)
-        returnDict["setupMode"] = NSNumber(bool: self.isSetupPackage())
-        returnDict["dfuMode"] = NSNumber(bool: self.isDFUPackage())
+        returnDict["newDataAvailable"] = NSNumber(value: self.newDataAvailable)
+        returnDict["stateOfExternalCrownstone"] = NSNumber(value: self.stateOfExternalCrownstone)
+        returnDict["setupMode"] = NSNumber(value: self.isSetupPackage())
+        returnDict["dfuMode"] = NSNumber(value: self.isDFUPackage())
         
         // random flag:
         var dataJSON = JSON(returnDict)
@@ -239,42 +239,42 @@ public class ScanResponcePacket {
         return dataJSON
     }
     
-    public func getDictionary() -> NSDictionary {
-        var returnDict : [String: AnyObject] = [
-            "firmwareVersion" : NSNumber(unsignedChar: self.firmwareVersion),
-            "crownstoneId" : NSNumber(unsignedShort: self.crownstoneId),
-            "switchState" : NSNumber(unsignedChar: self.switchState),
-            "eventBitmask" : NSNumber(unsignedChar: self.eventBitmask),
-            "temperature" : NSNumber(char: self.temperature),
-            "powerUsage" : NSNumber(int: self.powerUsage),
-            "accumulatedEnergy" : NSNumber(int: self.accumulatedEnergy),
+    open func getDictionary() -> NSDictionary {
+        let returnDict : [String: Any] = [
+            "firmwareVersion" : NSNumber(value: self.firmwareVersion),
+            "crownstoneId" : NSNumber(value: self.crownstoneId),
+            "switchState" : NSNumber(value: self.switchState),
+            "eventBitmask" : NSNumber(value: self.eventBitmask),
+            "temperature" : NSNumber(value: self.temperature),
+            "powerUsage" : NSNumber(value: self.powerUsage),
+            "accumulatedEnergy" : NSNumber(value: self.accumulatedEnergy),
             "newDataAvailable" : self.newDataAvailable,
             "stateOfExternalCrownstone" : self.stateOfExternalCrownstone,
             "setupMode" : self.isSetupPackage(),
             "dfuMode" : self.isDFUPackage()
         ]
         
-        return returnDict
+        return returnDict as NSDictionary
     }
     
-    public func stringify() -> String {
+    open func stringify() -> String {
         return JSONUtils.stringify(self.getJSON())
     }
     
-    public func isSetupPackage() -> Bool {
+    open func isSetupPackage() -> Bool {
         if (crownstoneId == 0 && switchState == 0 && powerUsage == 0 && accumulatedEnergy == 0 && setupFlag == true) {
             return true
         }
         return false
     }
     
-    public func isDFUPackage() -> Bool {
+    open func isDFUPackage() -> Bool {
         // TODO: define.
         return false
     }
     
-    public func decrypt(key: [UInt8]) {
-        var encryptedData = [UInt8](count: 16, repeatedValue:0)
+    open func decrypt(_ key: [UInt8]) {
+        var encryptedData = [UInt8](repeating: 0, count: 16)
         // copy the data we want to encrypt into a buffer
         for i in [Int](1...data.count-1) {
             encryptedData[i-1] = data[i]

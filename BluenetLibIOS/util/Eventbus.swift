@@ -8,14 +8,14 @@
 
 import Foundation
 
-public class EventBus {
+open class EventBus {
     init() {}
     
     var idCounter : Int = 0
     var subscribers = [Int:    String]()
     var topics      = [String: [Int: eventCallback]]()
     
-    func emit(topic: String, _ data: AnyObject) {
+    func emit(_ topic: String, _ data: Any) {
         if (self.topics[topic] != nil) {
             for (_ , callback) in self.topics[topic]! {
                 callback(data)
@@ -23,7 +23,7 @@ public class EventBus {
         }
     }
     
-    func on(topic: String, _ callback: (notification: AnyObject) -> Void) -> voidCallback {
+    func on(_ topic: String, _ callback: @escaping (_ notification: Any) -> Void) -> voidCallback {
         if (self.topics[topic] == nil) {
             self.topics[topic] = [Int: eventCallback]()
         }
@@ -40,7 +40,7 @@ public class EventBus {
    
     
     
-    func hasListeners(topic: String) -> Bool {
+    func hasListeners(_ topic: String) -> Bool {
         return (self.topics[topic] != nil)
     }
     
@@ -52,20 +52,20 @@ public class EventBus {
     
     // MARK: Util
     
-    func _off(id: Int) {
+    func _off(_ id: Int) {
         if (self.subscribers[id] != nil) {
             let topic = self.subscribers[id]!;
             if (self.topics[topic] != nil) {
                 // remove callback from topic
-                self.topics[topic]!.removeValueForKey(id)
+                self.topics[topic]!.removeValue(forKey: id)
                 
                 // clean topic if empty
                 if (self.topics[topic]!.count == 0) {
-                    self.topics.removeValueForKey(topic);
+                    self.topics.removeValue(forKey: topic);
                 }
                 
                 // remove subscriber index
-                self.subscribers.removeValueForKey(id);
+                self.subscribers.removeValue(forKey: id);
             }
         }
     }

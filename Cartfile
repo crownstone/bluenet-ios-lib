@@ -1,8 +1,8 @@
 # Crypto related functions and helpers for Swift
-github "krzyzanowskim/CryptoSwift" "0.5.2"
+github "krzyzanowskim/CryptoSwift"
 
 # We code in Asynchronous world. We promise. [http://promisekit.org/]
-github "mxcl/PromiseKit" "3.5.0"
+github "mxcl/PromiseKit"
 
 # JSON Parser
-github "SwiftyJSON/SwiftyJSON" "2.3.3"
+github "SwiftyJSON/SwiftyJSON"

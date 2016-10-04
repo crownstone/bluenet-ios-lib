@@ -11,16 +11,16 @@ import Foundation
 
 class NotificationMerger {
     var data : [UInt8]
-    var callback : ([UInt8] -> Void)
+    var callback : (([UInt8]) -> Void)
     var lastPacketIndex : UInt8
 
-    init(callback: ([UInt8] -> Void)) {
+    init(callback: @escaping (([UInt8]) -> Void)) {
         self.data = [UInt8]()
         self.callback = callback
         self.lastPacketIndex = 0xFF
     }
     
-    func merge(data: [UInt8]) {
+    func merge(_ data: [UInt8]) {
         if (data.count > 0) {
             if (data[0] == 0xFF) {
                 self.data += data[1...data.count-1]

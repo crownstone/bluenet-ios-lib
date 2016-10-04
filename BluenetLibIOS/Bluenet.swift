@@ -13,7 +13,7 @@ import CoreBluetooth
 
 public typealias voidCallback = () -> Void
 public typealias voidPromiseCallback = () -> Promise<Void>
-public typealias eventCallback = (AnyObject) -> Void
+public typealias eventCallback = (Any) -> Void
 
 /**
  * Bluenet.
@@ -35,20 +35,20 @@ public typealias eventCallback = (AnyObject) -> Void
    |  "nearestCrownstone"           |     NearestItem      |     When a verified advertisement packet in setup mode is received, we check the list
    |                                |                      |     of available stones in setup mode and return the closest.
  */
-public class Bluenet  {
+open class Bluenet  {
     // todo: set back to private, currently public for DEBUG
-    public let bleManager : BleManager!
-    public var settings : BluenetSettings!
+    open let bleManager : BleManager!
+    open var settings : BluenetSettings!
     let eventBus : EventBus!
     var deviceList = [String: AvailableDevice]()
     var setupList = [String: NSNumber]()
 
     // declare the classes handling the library protocol
-    public let dfu      : DfuHandler!
-    public let config   : ConfigHandler!
-    public let setup    : SetupHandler!
-    public let control  : ControlHandler!
-    public let power    : PowerHandler!
+    open let dfu      : DfuHandler!
+    open let config   : ConfigHandler!
+    open let setup    : SetupHandler!
+    open let control  : ControlHandler!
+    open let power    : PowerHandler!
 
     
     // MARK: API
@@ -78,7 +78,7 @@ public class Bluenet  {
     /**
      * Load a settings object into Bluenet
      */
-    public func setSettings(encryptionEnabled encryptionEnabled: Bool, adminKey: String?, memberKey: String?, guestKey: String?) {
+    open func setSettings(encryptionEnabled: Bool, adminKey: String?, memberKey: String?, guestKey: String?) {
         let settings = BluenetSettings(encryptionEnabled: encryptionEnabled, adminKey: adminKey, memberKey: memberKey, guestKey: guestKey)
         self.settings = settings
         self.bleManager.setSettings(settings)
@@ -91,7 +91,7 @@ public class Bluenet  {
      * Start actively scanning for BLE devices.
      * Scan results will be broadcasted on the "advertisementData" topic.
      */
-    public func startScanning() {
+    open func startScanning() {
         self.bleManager.stopScanning()
         self.bleManager.startScanning()
     }
@@ -101,7 +101,7 @@ public class Bluenet  {
      * Start actively scanning for Crownstones based on the scan response service uuid.
      * Scan results will be broadcasted on the "advertisementData" topic.
      */
-    public func startScanningForCrownstones() {
+    open func startScanningForCrownstones() {
         self.startScanningForService(CrownstoneAdvertisementServiceUUID)
     }
     
@@ -112,7 +112,7 @@ public class Bluenet  {
      *
      * This is the battery saving variant, only unique messages are shown.
      */
-    public func startScanningForCrownstonesUniqueOnly() {
+    open func startScanningForCrownstonesUniqueOnly() {
         self.startScanningForServiceUniqueOnly(CrownstoneAdvertisementServiceUUID)
     }
     
@@ -121,7 +121,7 @@ public class Bluenet  {
      * Start actively scanning for BLE devices containing a specific serviceUUID.
      * Scan results will be broadcasted on the "advertisementData" topic.
      */
-    public func startScanningForService(serviceUUID: String) {
+    open func startScanningForService(_ serviceUUID: String) {
         self.bleManager.stopScanning()
         self.bleManager.startScanningForService(serviceUUID)
     }
@@ -134,7 +134,7 @@ public class Bluenet  {
      *
      * This is the battery saving variant, only unique messages are shown.
      */
-    public func startScanningForServiceUniqueOnly(serviceUUID: String) {
+    open func startScanningForServiceUniqueOnly(_ serviceUUID: String) {
         self.bleManager.stopScanning()
         self.bleManager.startScanningForServiceUniqueOnly(serviceUUID)
     }
@@ -143,7 +143,7 @@ public class Bluenet  {
     /**
      * Stop actively scanning for BLE devices.
      */
-    public func stopScanning() {
+    open func stopScanning() {
         self.bleManager.stopScanning()
     }
     
@@ -152,7 +152,7 @@ public class Bluenet  {
      * Returns if the BLE manager is initialized.
      * Should be used to make sure commands are not send before it's finished and get stuck.
      */
-    public func isReady() -> Promise<Void> {
+    open func isReady() -> Promise<Void> {
         return self.bleManager.isReady()
     }
     
@@ -164,20 +164,20 @@ public class Bluenet  {
      *   - It will abort other pending connection requests
      *   - It will disconnect from a connected device if that is the case
      */
-    public func connect(uuid: String) -> Promise<Void> {
+    open func connect(_ uuid: String) -> Promise<Void> {
         return self.bleManager.connect(uuid)
-            .then({_ -> Promise<Void> in
+            .then{_ -> Promise<Void> in
                 return Promise<Void> {fulfill, reject in
                     if (self.settings.isEncryptionEnabled()) {
                         self.control.getAndSetSessionNonce()
-                            .then({_ in fulfill()})
-                            .error({err in reject(err)})
+                            .then{_ in fulfill()}
+                            .catch{err in reject(err)}
                     }
                     else {
                         fulfill()
                     }
                 }
-            });
+            };
     }
     
     
@@ -185,7 +185,7 @@ public class Bluenet  {
      * Disconnect from the connected device. Will also fulfil if there is nothing connected.
      * Timeout is set to 2 seconds.
      */
-    public func disconnect() -> Promise<Void> {
+    open func disconnect() -> Promise<Void> {
         return self.bleManager.disconnect()
     }
     
@@ -193,7 +193,7 @@ public class Bluenet  {
     /**
      * Debug.
      */
-    public func getBLEstate() -> CBCentralManagerState {
+    open func getBLEstate() -> CBCentralManagerState {
         return self.bleManager.BleState;
     }
     
@@ -202,41 +202,41 @@ public class Bluenet  {
      * Subscribe to a topic with a callback. This method returns an Int which is used as identifier of the subscription.
      * This identifier is supplied to the off method to unsubscribe.
      */
-    public func on(topic: String, _ callback: eventCallback) -> voidCallback {
+    open func on(_ topic: String, _ callback: @escaping eventCallback) -> voidCallback {
         return self.eventBus.on(topic, callback)
     }
     
     
-    public func waitToReconnect() -> Promise<Void> {
+    open func waitToReconnect() -> Promise<Void> {
         return self.bleManager.waitToReconnect()
     }
     
-    public func waitToWrite() -> Promise<Void> {
+    open func waitToWrite() -> Promise<Void> {
         return self.bleManager.waitToWrite()
     }
     
     // MARK: util
-    func _parseAdvertisement(data: AnyObject) {
+    func _parseAdvertisement(_ data: Any) {
         if let castData = data as? Advertisement {
             if deviceList[castData.handle] != nil {
                 deviceList[castData.handle]!.update(castData)
                 if (deviceList[castData.handle]!.verified) {
                     self.eventBus.emit("verifiedAdvertisementData",castData)
                     
-                    if (castData.rssi.integerValue < 0) {
+                    if (castData.rssi.intValue < 0) {
                         if (castData.isSetupPackage()) {
                             self.setupList[castData.handle] = castData.rssi
                             self._emitNearestSetupCrownstone()
                         }
                         else {
                             self._emitNearestCrownstone();
-                            self.setupList.removeValueForKey(castData.handle)
+                            self.setupList.removeValue(forKey: castData.handle)
                         }
                     }
                 }
             }
             else {
-                deviceList[castData.handle] = AvailableDevice(castData, {_ in self.deviceList.removeValueForKey(castData.handle)})
+                deviceList[castData.handle] = AvailableDevice(castData, {_ in self.deviceList.removeValue(forKey: castData.handle)})
             }
         }
     }
@@ -245,7 +245,7 @@ public class Bluenet  {
         var nearestRSSI = -1000
         var nearestId = ""
         for (stoneId, rssi) in self.setupList {
-            let rssiInt = rssi.integerValue
+            let rssiInt = rssi.intValue
             if (rssiInt > nearestRSSI) {
                 nearestRSSI = rssiInt
                 nearestId = stoneId

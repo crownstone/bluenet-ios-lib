@@ -10,11 +10,11 @@ import Foundation
 import CryptoSwift
 
 public enum UserLevel: Int {
-    case Admin   = 0
-    case Member  = 1
-    case Guest   = 2
-    case Setup   = 100
-    case UNKNOWN = 255
+    case admin   = 0
+    case member  = 1
+    case guest   = 2
+    case setup   = 100
+    case unknown = 255
 }
 
 let NONCE_LENGTH            = 16
@@ -26,7 +26,7 @@ let CHECKSUM                : UInt32 = 0xcafebabe
 
 var BLUENET_ENCRYPTION_TESTING = false
 
-public class SessionData {
+open class SessionData {
     var sessionNonce : [UInt8]!
     var validationKey : [UInt8]!
     
@@ -35,8 +35,8 @@ public class SessionData {
             throw BleError.INVALID_SESSION_DATA
         }
         
-        sessionNonce = [UInt8](count: SESSION_DATA_LENGTH, repeatedValue: 0)
-        validationKey   = [UInt8](count: SESSION_KEY_LENGTH,  repeatedValue: 0)
+        sessionNonce = [UInt8](repeating: 0, count: SESSION_DATA_LENGTH)
+        validationKey   = [UInt8](repeating: 0,  count: SESSION_KEY_LENGTH)
 
         for i in [Int](0...SESSION_KEY_LENGTH-1) {
             sessionNonce[i] = sessionData[i]
@@ -46,11 +46,11 @@ public class SessionData {
     }
 }
 
-public class zeroPadding: Padding {
-    public func add(data: [UInt8], blockSize: Int) -> [UInt8] {
+open class zeroPadding: Padding {
+    open func add(to data: [UInt8], blockSize: Int) -> [UInt8] {
         if (data.count % blockSize != 0) {
             let offset = blockSize - (data.count % blockSize)
-            let padding = [UInt8](count: offset, repeatedValue: 0)
+            let padding = [UInt8](repeating: 0, count: offset)
             let paddedData = data + padding
 
 //            print ("final padded data: \(data.count) \(padding.count) \(padding) \(paddedData)")
@@ -59,7 +59,7 @@ public class zeroPadding: Padding {
         return data
     }
     
-    public func remove(data: [UInt8], blockSize: Int?) -> [UInt8] {
+    open func remove(from data: [UInt8], blockSize: Int?) -> [UInt8] {
         return data
     }
 }
@@ -78,12 +78,12 @@ class EncryptionHandler {
     /** 
      * This method is used to encrypt data and wrap the envelope around it according to protocol V5
      */
-    static func encrypt(payload: NSData, settings: BluenetSettings) throws -> NSData {
+    static func encrypt(_ payload: Data, settings: BluenetSettings) throws -> Data {
         if (settings.sessionNonce == nil) {
             throw BleError.NO_SESSION_NONCE_SET
         }
         
-        if (settings.userLevel == .UNKNOWN) {
+        if (settings.userLevel == .unknown) {
             throw BleError.DO_NOT_HAVE_ENCRYPTION_KEY
         }
         
@@ -91,10 +91,10 @@ class EncryptionHandler {
         let sessionData = try SessionData(settings.sessionNonce!)
         
         // get byte array from data
-        let payloadArray = payload.arrayOfBytes()
+        let payloadArray = payload.bytes
         
         // create Nonce array
-        var nonce = [UInt8](count: PACKET_NONCE_LENGTH, repeatedValue: 0)
+        var nonce = [UInt8](repeating: 0, count: PACKET_NONCE_LENGTH)
         
         // fill Nonce with random stuff
         for i in [Int](0...PACKET_NONCE_LENGTH-1) {
@@ -107,19 +107,19 @@ class EncryptionHandler {
         let key = try _getKey(settings)
         
         // pad payload with sessionId
-        var paddedPayload = [UInt8](count: payloadArray.count + SESSION_KEY_LENGTH, repeatedValue: 0)
+        var paddedPayload = [UInt8](repeating: 0, count: payloadArray.count + SESSION_KEY_LENGTH)
         for i in [Int](0...SESSION_KEY_LENGTH-1) {
             paddedPayload[i] = sessionData.validationKey[i]
         }
         
         // put the input data in the padded payload
-        for (index, element) in payloadArray.enumerate() {
+        for (index, element) in payloadArray.enumerated() {
             paddedPayload[index+4] = element
         }
         
         // do the actual encryption
         let encryptedPayload = try AES(key: key, iv: IV, blockMode: CryptoSwift.BlockMode.CTR, padding: zeroPadding()).encrypt(paddedPayload)
-        var result = [UInt8](count: PACKET_NONCE_LENGTH+PACKET_USERLEVEL_LENGTH + encryptedPayload.count, repeatedValue: 0)
+        var result = [UInt8](repeating: 0, count: PACKET_NONCE_LENGTH+PACKET_USERLEVEL_LENGTH + encryptedPayload.count)
         
         // copy nonce into result
         for i in [Int](0...PACKET_NONCE_LENGTH-1) {
@@ -135,14 +135,14 @@ class EncryptionHandler {
             result[index] = encryptedPayload[i]
         }
         
-        return NSData(bytes:result)
+        return Data(bytes:result)
     }
     
-    static func decryptAdvertisement(input: [UInt8], key: [UInt8]) throws -> [UInt8] {
+    static func decryptAdvertisement(_ input: [UInt8], key: [UInt8]) throws -> [UInt8] {
         return try AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: zeroPadding()).decrypt(input)
     }
     
-    static func decryptSessionNonce(input: [UInt8], key: [UInt8]) throws -> [UInt8] {
+    static func decryptSessionNonce(_ input: [UInt8], key: [UInt8]) throws -> [UInt8] {
         if (input.count == 16) {
             let result = try AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: zeroPadding()).decrypt(input)
             let checksum = Conversion.uint8_array_to_uint32(result)
@@ -159,7 +159,7 @@ class EncryptionHandler {
         }
     }
     
-    static func decrypt(input: NSData, settings: BluenetSettings) throws -> NSData {
+    static func decrypt(_ input: Data, settings: BluenetSettings) throws -> Data {
         if (settings.sessionNonce == nil) {
             throw BleError.NO_SESSION_NONCE_SET
         }
@@ -172,14 +172,14 @@ class EncryptionHandler {
         // verify decryption success and strip checksum
         let result = try _verifyDecryption(decrypted, sessionData)
         
-        return NSData(bytes: result)
+        return Data(bytes: result)
     }
     
-    static func _verifyDecryption(decrypted: [UInt8], _ sessionData: SessionData) throws -> [UInt8] {
+    static func _verifyDecryption(_ decrypted: [UInt8], _ sessionData: SessionData) throws -> [UInt8] {
         // the conversion to uint32 only takes the first 4 bytes
         if (Conversion.uint8_array_to_uint32(decrypted) == Conversion.uint8_array_to_uint32(sessionData.validationKey!)) {
             // remove checksum from decyption and return payload
-            var result = [UInt8](count:decrypted.count - SESSION_KEY_LENGTH, repeatedValue: 0)
+            var result = [UInt8](repeating: 0, count: decrypted.count - SESSION_KEY_LENGTH)
             for i in [Int](SESSION_KEY_LENGTH...decrypted.count-1) {
                 result[i-SESSION_KEY_LENGTH] = decrypted[i]
             }
@@ -190,7 +190,7 @@ class EncryptionHandler {
         }
     }
     
-    static func _decrypt(input: NSData, _ sessionData: SessionData, _ settings: BluenetSettings) throws -> [UInt8] {
+    static func _decrypt(_ input: Data, _ sessionData: SessionData, _ settings: BluenetSettings) throws -> [UInt8] {
         let package = try EncryptedPackage(data: input)
         let key = try _getKey(package.userLevel, settings)
         let IV = try generateIV(package.nonce, sessionData: sessionData.sessionNonce)
@@ -200,24 +200,24 @@ class EncryptionHandler {
         return decrypted
     }
     
-    static func _getKey(settings: BluenetSettings) throws -> [UInt8] {
+    static func _getKey(_ settings: BluenetSettings) throws -> [UInt8] {
         return try _getKey(settings.userLevel, settings);
     }
     
-    static func _getKey(userLevel: UserLevel, _ settings: BluenetSettings) throws -> [UInt8] {
-        if (settings.initializedKeys == false && userLevel != .Setup) {
+    static func _getKey(_ userLevel: UserLevel, _ settings: BluenetSettings) throws -> [UInt8] {
+        if (settings.initializedKeys == false && userLevel != .setup) {
             throw BleError.COULD_NOT_ENCRYPT_KEYS_NOT_SET
         }
         
         var key : [UInt8]?
         switch (userLevel) {
-        case .Admin:
+        case .admin:
             key = settings.adminKey
-        case .Member:
+        case .member:
             key = settings.memberKey
-        case .Guest:
+        case .guest:
             key = settings.guestKey
-        case .Setup:
+        case .setup:
             key = settings.setupKey
         default:
             throw BleError.INVALID_KEY_FOR_ENCRYPTION
@@ -230,11 +230,11 @@ class EncryptionHandler {
         return key!
     }
     
-    static func generateIV(packetNonce: [UInt8], sessionData: [UInt8]) throws -> [UInt8] {
+    static func generateIV(_ packetNonce: [UInt8], sessionData: [UInt8]) throws -> [UInt8] {
         if (packetNonce.count != PACKET_NONCE_LENGTH) {
             throw BleError.INVALID_SIZE_FOR_SESSION_NONCE_PACKET
         }
-        var IV = [UInt8](count: NONCE_LENGTH, repeatedValue: 0)
+        var IV = [UInt8](repeating: 0, count: NONCE_LENGTH)
         // the IV used in the CTR mode is 8 bytes, the first 3 are random
         for i in [Int](0...PACKET_NONCE_LENGTH-1) {
             IV[i] = packetNonce[i]

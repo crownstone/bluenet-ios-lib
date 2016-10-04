@@ -8,10 +8,10 @@
 
 import Foundation
 
-public class Conversion {
+open class Conversion {
     
     // Convert a number into an array of 2 bytes.
-    public static func uint16_to_uint8_array(value: UInt16) -> [UInt8] {
+    open static func uint16_to_uint8_array(_ value: UInt16) -> [UInt8] {
         return [
             UInt8((value >> 0 & 0xFF)),
             UInt8((value >> 8 & 0xFF))
@@ -19,7 +19,7 @@ public class Conversion {
     }
     
     // Convert a number into an array of 4 bytes.
-    public static func uint32_to_uint8_array(value: UInt32) -> [UInt8] {
+    open static func uint32_to_uint8_array(_ value: UInt32) -> [UInt8] {
         return [
             UInt8((value >> 0 & 0xFF)),
             UInt8((value >> 8 & 0xFF)),
@@ -28,7 +28,7 @@ public class Conversion {
         ]
     }
     
-    public static func string_to_uint8_array(string: String) -> [UInt8] {
+    open static func string_to_uint8_array(_ string: String) -> [UInt8] {
         var arr = [UInt8]();
         for c in string.characters {
             let scalars = String(c).unicodeScalars
@@ -37,7 +37,7 @@ public class Conversion {
         return arr
     }
     
-    public static func uint8_array_to_hex_string(data: [UInt8]) -> String {
+    open static func uint8_array_to_hex_string(_ data: [UInt8]) -> String {
         var stringResult = ""
         for byte in data {
             stringResult += Conversion.uint8_to_hex_string(byte)
@@ -47,7 +47,7 @@ public class Conversion {
     
     
     
-    public static func uint8_to_hex_string(byte: UInt8) -> String {
+    open static func uint8_to_hex_string(_ byte: UInt8) -> String {
         if (byte < 0xf) {
             return "0" + String(format:"%1X", byte)
         }
@@ -56,7 +56,7 @@ public class Conversion {
         }
     }
     
-    public static func hex_string_to_uint8_array(input: String) -> [UInt8] {
+    open static func hex_string_to_uint8_array(_ input: String) -> [UInt8] {
         var hexNumber = ""
         var result = [UInt8]()
         for letter in input.characters {
@@ -69,7 +69,7 @@ public class Conversion {
         return result
     }
     
-    public static func uint8_array_to_macAddress(input:[UInt8]) -> String {
+    open static func uint8_array_to_macAddress(_ input:[UInt8]) -> String {
         var string = ""
         for i in [Int](0...input.count-1) {
             // due to little endian, we read it out in the reverse order.
@@ -83,30 +83,30 @@ public class Conversion {
         return string
     }
     
-    public static func reverse(input: [UInt8]) -> [UInt8] {
-        return input.reverse() as [UInt8]
+    open static func reverse(_ input: [UInt8]) -> [UInt8] {
+        return input.reversed() as [UInt8]
     }
     
-    public static func ibeaconUUIDString_to_uint8_array(input:String) -> [UInt8] {
-        let check = NSUUID(UUIDString: input)
+    open static func ibeaconUUIDString_to_uint8_array(_ input:String) -> [UInt8] {
+        let check = UUID(uuidString: input)
         if (check != nil) {
-            var stripped = input.stringByReplacingOccurrencesOfString("-", withString: "")
-            stripped  = stripped.stringByReplacingOccurrencesOfString(":", withString: "")
+            var stripped = input.replacingOccurrences(of: "-", with: "")
+            stripped  = stripped.replacingOccurrences(of: ":", with: "")
             return Conversion.hex_string_to_uint8_array(stripped)
         }
         return []
     }
     
-    public static func ibeaconUUIDString_to_reversed_uint8_array(input:String) -> [UInt8] {
+    open static func ibeaconUUIDString_to_reversed_uint8_array(_ input:String) -> [UInt8] {
         let byteArray = Conversion.ibeaconUUIDString_to_uint8_array(input)
         return Conversion.reverse(byteArray)
     }
     
-    public static func uint8_array_to_uint16(arr8: [UInt8]) -> UInt16 {
+    open static func uint8_array_to_uint16(_ arr8: [UInt8]) -> UInt16 {
         return (UInt16(arr8[1]) << 8) + UInt16(arr8[0])
     }
     
-    public static func uint8_array_to_uint32(arr8: [UInt8]) -> UInt32 {
+    open static func uint8_array_to_uint32(_ arr8: [UInt8]) -> UInt32 {
         let p1 = UInt32(arr8[3]) << 24
         let p2 = UInt32(arr8[2]) << 16
         let p3 = UInt32(arr8[1]) << 8
@@ -114,13 +114,13 @@ public class Conversion {
         return p1 + p2 + p3 + p4
     }
     
-    public static func uint32_to_int32(val: UInt32) -> Int32 {
-        let ns = NSNumber(unsignedInt: val)
-        return ns.intValue
+    open static func uint32_to_int32(_ val: UInt32) -> Int32 {
+        let ns = NSNumber(value: val as UInt32)
+        return ns.int32Value
     }
     
-    public static func uint8_to_bit_array(val: UInt8) -> [Bool] {
-        var result = [Bool](count: 8, repeatedValue: false)
+    open static func uint8_to_bit_array(_ val: UInt8) -> [Bool] {
+        var result = [Bool](repeating: false, count: 8)
         
         let bitString = String(val, radix: 2)
         let stringLength = bitString.characters.count
@@ -135,8 +135,8 @@ public class Conversion {
     }
     
     
-    public static func uint8_to_int8(val: UInt8) -> Int8 {
-        let ns = NSNumber(unsignedChar: val)
-        return ns.charValue
+    open static func uint8_to_int8(_ val: UInt8) -> Int8 {
+        let ns = NSNumber(value: val as UInt8)
+        return ns.int8Value
     }
 }

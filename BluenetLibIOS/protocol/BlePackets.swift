@@ -67,9 +67,9 @@ class BLEPacket {
         return arr
     }
     
-    func getNSData() -> NSData {
+    func getNSData() -> Data {
         let bytes = self.getPacket()
-        return NSData(bytes: bytes, length: bytes.count)
+        return Data(bytes: UnsafePointer<UInt8>(bytes), count: bytes.count)
     }
 }
 
@@ -93,16 +93,16 @@ class ControlPacket : BLEPacket {
 }
 
 class FactoryResetPacket : ControlPacket {
-    init() {super.init(type: ControlType.FACTORY_RESET, payload32: 0xdeadbeef)}
+    init() {super.init(type: ControlType.factory_RESET, payload32: 0xdeadbeef)}
 }
 
 
 class EnableScannerPacket : ControlPacket {
-    init(payload8: UInt8) {super.init(type: ControlType.ENABLE_SCANNER, payload8: payload8)}
+    init(payload8: UInt8) {super.init(type: ControlType.enable_SCANNER, payload8: payload8)}
 }
 
 class EnableScannerDelayPacket : ControlPacket {
-    init(delayInMs: Int) {super.init(type: ControlType.ENABLE_SCANNER, payload16: UInt16(delayInMs))}
+    init(delayInMs: Int) {super.init(type: ControlType.enable_SCANNER, payload16: UInt16(delayInMs))}
 }
 
 class MeshControlPacket {
@@ -122,7 +122,7 @@ class ReadConfigPacket : BLEPacket {
     init(type: ConfigurationType, payload32: UInt32) { super.init(type: type.rawValue, payload: payload32) }
     init(type: ConfigurationType, payloadArray: [UInt8]) { super.init(type: type.rawValue, payload: payloadArray) }
     
-    func getOpCode() -> OpCode { return .READ }
+    func getOpCode() -> OpCode { return .read }
     
     override func getPacket() -> [UInt8] {
         var arr = [UInt8]()
@@ -134,7 +134,7 @@ class ReadConfigPacket : BLEPacket {
     }
 }
 class WriteConfigPacket : ReadConfigPacket {
-    override func getOpCode() -> OpCode { return .WRITE }
+    override func getOpCode() -> OpCode { return .write }
 }
 
 
@@ -148,7 +148,7 @@ class ReadStatePacket : BLEPacket {
     init(type: StateType, payloadArray: [UInt8]) { super.init(type: type.rawValue, payload: payloadArray) }
     
     func getOpCode() -> OpCode {
-        return .READ
+        return .read
     }
     
     override func getPacket() -> [UInt8] {
@@ -162,11 +162,11 @@ class ReadStatePacket : BLEPacket {
 }
 
 class WriteStatePacket : ReadStatePacket {
-    override func getOpCode() -> OpCode { return .WRITE }
+    override func getOpCode() -> OpCode { return .write }
 }
 
 class NotificationStatePacket : ReadStatePacket {
-    override func getOpCode() -> OpCode { return .NOTIFY }
+    override func getOpCode() -> OpCode { return .notify }
 }
 
 

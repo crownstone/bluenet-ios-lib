@@ -10,7 +10,7 @@ import Foundation
 import PromiseKit
 import CoreBluetooth
 
-public class PowerHandler {
+open class PowerHandler {
     let bleManager : BleManager!
     var settings : BluenetSettings!
     let eventBus : EventBus!
@@ -27,20 +27,20 @@ public class PowerHandler {
      * Set the switch state. If 0 or 1, switch on or off. If 0 < x < 1 then dim.
      * TODO: currently only relay is supported.
      */
-    public func switchRelay(state: UInt8) -> Promise<Void> {
+    open func switchRelay(_ state: UInt8) -> Promise<Void> {
         print ("------ BLUENET_LIB: switching relay to \(state)")
         let packet : [UInt8] = [state]
         return self.bleManager.writeToCharacteristic(
             CSServices.PowerService,
             characteristicId: PowerCharacteristics.Relay,
-            data: NSData(bytes: packet, length: packet.count),
-            type: CBCharacteristicWriteType.WithResponse
+            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+            type: CBCharacteristicWriteType.withResponse
         )
     }
     
     
     
-    public func notifyPowersamples() -> Promise<voidPromiseCallback> {
+    open func notifyPowersamples() -> Promise<voidPromiseCallback> {
         let successCallback = {(data: [UInt8]) -> Void in
             let samples = PowerSamples(data: data)
             if (samples.valid) {
@@ -56,9 +56,9 @@ public class PowerHandler {
         }
         let merger = NotificationMerger(callback: successCallback)
         
-        let callback = {(data: AnyObject) -> Void in
-            if let castData = data as? NSData {
-                merger.merge(castData.arrayOfBytes())
+        let callback = {(data: Any) -> Void in
+            if let castData = data as? Data {
+                merger.merge(castData.bytes)
             }
         }
         return self.bleManager.enableNotifications(CSServices.PowerService, characteristicId: PowerCharacteristics.PowerSamples, callback: callback)

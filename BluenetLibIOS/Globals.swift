@@ -14,7 +14,7 @@ import UIKit
 var APPNAME = "Crownstone"
 var VIEWCONTROLLER : UIViewController?
 
-public func setBluenetGlobals(viewController viewController: UIViewController, appName: String) {
+public func setBluenetGlobals(viewController: UIViewController, appName: String) {
     VIEWCONTROLLER = viewController;
     APPNAME = appName
 }

@@ -14,13 +14,9 @@ import Foundation
  *
  * @param delay = delay in seconds
  */
-public func delay(delay:Double, _ closure:()->()) {
-    dispatch_after(
-        dispatch_time(
-            DISPATCH_TIME_NOW,
-            Int64(delay * Double(NSEC_PER_SEC))
-        ),
-        dispatch_get_main_queue(), closure)
+public func delay(_ delay:Double, _ closure: @escaping ()->()) {
+    DispatchQueue.main.asyncAfter(
+        deadline: DispatchTime.now() + Double(Int64(delay * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC), execute: closure)
 }
 
 
@@ -30,18 +26,18 @@ public func delay(delay:Double, _ closure:()->()) {
 public func showLocationAlert() {
     let alertController = UIAlertController(title: "Allow \(APPNAME) to use your location",
                                             message: "The location permission was not authorized. Please set it to \"Always\" in Settings to continue.",
-                                            preferredStyle: .Alert)
+                                            preferredStyle: .alert)
     
-    let settingsAction = UIAlertAction(title: "Settings", style: .Default) { (alertAction) in
+    let settingsAction = UIAlertAction(title: "Settings", style: .default) { (alertAction) in
         // THIS IS WHERE THE MAGIC HAPPENS!!!! It triggers the settings page to change the permissions
-        if let appSettings = NSURL(string: UIApplicationOpenSettingsURLString) {
-            UIApplication.sharedApplication().openURL(appSettings)
+        if let appSettings = URL(string: UIApplicationOpenSettingsURLString) {
+            UIApplication.shared.openURL(appSettings)
         }
     }
     alertController.addAction(settingsAction)
     
-    let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil)
+    let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
     alertController.addAction(cancelAction)
     
-    VIEWCONTROLLER!.presentViewController(alertController, animated: true, completion: nil)
+    VIEWCONTROLLER!.present(alertController, animated: true, completion: nil)
 }
