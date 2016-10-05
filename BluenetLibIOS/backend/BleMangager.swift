@@ -235,7 +235,6 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                     pendingPromise = promiseContainer(fulfill, reject, type: .CONNECT)
                     pendingPromise.setDelayedReject(timeoutDurations.connect, errorOnReject: .CONNECT_TIMEOUT)
                     
-                    
                     centralManager.connect(connectingPeripheral!, options: nil)
 
                 }
@@ -254,11 +253,11 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                 print ("------ BLUENET_LIB: disconnecting from connecting peripheral")
                 abortConnecting()
                     .then{ _ in return self._disconnect() }
-                    .then{fulfill}
+                    .then{_ -> Void in fulfill()}
                     .catch{err in reject(err)}
             }
             else {
-                self._disconnect().then{fulfill}.catch{err in reject(err)}
+                self._disconnect().then{_ -> Void in fulfill()}.catch{err in reject(err)}
             }
         }
     }
@@ -582,10 +581,13 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         if #available(iOS 10.0, *) {
             switch central.state{
             case CBManagerState.unauthorized:
+                self.BleState = .unauthorized
                 print("------ BLUENET_LIB: This app is not authorised to use Bluetooth low energy")
             case CBManagerState.poweredOff:
+                self.BleState = .poweredOff
                 print("------ BLUENET_LIB: Bluetooth is currently powered off.")
             case CBManagerState.poweredOn:
+                self.BleState = .poweredOn
                 print("------ BLUENET_LIB: Bluetooth is currently powered on and available to use.")
             default:break
             }
