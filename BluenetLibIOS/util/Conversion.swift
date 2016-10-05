@@ -69,6 +69,15 @@ open class Conversion {
         return result
     }
     
+    open static func ascii_or_hex_string_to_16_byte_array(_ input: String) -> [UInt8] {
+        if (input.characters.count == 16) {
+            return Conversion.string_to_uint8_array(input);
+        }
+        else {
+            return Conversion.hex_string_to_uint8_array(input)
+        }
+    }
+    
     open static func uint8_array_to_macAddress(_ input:[UInt8]) -> String {
         var string = ""
         for i in [Int](0...input.count-1) {

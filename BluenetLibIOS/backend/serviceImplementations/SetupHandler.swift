@@ -94,15 +94,15 @@ open class SetupHandler {
     }
     open func writeAdminKey(_ key: String) -> Promise<Void> {
         print ("writeAdminKey")
-        return self._writeAndVerify(.admin_ENCRYPTION_KEY, payload: self._getKeyPayload(key))
+        return self._writeAndVerify(.admin_ENCRYPTION_KEY, payload: Conversion.ascii_or_hex_string_to_16_byte_array(key))
     }
     open func writeMemberKey(_ key: String) -> Promise<Void> {
         print ("writeMemberKey")
-        return self._writeAndVerify(.member_ENCRYPTION_KEY, payload: self._getKeyPayload(key))
+        return self._writeAndVerify(.member_ENCRYPTION_KEY, payload: Conversion.ascii_or_hex_string_to_16_byte_array(key))
     }
     open func writeGuestKey(_ key: String) -> Promise<Void> {
         print ("writeGuestKey")
-        return self._writeAndVerify(.guest_ENCRYPTION_KEY, payload: self._getKeyPayload(key))
+        return self._writeAndVerify(.guest_ENCRYPTION_KEY, payload: Conversion.ascii_or_hex_string_to_16_byte_array(key))
     }
     open func writeMeshAccessAddress(_ address: UInt32) -> Promise<Void> {
         print ("writeMeshAccessAddress")
@@ -132,16 +132,6 @@ open class SetupHandler {
     }
     
     // MARK : Support functions
-    
-    func _getKeyPayload(_ key: String) -> [UInt8] {
-        if (key.characters.count == 16) {
-            return Conversion.string_to_uint8_array(key);
-        }
-        else {
-            return Conversion.hex_string_to_uint8_array(key)
-        }
-
-    }
     
     func _writeAndVerify(_ type: ConfigurationType, payload: [UInt8], iteration: UInt8 = 0) -> Promise<Void> {
         let initialPacket = WriteConfigPacket(type: type, payloadArray: payload).getPacket()
