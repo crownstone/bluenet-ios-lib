@@ -95,7 +95,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         
         self.settings = BluenetSettings()
         self.eventBus = eventBus
-        self.centralManager = CBCentralManager(delegate: self, queue: nil)
+        self.centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionRestoreIdentifierKey: "BluenetIOS"])
         
         // initialize the pending promise containers
         pendingPromise = promiseContainer()
