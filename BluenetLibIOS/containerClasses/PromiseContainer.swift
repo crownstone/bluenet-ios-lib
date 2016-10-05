@@ -98,7 +98,7 @@ class promiseContainer {
     }
     
     func setDelayedReject(_ delayTimeInSeconds: Double, errorOnReject: BleError) {
-        delay(delayTimeInSeconds, {_ in self.reject(errorOnReject as! Error)})
+        delay(delayTimeInSeconds, {_ in self.reject(errorOnReject as Error)})
     }
     
     

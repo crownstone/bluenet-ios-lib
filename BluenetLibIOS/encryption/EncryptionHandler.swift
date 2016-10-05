@@ -152,7 +152,6 @@ class EncryptionHandler {
             else {
                 throw BleError.COULD_NOT_VALIDATE_SESSION_NONCE
             }
-            return result
         }
         else {
             throw BleError.READ_SESSION_NONCE_ZERO_MAYBE_ENCRYPTION_DISABLED

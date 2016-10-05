@@ -61,7 +61,7 @@ open class SetupHandler {
                     self.eventBus.emit("setupProgress", 0);
                     self.bleManager.settings.exitSetup()
                     self.bleManager.settings.restoreEncryption()
-                    self.bleManager.disconnect()
+                    _ = self.bleManager.disconnect()
                     reject(err)
                 }
         }

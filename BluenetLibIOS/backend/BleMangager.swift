@@ -114,7 +114,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     open func isReady() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             if (self.BleState != .poweredOn) {
-                delay(0.25, {_ in self.isReady().then(execute: {_ in fulfill()})})
+                delay(0.25, {_ in _ = self.isReady().then{_ -> Void in fulfill()}})
             }
             else {
                 fulfill()
