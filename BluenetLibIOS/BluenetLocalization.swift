@@ -50,7 +50,7 @@ open class BluenetLocalization {
     var fingerprintData = [String : [String : Fingerprint]]() // groupId: locationId: Fingerprint
     
     // MARK API
-    
+  
     /**
      * On init the handlers and interpreters are bound to the events broadcasted by this lib.
      */

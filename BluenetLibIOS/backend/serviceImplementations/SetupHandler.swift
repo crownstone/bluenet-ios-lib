@@ -136,12 +136,12 @@ open class SetupHandler {
     func _writeAndVerify(_ type: ConfigurationType, payload: [UInt8], iteration: UInt8 = 0) -> Promise<Void> {
         let initialPacket = WriteConfigPacket(type: type, payloadArray: payload).getPacket()
         return _writeConfigPacket(initialPacket)
-            .then{_ -> Promise<Void> in self.bleManager.waitToWrite()}
+            .then{_ -> Promise<Void> in self.bleManager.waitToWrite(iteration)}
             .then{_ -> Promise<Void> in
                 let packet = ReadConfigPacket(type: type).getPacket()
                 return self._writeConfigPacket(packet)
             }
-            .then{_ -> Promise<Void> in self.bleManager.waitToWrite()}
+            .then{_ -> Promise<Void> in self.bleManager.waitToWrite(iteration)}
             .then{_ -> Promise<Bool> in
                 return self._verifyResult(initialPacket)
             }

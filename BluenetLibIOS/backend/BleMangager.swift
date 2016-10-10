@@ -131,9 +131,16 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     }
     
     // this delay is set up for calls that need to write to storage.
-    open func waitToWrite() -> Promise<Void> {
+    open func waitToWrite(_ iteration: UInt8?) -> Promise<Void> {
+        if (iteration != nil) {
+            if (iteration! > 0) {
+                print("------ BLUENET_LIB: Could not verify immediatly, waiting longer between steps...")
+                return Promise<Void> { fulfill, reject in delay(2 * timeoutDurations.waitForWrite, fulfill) }
+            }
+        }
         return Promise<Void> { fulfill, reject in delay(timeoutDurations.waitForWrite, fulfill) }
     }
+
     
     /**
      * Connect to a ble device. The uuid is the Apple UUID which differs between phones for a single device
