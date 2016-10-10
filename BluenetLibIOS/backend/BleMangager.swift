@@ -95,7 +95,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         
         self.settings = BluenetSettings()
         self.eventBus = eventBus
-        self.centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionRestoreIdentifierKey: "BluenetIOS"])
+        self.centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true, CBCentralManagerOptionRestoreIdentifierKey: "BluenetIOS"])
         
         // initialize the pending promise containers
         pendingPromise = promiseContainer()
@@ -114,7 +114,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     open func isReady() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             if (self.BleState != .poweredOn) {
-                delay(0.25, {_ in _ = self.isReady().then{_ -> Void in fulfill()}})
+                delay(0.50, {_ in _ = self.isReady().then{_ -> Void in fulfill()}})
             }
             else {
                 fulfill()
