@@ -41,7 +41,7 @@ open class Bluenet  {
     open var settings : BluenetSettings!
     let eventBus : EventBus!
     var deviceList = [String: AvailableDevice]()
-    var setupList = [String: NSNumber]()
+    var setupList = [String: NearestItem]()
 
     // declare the classes handling the library protocol
     open let dfu      : DfuHandler!
@@ -191,9 +191,9 @@ open class Bluenet  {
     
     
     /**
-     * Debug.
+     * Get the state of the BLE controller.
      */
-    open func getBLEstate() -> CBCentralManagerState {
+    open func isBleOff() -> CBCentralManagerState {
         return self.bleManager.BleState;
     }
     
@@ -225,14 +225,17 @@ open class Bluenet  {
                     
                     if (castData.rssi.intValue < 0) {
                         if (castData.isSetupPackage()) {
-                            self.setupList[castData.handle] = castData.rssi
+                            self.setupList[castData.handle] = NearestItem(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue, setupMode: true)
                             self._emitNearestSetupCrownstone()
                         }
                         else {
-                            self._emitNearestCrownstone();
+                            self._emitNearestCrownstone(topic: "nearestCrownstone", verifiedOnly: true);
                             self.setupList.removeValue(forKey: castData.handle)
                         }
                     }
+                }
+                else {
+                    self._emitNearestCrownstone(topic: "nearestItem", verifiedOnly: false);
                 }
             }
             else {
@@ -243,32 +246,42 @@ open class Bluenet  {
     
     func _emitNearestSetupCrownstone() {
         var nearestRSSI = -1000
-        var nearestId = ""
-        for (stoneId, rssi) in self.setupList {
-            let rssiInt = rssi.intValue
-            if (rssiInt > nearestRSSI) {
-                nearestRSSI = rssiInt
-                nearestId = stoneId
+        var nearestHandle = ""
+        var nearestName = ""
+        for (handle, nearestItem) in self.setupList {
+            if (nearestItem.rssi > nearestRSSI) {
+                nearestRSSI = nearestItem.rssi
+                nearestHandle = nearestItem.handle
+                nearestName = nearestItem.name
             }
         }
-        if (nearestId != "" && nearestRSSI < 0) {
-            let data = NearestItem(handle: nearestId, rssi: nearestRSSI, setupMode: true)
+        if (nearestHandle != "" && nearestRSSI < 0) {
+            let data = NearestItem(name: nearestName, handle: nearestHandle, rssi: nearestRSSI, setupMode: true)
             self.eventBus.emit("nearestSetupCrownstone", data)
         }
     }
     
-    func _emitNearestCrownstone() {
+    func _emitNearestCrownstone(topic: String, verifiedOnly: Bool = true) {
         var nearestRSSI = -1000
-        var nearestId = ""
-        for (stoneId, device) in self.deviceList {
+        var nearestHandle = ""
+        var nearestName : String?
+        for (handle, device) in self.deviceList {
             if (device.rssi > nearestRSSI) {
-                nearestRSSI = device.rssi
-                nearestId = stoneId
+                if (verifiedOnly == true && device.verified == true || verifiedOnly == false) {
+                    nearestRSSI = device.rssi
+                    nearestHandle = handle
+                    nearestName = device.name
+                }
             }
         }
-        if (nearestId != "" && nearestRSSI < 0) {
-            let data = NearestItem(handle: nearestId, rssi: nearestRSSI, setupMode: false)
-            self.eventBus.emit("nearestCrownstone", data)
+        
+        if (nearestName == nil) {
+            nearestName = "nil"
+        }
+        
+        if (nearestHandle != "" && nearestRSSI < 0) {
+            let data = NearestItem(name: nearestName!, handle: nearestHandle, rssi: nearestRSSI, setupMode: false)
+            self.eventBus.emit(topic, data)
         }
     }
     

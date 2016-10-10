@@ -10,11 +10,13 @@ import Foundation
 import SwiftyJSON
 
 open class NearestItem {
+    var name : String = ""
     var handle : String = ""
     var rssi : Int = 0
     var setupMode : Bool = false
     
-    init(handle:String, rssi: Int, setupMode: Bool) {
+    init(name: String, handle:String, rssi: Int, setupMode: Bool) {
+        self.name = name
         self.handle = handle;
         self.rssi = rssi
         self.setupMode = setupMode
@@ -22,6 +24,7 @@ open class NearestItem {
     
     open func getJSON() -> JSON {
         var dataDict = [String : Any]()
+        dataDict["name"] = self.name
         dataDict["handle"] = self.handle
         dataDict["rssi"] = self.rssi
         dataDict["setupMode"] = self.setupMode
@@ -36,6 +39,7 @@ open class NearestItem {
     
     open func getDictionary() -> NSDictionary {
         let returnDict : [String: Any] = [
+            "name": self.name,
             "handle" : self.handle,
             "rssi" : self.rssi,
             "setupMode" : self.setupMode
