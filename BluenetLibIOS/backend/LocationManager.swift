@@ -65,13 +65,12 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     open func clearTrackedBeacons() {
-        self.stopTrackingIBeacons()
+        self.pauseTrackingIBeacons()
         self.trackingBeacons.removeAll()
     }
     
-    
     open func stopTrackingIBeacon(_ uuid: String) {
-        // stop monitoring all becons
+        // stop monitoring this beacon
         var targetIndex : Int? = nil;
         let uuidObject = UUID(uuidString : uuid)
         if (uuidObject == nil) {
@@ -97,7 +96,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         
     }
     
-    open func stopTrackingIBeacons() {
+    open func pauseTrackingIBeacons() {
         // stop monitoring all becons
         for beacon in self.trackingBeacons {
             self.manager.stopRangingBeacons(in: beacon.region)
@@ -120,7 +119,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     
     func resetBeaconRanging() {
         print ("------ BLUENET_LIB_NAV: Resetting ibeacon tracking")
-        self.stopTrackingIBeacons()
+        self.pauseTrackingIBeacons()
         self.startTrackingIBeacons()
         self.trackingState = true
     }

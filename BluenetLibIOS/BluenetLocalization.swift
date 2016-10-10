@@ -85,15 +85,21 @@ open class BluenetLocalization {
         self.locationManager.clearTrackedBeacons()
     }
     
+    
+    /**
+     * This will stop listening to a single iBeacon uuid and remove it from the list. This is called when you remove the region from
+     * the list of stuff you want to listen to. It will not be resumed by resumeTracking.
+     */
     open func stopTrackingIBeacon(_ uuid: String) {
         self.locationManager.stopTrackingIBeacon(uuid);
     }
     
     /**
-     *  This will stop listening to any and all updates from the iBeacon tracking. Your app may fall asleep.
+     *  This will pause listening to any and all updates from the iBeacon tracking. Your app may fall asleep. It can be resumed by 
+     *  the resumeTracking method.
      */
-    open func stopTracking() {
-        self.locationManager.stopTrackingIBeacons()
+    open func pauseTracking() {
+        self.locationManager.pauseTrackingIBeacons()
     }
     
     /**
