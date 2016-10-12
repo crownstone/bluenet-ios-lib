@@ -37,7 +37,7 @@ enum ConfigurationType : UInt8 {
     case room = 2
     case floor = 3
     case nearby_TIMEOUT = 4
-    case pwm_FREQUENCY = 5
+    case pwm_PERIOD = 5
     case ibeacon_MAJOR = 6
     case ibeacon_MINOR = 7
     case ibeacon_UUID = 8

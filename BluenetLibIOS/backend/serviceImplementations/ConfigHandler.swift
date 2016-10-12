@@ -35,7 +35,7 @@ open class ConfigHandler {
     }
     
     open func setPWMPeriod(_ pwmPeriod: NSNumber) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.pwm_FREQUENCY, payload32: pwmPeriod.uint32Value)
+        let data = WriteConfigPacket(type: ConfigurationType.pwm_PERIOD, payload32: pwmPeriod.uint32Value)
         let packet = data.getPacket();
         return self.bleManager.writeToCharacteristic(
             CSServices.CrownstoneService,
