@@ -262,7 +262,8 @@ open class ScanResponcePacket {
             "newDataAvailable" : self.newDataAvailable,
             "stateOfExternalCrownstone" : self.stateOfExternalCrownstone,
             "setupMode" : self.isSetupPackage(),
-            "dfuMode" : self.isDFUPackage()
+            "dfuMode" : self.isDFUPackage(),
+            "random" : self.random
         ]
         
         return returnDict as NSDictionary

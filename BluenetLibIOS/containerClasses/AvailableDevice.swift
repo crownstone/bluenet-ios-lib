@@ -21,6 +21,7 @@ open class AvailableDevice {
     var lastUpdate : Double = 0
     var cleanupCallback : voidCallback
     var avgRssi : Double!
+    var random : String = "test"
     var verified = false
     var dfu = false
     
@@ -89,7 +90,7 @@ open class AvailableDevice {
                 self.consecutiveMatches = 0
             }
             else {
-                if (response.crownstoneId == self.crownstoneId && response.stateOfExternalCrownstone == false) {
+                if (response.crownstoneId == self.crownstoneId && response.stateOfExternalCrownstone == false && self.random != response.random) {
                     if (self.consecutiveMatches >= AMOUNT_OF_REQUIRED_MATCHES) {
                         self.verified = true
                     }
@@ -106,11 +107,13 @@ open class AvailableDevice {
                     self.crownstoneId = response.crownstoneId
                 }
             }
+            self.random = response.random
         }
         else {
             self.consecutiveMatches = 0
             self.verified = false;
         }
+        
     }
     
     func calculateRssiAverage() {

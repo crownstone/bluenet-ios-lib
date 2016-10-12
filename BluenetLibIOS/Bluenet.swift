@@ -275,7 +275,7 @@ open class Bluenet  {
         var nearestName : String?
         for (handle, device) in self.deviceList {
             if (device.rssi > nearestRSSI) {
-                if (verifiedOnly == true && device.verified == true || verifiedOnly == false) {
+                if ((verifiedOnly == true && device.verified == true) || verifiedOnly == false) {
                     nearestRSSI = device.rssi
                     nearestHandle = handle
                     nearestName = device.name
