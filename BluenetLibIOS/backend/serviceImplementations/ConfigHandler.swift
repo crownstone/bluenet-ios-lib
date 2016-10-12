@@ -33,6 +33,17 @@ open class ConfigHandler {
             type: CBCharacteristicWriteType.withResponse
         )
     }
+    
+    open func setPWMPeriod(_ pwmPeriod: NSNumber) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.pwm_FREQUENCY, payload32: pwmPeriod.uint32Value)
+        let packet = data.getPacket();
+        return self.bleManager.writeToCharacteristic(
+            CSServices.CrownstoneService,
+            characteristicId: CrownstoneCharacteristics.ConfigControl,
+            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+            type: CBCharacteristicWriteType.withResponse
+        )
+    }
 
     
     
