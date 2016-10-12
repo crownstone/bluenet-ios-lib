@@ -589,18 +589,18 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             switch central.state{
             case CBManagerState.unauthorized:
                 self.BleState = .unauthorized
-                self.eventBus.emit("BLEStatus", "unauthorized");
+                self.eventBus.emit("bleStatus", "unauthorized");
                 print("------ BLUENET_LIB: This app is not authorised to use Bluetooth low energy")
             case CBManagerState.poweredOff:
                 self.BleState = .poweredOff
-                self.eventBus.emit("BLEStatus", "poweredOff");
+                self.eventBus.emit("bleStatus", "poweredOff");
                 print("------ BLUENET_LIB: Bluetooth is currently powered off.")
             case CBManagerState.poweredOn:
                 self.BleState = .poweredOn
-                self.eventBus.emit("BLEStatus", "poweredOn");
+                self.eventBus.emit("bleStatus", "poweredOn");
                 print("------ BLUENET_LIB: Bluetooth is currently powered on and available to use.")
             default:
-                self.eventBus.emit("BLEStatus", "unknown");
+                self.eventBus.emit("bleStatus", "unknown");
                 break
             }
         } else {
@@ -608,18 +608,18 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             switch central.state.rawValue {
             case 3: // CBCentralManagerState.unauthorized :
                 self.BleState = .unauthorized
-                self.eventBus.emit("BLEStatus", "unauthorized");
+                self.eventBus.emit("bleStatus", "unauthorized");
                 print("------ BLUENET_LIB: This app is not authorised to use Bluetooth low energy")
             case 4: // CBCentralManagerState.poweredOff:
                 self.BleState = .poweredOff
-                self.eventBus.emit("BLEStatus", "poweredOff");
+                self.eventBus.emit("bleStatus", "poweredOff");
                 print("------ BLUENET_LIB: Bluetooth is currently powered off.")
             case 5: //CBCentralManagerState.poweredOn:
                 self.BleState = .poweredOn
-                self.eventBus.emit("BLEStatus", "poweredOn");
+                self.eventBus.emit("bleStatus", "poweredOn");
                 print("------ BLUENET_LIB: Bluetooth is currently powered on and available to use.")
             default:
-                self.eventBus.emit("BLEStatus", "unknown");
+                self.eventBus.emit("bleStatus", "unknown");
                 break
             }
         }

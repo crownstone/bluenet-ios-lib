@@ -26,7 +26,7 @@ public typealias eventCallback = (Any) -> Void
  * This lib broadcasts the following data:
    |  topic:                        |     dataType:        |     when:
    |  --------------------------------------------------------------------------------------------------------
-   |  "BLEStatus"                   |     String           |     Is emitted when the state of the BLE changes "unauthorized" "poweredOff" "poweredOn" "unknown"
+   |  "bleStatus"                   |     String           |     Is emitted when the state of the BLE changes. Possible values: "unauthorized", "poweredOff", "poweredOn", "unknown"
    |  "setupProgress"               |     NSNumber         |     Phases in the setup process, numbers from 1 - 13, 0 for error.
    |  "advertisementData"           |     Advertisement    |     When an advertisement packet is received
    |  "verifiedAdvertisementData"   |     Advertisement    |     When an advertisement has been decrypted successfully 3 consecutive times it is verified.
@@ -194,14 +194,14 @@ open class Bluenet  {
     /**
      * Get the state of the BLE controller.
      */
-    open func getBLEState() -> CBCentralManagerState {
+    open func getBleState() -> CBCentralManagerState {
         return self.bleManager.BleState;
     }
     
     /**
      * Re-emit the state of the BLE controller.
      */
-    open func emitBLEState() {
+    open func emitBleState() {
         self.bleManager.centralManagerDidUpdateState(self.bleManager.centralManager);
     }
     
