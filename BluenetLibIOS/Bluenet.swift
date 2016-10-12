@@ -248,7 +248,7 @@ open class Bluenet  {
         var nearestRSSI = -1000
         var nearestHandle = ""
         var nearestName = ""
-        for (handle, nearestItem) in self.setupList {
+        for (_ , nearestItem) in self.setupList {
             if (nearestItem.rssi > nearestRSSI) {
                 nearestRSSI = nearestItem.rssi
                 nearestHandle = nearestItem.handle
