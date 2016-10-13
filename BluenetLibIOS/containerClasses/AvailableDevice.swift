@@ -84,6 +84,7 @@ open class AvailableDevice {
             if (response.isSetupPackage()) {
                 self.verified = true
                 self.consecutiveMatches = 0
+                return
             }
             else if (response.isDFUPackage()) {
                 self.verified = true
@@ -97,6 +98,9 @@ open class AvailableDevice {
                     else {
                         self.consecutiveMatches += 1
                     }
+                }
+                else if (self.random == response.random) {
+                     // dont do anything, wait for next payload
                 }
                 else if (response.crownstoneId != self.crownstoneId && response.stateOfExternalCrownstone == true) {
                     // dont do anything

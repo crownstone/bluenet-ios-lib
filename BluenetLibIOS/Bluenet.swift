@@ -243,7 +243,9 @@ open class Bluenet  {
                     }
                 }
                 else {
-                    self._emitNearestCrownstone(topic: "nearestItem", verifiedOnly: false);
+                    if (castData.rssi.intValue < 0) {
+                        self._emitNearestCrownstone(topic: "nearestItem", verifiedOnly: false);
+                    }
                 }
             }
             else {
