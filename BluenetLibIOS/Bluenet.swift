@@ -237,14 +237,14 @@ open class Bluenet  {
                             self._emitNearestSetupCrownstone()
                         }
                         else {
-                            self._emitNearestCrownstone(topic: "nearestCrownstone", verifiedOnly: true);
+                            self._emitNearestCrownstone(topic: "nearestVerifiedCrownstone", verifiedOnly: true);
                             self.setupList.removeValue(forKey: castData.handle)
                         }
                     }
                 }
-                else {
+                else if (castData.isCrownstone) {
                     if (castData.rssi.intValue < 0) {
-                        self._emitNearestCrownstone(topic: "nearestItem", verifiedOnly: false);
+                        self._emitNearestCrownstone(topic: "nearestCrownstone", verifiedOnly: false);
                     }
                 }
             }
