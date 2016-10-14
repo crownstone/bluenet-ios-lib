@@ -212,9 +212,11 @@ open class ScanResponcePacket {
             
             // bitmask states
             let bitmaskArray = Conversion.uint8_to_bit_array(self.eventBitmask)
+            
             newDataAvailable = bitmaskArray[0]
             stateOfExternalCrownstone = bitmaskArray[1]
             setupFlag = bitmaskArray[7]
+        
             dfuMode = false
             validData = true
         }

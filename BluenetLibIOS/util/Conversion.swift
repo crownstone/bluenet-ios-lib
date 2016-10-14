@@ -130,16 +130,15 @@ open class Conversion {
     
     open static func uint8_to_bit_array(_ val: UInt8) -> [Bool] {
         var result = [Bool](repeating: false, count: 8)
-        
-        let bitString = String(val, radix: 2)
-        let stringLength = bitString.characters.count
-        let padding = 8-stringLength
-        
-        var index = padding
-        for char in bitString.characters {
-            result[index] = char == "1"
-            index += 1
-        }
+        let one : UInt8 = 1
+        result[0] = (val & one) != 0
+        result[1] = (val & (one << 1)) != 0
+        result[2] = (val & (one << 2)) != 0
+        result[3] = (val & (one << 3)) != 0
+        result[4] = (val & (one << 4)) != 0
+        result[5] = (val & (one << 5)) != 0
+        result[6] = (val & (one << 6)) != 0
+        result[7] = (val & (one << 7)) != 0
         return result
     }
     

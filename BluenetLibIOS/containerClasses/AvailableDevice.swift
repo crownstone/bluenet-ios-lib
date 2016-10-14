@@ -4,13 +4,10 @@
 //
 //  Created by Alex de Mulder on 17/06/16.
 //  Copyright © 2016 Alex de Mulder. All rights reserved.
-//
 
 import Foundation
 
 let AMOUNT_OF_REQUIRED_MATCHES = 3
-
-
 
 open class AvailableDevice {
     var rssiHistory = [Double: Int]()
@@ -84,7 +81,6 @@ open class AvailableDevice {
             if (response.isSetupPackage()) {
                 self.verified = true
                 self.consecutiveMatches = 0
-                return
             }
             else if (response.isDFUPackage()) {
                 self.verified = true
