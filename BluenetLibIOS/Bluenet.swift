@@ -99,22 +99,30 @@ open class Bluenet  {
     
     
     /**
-     * Start actively scanning for Crownstones based on the scan response service uuid.
+     * Start actively scanning for Crownstones (and guidestones) based on the scan response service uuid.
      * Scan results will be broadcasted on the "advertisementData" topic.
      */
     open func startScanningForCrownstones() {
-        self.startScanningForService(CrownstoneAdvertisementServiceUUID)
+        self.startScanningForServices([
+            CrownstoneBuiltinAdvertisementServiceUUID,
+            CrownstonePlugAdvertisementServiceUUID,
+            GuidestoneAdvertisementServiceUUID
+        ])
     }
     
     
     /**
-     * Start actively scanning for Crownstones based on the scan response service uuid.
+     * Start actively scanning for Crownstones (and guidestones) based on the scan response service uuid.
      * Scan results will be broadcasted on the "advertisementData" topic.
      *
      * This is the battery saving variant, only unique messages are shown.
      */
     open func startScanningForCrownstonesUniqueOnly() {
-        self.startScanningForServiceUniqueOnly(CrownstoneAdvertisementServiceUUID)
+        self.startScanningForServicesUniqueOnly([
+            CrownstoneBuiltinAdvertisementServiceUUID,
+            CrownstonePlugAdvertisementServiceUUID,
+            GuidestoneAdvertisementServiceUUID
+        ])
     }
     
     
@@ -124,7 +132,16 @@ open class Bluenet  {
      */
     open func startScanningForService(_ serviceUUID: String) {
         self.bleManager.stopScanning()
-        self.bleManager.startScanningForService(serviceUUID)
+        self.bleManager.startScanningForService(serviceUUID, uniqueOnly: false)
+    }
+    
+    /**
+     * Start actively scanning for BLE devices containing a specific serviceUUID.
+     * Scan results will be broadcasted on the "advertisementData" topic.
+     */
+    open func startScanningForServices(_ serviceUUIDs: [String]) {
+        self.bleManager.stopScanning()
+        self.bleManager.startScanningForServices(serviceUUIDs, uniqueOnly: false)
     }
     
     
@@ -137,7 +154,18 @@ open class Bluenet  {
      */
     open func startScanningForServiceUniqueOnly(_ serviceUUID: String) {
         self.bleManager.stopScanning()
-        self.bleManager.startScanningForServiceUniqueOnly(serviceUUID)
+        self.bleManager.startScanningForService(serviceUUID, uniqueOnly: true)
+    }
+    
+    /**
+     * Start actively scanning for BLE devices containing a specific serviceUUID.
+     * Scan results will be broadcasted on the "advertisementData" topic.
+     *
+     * This is the battery saving variant, only unique messages are shown.
+     */
+    open func startScanningForServicesUniqueOnly(_ serviceUUIDs: [String]) {
+        self.bleManager.stopScanning()
+        self.bleManager.startScanningForServices(serviceUUIDs, uniqueOnly: true)
     }
     
     
@@ -242,7 +270,7 @@ open class Bluenet  {
                         }
                     }
                 }
-                else if (castData.isCrownstone) {
+                else if (castData.isCrownstoneFamily) {
                     if (castData.rssi.intValue < 0) {
                         self._emitNearestCrownstone(topic: "nearestCrownstone", verifiedOnly: false);
                     }

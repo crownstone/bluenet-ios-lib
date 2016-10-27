@@ -16,7 +16,9 @@ import Foundation
  *
  */
 
-public let CrownstoneAdvertisementServiceUUID   = "C001"
+public let CrownstonePlugAdvertisementServiceUUID = "C001"
+public let CrownstoneBuiltinAdvertisementServiceUUID = "C002"
+public let GuidestoneAdvertisementServiceUUID = "C003"
 
 public struct CSServices {
     public static let CrownstoneService         = "24f00000-7d10-4805-bfc1-7663a01c3bff"

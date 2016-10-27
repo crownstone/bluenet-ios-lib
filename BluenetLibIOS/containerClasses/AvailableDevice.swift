@@ -32,7 +32,7 @@ open class AvailableDevice {
         self.handle = data.handle
         self.cleanupCallback = cleanupCallback
         self.avgRssi = data.rssi.doubleValue
-        if (data.isCrownstone) {
+        if (data.isCrownstoneFamily) {
             if (data.isSetupPackage()) {
                 self.verified = true;
             }

@@ -10,8 +10,6 @@ import Foundation
 import CoreBluetooth
 import SwiftyJSON
 
-let CROWNSTONE_SERVICEDATA_UUID = "C001"
-
 /**
  * Wrapper for all relevant data of the object
  *
@@ -20,7 +18,11 @@ open class Advertisement {
     open var handle : String
     open var name : String
     open var rssi : NSNumber
-    open var isCrownstone : Bool = false
+    open var isCrownstoneFamily  : Bool = false
+    open var isCrownstonePlug    : Bool = false
+    open var isCrownstoneBuiltin : Bool = false
+    open var isGuidestone        : Bool = false
+    
     open var serviceData = [String: [UInt8]]()
     open var serviceDataAvailable : Bool
     open var serviceUUID : String?
@@ -52,9 +54,15 @@ open class Advertisement {
         }
         
         for (id, data) in self.serviceData {
-            if (id == CROWNSTONE_SERVICEDATA_UUID) {
-                self.scanResponse = ScanResponcePacket(data)
-                self.isCrownstone = self.scanResponse!.isCrownstone()
+            if (id == CrownstonePlugAdvertisementServiceUUID ||
+                id == CrownstoneBuiltinAdvertisementServiceUUID ||
+                id == GuidestoneAdvertisementServiceUUID) {
+                self.scanResponse        = ScanResponcePacket(data)
+                self.isCrownstoneFamily  = self.scanResponse!.hasCrownstoneDataFormat()
+                self.isCrownstonePlug    = (id == CrownstonePlugAdvertisementServiceUUID)
+                self.isCrownstoneBuiltin = (id == CrownstoneBuiltinAdvertisementServiceUUID)
+                self.isGuidestone        = (id == GuidestoneAdvertisementServiceUUID)
+                break
             }
         }
     }
@@ -70,7 +78,11 @@ open class Advertisement {
     func getServiceDataJSON() -> JSON {
         if (self.serviceDataAvailable) {
             for (id, data) in self.serviceData {
-                if (id == CROWNSTONE_SERVICEDATA_UUID && self.scanResponse != nil) {
+                if ((
+                    id == CrownstonePlugAdvertisementServiceUUID ||
+                    id == CrownstoneBuiltinAdvertisementServiceUUID ||
+                    id == GuidestoneAdvertisementServiceUUID) &&
+                    self.scanResponse != nil) {
                     return self.scanResponse!.getJSON()
                 }
                 else {
@@ -87,7 +99,10 @@ open class Advertisement {
         dataDict["handle"] = self.handle
         dataDict["name"] = self.name
         dataDict["rssi"] = self.rssi
-        dataDict["isCrownstone"] = self.isCrownstone
+        dataDict["isCrownstoneFamily"]  = self.isCrownstoneFamily
+        dataDict["isCrownstonePlug"]    = self.isCrownstonePlug
+        dataDict["isCrownstoneBuiltin"] = self.isCrownstoneBuiltin
+        dataDict["isGuidestone"]        = self.isGuidestone
         
         if (self.serviceUUID != nil) {
             dataDict["serviceUUID"] = self.serviceUUID
@@ -95,7 +110,7 @@ open class Advertisement {
       
         var dataJSON = JSON(dataDict)
         if (self.serviceDataAvailable) {
-            if (self.isCrownstone) {
+            if (self.isCrownstoneFamily) {
                 dataJSON["serviceData"] = self.scanResponse!.getJSON()
             }
             else {
@@ -109,9 +124,12 @@ open class Advertisement {
     open func getDictionary() -> NSDictionary {
         var returnDict : [String: Any] = [
             "handle" : self.handle,
-            "name" : self.name,
-            "rssi" : self.rssi,
-            "isCrownstone" : self.isCrownstone
+            "name"   : self.name,
+            "rssi"   : self.rssi,
+            "isCrownstoneFamily"   : self.isCrownstoneFamily,
+            "isCrownstonePlug"     : self.isCrownstonePlug,
+            "isCrownstoneBuiltin"  : self.isCrownstoneBuiltin,
+            "isGuidestone"         : self.isGuidestone
         ]
         
         if (self.serviceUUID != nil) {
@@ -119,7 +137,7 @@ open class Advertisement {
         }
         
         if (self.serviceDataAvailable) {
-            if (self.isCrownstone) {
+            if (self.isCrownstoneFamily) {
                 returnDict["serviceData"] = self.scanResponse!.getDictionary()
             }
             else {
@@ -225,7 +243,7 @@ open class ScanResponcePacket {
         }
     }
     
-    open func isCrownstone() -> Bool {
+    open func hasCrownstoneDataFormat() -> Bool {
         return validData
     }
     
