@@ -558,16 +558,13 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     
     open func startScanning() {
         print ("------ BLUENET_LIB: start scanning everything")
-        //        let generalService = CBUUID(string: "f5f90000-f5f9-11e4-aa15-123b93f75cba")
-        //let generalService = CBUUID(string: "5432")
-        // centralManager.scanForPeripheralsWithServices([generalService], options:nil)//, options:[CBCentralManagerScanOptionAllowDuplicatesKey:false])
-        centralManager.scanForPeripherals(withServices: nil, options:[CBCentralManagerScanOptionAllowDuplicatesKey:true])
+        centralManager.scanForPeripherals(withServices: nil, options:[CBCentralManagerScanOptionAllowDuplicatesKey: true])
     }
     
     open func startScanningForService(_ serviceUUID: String, uniqueOnly: Bool = false) {
         print ("------ BLUENET_LIB: start scanning for services \(serviceUUID)")
         let service = CBUUID(string: serviceUUID)
-        centralManager.scanForPeripherals(withServices: [service], options:[CBCentralManagerScanOptionAllowDuplicatesKey: uniqueOnly])
+        centralManager.scanForPeripherals(withServices: [service], options:[CBCentralManagerScanOptionAllowDuplicatesKey: !uniqueOnly])
     }
     
     open func startScanningForServices(_ serviceUUIDs: [String], uniqueOnly: Bool = false) {
@@ -577,7 +574,9 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             services.append(CBUUID(string: service))
         }
         
-        centralManager.scanForPeripherals(withServices: services, options:[CBCentralManagerScanOptionAllowDuplicatesKey: uniqueOnly])
+        centralManager.scanForPeripherals(withServices: services, options:[CBCentralManagerScanOptionAllowDuplicatesKey: !uniqueOnly])
+        
+        
     }
     
     open func stopScanning() {

@@ -35,8 +35,6 @@ open class iBeaconContainer {
         self.minor = minor.uint16Value
         self.region = CLBeaconRegion(proximityUUID: self.UUID, major: self.major!, minor: self.minor!, identifier: referenceId)
     }
-    
- 
 }
 
 open class iBeaconPacket {
