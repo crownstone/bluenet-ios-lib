@@ -1,5 +1,5 @@
 # Crypto related functions and helpers for Swift
-github "krzyzanowskim/CryptoSwift"
+github "krzyzanowskim/CryptoSwift" “0.6.1”
 
 # We code in Asynchronous world. We promise. [http://promisekit.org/]
 github "mxcl/PromiseKit"
