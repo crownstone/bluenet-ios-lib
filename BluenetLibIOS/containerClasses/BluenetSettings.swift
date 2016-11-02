@@ -18,13 +18,15 @@ open class BluenetSettings {
     open var setupKey  : [UInt8]?
     open var initializedKeys = false
     open var sessionNonce : [UInt8]?
+    open var referenceId : String = "unknown"
     
     open var userLevel : UserLevel = .unknown
     
     init() {}
     
-    public init(encryptionEnabled: Bool, adminKey: String?, memberKey: String?, guestKey: String?) {
+    public init(encryptionEnabled: Bool, adminKey: String?, memberKey: String?, guestKey: String?, referenceId: String) {
         self.encryptionEnabled = encryptionEnabled
+        self.referenceId = referenceId
         
         if (adminKey != nil) {
             self.adminKey = Conversion.ascii_or_hex_string_to_16_byte_array(adminKey!)

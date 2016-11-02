@@ -18,6 +18,8 @@ open class Advertisement {
     open var handle : String
     open var name : String
     open var rssi : NSNumber
+    open var referenceId : String // id of the entity that provides the keys
+    
     open var isCrownstoneFamily  : Bool = false
     open var isCrownstonePlug    : Bool = false
     open var isCrownstoneBuiltin : Bool = false
@@ -28,7 +30,9 @@ open class Advertisement {
     open var serviceUUID : String?
     open var scanResponse : ScanResponcePacket?
     
-    init(handle: String, name: String?, rssi: NSNumber, serviceData: Any, serviceUUID: Any) {
+    init(handle: String, name: String?, rssi: NSNumber, serviceData: Any, serviceUUID: Any, referenceId: String) {
+        self.referenceId = referenceId
+        
         if (name != nil) {
             self.name = name!
         }
@@ -171,7 +175,7 @@ open class Advertisement {
         return (serviceDataAvailable && self.scanResponse != nil)
     }
     
-    open func decrypt(_ key: [UInt8]) {
+    open func decrypt( _ key: [UInt8] ) {
         if (serviceDataAvailable && self.scanResponse != nil) {
             self.scanResponse!.decrypt(key)
         }
@@ -283,6 +287,7 @@ open class ScanResponcePacket {
             "stateOfExternalCrownstone" : self.stateOfExternalCrownstone,
             "setupMode" : self.isSetupPackage(),
             "dfuMode" : self.isDFUPackage(),
+            "referenceId:" : "test",
             "random" : self.random
         ]
         

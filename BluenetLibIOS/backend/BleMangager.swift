@@ -634,7 +634,8 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             name: peripheral.name,
             rssi: RSSI,
             serviceData: advertisementData["kCBAdvDataServiceData"],
-            serviceUUID: advertisementData["kCBAdvDataServiceUUIDs"]
+            serviceUUID: advertisementData["kCBAdvDataServiceUUIDs"],
+            referenceId: settings.referenceId
         );
 
         if (self.settings.isEncryptionEnabled() && emitData.isSetupPackage() == false && settings.guestKey != nil) {
