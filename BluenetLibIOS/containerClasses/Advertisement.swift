@@ -107,6 +107,7 @@ open class Advertisement {
         dataDict["isCrownstonePlug"]    = self.isCrownstonePlug
         dataDict["isCrownstoneBuiltin"] = self.isCrownstoneBuiltin
         dataDict["isGuidestone"]        = self.isGuidestone
+        dataDict["referenceId"]         = self.referenceId
         
         if (self.serviceUUID != nil) {
             dataDict["serviceUUID"] = self.serviceUUID
@@ -133,7 +134,8 @@ open class Advertisement {
             "isCrownstoneFamily"   : self.isCrownstoneFamily,
             "isCrownstonePlug"     : self.isCrownstonePlug,
             "isCrownstoneBuiltin"  : self.isCrownstoneBuiltin,
-            "isGuidestone"         : self.isGuidestone
+            "isGuidestone"         : self.isGuidestone,
+            "referenceId"          : self.referenceId
         ]
         
         if (self.serviceUUID != nil) {
@@ -287,7 +289,6 @@ open class ScanResponcePacket {
             "stateOfExternalCrownstone" : self.stateOfExternalCrownstone,
             "setupMode" : self.isSetupPackage(),
             "dfuMode" : self.isDFUPackage(),
-            "referenceId:" : "test",
             "random" : self.random
         ]
         
