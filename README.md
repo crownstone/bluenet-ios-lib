@@ -43,10 +43,10 @@ This lib has two parts, the BLE one called Bluenet and the location one called B
 We use PromiseKit to handle all async events. If you see the return type is Promise<DataType> that
 means this method is asynchronous and you'll have to use promises.
 
-# Bluenet (BLE)
+[# Bluenet (BLE)](./BluenetLibIOS.md)
 
-Read the docs here 
+[Read the docs here](./BluenetLibIOS.md)
 
-# BluenetLocalization (iBeacon and indoor localization)
+[# BluenetLocalization (iBeacon and indoor localization)](./BluenetLocalization.md)
 
-Read the docs here 
+[Read the docs here](./BluenetLocalization.md)
