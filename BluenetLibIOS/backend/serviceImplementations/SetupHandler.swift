@@ -26,7 +26,7 @@ open class SetupHandler {
     /**
      * This will handle the complete setup. We expect bonding has already been done by now.
      */
-    open func setup(_ crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: UInt32, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
+    open func setup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: UInt32, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             self.bleManager.settings.disableEncryptionTemporarily()
             self.getSessionKey()

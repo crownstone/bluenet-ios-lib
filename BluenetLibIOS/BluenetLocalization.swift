@@ -27,8 +27,8 @@ import SwiftyJSON
  * This lib broadcasts the following data:
     topic:                      dataType:               when:
     "iBeaconAdvertisement"      [iBeaconPacket]         Once a second when the iBeacon's are ranged   (array of iBeaconPacket objects)
-    "enterRegion"               String                  When a region (denoted by groupId) is entered (data is the groupId as String)
-    "exitRegion"                String                  When a region (denoted by groupId) is no longer detected (data is the groupId as String)
+    "enterRegion"               String                  When a region (denoted by referenceId) is entered (data is the referenceId as String)
+    "exitRegion"                String                  When a region (denoted by referenceId) is no longer detected (data is the referenceId as String)
     "enterLocation"             String                  When the classifier determines the user has entered a new location (data is the locationId as String)
     "exitLocation"              String                  When the classifier determines the user has left his location in favor 
                                                             of a new one. Not triggered when region is left (data is the locationId as String)
@@ -44,10 +44,10 @@ open class BluenetLocalization {
     var activeGroupId : String?
     var activeLocationId : String?
     var indoorLocalizationConsecutiveMatchesThreshold = 2
-    var indoorLocalizationEnabled : Bool = false;
+    var indoorLocalizationEnabled : Bool = false
     var indoorLocalizationConsecutiveMatches = 0
     var lastMeasurement = ""
-    var fingerprintData = [String : [String : Fingerprint]]() // groupId: locationId: Fingerprint
+    var fingerprintData = [String : [String : Fingerprint]]() // referenceId: locationId: Fingerprint
     
     // MARK API
   
@@ -67,7 +67,7 @@ open class BluenetLocalization {
      * This method configures an ibeacon with the ibeaconUUID you provide. The dataId is used to notify
      * you when this region is entered as well as to keep track of which classifiers belong to which datapoint in your reference.
      */
-    open func trackIBeacon(_ uuid: String, referenceId: String) {
+    open func trackIBeacon(uuid: String, referenceId: String) {
         if (uuid.characters.count < 30) {
             print("BLUENET LOCALIZATION ---- Cannot track \(referenceId) with UUID \(uuid)")
         }
@@ -142,8 +142,8 @@ open class BluenetLocalization {
      * Load a fingerprint into the classifier(s) for the specified groupId and locationId.
      * The fingerprint can be constructed from a string by using the initializer when creating the Fingerprint object
      */
-    open func loadFingerprint(_ groupId: String, locationId: String, fingerprint: Fingerprint) {
-        self._loadFingerprint(groupId, locationId: locationId, fingerprint: fingerprint)
+    open func loadFingerprint(referenceId: String, locationId: String, fingerprint: Fingerprint) {
+        self._loadFingerprint(referenceId, locationId: locationId, fingerprint: fingerprint)
     }
    
     
@@ -151,8 +151,8 @@ open class BluenetLocalization {
      * Obtain the fingerprint for this groupId and locationId. usually done after collecting it.
      * The user is responsible for persistently storing and loading the fingerprints.
      */
-    open func getFingerprint(_ groupId: String, locationId: String) -> Fingerprint? {
-        if let groupFingerprints = self.fingerprintData[groupId] {
+    open func getFingerprint(_ referenceId: String, locationId: String) -> Fingerprint? {
+        if let groupFingerprints = self.fingerprintData[referenceId] {
             if let returnPrint = groupFingerprints[locationId] {
                 return returnPrint
             }
@@ -192,15 +192,15 @@ open class BluenetLocalization {
    
     
     /**
-     * Finalize collecting a fingerprint and store it in the appropriate classifier based on the groupId and the locationId.
+     * Finalize collecting a fingerprint and store it in the appropriate classifier based on the referenceId and the locationId.
      */
-    open func finalizeFingerprint(_ groupId: String, locationId: String) {
+    open func finalizeFingerprint(_ referenceId: String, locationId: String) {
         if (self.collectingFingerprint != nil) {
-            if (self.fingerprintData[groupId] == nil) {
-                self.fingerprintData[groupId] = [String: Fingerprint]()
+            if (self.fingerprintData[referenceId] == nil) {
+                self.fingerprintData[referenceId] = [String: Fingerprint]()
             }
-            self.fingerprintData[groupId]![locationId] = self.collectingFingerprint!
-            self._loadFingerprint(groupId, locationId: locationId, fingerprint: self.collectingFingerprint!)
+            self.fingerprintData[referenceId]![locationId] = self.collectingFingerprint!
+            self._loadFingerprint(referenceId, locationId: locationId, fingerprint: self.collectingFingerprint!)
         }
         self._cleanupCollectingFingerprint()
     }
@@ -274,11 +274,11 @@ open class BluenetLocalization {
         }
     }
     
-    func _loadFingerprint(_ groupId: String, locationId: String, fingerprint: Fingerprint) {
-        if (self.classifier[groupId] == nil) {
-            self.classifier[groupId] = ClassifierWrapper()
+    func _loadFingerprint(_ referenceId: String, locationId: String, fingerprint: Fingerprint) {
+        if (self.classifier[referenceId] == nil) {
+            self.classifier[referenceId] = ClassifierWrapper()
         }
-        self.classifier[groupId]!.loadFingerprint(locationId, fingerprint: fingerprint)
+        self.classifier[referenceId]!.loadFingerprint(locationId, fingerprint: fingerprint)
     }
     
     func _moveToNewLocation(_ newLocation: String ) {
