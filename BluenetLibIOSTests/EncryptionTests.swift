@@ -34,9 +34,9 @@ class EncryptionTests: XCTestCase {
     
        
     func testKeys() {
-        let adminKey   = try! EncryptionHandler._getKey(UserLevel.Admin, settings)
-        let memberKey  = try! EncryptionHandler._getKey(UserLevel.Member, settings)
-        let guestKey   = try! EncryptionHandler._getKey(UserLevel.Guest, settings)
+        let adminKey   = try! EncryptionHandler._getKey(UserLevel.admin, settings)
+        let memberKey  = try! EncryptionHandler._getKey(UserLevel.member, settings)
+        let guestKey   = try! EncryptionHandler._getKey(UserLevel.guest, settings)
 
         XCTAssertEqual(adminKey,  settings.adminKey!)
         XCTAssertEqual(memberKey, settings.memberKey!)
@@ -49,7 +49,7 @@ class EncryptionTests: XCTestCase {
         // we are going to try if the CTR method from Cryptswift is doing what we think its doing when adding the counter to the IV
         let sessionData = try! SessionData([81,82,83,84,85])
         let payload : [UInt8] = [1,2,3,4,5,6,7,8,9,10,11,12,13]
-        let payloadData = NSData(bytes: payload)
+        let payloadData = Data(payload)
         let data = try! EncryptionHandler.encrypt(payloadData, settings: settings)
         
         // key we use above
@@ -73,13 +73,16 @@ class EncryptionTests: XCTestCase {
         let prefix : [UInt8] = [128, 128, 128, 0]
         let emulatedCTRResult = prefix + encryptedDataPart1 + encryptedDataPart2
         
-        XCTAssertEqual(data.arrayOfBytes(), emulatedCTRResult, "ctr mode not the same as expected ecb emulation")
+        
+        let uint8Arr = Array(UnsafeBufferPointer(start: (data as NSData).bytes.bindMemory(to: UInt8.self, capacity: data.count), count: data.count))
+        XCTAssertEqual(uint8Arr, emulatedCTRResult, "ctr mode not the same as expected ecb emulation")
         
         let decryptedData = try! EncryptionHandler.decrypt(data, settings: settings)
         
-        XCTAssertEqual(decryptedData.arrayOfBytes(), payloadPart1+payloadPart2, "decryption failed")
+        let decryptedUint8Array = Array(UnsafeBufferPointer(start: (data as NSData).bytes.bindMemory(to: UInt8.self, capacity: data.count), count: data.count))
+        XCTAssertEqual(decryptedUint8Array, payloadPart1+payloadPart2, "decryption failed")
         // we slice both the decrypted data and the payload so both are of type ArraySlice in order to match the contents
-        XCTAssertEqual(decryptedData.arrayOfBytes()[0...12], payload[0...payload.count-1], "decryption failed")
+        XCTAssertEqual(decryptedUint8Array[0...12], payload[0...payload.count-1], "decryption failed")
 
     }
     
@@ -88,10 +91,10 @@ class EncryptionTests: XCTestCase {
         let sessionData = try! SessionData([64,64,64,64,64])
         let payload : [UInt8] = [2,2,2,2]
         settings.adminKey = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-        let payloadData = NSData(bytes: payload)
+        let payloadData = Data(payload)
         let data = try! EncryptionHandler.encrypt(payloadData, settings: settings)
         
-        print(data.arrayOfBytes())
+
         print(Conversion.uint32_to_uint8_array(0xcafebabe))
     }
     
@@ -100,10 +103,9 @@ class EncryptionTests: XCTestCase {
         let sessionData = try! SessionData([64,64,64,64,64])
         let payload : [UInt8] = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]
         settings.adminKey = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-        let payloadData = NSData(bytes: payload)
+        let payloadData = Data(bytes: payload)
         let data = try! EncryptionHandler.encrypt(payloadData, settings: settings)
-        
-        print(data.arrayOfBytes())
+
     }
     
     func testECBEncryptionOnChip() {

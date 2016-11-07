@@ -19,6 +19,7 @@
 		FA19B5961D5B8F8E001CC25F /* Firmware.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA19B5951D5B8F8E001CC25F /* Firmware.swift */; };
 		FA270B051D0F12CD00CB0AE8 /* Characteristics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA270B041D0F12CD00CB0AE8 /* Characteristics.swift */; };
 		FA270B071D0F12D800CB0AE8 /* Services.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA270B061D0F12D800CB0AE8 /* Services.swift */; };
+		FA2DCB681DD0C99300D5A893 /* BluenetLibIOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA3C18791CBBDA6B00A11CF7 /* BluenetLibIOS.framework */; };
 		FA2EEF7A1DA3FF9A0096B67F /* CryptoSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA2EEF771DA3FF9A0096B67F /* CryptoSwift.framework */; };
 		FA2EEF7B1DA3FF9A0096B67F /* PromiseKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA2EEF781DA3FF9A0096B67F /* PromiseKit.framework */; };
 		FA2EEF7C1DA3FF9A0096B67F /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA2EEF791DA3FF9A0096B67F /* SwiftyJSON.framework */; };
@@ -123,6 +124,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA2DCB681DD0C99300D5A893 /* BluenetLibIOS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

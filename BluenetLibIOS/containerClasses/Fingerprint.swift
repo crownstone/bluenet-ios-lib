@@ -10,28 +10,29 @@ import Foundation
 import SwiftyJSON
 
 open class Fingerprint {
-    open var data = [String: [NSNumber]]()
+    open var data = [[String:NSNumber]]()
     
     public init() {}
     public init(stringifiedData: String) {
         let jsonData = JSON.parse(stringifiedData)
-        if let dictData = jsonData.dictionaryObject {
-            for (key, data) in dictData {
-                if let numArray = data as? [NSNumber] {
-                    self.data[key] = numArray
+        if let arr = jsonData.arrayObject {
+            for possibleDict in arr {
+                if let dict = possibleDict as? [String: NSNumber] {
+                    data.append(dict)
                 }
             }
         }
     }
     
     func collect(_ ibeaconData: [iBeaconPacket]) {
+        var returnDict = [String: NSNumber]()
+        
         for point in ibeaconData {
-            if (data.index(forKey: point.idString) == nil) {
-                data[point.idString] = [NSNumber]()
-            }
-            
-            data[point.idString]!.append(point.rssi)
+            returnDict[point.idString] = point.rssi
         }
+        returnDict["timestamp"] = NSNumber(value: NSDate().timeIntervalSince1970)
+        
+        data.append(returnDict);
     }
     
     open func getJSON() -> JSON {

@@ -92,8 +92,26 @@ class NaiveBayes {
         return ProbabiltyReport(sampleSize: samples, probability: totalProbability)
     }
     
+    
+    static func _translateFingerPrint(_ fingerprint: Fingerprint) -> [String: [NSNumber]] {
+        var translatedData = [String: [NSNumber]]()
+        for (dataPoint) in fingerprint.data {
+            for (stoneId, measurement) in dataPoint {
+                if (stoneId != "timestamp") {
+                    if (translatedData[stoneId] == nil) {
+                        translatedData[stoneId] = [NSNumber]()
+                    }
+                    translatedData[stoneId]!.append(measurement)
+                }
+            }
+        }
+        return translatedData
+    }
+    
     func _processFingerPrint(_ locationId: String, _ fingerprint: Fingerprint) {
-        for (stoneId, measurements) in fingerprint.data {
+        var translatedData = NaiveBayes._translateFingerPrint(fingerprint)
+        
+        for (stoneId, measurements) in translatedData {
             let mean = self._getMean(measurements)
             let std = self._getSTD(mean, measurements)
             let summary = NBSummary(mean, std)

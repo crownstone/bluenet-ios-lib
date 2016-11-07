@@ -181,6 +181,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
                     uuid: beacon.proximityUUID.uuidString,
                     major: beacon.major,
                     minor: beacon.minor,
+                    distance: NSNumber(value: beacon.accuracy),
                     rssi: NSNumber(value: beacon.rssi),
                     referenceId: region.identifier
                 ))

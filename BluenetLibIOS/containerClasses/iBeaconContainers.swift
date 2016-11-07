@@ -42,14 +42,16 @@ open class iBeaconPacket {
     open var major: NSNumber
     open var minor: NSNumber
     open var rssi : NSNumber
+    open var distance : NSNumber
     open var idString: String
     open var referenceId: String
     
-    init(uuid: String, major: NSNumber, minor: NSNumber, rssi: NSNumber, referenceId: String) {
+    init(uuid: String, major: NSNumber, minor: NSNumber, distance: NSNumber, rssi: NSNumber, referenceId: String) {
         self.uuid = uuid
         self.major = major
         self.minor = minor
         self.rssi = rssi
+        self.distance = distance
         self.referenceId = referenceId
         
         // we claim that the uuid, major and minor combination is unique.
@@ -62,6 +64,7 @@ open class iBeaconPacket {
         dataDict["uuid"]  = self.uuid
         dataDict["major"] = self.major
         dataDict["minor"] = self.minor
+        dataDict["distance"]  = self.distance
         dataDict["rssi"]  = self.rssi
         dataDict["referenceId"]  = self.referenceId
         
@@ -79,6 +82,7 @@ open class iBeaconPacket {
             "major" : self.major,
             "minor" : self.minor,
             "rssi" : self.rssi,
+            "distance" : self.distance,
             "referenceId" : self.referenceId,
         ]
         
