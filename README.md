@@ -49,4 +49,4 @@ means this method is asynchronous and you'll have to use promises.
 
 # BluenetLocalization (iBeacon and indoor localization)
 
-[Read the docs here](./BluenetLocalization.md)
+[Read the docs here](./BluenetLocalizationLibIOS.md)
