@@ -25,18 +25,40 @@ open class ConfigHandler {
     
     open func setIBeaconUUID(_ uuid: String) -> Promise<Void> {
         let data = WriteConfigPacket(type: ConfigurationType.ibeacon_UUID, payload: uuid)
-        let packet = data.getPacket();
-        return self.bleManager.writeToCharacteristic(
-            CSServices.CrownstoneService,
-            characteristicId: CrownstoneCharacteristics.ConfigControl,
-            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-            type: CBCharacteristicWriteType.withResponse
-        )
+        return self._writeToConfig(packet: data.getPacket())
     }
     
     open func setPWMPeriod(_ pwmPeriod: NSNumber) -> Promise<Void> {
         let data = WriteConfigPacket(type: ConfigurationType.pwm_PERIOD, payload32: pwmPeriod.uint32Value)
-        let packet = data.getPacket();
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
+    open func setScanDuration(_ scanDurationsMs: NSNumber) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.scan_DURATION, payload16: scanDurationsMs.uint16Value)
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
+    open func setScanSendDelay(_ scanSendDelay: NSNumber) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.scan_SEND_DELAY, payload16: scanSendDelay.uint16Value)
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
+    open func setScanBreakDuration(_ scanBreakDuration: NSNumber) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.scan_BREAK_DURATION, payload16: scanBreakDuration.uint16Value)
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
+    open func setScanFilter(_ scanFilter: NSNumber) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.scan_BREAK_DURATION, payload8: scanFilter.uint8Value)
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
+    open func setScanFilterFraction(_ scanFilterFraction: NSNumber) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.scan_FILTER_FRACTION, payload16: scanFilterFraction.uint16Value)
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
+    func _writeToConfig(packet: [UInt8]) -> Promise<Void> {
         return self.bleManager.writeToCharacteristic(
             CSServices.CrownstoneService,
             characteristicId: CrownstoneCharacteristics.ConfigControl,
