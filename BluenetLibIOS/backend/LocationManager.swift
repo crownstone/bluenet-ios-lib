@@ -194,24 +194,27 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     open func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
-        print("did enter region \(region) \n");
+        print("------ BLUENET_LIB_NAV: did enter region \(region) \n");
         self._startRanging(region);
     }
     
     
     open func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
-        print("did exit region \(region) \n");
+        print("------ BLUENET_LIB_NAV: did exit region \(region) \n");
         self._stopRanging(region);
     }
     
     // this is a fallback mechanism because the enter and exit do not always fire.
     open func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
-        print("State change \(state.rawValue) , \(region)")
-        if (state.rawValue == 1) {
+        print("------ BLUENET_LIB_NAV: State change \(state.rawValue) , \(region)")
+        if (state.rawValue == 1) {       // 1 == inside
             self._startRanging(region)
         }
-        else { // 0 == unknown, 2 is outside
+        else if (state.rawValue == 2) {  // 2 == outside
             self._stopRanging(region)
+        }
+        else {                           // 0 == unknown,
+           self._stopRanging(region)
         }
     }
     
