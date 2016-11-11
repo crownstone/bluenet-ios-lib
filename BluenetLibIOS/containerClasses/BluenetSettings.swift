@@ -94,6 +94,10 @@ open class BluenetSettings {
         self.temporaryDisable = false
     }
     
+    open func isTemporarilyDisabled() -> Bool {
+        return temporaryDisable
+    }
+    
     open func isEncryptionEnabled() -> Bool {
         if (temporaryDisable == true) {
             return false
