@@ -76,12 +76,25 @@ open class BluenetLocalization {
             self.locationManager.trackBeacon(trackStone)
         }
     }
+    
+    
+    /**
+     * This can be used to have another way of resetting the enter/exit events. In certain cases (ios 10) the exitRegion event might not be fired correctly.
+     * The app can correct for this and implement it's own exitRegion logic. By calling this afterwards the lib will fire a new enter region event when it sees
+     * new beacons.
+     */
+    open func forceClearActiveRegion() {
+        activeGroupId = nil
+        activeLocationId = nil
+    }
    
     /**
      *  This will stop listening to any and all updates from the iBeacon tracking. Your app may fall asleep.
      *  It will also remove the list of all tracked iBeacons.
      */
     open func clearTrackedBeacons() {
+        activeGroupId = nil
+        activeLocationId = nil
         self.locationManager.clearTrackedBeacons()
     }
     
@@ -121,6 +134,7 @@ open class BluenetLocalization {
      * This should be used if the user is sure the fingerprinting process has been finished.
      */
     open func startIndoorLocalization() {
+        activeLocationId = nil
         self.indoorLocalizationEnabled = true;
     }
     /**

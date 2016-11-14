@@ -99,6 +99,11 @@ unsubscribe() // now you are unsubscribed and the callback will not be invoked a
 > Can be called multiple times without duplicate events.
 
 
+#### forceClearActiveRegion()
+> This can be used to have another way of resetting the enter/exit events. In certain cases (ios 10) the exitRegion event might not be fired correctly.
+> The app can correct for this and implement it's own exitRegion logic. By calling this method afterwards the lib will fire a new enter region event when it sees new beacons.
+
+
 ## Indoor localization
 
 Starting and stopping the usasge of the classifier will also start and stop the emitting of the "enterLocation", "exitLocation"

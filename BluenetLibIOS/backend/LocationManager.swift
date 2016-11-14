@@ -19,23 +19,20 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     var appName = "Crownstone"
     var started = false
     var trackingState = false
-
     
     public init(eventBus: EventBus) {
-        super.init();
+        super.init()
         
-        self.eventBus = eventBus;
+        self.eventBus = eventBus
         
         //print("Starting location manager")
         self.manager = CLLocationManager()
-        self.manager.delegate = self;
+        self.manager.delegate = self
         
         CLLocationManager.locationServicesEnabled()
         
         print("------ BLUENET_LIB_NAV: location services enabled: \(CLLocationManager.locationServicesEnabled())");
         print("------ BLUENET_LIB_NAV: ranging services enabled: \(CLLocationManager.isRangingAvailable())");
-        
-        self.stopTrackingAllRegions()
 
         self.check()
     }
@@ -51,6 +48,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         
         self.start();
     }
+
     
     open func check() {
         self.locationManager(self.manager, didChangeAuthorization: CLLocationManager.authorizationStatus())
@@ -166,13 +164,9 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     open func locationManager(_ manager : CLLocationManager, didStartMonitoringFor region : CLRegion) {
         print("------ BLUENET_LIB_NAV: did start MONITORING \(region) \n");
     }
+        
     
     open func locationManager(_ manager : CLLocationManager, didRangeBeacons beacons : [CLBeacon], in region: CLBeaconRegion) {
-//        print ("Did Range:")
-//        for beacon in beacons {
-//            print("\(beacon)")
-//        }
-//        print(" ")
         var iBeacons = [iBeaconPacket]()
         
         for beacon in beacons {
@@ -214,7 +208,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
             self._stopRanging(region)
         }
         else {                           // 0 == unknown,
-           self._stopRanging(region)
+           // self._stopRanging(region)
         }
     }
     
@@ -250,9 +244,8 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
      *  Discussion:
      *    Invoked when a region monitoring error has occurred. Error types are defined in "CLError.h".
      */
- 
     open func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error){
-        print("------ BLUENET_LIB_NAV: did monitoringDidFailForRegion \(region)  withError: \(error) \n");
+        print("------ BLUENET_LIB_NAV: did monitoringDidFailForRegion \(region)  withError: \(error)\n");
     }
     
 
@@ -274,24 +267,40 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     }
 
     func _startRanging(_ region: CLRegion) {
-        self.eventBus.emit("lowLevelEnterRegion", region.identifier)
+        for element in self.manager.rangedRegions {
+            if (element.identifier == region.identifier) {
+                // print("Aborting double START")
+                return
+            }
+        }
         
+        self.eventBus.emit("lowLevelEnterRegion", region.identifier)
         for element in self.trackingBeacons {
-//            print ("------ BLUENET_LIB_NAV: region id \(region.identifier) vs elementId \(element.region.identifier) \n")
             if (element.region.identifier == region.identifier) {
-                print ("------ BLUENET_LIB_NAV: startRanging")
+                print ("------ BLUENET_LIB_NAV: startRanging region \(region.identifier)")
                 self.manager.startRangingBeacons(in: element.region)
             }
         }
     }
     
     func _stopRanging(_ region: CLRegion) {
+        var abort = true
+        for element in self.manager.rangedRegions {
+            if (element.identifier == region.identifier) {
+                abort = false
+            }
+        }
+        
+        if (abort) {
+            //print("Aborting double stop")
+            return
+        }
+        
         self.eventBus.emit("lowLevelExitRegion", region.identifier)
         
         for element in self.trackingBeacons {
-//            print ("------ BLUENET_LIB_NAV: region id \(region.identifier) vs elementId \(element.region.identifier) \n")
             if (element.region.identifier == region.identifier) {
-                print ("------ BLUENET_LIB_NAV: stopRanging!")
+                print ("------ BLUENET_LIB_NAV: stopRanging region \(region.identifier)!")
                 self.manager.stopRangingBeacons(in: element.region)
             }
         }
