@@ -26,7 +26,7 @@ open class SetupHandler {
     /**
      * This will handle the complete setup. We expect bonding has already been done by now.
      */
-    open func setup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: UInt32, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
+    open func setup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             self.bleManager.settings.disableEncryptionTemporarily()
             self.getSessionKey()
@@ -104,9 +104,9 @@ open class SetupHandler {
         print ("writeGuestKey")
         return self._writeAndVerify(.guest_ENCRYPTION_KEY, payload: Conversion.ascii_or_hex_string_to_16_byte_array(key))
     }
-    open func writeMeshAccessAddress(_ address: UInt32) -> Promise<Void> {
+    open func writeMeshAccessAddress(_ address: String) -> Promise<Void> {
         print ("writeMeshAccessAddress")
-        return self._writeAndVerify(.mesh_ACCESS_ADDRESS, payload: Conversion.uint32_to_uint8_array(address))
+        return self._writeAndVerify(.mesh_ACCESS_ADDRESS, payload: Conversion.hex_string_to_uint8_array(address))
     }
     open func writeIBeaconUUID(_ uuid: String) -> Promise<Void> {
         print ("writeIBeaconUUID")
