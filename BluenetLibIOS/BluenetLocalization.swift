@@ -296,11 +296,15 @@ open class BluenetLocalization {
     }
     
     func _moveToNewLocation(_ newLocation: String ) {
+        var locationDict = [String: String?]()
+        locationDict["region"] = self.activeGroupId
+        locationDict["location"] = self.activeLocationId
+        
         if (self.activeLocationId != nil) {
-            self.eventBus.emit("exitLocation", self.activeLocationId!)
+            self.eventBus.emit("exitLocation", locationDict)
         }
         self.activeLocationId = newLocation
-        self.eventBus.emit("enterLocation", self.activeLocationId!)
+        self.eventBus.emit("enterLocation", locationDict)
     }
     
     func _handleRegionExit(_ regionId: Any) {
@@ -335,7 +339,11 @@ open class BluenetLocalization {
     func _evaluateData(_ data : [iBeaconPacket]) -> ClassifierResult {
         let result = self.classifier[self.activeGroupId!]!.predict(data)
         if (result.valid == true) {
-            self.eventBus.emit("currentLocation", result.location)
+            var locationDict = [String: String]()
+            locationDict["region"] = self.activeGroupId
+            locationDict["location"] = result.location
+            
+            self.eventBus.emit("currentLocation", locationDict)
         }
         return result
     }
