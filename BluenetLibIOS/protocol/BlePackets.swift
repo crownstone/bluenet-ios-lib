@@ -92,6 +92,23 @@ class ControlPacket : BLEPacket {
     }
 }
 
+class keepAliveStatePacket {
+    var data = [UInt8]()
+    
+    init(state: UInt8, timeout: UInt16) {
+        data.append(state)
+        
+        let timeoutArray = Conversion.uint16_to_uint8_array(timeout)
+        data.append(timeoutArray[0])
+        data.append(timeoutArray[1])
+    }
+    
+    func getPacket() -> [UInt8] {
+        return data;
+    }
+
+}
+
 class FactoryResetPacket : ControlPacket {
     init() {super.init(type: ControlType.factory_RESET, payload32: 0xdeadbeef)}
 }

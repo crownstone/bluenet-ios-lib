@@ -123,6 +123,18 @@ open class ControlHandler {
         return self._writeControlPacket(ControlPacket(type: .disconnect).getPacket()).then{_ in self.bleManager.disconnect()}
     }
     
+    open func keepAliveState(state: UInt8, timeout: UInt16) -> Promise<Void> {
+        print ("------ BLUENET_LIB: Keep alive state")
+        let keepalivePacket = keepAliveStatePacket(state: state,timeout: timeout).getPacket()
+        return self._writeControlPacket(ControlPacket(type: .keep_ALIVE_STATE, payloadArray: keepalivePacket).getPacket())
+    }
+    
+    open func keepAlive() -> Promise<Void> {
+        print ("------ BLUENET_LIB: Keep alive")
+        return self._writeControlPacket(ControlPacket(type: .keep_ALIVE).getPacket())
+    }
+    
+    
     /**
      * The session nonce is the only char that is ECB encrypted. We therefore read it without the libraries decryption (AES CTR) and decrypt it ourselves.
      **/
