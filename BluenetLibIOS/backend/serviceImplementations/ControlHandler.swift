@@ -123,9 +123,14 @@ open class ControlHandler {
         return self._writeControlPacket(ControlPacket(type: .disconnect).getPacket()).then{_ in self.bleManager.disconnect()}
     }
     
-    open func keepAliveState(state: UInt8, timeout: UInt16) -> Promise<Void> {
+    open func keepAliveState(state: Float, timeout: UInt16) -> Promise<Void> {
+        var switchState = min(1,max(0,state))*100
+        
+        // temporary to disable dimming
+        switchState = ceil(switchState)
+        
         print ("------ BLUENET_LIB: Keep alive state")
-        let keepalivePacket = keepAliveStatePacket(state: state,timeout: timeout).getPacket()
+        let keepalivePacket = keepAliveStatePacket(state: NSNumber(value: switchState as Float).uint8Value,timeout: timeout).getPacket()
         return self._writeControlPacket(ControlPacket(type: .keep_ALIVE_STATE, payloadArray: keepalivePacket).getPacket())
     }
     
