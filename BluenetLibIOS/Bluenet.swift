@@ -247,6 +247,10 @@ open class Bluenet  {
         return self.bleManager.waitToReconnect()
     }
     
+    open func waitToWrite() -> Promise<Void> {
+        return self.bleManager.waitToWrite(0)
+    }
+    
     open func waitToWrite(_ iteration: UInt8?) -> Promise<Void> {
         return self.bleManager.waitToWrite(iteration)
     }
