@@ -213,6 +213,12 @@ when using the methods in this lib. The required rights for certain commands can
 #### setIBeaconUUID(_ uuid: String) -> Promise\<Void>
 > This will set the iBeacon uuid. You will have to reboot the Crownstone for this to take effect.
 
+#### setIBeaconMajor(_ major: UInt16) -> Promise\<Void>
+> This will set the iBeacon major. You will have to reboot the Crownstone for this to take effect.
+
+#### setIBeaconMinor(_ minor: UInt16) -> Promise\<Void>
+> This will set the iBeacon minor. You will have to reboot the Crownstone for this to take effect.
+
 #### setPWMPeriod(_ pwmPeriod: NSNumber) -> Promise\<Void>
 > This will set the period of the PWM. Do not use this if you do not know exactly what you're doing.
 

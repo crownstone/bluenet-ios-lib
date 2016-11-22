@@ -28,6 +28,16 @@ open class ConfigHandler {
         return self._writeToConfig(packet: data.getPacket())
     }
     
+    open func setIBeaconMajor(_ major: UInt16) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.ibeacon_MAJOR, payload16: major)
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
+    open func setIBeaconMinor(_ minor: UInt16) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.ibeacon_MINOR, payload16: minor)
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
     open func setPWMPeriod(_ pwmPeriod: NSNumber) -> Promise<Void> {
         let data = WriteConfigPacket(type: ConfigurationType.pwm_PERIOD, payload32: pwmPeriod.uint32Value)
         return self._writeToConfig(packet: data.getPacket())

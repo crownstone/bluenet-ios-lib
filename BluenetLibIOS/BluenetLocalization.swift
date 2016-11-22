@@ -82,7 +82,7 @@ open class BluenetLocalization {
      * This can be used to have another way of resetting the enter/exit events. In certain cases (ios 10) the exitRegion event might not be fired correctly.
      * The app can correct for this and implement it's own exitRegion logic. By calling this afterwards the lib will fire a new enter region event when it sees
      * new beacons.
-     */
+     */	
     open func forceClearActiveRegion() {
         activeGroupId = nil
         activeLocationId = nil
