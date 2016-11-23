@@ -298,12 +298,17 @@ open class BluenetLocalization {
     func _moveToNewLocation(_ newLocation: String ) {
         var locationDict = [String: String?]()
         locationDict["region"] = self.activeGroupId
-        locationDict["location"] = self.activeLocationId
         
         if (self.activeLocationId != nil) {
+            // put the precious location in the dictionary
+            locationDict["location"] = self.activeLocationId
             self.eventBus.emit("exitLocation", locationDict)
         }
+        
         self.activeLocationId = newLocation
+        // put the new location in the dictionary
+        locationDict["location"] = self.activeLocationId
+        
         self.eventBus.emit("enterLocation", locationDict)
     }
     

@@ -19,7 +19,7 @@ To add the dependency to the Cartfile, copy paste the lines below into it, save 
 # BluenetLibIOS
 github "crownstone/bluenet-lib-ios"
 ```
-
+Q
 Once this is finished, run the following command in your terminal (in the same folder as the Cartfile)
 
 ```

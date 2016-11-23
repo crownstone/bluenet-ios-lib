@@ -95,6 +95,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         
         self.settings = BluenetSettings()
         self.eventBus = eventBus
+        // TODO: Make restoration optional.
         self.centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true, CBCentralManagerOptionRestoreIdentifierKey: "BluenetIOS"])
         
         // initialize the pending promise containers
