@@ -123,6 +123,19 @@ open class ControlHandler {
         return self._writeControlPacket(ControlPacket(type: .disconnect).getPacket()).then{_ in self.bleManager.disconnect()}
     }
     
+    open func switchRelay(_ state: UInt8) -> Promise<Void> {
+        print ("------ BLUENET_LIB: switching relay to \(state)")
+        return self._writeControlPacket(ControlPacket(type: .relay, payload8: state).getPacket())
+    }
+    
+    
+    open func switchPWM(_ state: Float) -> Promise<Void> {
+        var switchState = min(1,max(0,state))*100
+        print ("------ BLUENET_LIB: switching PWM to \(switchState)")
+        return self._writeControlPacket(ControlPacket(type: .pwm, payload8: NSNumber(value: switchState as Float).uint8Value).getPacket())
+    }
+
+    
     open func keepAliveState(state: Float, timeout: UInt16) -> Promise<Void> {
         var switchState = min(1,max(0,state))*100
         
