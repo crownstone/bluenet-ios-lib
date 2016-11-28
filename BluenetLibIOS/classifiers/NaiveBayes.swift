@@ -81,7 +81,7 @@ class NaiveBayes {
                 samples += 1
             }
             else {
-                print("CANNOT LOAD SUMMARY FOR \(stoneId)")
+                //print("CANNOT LOAD SUMMARY FOR \(stoneId)")
             }
         }
 
