@@ -13,8 +13,12 @@ import UIKit
 
 var APPNAME = "Crownstone"
 var VIEWCONTROLLER : UIViewController?
+var LOGGING_PRINT = true
+var LOGGING_FILE = false
 
-public func setBluenetGlobals(viewController: UIViewController, appName: String) {
-    VIEWCONTROLLER = viewController;
-    APPNAME = appName
+public func setBluenetGlobals(viewController: UIViewController, appName: String, loggingPrint: Bool = true, loggingFile: Bool = false) {
+    VIEWCONTROLLER = viewController
+    APPNAME        = appName
+    LOGGING_PRINT  = loggingPrint
+    LOGGING_FILE   = loggingFile
 }

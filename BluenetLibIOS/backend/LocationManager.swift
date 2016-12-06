@@ -31,8 +31,8 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         
         CLLocationManager.locationServicesEnabled()
         
-        print("------ BLUENET_LIB_NAV: location services enabled: \(CLLocationManager.locationServicesEnabled())");
-        print("------ BLUENET_LIB_NAV: ranging services enabled: \(CLLocationManager.isRangingAvailable())");
+        Log("------ BLUENET_LIB_NAV: location services enabled: \(CLLocationManager.locationServicesEnabled())");
+        Log("------ BLUENET_LIB_NAV: ranging services enabled: \(CLLocationManager.isRangingAvailable())");
 
         self.check()
     }
@@ -57,7 +57,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     open func stopTrackingAllRegions() {
         // stop monitoring all previous regions
         for region in self.manager.monitoredRegions {
-            print ("------ BLUENET_LIB_NAV: INITIALIZATION: stop monitoring old region: \(region)")
+            Log("------ BLUENET_LIB_NAV: INITIALIZATION: stop monitoring old region: \(region)")
             self.manager.stopMonitoring(for: region)
         }
     }
@@ -116,7 +116,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     func resetBeaconRanging() {
-        print ("------ BLUENET_LIB_NAV: Resetting ibeacon tracking")
+        Log("------ BLUENET_LIB_NAV: Resetting ibeacon tracking")
         self.pauseTrackingIBeacons()
         self.startTrackingIBeacons()
         self.trackingState = true
@@ -141,28 +141,28 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     open func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         switch (CLLocationManager.authorizationStatus()) {
         case .notDetermined:
-            print("------ BLUENET_LIB_NAV: location NotDetermined")
+            Log("------ BLUENET_LIB_NAV: location NotDetermined")
             /*
              First you need to add NSLocationWhenInUseUsageDescription or NSLocationAlwaysUsageDescription(if you want to use in background) in your info.plist file OF THE PROGRAM THAT IMPLEMENTS THIS!
              */
             manager.requestAlwaysAuthorization()
         case .restricted:
-            print("------ BLUENET_LIB_NAV: location Restricted")
+            Log("------ BLUENET_LIB_NAV: location Restricted")
         case .denied:
             showLocationAlert()
-            print("------ BLUENET_LIB_NAV: location Denied")
+            Log("------ BLUENET_LIB_NAV: location Denied")
         case .authorizedAlways:
-            print("------ BLUENET_LIB_NAV: location AuthorizedAlways")
+            Log("------ BLUENET_LIB_NAV: location AuthorizedAlways")
             start()
         case .authorizedWhenInUse:
-            print("------ BLUENET_LIB_NAV: location AuthorizedWhenInUse")
+            Log("------ BLUENET_LIB_NAV: location AuthorizedWhenInUse")
             showLocationAlert()
         }
     }
     
     
     open func locationManager(_ manager : CLLocationManager, didStartMonitoringFor region : CLRegion) {
-        print("------ BLUENET_LIB_NAV: did start MONITORING \(region) \n");
+        Log("------ BLUENET_LIB_NAV: did start MONITORING \(region) \n");
     }
         
     
@@ -188,19 +188,19 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     open func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
-        print("------ BLUENET_LIB_NAV: did enter region \(region) \n");
+        Log("------ BLUENET_LIB_NAV: did enter region \(region) \n");
         self._startRanging(region);
     }
     
     
     open func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
-        print("------ BLUENET_LIB_NAV: did exit region \(region) \n");
+        Log("------ BLUENET_LIB_NAV: did exit region \(region) \n");
         self._stopRanging(region);
     }
     
     // this is a fallback mechanism because the enter and exit do not always fire.
     open func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
-        print("------ BLUENET_LIB_NAV: State change \(state.rawValue) , \(region)")
+        Log("------ BLUENET_LIB_NAV: State change \(state.rawValue) , \(region)")
         if (state.rawValue == 1) {       // 1 == inside
             self._startRanging(region)
         }
@@ -222,7 +222,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
      */
 
     open func locationManager(_ manager: CLLocationManager, rangingBeaconsDidFailFor region: CLBeaconRegion, withError error: Error) {
-         print("------ BLUENET_LIB_NAV: did rangingBeaconsDidFailForRegion \(region)  withError: \(error) \n");
+         Log("------ BLUENET_LIB_NAV: did rangingBeaconsDidFailForRegion \(region)  withError: \(error) \n");
     }
     
     
@@ -235,7 +235,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
      */
   
     open func locationManager(_ manager: CLLocationManager, didFailWithError error: Error){
-        print("------ BLUENET_LIB_NAV: did didFailWithError withError: \(error) \n");
+        Log("------ BLUENET_LIB_NAV: did didFailWithError withError: \(error) \n");
     }
     
     /*
@@ -245,7 +245,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
      *    Invoked when a region monitoring error has occurred. Error types are defined in "CLError.h".
      */
     open func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error){
-        print("------ BLUENET_LIB_NAV: did monitoringDidFailForRegion \(region)  withError: \(error)\n");
+        Log("------ BLUENET_LIB_NAV: did monitoringDidFailForRegion \(region)  withError: \(error)\n");
     }
     
 
@@ -269,7 +269,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     func _startRanging(_ region: CLRegion) {
         for element in self.manager.rangedRegions {
             if (element.identifier == region.identifier) {
-                // print("Aborting double START")
+                // Log("Aborting double START")
                 return
             }
         }
@@ -277,7 +277,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         self.eventBus.emit("lowLevelEnterRegion", region.identifier)
         for element in self.trackingBeacons {
             if (element.region.identifier == region.identifier) {
-                print ("------ BLUENET_LIB_NAV: startRanging region \(region.identifier)")
+                Log("------ BLUENET_LIB_NAV: startRanging region \(region.identifier)")
                 self.manager.startRangingBeacons(in: element.region)
             }
         }
@@ -292,7 +292,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         }
         
         if (abort) {
-            //print("Aborting double stop")
+            //Log("Aborting double stop")
             return
         }
         
@@ -300,7 +300,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         
         for element in self.trackingBeacons {
             if (element.region.identifier == region.identifier) {
-                print ("------ BLUENET_LIB_NAV: stopRanging region \(region.identifier)!")
+                Log("------ BLUENET_LIB_NAV: stopRanging region \(region.identifier)!")
                 self.manager.stopRangingBeacons(in: element.region)
             }
         }

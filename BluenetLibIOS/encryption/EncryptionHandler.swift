@@ -53,7 +53,7 @@ open class zeroPadding: Padding {
             let padding = [UInt8](repeating: 0, count: offset)
             let paddedData = data + padding
 
-//            print ("final padded data: \(data.count) \(padding.count) \(padding) \(paddedData)")
+//            Log("final padded data: \(data.count) \(padding.count) \(padding) \(paddedData)")
             return paddedData
         }
         return data

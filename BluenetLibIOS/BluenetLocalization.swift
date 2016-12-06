@@ -69,7 +69,7 @@ open class BluenetLocalization {
      */
     open func trackIBeacon(uuid: String, referenceId: String) {
         if (uuid.characters.count < 30) {
-            print("BLUENET LOCALIZATION ---- Cannot track \(referenceId) with UUID \(uuid)")
+            Log("BLUENET LOCALIZATION ---- Cannot track \(referenceId) with UUID \(uuid)")
         }
         else {
             let trackStone = iBeaconContainer(referenceId: referenceId, uuid: uuid)

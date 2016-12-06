@@ -54,7 +54,7 @@ open class JSONUtils {
                     result = dictionary
                 }
             }catch {
-                print("Error while parsing string into dictionary")
+                Log("Error while parsing string into dictionary")
             }
         }
         return result

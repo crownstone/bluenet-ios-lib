@@ -28,7 +28,7 @@ open class PowerHandler {
      * TODO: currently only relay is supported.
      */
     open func switchRelay(_ state: UInt8) -> Promise<Void> {
-        print ("------ BLUENET_LIB: switching relay to \(state)")
+        Log("------ BLUENET_LIB: switching relay to \(state)")
         let packet : [UInt8] = [state]
         return self.bleManager.writeToCharacteristic(
             CSServices.PowerService,
@@ -44,7 +44,7 @@ open class PowerHandler {
      * TODO: currently only relay is supported.
      */
     open func switchPWM(_ state: UInt8) -> Promise<Void> {
-        print ("------ BLUENET_LIB: switching relay to \(state)")
+        Log("------ BLUENET_LIB: switching relay to \(state)")
         let packet : [UInt8] = [state]
         return self.bleManager.writeToCharacteristic(
             CSServices.PowerService,
@@ -68,7 +68,7 @@ open class PowerHandler {
                     
                 }
                 
-                print("collectedSamples \(samples.current.count) \(samples.voltage.count) \(samples.currentTimes.count) \(samples.voltageTimes.count)")
+                Log("collectedSamples \(samples.current.count) \(samples.voltage.count) \(samples.currentTimes.count) \(samples.voltageTimes.count)")
             }
         }
         let merger = NotificationMerger(callback: successCallback)

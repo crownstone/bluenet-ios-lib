@@ -35,6 +35,7 @@
 		FA6D3A281D6AF00E00DFF113 /* PowerSamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6D3A271D6AF00E00DFF113 /* PowerSamples.swift */; };
 		FA6D3A2A1D6B076700DFF113 /* NotificationMerger.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6D3A291D6B076700DFF113 /* NotificationMerger.swift */; };
 		FA71E49E1D4761D900D93A2F /* EncryptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA71E49D1D4761D900D93A2F /* EncryptionTests.swift */; };
+		FA7987511DF6C1E10005EB86 /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7987501DF6C1E10005EB86 /* Logging.swift */; };
 		FAC6EC751D79F8F100545E48 /* NearestItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC6EC741D79F8F100545E48 /* NearestItem.swift */; };
 		FAE862581CF4515A0027539D /* Bluenet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE862571CF4515A0027539D /* Bluenet.swift */; };
 		FAE8625C1CF478E50027539D /* Eventbus.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE8625B1CF478E50027539D /* Eventbus.swift */; };
@@ -94,6 +95,7 @@
 		FA71E49D1D4761D900D93A2F /* EncryptionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptionTests.swift; sourceTree = "<group>"; };
 		FA79874E1DF6B3380005EB86 /* BluenetLibIOS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BluenetLibIOS.md; sourceTree = "<group>"; };
 		FA79874F1DF6B3380005EB86 /* BluenetLocalizationLibIOS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BluenetLocalizationLibIOS.md; sourceTree = "<group>"; };
+		FA7987501DF6C1E10005EB86 /* Logging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
 		FAC6EC741D79F8F100545E48 /* NearestItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearestItem.swift; sourceTree = "<group>"; };
 		FAE862571CF4515A0027539D /* Bluenet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bluenet.swift; sourceTree = "<group>"; };
 		FAE8625B1CF478E50027539D /* Eventbus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Eventbus.swift; sourceTree = "<group>"; };
@@ -184,6 +186,7 @@
 				FA3C187C1CBBDA6B00A11CF7 /* BluenetLibIOS.h */,
 				FAFE004D1D14379B001CF20C /* Globals.swift */,
 				FA3C187E1CBBDA6B00A11CF7 /* Info.plist */,
+				FA7987501DF6C1E10005EB86 /* Logging.swift */,
 			);
 			path = BluenetLibIOS;
 			sourceTree = "<group>";
@@ -402,6 +405,7 @@
 				FAFE00461D14363E001CF20C /* Fingerprint.swift in Sources */,
 				FA270B071D0F12D800CB0AE8 /* Services.swift in Sources */,
 				FA19B5941D5B82A2001CC25F /* SetupHandler.swift in Sources */,
+				FA7987511DF6C1E10005EB86 /* Logging.swift in Sources */,
 				FA0C963B1D11904900794D85 /* Conversion.swift in Sources */,
 				FA19B5961D5B8F8E001CC25F /* Firmware.swift in Sources */,
 				FA4E02991D0873CD0086E2BF /* BluenetLocalization.swift in Sources */,

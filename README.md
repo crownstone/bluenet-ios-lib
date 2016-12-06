@@ -43,6 +43,11 @@ This lib has two parts, the BLE one called Bluenet and the location one called B
 We use PromiseKit to handle all async events. If you see the return type is Promise<DataType> that
 means this method is asynchronous and you'll have to use promises.
 
+To use the lib, you will need to define a few of it's globals using the method below.
+
+#### setBluenetGlobals(viewController: UIViewController, appName: String, loggingPrint: Bool = true, loggingFile: Bool = false)
+The viewcontroller is used to trigger the permission alerts and the appName is used in these alerts. The logging commands are for writing logs to file or logs to console. By default, console is enabled and to file is disabled.
+
 # Bluenet (BLE)
 
 [Read the docs here](./BluenetLibIOS.md)

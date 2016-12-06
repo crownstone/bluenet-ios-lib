@@ -52,7 +52,7 @@ open class SetupHandler {
                 .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 11); return self.finalizeSetup()}
                 .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 12); return self.bleManager.disconnect()}
                 .then{(_) -> Void in
-                    print("------ BLUENET_LIB: Setup Finished")
+                    Log("------ BLUENET_LIB: Setup Finished")
                     self.eventBus.emit("setupProgress", 13);
                     self.bleManager.settings.exitSetup()
                     fulfill()
@@ -68,18 +68,18 @@ open class SetupHandler {
     }
     
     open func getSessionKey() -> Promise<[UInt8]> {
-        print ("getSessionKey")
+        Log("getSessionKey")
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.SetupService, characteristic: SetupCharacteristics.SessionKey)
     }
         
     open func getSessionNonce() -> Promise<[UInt8]> {
-        print ("getSessionNonce")
+        Log("getSessionNonce")
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.SetupService, characteristic: SetupCharacteristics.SessionNonce)
     }
     
     
     open func goToDFU() -> Promise<Void> {
-        print ("put in DFU during setup.")
+        Log("put in DFU during setup.")
         let packet : [UInt8] = [66]
         self.bleManager.settings.disableEncryptionTemporarily()
         return Promise<Void> { fulfill, reject in
@@ -106,45 +106,45 @@ open class SetupHandler {
     open func getMACAddress() -> Promise<String> {
         return Promise<String> { fulfill, reject in
             self.bleManager.readCharacteristicWithoutEncryption(CSServices.SetupService, characteristic: SetupCharacteristics.MacAddress)
-                .then{data -> Void in print(data); fulfill(Conversion.uint8_array_to_macAddress(data))}
+                .then{data -> Void in Log("\(data)"); fulfill(Conversion.uint8_array_to_macAddress(data))}
                 .catch{err in reject(err)}
         }
     }
     
     open func writeCrownstoneId(_ id: UInt16) -> Promise<Void> {
-        print ("writeCrownstoneId")
+        Log("writeCrownstoneId")
         return self._writeAndVerify(.crownstone_IDENTIFIER, payload: Conversion.uint16_to_uint8_array(id))
     }
     open func writeAdminKey(_ key: String) -> Promise<Void> {
-        print ("writeAdminKey")
+        Log("writeAdminKey")
         return self._writeAndVerify(.admin_ENCRYPTION_KEY, payload: Conversion.ascii_or_hex_string_to_16_byte_array(key))
     }
     open func writeMemberKey(_ key: String) -> Promise<Void> {
-        print ("writeMemberKey")
+        Log("writeMemberKey")
         return self._writeAndVerify(.member_ENCRYPTION_KEY, payload: Conversion.ascii_or_hex_string_to_16_byte_array(key))
     }
     open func writeGuestKey(_ key: String) -> Promise<Void> {
-        print ("writeGuestKey")
+        Log("writeGuestKey")
         return self._writeAndVerify(.guest_ENCRYPTION_KEY, payload: Conversion.ascii_or_hex_string_to_16_byte_array(key))
     }
     open func writeMeshAccessAddress(_ address: String) -> Promise<Void> {
-        print ("writeMeshAccessAddress")
+        Log("writeMeshAccessAddress")
         return self._writeAndVerify(.mesh_ACCESS_ADDRESS, payload: Conversion.hex_string_to_uint8_array(address))
     }
     open func writeIBeaconUUID(_ uuid: String) -> Promise<Void> {
-        print ("writeIBeaconUUID")
+        Log("writeIBeaconUUID")
         return self._writeAndVerify(.ibeacon_UUID, payload: Conversion.ibeaconUUIDString_to_reversed_uint8_array(uuid))
     }
     open func writeIBeaconMajor(_ major: UInt16) -> Promise<Void> {
-        print ("writeIBeaconMajor")
+        Log("writeIBeaconMajor")
         return self._writeAndVerify(.ibeacon_MAJOR, payload: Conversion.uint16_to_uint8_array(major))
     }
     open func writeIBeaconMinor(_ minor: UInt16) -> Promise<Void> {
-        print ("writeIBeaconMinor")
+        Log("writeIBeaconMinor")
         return self._writeAndVerify(.ibeacon_MINOR, payload: Conversion.uint16_to_uint8_array(minor))
     }
     open func finalizeSetup() -> Promise<Void> {
-        print ("finalizeSetup")
+        Log("finalizeSetup")
         let packet = ControlPacket(type: .validate_SETUP).getPacket()
         return self.bleManager.writeToCharacteristic(
             CSServices.SetupService,
