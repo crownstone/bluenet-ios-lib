@@ -17,8 +17,9 @@ func Log(_ data: String) {
         let dir: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last! as URL
         let url = dir.appendingPathComponent("BluenetLog.log")
     
-        let timestring = Date().timeIntervalSince1970
-        let content = "\(timestring) - " + data + "\n"
+        let timestamp = Date().timeIntervalSince1970
+        let time = Date().description
+        let content = "\(timestamp) - \(time) - " + data + "\n"
         let contentToWrite = content.data(using: String.Encoding.utf8)!
         
         if let fileHandle = FileHandle(forWritingAtPath: url.path) {
