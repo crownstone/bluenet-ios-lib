@@ -38,6 +38,8 @@ open class BluenetLocalization {
     open var locationManager : LocationManager!
     var eventBus : EventBus!
     
+    var counter : Int64 = 0;
+    
     var classifier = [String: ClassifierWrapper]()
     var collectingFingerprint : Fingerprint?
     var collectingCallback : voidCallback?
@@ -253,6 +255,8 @@ open class BluenetLocalization {
     
     func _updateState(_ ibeaconData: Any) {
         if let data = ibeaconData as? [iBeaconPacket] {
+            self.counter += 1
+            Log("received iBeacon nr: \(self.counter) classifierState: \(indoorLocalizationEnabled) amountOfBeacons: \(data.count)")
             if (data.count > 0 && self.activeGroupId != nil) {
                 // create classifiers for this group if required.
                 if (self.classifier[self.activeGroupId!] == nil) {
