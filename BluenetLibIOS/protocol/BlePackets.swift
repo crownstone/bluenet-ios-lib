@@ -34,6 +34,12 @@ class BLEPacket {
         self.length = Conversion.uint16_to_uint8_array(__uint16_t(self.payload.count))
     }
     
+    init(type: UInt8, payload: Int8) {
+        self.type = type
+        self.payload = [Conversion.int8_to_uint8(payload)]
+        self.length = Conversion.uint16_to_uint8_array(__uint16_t(self.payload.count))
+    }
+    
     init(type: UInt8, payload: UInt8) {
         self.type = type
         self.payload = [payload]
@@ -134,6 +140,7 @@ class ReadConfigPacket : BLEPacket {
 
     init(type: ConfigurationType)                    { super.init(type: type.rawValue) }
     init(type: ConfigurationType, payload:   String) { super.init(type: type.rawValue, payload: payload)   }
+    init(type: ConfigurationType, payload8:  Int8)   { super.init(type: type.rawValue, payload: payload8)  }
     init(type: ConfigurationType, payload8:  UInt8)  { super.init(type: type.rawValue, payload: payload8)  }
     init(type: ConfigurationType, payload16: UInt16) { super.init(type: type.rawValue, payload: payload16) }
     init(type: ConfigurationType, payload32: UInt32) { super.init(type: type.rawValue, payload: payload32) }

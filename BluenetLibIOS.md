@@ -174,7 +174,18 @@ So far we provide the following modules:
 - power
 
 Some methods require certain rights. If you provide the Admin key in setSettings, you have admin rights, if you only provide the member and guest keys you have member rights. All encryption is automatically taken care of
-when using the methods in this lib. The required rights for certain commands can be found in the bluenet protocol documentation.
+when using the methods in this lib. The required rights for certain commands can be found in the bluenet protocol documentation. 
+
+The modules are called as follows:
+
+```js
+bluenet.<moduleName>.<methodName>(args)
+
+// so for example:
+
+bluenet.control.commandFactoryReset()
+
+```
 
 ### Control
 
@@ -199,7 +210,7 @@ when using the methods in this lib. The required rights for certain commands can
 
 
 #### reset() -> Promise\<Void>
-> Reset the Crownstone. If you change a config setting, they will take effect after a restart. All memory and settings will be retained in a reset.
+> Restart the Crownstone. If you change a config setting, they will take effect after a restart. All memory and settings will be retained in a reset.
 
 #### putInDFU() -> Promise\<Void>
 > You can use this method to put this Crownstone into DFU mode. This allows it to be programmed over the air.
@@ -209,6 +220,8 @@ when using the methods in this lib. The required rights for certain commands can
 
 
 ### Config
+
+#### IMPORTANT! After setting the settings you want, you need to call the reset() method: bluenet.control.reset() before the new settings are used!
 
 #### setIBeaconUUID(_ uuid: String) -> Promise\<Void>
 > This will set the iBeacon uuid. You will have to reboot the Crownstone for this to take effect.
@@ -221,6 +234,9 @@ when using the methods in this lib. The required rights for certain commands can
 
 #### setPWMPeriod(_ pwmPeriod: NSNumber) -> Promise\<Void>
 > This will set the period of the PWM. Do not use this if you do not know exactly what you're doing.
+
+#### setTxPower(_ txPower: NSNumber) -> Promise\<Void>
+> This will set the power at which the Crownstone broadcasts its messages. Possible values are -40, -30, -20, -16, -12, -8, -4, 0, or 4.
 
 
 ### Setup

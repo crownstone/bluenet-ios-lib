@@ -58,7 +58,9 @@ public enum BleError : Error {
     case NOT_IN_RECOVERY_MODE
     case CANNOT_READ_FACTORY_RESET_CHARACTERISTIC
     case RECOVER_MODE_DISABLED
-
+    
+    // input errors
+    case INVALID_TX_POWER_VALUE
 }
 
 struct timeoutDurations {

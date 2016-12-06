@@ -95,13 +95,13 @@ class NaiveBayes {
     
     static func _translateFingerPrint(_ fingerprint: Fingerprint) -> [String: [NSNumber]] {
         var translatedData = [String: [NSNumber]]()
-        for (dataPoint) in fingerprint.data {
-            for (stoneId, measurement) in dataPoint {
-                if (stoneId != "timestamp") {
+        for (entry) in fingerprint.data {
+            if let data = entry["devices"] as? [String: NSNumber] {
+                for (stoneId, rssi) in data {
                     if (translatedData[stoneId] == nil) {
                         translatedData[stoneId] = [NSNumber]()
                     }
-                    translatedData[stoneId]!.append(measurement)
+                    translatedData[stoneId]!.append(rssi)
                 }
             }
         }
@@ -109,7 +109,7 @@ class NaiveBayes {
     }
     
     func _processFingerPrint(_ locationId: String, _ fingerprint: Fingerprint) {
-        var translatedData = NaiveBayes._translateFingerPrint(fingerprint)
+        let translatedData = NaiveBayes._translateFingerPrint(fingerprint)
         
         for (stoneId, measurements) in translatedData {
             let mean = self._getMean(measurements)

@@ -77,6 +77,29 @@ open class SetupHandler {
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.SetupService, characteristic: SetupCharacteristics.SessionNonce)
     }
     
+    
+    open func goToDFU() -> Promise<Void> {
+        print ("put in DFU during setup.")
+        let packet : [UInt8] = [66]
+        self.bleManager.settings.disableEncryptionTemporarily()
+        return Promise<Void> { fulfill, reject in
+            self.bleManager.writeToCharacteristic(
+                CSServices.SetupService,
+                characteristicId: SetupCharacteristics.GoToDFU,
+                data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                type: CBCharacteristicWriteType.withResponse
+            )
+            .then{_ -> Void in
+                self.bleManager.settings.restoreEncryption()
+                fulfill()
+            }
+            .catch{(err: Error) -> Void in
+                self.bleManager.settings.restoreEncryption()
+                reject(err)
+            }
+        }
+    }
+    
     /**
      * Get the MAC address as a F3:D4:A1:CC:FF:32 String
      */

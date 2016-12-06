@@ -147,4 +147,9 @@ open class Conversion {
         let ns = NSNumber(value: val as UInt8)
         return ns.int8Value
     }
+    
+    open static func int8_to_uint8(_ val: Int8) -> UInt8 {
+        let ns = NSNumber(value: val as Int8)
+        return ns.uint8Value
+    }
 }

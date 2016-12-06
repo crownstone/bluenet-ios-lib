@@ -10,14 +10,14 @@ import Foundation
 import SwiftyJSON
 
 open class Fingerprint {
-    open var data = [[String:NSNumber]]()
+    open var data = [[String: Any]]()
     
     public init() {}
     public init(stringifiedData: String) {
         let jsonData = JSON.parse(stringifiedData)
         if let arr = jsonData.arrayObject {
             for possibleDict in arr {
-                if let dict = possibleDict as? [String: NSNumber] {
+                if let dict = possibleDict as? [String: Any] {
                     data.append(dict)
                 }
             }
@@ -25,14 +25,16 @@ open class Fingerprint {
     }
     
     func collect(_ ibeaconData: [iBeaconPacket]) {
-        var returnDict = [String: NSNumber]()
+        var dataDict = [String: Any]()
         
+        var devicesDict = [String: NSNumber]()
         for point in ibeaconData {
-            returnDict[point.idString] = point.rssi
+            devicesDict[point.idString] = point.rssi
         }
-        returnDict["timestamp"] = NSNumber(value: NSDate().timeIntervalSince1970)
+        dataDict["devices"] = devicesDict
+        dataDict["timestamp"] = NSNumber(value: NSDate().timeIntervalSince1970)
         
-        data.append(returnDict);
+        data.append(dataDict);
     }
     
     open func getJSON() -> JSON {

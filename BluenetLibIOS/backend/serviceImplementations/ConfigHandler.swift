@@ -68,6 +68,20 @@ open class ConfigHandler {
         return self._writeToConfig(packet: data.getPacket())
     }
     
+    open func setTxPower (_ txPower: NSNumber) -> Promise<Void> {
+        return Promise<Void> { fulfill, reject in
+            if (txPower == -40 || txPower == -30 || txPower == -20 || txPower == -16 || txPower == -12 || txPower == -8 || txPower == -4 || txPower == 0 || txPower == 4) {
+                let data = WriteConfigPacket(type: ConfigurationType.tx_POWER, payload8: txPower.int8Value)
+                self._writeToConfig(packet: data.getPacket())
+                    .then{_ in fulfill()}
+                    .catch{err in reject(err)}
+            }
+            else {
+                reject(BleError.INVALID_TX_POWER_VALUE)
+            }
+        }
+    }
+    
     func _writeToConfig(packet: [UInt8]) -> Promise<Void> {
         return self.bleManager.writeToCharacteristic(
             CSServices.CrownstoneService,

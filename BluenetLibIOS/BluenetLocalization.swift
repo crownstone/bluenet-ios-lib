@@ -44,7 +44,7 @@ open class BluenetLocalization {
     var activeGroupId : String?
     var activeLocationId : String?
     var indoorLocalizationConsecutiveMatchesThreshold = 2
-    var indoorLocalizationEnabled : Bool = false
+    open var indoorLocalizationEnabled : Bool = false
     var indoorLocalizationConsecutiveMatches = 0
     var lastMeasurement = ""
     var fingerprintData = [String : [String : Fingerprint]]() // referenceId: locationId: Fingerprint

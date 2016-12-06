@@ -92,6 +92,8 @@
 		FA6D3A271D6AF00E00DFF113 /* PowerSamples.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PowerSamples.swift; sourceTree = "<group>"; };
 		FA6D3A291D6B076700DFF113 /* NotificationMerger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationMerger.swift; sourceTree = "<group>"; };
 		FA71E49D1D4761D900D93A2F /* EncryptionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptionTests.swift; sourceTree = "<group>"; };
+		FA79874E1DF6B3380005EB86 /* BluenetLibIOS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BluenetLibIOS.md; sourceTree = "<group>"; };
+		FA79874F1DF6B3380005EB86 /* BluenetLocalizationLibIOS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BluenetLocalizationLibIOS.md; sourceTree = "<group>"; };
 		FAC6EC741D79F8F100545E48 /* NearestItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearestItem.swift; sourceTree = "<group>"; };
 		FAE862571CF4515A0027539D /* Bluenet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bluenet.swift; sourceTree = "<group>"; };
 		FAE8625B1CF478E50027539D /* Eventbus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Eventbus.swift; sourceTree = "<group>"; };
@@ -153,6 +155,8 @@
 				FA3C18871CBBDA6B00A11CF7 /* BluenetLibIOSTests */,
 				FA3C187A1CBBDA6B00A11CF7 /* Products */,
 				FAE862611CF4B3830027539D /* Cartfile */,
+				FA79874E1DF6B3380005EB86 /* BluenetLibIOS.md */,
+				FA79874F1DF6B3380005EB86 /* BluenetLocalizationLibIOS.md */,
 				FAE9371D1D14453000945989 /* README.md */,
 			);
 			sourceTree = "<group>";
