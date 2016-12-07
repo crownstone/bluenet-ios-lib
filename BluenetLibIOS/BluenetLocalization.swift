@@ -321,16 +321,23 @@ open class BluenetLocalization {
     
     func _handleRegionExit(_ regionId: Any) {
         if regionId is String {
+            if (DEBUG_LOG_ENABLED) {
+                Log("REGION EXIT \(regionId)")
+            }
             if (self.activeGroupId != nil) {
                 self.eventBus.emit("exitRegion", regionId)
             }
         }
         else {
+            if (DEBUG_LOG_ENABLED) {
+                Log("REGION EXIT (id not string)")
+            }
             if (self.activeGroupId != nil) {
                 self.eventBus.emit("exitRegion", self.activeGroupId!)
             }
         }
         self.activeGroupId = nil
+        
     }
     
     func _handleRegionEnter(_ regionId: Any) {
@@ -345,7 +352,18 @@ open class BluenetLocalization {
                 self.eventBus.emit("enterRegion", regionString)
             }
             self.activeGroupId = regionString
+            
+            if (DEBUG_LOG_ENABLED) {
+                Log("REGION ENTER \(regionString)")
+            }
         }
+        else {
+            if (DEBUG_LOG_ENABLED) {
+                Log("REGION ENTER region not string")
+            }
+        }
+        
+        
     }    
     
     func _evaluateData(_ data : [iBeaconPacket]) -> ClassifierResult {
