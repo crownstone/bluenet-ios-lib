@@ -38,6 +38,7 @@ public typealias eventCallback = (Any) -> Void
  */
 open class Bluenet  {
     // todo: set back to private, currently public for DEBUG
+    var counter : UInt64 = 0
     open let bleManager : BleManager!
     open var settings : BluenetSettings!
     let eventBus : EventBus!
@@ -261,11 +262,25 @@ open class Bluenet  {
             if deviceList[castData.handle] != nil {
                 deviceList[castData.handle]!.update(castData)
                 if (deviceList[castData.handle]!.verified) {
+                    // log debug for verified advertisement
+                    if (DEBUG_LOG_ENABLED) {
+                        self.counter += 1
+                        Log("received verifiedAdvertisementData nr: \(self.counter)")
+                    }
                     self.eventBus.emit("verifiedAdvertisementData",castData)
                     
                     if (castData.rssi.intValue < 0) {
                         if (castData.isSetupPackage()) {
+                            // log debug for nearest setup
+                            if (DEBUG_LOG_ENABLED) {
+                                Log("received SetupAdvertisement nr: \(self.counter)")
+                            }
+                            
                             self.setupList[castData.handle] = NearestItem(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue, setupMode: true)
+                            // log debug for nearest setup
+                            if (DEBUG_LOG_ENABLED) {
+                                Log("received nearestSetupCrownstone nr: \(self.counter)")
+                            }
                             self._emitNearestSetupCrownstone()
                         }
                         else {

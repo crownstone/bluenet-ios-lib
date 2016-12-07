@@ -255,8 +255,11 @@ open class BluenetLocalization {
     
     func _updateState(_ ibeaconData: Any) {
         if let data = ibeaconData as? [iBeaconPacket] {
-            self.counter += 1
-            Log("received iBeacon nr: \(self.counter) classifierState: \(indoorLocalizationEnabled) amountOfBeacons: \(data.count)")
+            // log ibeacon receiving for debugging purposes
+            if (DEBUG_LOG_ENABLED) {
+                self.counter += 1
+                Log("received iBeacon nr: \(self.counter) classifierState: \(indoorLocalizationEnabled) amountOfBeacons: \(data.count)")
+            }
             if (data.count > 0 && self.activeGroupId != nil) {
                 // create classifiers for this group if required.
                 if (self.classifier[self.activeGroupId!] == nil) {
