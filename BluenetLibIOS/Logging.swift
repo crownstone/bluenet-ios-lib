@@ -9,13 +9,17 @@
 import Foundation
 
 func Log(_ data: String) {
+    Log(data, filename: "BluenetLog.log")
+}
+
+func Log(_ data: String, filename: String = "BluenetLog.log") {
     if (LOGGING_PRINT) {
         print(data)
     }
 
     if (LOGGING_FILE) {
         let dir: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last! as URL
-        let url = dir.appendingPathComponent("BluenetLog.log")
+        let url = dir.appendingPathComponent(filename)
     
         let timestamp = Date().timeIntervalSince1970
         let time = Date().description
