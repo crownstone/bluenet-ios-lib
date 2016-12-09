@@ -17,7 +17,10 @@ func Log(_ data: String, filename: String = "BluenetLog.log") {
     if (LOGGING_PRINT) {
         print(data)
     }
+    LogFile(data, filename: filename)
+}
 
+func LogFile(_ data: String, filename: String = "BluenetLog.log") {
     if (LOGGING_FILE) {
         let dir: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last! as URL
         let url = dir.appendingPathComponent(filename)
@@ -25,7 +28,7 @@ func Log(_ data: String, filename: String = "BluenetLog.log") {
         UIDevice.current.isBatteryMonitoringEnabled = true
         
         let battery = UIDevice.current.batteryLevel
-    
+        
         let timestamp = Date().timeIntervalSince1970
         let time = Date().description
         let content = "\(timestamp) - \(time):battery:\(battery) - " + data + "\n"
@@ -47,4 +50,5 @@ func Log(_ data: String, filename: String = "BluenetLog.log") {
             }
         }
     }
+
 }
