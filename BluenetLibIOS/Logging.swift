@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 func Log(_ data: String) {
     Log(data, filename: "BluenetLog.log")
@@ -20,10 +21,14 @@ func Log(_ data: String, filename: String = "BluenetLog.log") {
     if (LOGGING_FILE) {
         let dir: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last! as URL
         let url = dir.appendingPathComponent(filename)
+        
+        UIDevice.current.isBatteryMonitoringEnabled = true
+        
+        let battery = UIDevice.current.batteryLevel
     
         let timestamp = Date().timeIntervalSince1970
         let time = Date().description
-        let content = "\(timestamp) - \(time) - " + data + "\n"
+        let content = "\(timestamp) - \(time):battery:\(battery) - " + data + "\n"
         let contentToWrite = content.data(using: String.Encoding.utf8)!
         
         if let fileHandle = FileHandle(forWritingAtPath: url.path) {

@@ -79,6 +79,12 @@ open class BluenetLocalization {
         }
     }
     
+    /**
+     * This method will call requestState on every registered region.
+     */
+    open func refreshLocation() {
+        self.locationManager.refreshLocation()
+    }
     
     /**
      * This can be used to have another way of resetting the enter/exit events. In certain cases (ios 10) the exitRegion event might not be fired correctly.
@@ -258,7 +264,7 @@ open class BluenetLocalization {
             // log ibeacon receiving for debugging purposes
             if (DEBUG_LOG_ENABLED) {
                 self.counter += 1
-                Log("received iBeacon nr: \(self.counter) classifierState: \(indoorLocalizationEnabled) amountOfBeacons: \(data.count)")
+                Log("received iBeacon nr: \(self.counter) classifierState: \(indoorLocalizationEnabled) amountOfBeacons: \(data.count) activeRegionId: \(self.activeGroupId)")
                 for packet in data {
                     Log("received iBeacon DETAIL \(packet.idString) \(packet.rssi) \(packet.referenceId)")
                 }

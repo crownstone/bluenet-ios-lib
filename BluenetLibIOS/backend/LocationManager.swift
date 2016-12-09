@@ -45,10 +45,16 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
                 self.manager.requestState(for: beacon.region)
             }
         }
-        
         self.start();
     }
 
+    
+    open func refreshLocation() {
+        for region in self.manager.monitoredRegions {
+            self.manager.requestState(for: region)
+        }
+    }
+    
     
     open func check() {
         self.locationManager(self.manager, didChangeAuthorization: CLLocationManager.authorizationStatus())
