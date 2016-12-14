@@ -264,9 +264,9 @@ open class BluenetLocalization {
             // log ibeacon receiving for debugging purposes
             if (DEBUG_LOG_ENABLED) {
                 self.counter += 1
-                Log("received iBeacon nr: \(self.counter) classifierState: \(indoorLocalizationEnabled) amountOfBeacons: \(data.count) activeRegionId: \(self.activeGroupId)")
+                LogFile("received iBeacon nr: \(self.counter) classifierState: \(indoorLocalizationEnabled) amountOfBeacons: \(data.count) activeRegionId: \(self.activeGroupId)")
                 for packet in data {
-                    Log("received iBeacon DETAIL \(packet.idString) \(packet.rssi) \(packet.referenceId)")
+                    LogFile("received iBeacon DETAIL \(packet.idString) \(packet.rssi) \(packet.referenceId)")
                 }
             }
             if (data.count > 0 && self.activeGroupId != nil) {

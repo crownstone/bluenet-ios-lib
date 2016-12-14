@@ -265,7 +265,7 @@ open class Bluenet  {
                     // log debug for verified advertisement
                     if (DEBUG_LOG_ENABLED) {
                         self.counter += 1
-                        Log("received verifiedAdvertisementData nr: \(self.counter)")
+                        LogFile("received verifiedAdvertisementData nr: \(self.counter)")
                     }
                     self.eventBus.emit("verifiedAdvertisementData",castData)
                     
@@ -273,13 +273,13 @@ open class Bluenet  {
                         if (castData.isSetupPackage()) {
                             // log debug for nearest setup
                             if (DEBUG_LOG_ENABLED) {
-                                Log("received SetupAdvertisement nr: \(self.counter)")
+                                LogFile("received SetupAdvertisement nr: \(self.counter)")
                             }
                             
                             self.setupList[castData.handle] = NearestItem(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue, setupMode: true)
                             // log debug for nearest setup
                             if (DEBUG_LOG_ENABLED) {
-                                Log("received nearestSetupCrownstone nr: \(self.counter)")
+                                LogFile("received nearestSetupCrownstone nr: \(self.counter)")
                             }
                             self._emitNearestSetupCrownstone()
                         }

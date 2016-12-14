@@ -17,10 +17,10 @@ open class BluenetMotion  {
     public init() {
         motionManager = CMMotionManager()
         
-        motionManager.deviceMotionUpdateInterval = 0.4
+        motionManager.deviceMotionUpdateInterval = 1.0
     
         motionManager.startDeviceMotionUpdates(to: OperationQueue.main, withHandler: {motion, error in
-            LogFile("motion \(motion)", filename: "motion.log")
+//            LogFile("motion \(motion)", filename: "motion.log")
         })
         
        
