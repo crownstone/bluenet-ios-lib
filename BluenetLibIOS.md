@@ -18,6 +18,9 @@ This lib broadcasts the following data using its own eventbus:
 
 You can subscribe to these events with the **on*>method descibed below.
 
+This lib implements protocol 0.7.0 of Bluenet which can be found here:
+https://github.com/crownstone/bluenet/blob/f600fef8ddfc5fdfa1604ab1db47966eba6c75f4/docs/PROTOCOL.md
+
 
 ### Bluenet is initialized without arguments.
 ```
@@ -215,9 +218,14 @@ bluenet.control.commandFactoryReset()
 #### putInDFU() -> Promise\<Void>
 > You can use this method to put this Crownstone into DFU mode. This allows it to be programmed over the air.
 
-#### disconnect() -> Promise\<Void> {
+#### disconnect() -> Promise\<Void> 
 > If you tell iOS to disconnect, it will actually remain connected for about 10 seconds. This method will tell the Crownstone to break the connection instead. This allows you to disconnect instantly.
 
+#### keepAliveState(changeState: Bool, state: Float, timeout: UInt16) -> Promise\<Void> 
+> Keepalives are meant to instruct the Crownstone what to do if it doesnot hear anything anymore. If the changeState is true, then the state and timeout (which is seconds) will be used. This means that the Crownstone will switch to match state once the timeout expires. If any keepalive is received in the meantime, the timeout will be postponed. Only the last received state will be executed. If changeState is false, the keepaliveState on the Crownstone will be cleared and nothing will happen when the timer runs out.
+
+#### keepAlive() -> Promise\<Void> 
+> This keepAlive is just to postpone the timeout and does not influence the set state.
 
 ### Config
 

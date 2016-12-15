@@ -136,14 +136,25 @@ open class ControlHandler {
     }
 
     
-    open func keepAliveState(state: Float, timeout: UInt16) -> Promise<Void> {
+    /**
+     * If the changeState is true, then the state and timeout will be used. If it is false, the keepaliveState on the Crownstone will be cleared and nothing will happen when the timer runs out.
+     */
+    open func keepAliveState(changeState: Bool, state: Float, timeout: UInt16) -> Promise<Void> {
         var switchState = min(1,max(0,state))*100
+        
+        // make sure we do not
+        var actionState : UInt8 = 0
+        if (changeState == true) {
+            actionState = 1
+        }
         
         // temporary to disable dimming
         switchState = ceil(switchState)
         
         Log("------ BLUENET_LIB: Keep alive state")
-        let keepalivePacket = keepAliveStatePacket(state: NSNumber(value: switchState as Float).uint8Value,timeout: timeout).getPacket()
+        let keepalivePacket = keepAliveStatePacket(action: actionState,
+                                                   state: NSNumber(value: switchState as Float).uint8Value,
+                                                   timeout: timeout).getPacket()
         return self._writeControlPacket(ControlPacket(type: .keep_ALIVE_STATE, payloadArray: keepalivePacket).getPacket())
     }
     

@@ -101,7 +101,8 @@ class ControlPacket : BLEPacket {
 class keepAliveStatePacket {
     var data = [UInt8]()
     
-    init(state: UInt8, timeout: UInt16) {
+    init(action: UInt8, state: UInt8, timeout: UInt16) {
+        data.append(action)
         data.append(state)
         
         let timeoutArray = Conversion.uint16_to_uint8_array(timeout)
