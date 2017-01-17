@@ -9,3 +9,6 @@ github "SwiftyJSON/SwiftyJSON"
 
 # DFU code from Nordic
 github "NordicSemiconductor/IOS-Pods-DFU-Library"
+
+# required for Zip which is required by Nordic
+github "dexman/Minizip"
