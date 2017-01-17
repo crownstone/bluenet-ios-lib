@@ -399,7 +399,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# this is used to remove a conflicting file that is introduced with the carthage install of\n# Nordics DFU lib\n# Nordic claims this is a minor issue which will not be fixed. (issue #49)\nrm -f ./Carthage/Checkouts/Zip/Zip/minizip/module.modulemap";
+			shellScript = "# this is used to remove a conflicting file that is introduced with the carthage install of\n# Nordics DFU lib\n# Nordic claims this is a minor issue which will not be fixed. (issue #49)\n\n# required to build framework in xcode\nrm -f ./Carthage/Checkouts/Zip/Zip/minizip/module.modulemap\n\n# required to build framework when used with carthage externally\nrm -f ./Zip/Zip/minizip/module.modulemap";
 		};
 /* End PBXShellScriptBuildPhase section */
 

@@ -642,8 +642,8 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             handle: peripheral.identifier.uuidString,
             name: peripheral.name,
             rssi: RSSI,
-            serviceData: advertisementData["kCBAdvDataServiceData"],
-            serviceUUID: advertisementData["kCBAdvDataServiceUUIDs"],
+            serviceData: advertisementData["kCBAdvDataServiceData"] as Any,
+            serviceUUID: advertisementData["kCBAdvDataServiceUUIDs"] as Any,
             referenceId: settings.referenceId
         );
 

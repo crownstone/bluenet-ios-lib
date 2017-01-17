@@ -14,7 +14,7 @@ open class Fingerprint {
     
     public init() {}
     public init(stringifiedData: String) {
-        let jsonData = JSON.parse(stringifiedData)
+        let jsonData = JSON(parseJSON: stringifiedData)
         if let arr = jsonData.arrayObject {
             for possibleDict in arr {
                 if let dict = possibleDict as? [String: Any] {

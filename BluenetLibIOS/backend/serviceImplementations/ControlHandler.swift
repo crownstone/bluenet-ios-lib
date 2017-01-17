@@ -130,7 +130,7 @@ open class ControlHandler {
     
     
     open func switchPWM(_ state: Float) -> Promise<Void> {
-        var switchState = min(1,max(0,state))*100
+        let switchState = min(1,max(0,state))*100
         Log("------ BLUENET_LIB: switching PWM to \(switchState)")
         return self._writeControlPacket(ControlPacket(type: .pwm, payload8: NSNumber(value: switchState as Float).uint8Value).getPacket())
     }
