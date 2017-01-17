@@ -20,6 +20,7 @@
 		FA24D1631DF96F6500A41DA1 /* BluenetMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA24D1621DF96F6500A41DA1 /* BluenetMotion.swift */; };
 		FA270B051D0F12CD00CB0AE8 /* Characteristics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA270B041D0F12CD00CB0AE8 /* Characteristics.swift */; };
 		FA270B071D0F12D800CB0AE8 /* Services.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA270B061D0F12D800CB0AE8 /* Services.swift */; };
+		FA2D0F6E1E1BFD88006A8260 /* iOSDFULibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA2D0F6D1E1BFD88006A8260 /* iOSDFULibrary.framework */; };
 		FA2DCB681DD0C99300D5A893 /* BluenetLibIOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA3C18791CBBDA6B00A11CF7 /* BluenetLibIOS.framework */; };
 		FA2EEF7A1DA3FF9A0096B67F /* CryptoSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA2EEF771DA3FF9A0096B67F /* CryptoSwift.framework */; };
 		FA2EEF7B1DA3FF9A0096B67F /* PromiseKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA2EEF781DA3FF9A0096B67F /* PromiseKit.framework */; };
@@ -28,6 +29,7 @@
 		FA3C18891CBBDA6B00A11CF7 /* BluenetLibIOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3C18881CBBDA6B00A11CF7 /* BluenetLibIOSTests.swift */; };
 		FA3C189B1CBBDB9400A11CF7 /* BleMangager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3C18991CBBDB9400A11CF7 /* BleMangager.swift */; };
 		FA3C189D1CBBDB9400A11CF7 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3C189A1CBBDB9400A11CF7 /* LocationManager.swift */; };
+		FA404F641E2E5772006B34ED /* Zip.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA404F631E2E5772006B34ED /* Zip.framework */; };
 		FA44BB181CF5A6B50018C9D0 /* PromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA44BB171CF5A6B50018C9D0 /* PromiseTests.swift */; };
 		FA4A09D81D096932005753CE /* BlePackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4A09D71D096932005753CE /* BlePackets.swift */; };
 		FA4A09DA1D099D01005753CE /* BluenetTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4A09D91D099D01005753CE /* BluenetTypes.swift */; };
@@ -76,6 +78,7 @@
 		FA24D1621DF96F6500A41DA1 /* BluenetMotion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluenetMotion.swift; sourceTree = "<group>"; };
 		FA270B041D0F12CD00CB0AE8 /* Characteristics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Characteristics.swift; sourceTree = "<group>"; };
 		FA270B061D0F12D800CB0AE8 /* Services.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Services.swift; sourceTree = "<group>"; };
+		FA2D0F6D1E1BFD88006A8260 /* iOSDFULibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iOSDFULibrary.framework; path = Carthage/Build/iOS/iOSDFULibrary.framework; sourceTree = "<group>"; };
 		FA2EEF771DA3FF9A0096B67F /* CryptoSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoSwift.framework; path = Carthage/Build/iOS/CryptoSwift.framework; sourceTree = "<group>"; };
 		FA2EEF781DA3FF9A0096B67F /* PromiseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PromiseKit.framework; path = Carthage/Build/iOS/PromiseKit.framework; sourceTree = "<group>"; };
 		FA2EEF791DA3FF9A0096B67F /* SwiftyJSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftyJSON.framework; path = Carthage/Build/iOS/SwiftyJSON.framework; sourceTree = "<group>"; };
@@ -87,6 +90,7 @@
 		FA3C188A1CBBDA6B00A11CF7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FA3C18991CBBDB9400A11CF7 /* BleMangager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BleMangager.swift; sourceTree = "<group>"; };
 		FA3C189A1CBBDB9400A11CF7 /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		FA404F631E2E5772006B34ED /* Zip.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Zip.framework; path = Carthage/Build/iOS/Zip.framework; sourceTree = "<group>"; };
 		FA44BB171CF5A6B50018C9D0 /* PromiseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseTests.swift; sourceTree = "<group>"; };
 		FA4A09D71D096932005753CE /* BlePackets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlePackets.swift; sourceTree = "<group>"; };
 		FA4A09D91D099D01005753CE /* BluenetTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluenetTypes.swift; sourceTree = "<group>"; };
@@ -122,7 +126,9 @@
 			files = (
 				FA2EEF7A1DA3FF9A0096B67F /* CryptoSwift.framework in Frameworks */,
 				FA2EEF7B1DA3FF9A0096B67F /* PromiseKit.framework in Frameworks */,
+				FA2D0F6E1E1BFD88006A8260 /* iOSDFULibrary.framework in Frameworks */,
 				FA2EEF7C1DA3FF9A0096B67F /* SwiftyJSON.framework in Frameworks */,
+				FA404F641E2E5772006B34ED /* Zip.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -152,6 +158,8 @@
 		FA3C186F1CBBDA6B00A11CF7 = {
 			isa = PBXGroup;
 			children = (
+				FA404F631E2E5772006B34ED /* Zip.framework */,
+				FA2D0F6D1E1BFD88006A8260 /* iOSDFULibrary.framework */,
 				FA2EEF771DA3FF9A0096B67F /* CryptoSwift.framework */,
 				FA2EEF781DA3FF9A0096B67F /* PromiseKit.framework */,
 				FA2EEF791DA3FF9A0096B67F /* SwiftyJSON.framework */,
@@ -290,6 +298,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = FA3C188D1CBBDA6B00A11CF7 /* Build configuration list for PBXNativeTarget "BluenetLibIOS" */;
 			buildPhases = (
+				FA404F651E2E5AC7006B34ED /* ShellScript */,
 				FA3C18741CBBDA6B00A11CF7 /* Sources */,
 				FA3C18751CBBDA6B00A11CF7 /* Frameworks */,
 				FA3C18761CBBDA6B00A11CF7 /* Headers */,
@@ -377,6 +386,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		FA404F651E2E5AC7006B34ED /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# this is used to remove a conflicting file that is introduced with the carthage install of\n# Nordics DFU lib\n# Nordic claims this is a minor issue which will not be fixed. (issue #49)\nrm -f ./Carthage/Checkouts/Zip/Zip/minizip/module.modulemap";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		FA3C18741CBBDA6B00A11CF7 /* Sources */ = {

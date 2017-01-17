@@ -34,7 +34,6 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         Log("------ BLUENET_LIB_NAV: location services enabled: \(CLLocationManager.locationServicesEnabled())");
         Log("------ BLUENET_LIB_NAV: ranging services enabled: \(CLLocationManager.isRangingAvailable())");
 
-        self.check()
     }
     
     open func trackBeacon(_ beacon: iBeaconContainer) {
@@ -56,7 +55,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     
-    open func check() {
+    open func requestLocationPermission() {
         self.locationManager(self.manager, didChangeAuthorization: CLLocationManager.authorizationStatus())
     }
     
@@ -146,23 +145,28 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     
     open func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         switch (CLLocationManager.authorizationStatus()) {
-        case .notDetermined:
-            Log("------ BLUENET_LIB_NAV: location NotDetermined")
-            /*
-             First you need to add NSLocationWhenInUseUsageDescription or NSLocationAlwaysUsageDescription(if you want to use in background) in your info.plist file OF THE PROGRAM THAT IMPLEMENTS THIS!
-             */
-            manager.requestAlwaysAuthorization()
-        case .restricted:
-            Log("------ BLUENET_LIB_NAV: location Restricted")
-        case .denied:
-            showLocationAlert()
-            Log("------ BLUENET_LIB_NAV: location Denied")
-        case .authorizedAlways:
-            Log("------ BLUENET_LIB_NAV: location AuthorizedAlways")
-            start()
-        case .authorizedWhenInUse:
-            Log("------ BLUENET_LIB_NAV: location AuthorizedWhenInUse")
-            showLocationAlert()
+            case .notDetermined:
+                Log("------ BLUENET_LIB_NAV: location NotDetermined")
+                /*
+                 First you need to add NSLocationWhenInUseUsageDescription or NSLocationAlwaysUsageDescription(if you want to use in background) in your info.plist file OF THE PROGRAM THAT IMPLEMENTS THIS!
+                 */
+                manager.requestAlwaysAuthorization()
+                self.eventBus.emit("locationStatus", "unknown");
+            case .restricted:
+                Log("------ BLUENET_LIB_NAV: location Restricted")
+                self.eventBus.emit("locationStatus", "off");
+            case .denied:
+                Log("------ BLUENET_LIB_NAV: location Denied")
+                self.eventBus.emit("locationStatus", "off");
+                showLocationAlert()
+            case .authorizedAlways:
+                Log("------ BLUENET_LIB_NAV: location AuthorizedAlways")
+                self.eventBus.emit("locationStatus", "background");
+                start()
+            case .authorizedWhenInUse:
+                Log("------ BLUENET_LIB_NAV: location AuthorizedWhenInUse")
+                self.eventBus.emit("locationStatus", "foreground");
+                showLocationAlert()
         }
     }
     

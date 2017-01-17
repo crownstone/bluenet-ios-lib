@@ -9,6 +9,7 @@
 import Foundation
 import PromiseKit
 import CoreBluetooth
+import iOSDFULibrary
 
 class NotifcationPacket {
     var OpCode : UInt8 = 0

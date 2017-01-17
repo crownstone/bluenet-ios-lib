@@ -66,10 +66,21 @@ open class BluenetLocalization {
     
     
     /**
+     * The user needs to manually request permission
+     */
+    open func requestLocationPermission() {
+        self.locationManager.requestLocationPermission()
+    }
+    
+    /**
      * This method configures an ibeacon with the ibeaconUUID you provide. The dataId is used to notify
      * you when this region is entered as well as to keep track of which classifiers belong to which datapoint in your reference.
      */
     open func trackIBeacon(uuid: String, referenceId: String) {
+        // verify permission
+        self.locationManager.requestLocationPermission()
+        
+        
         if (uuid.characters.count < 30) {
             Log("BLUENET LOCALIZATION ---- Cannot track \(referenceId) with UUID \(uuid)")
         }
