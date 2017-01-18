@@ -2,7 +2,7 @@
 github "krzyzanowskim/CryptoSwift" "0.6.1"
 
 # We code in Asynchronous world. We promise. [http://promisekit.org/]
-github "mxcl/PromiseKit"
+github "mxcl/PromiseKit" "4.0.5"
 
 # JSON Parser
 github "SwiftyJSON/SwiftyJSON"
