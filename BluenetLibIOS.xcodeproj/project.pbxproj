@@ -29,7 +29,6 @@
 		FA3C18891CBBDA6B00A11CF7 /* BluenetLibIOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3C18881CBBDA6B00A11CF7 /* BluenetLibIOSTests.swift */; };
 		FA3C189B1CBBDB9400A11CF7 /* BleMangager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3C18991CBBDB9400A11CF7 /* BleMangager.swift */; };
 		FA3C189D1CBBDB9400A11CF7 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3C189A1CBBDB9400A11CF7 /* LocationManager.swift */; };
-		FA404F641E2E5772006B34ED /* Zip.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA404F631E2E5772006B34ED /* Zip.framework */; };
 		FA44BB181CF5A6B50018C9D0 /* PromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA44BB171CF5A6B50018C9D0 /* PromiseTests.swift */; };
 		FA4A09D81D096932005753CE /* BlePackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4A09D71D096932005753CE /* BlePackets.swift */; };
 		FA4A09DA1D099D01005753CE /* BluenetTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4A09D91D099D01005753CE /* BluenetTypes.swift */; };
@@ -90,7 +89,6 @@
 		FA3C188A1CBBDA6B00A11CF7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FA3C18991CBBDB9400A11CF7 /* BleMangager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BleMangager.swift; sourceTree = "<group>"; };
 		FA3C189A1CBBDB9400A11CF7 /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
-		FA404F631E2E5772006B34ED /* Zip.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Zip.framework; path = Carthage/Build/iOS/Zip.framework; sourceTree = "<group>"; };
 		FA44BB171CF5A6B50018C9D0 /* PromiseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseTests.swift; sourceTree = "<group>"; };
 		FA4A09D71D096932005753CE /* BlePackets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlePackets.swift; sourceTree = "<group>"; };
 		FA4A09D91D099D01005753CE /* BluenetTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluenetTypes.swift; sourceTree = "<group>"; };
@@ -128,7 +126,6 @@
 				FA2EEF7B1DA3FF9A0096B67F /* PromiseKit.framework in Frameworks */,
 				FA2D0F6E1E1BFD88006A8260 /* iOSDFULibrary.framework in Frameworks */,
 				FA2EEF7C1DA3FF9A0096B67F /* SwiftyJSON.framework in Frameworks */,
-				FA404F641E2E5772006B34ED /* Zip.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -158,7 +155,6 @@
 		FA3C186F1CBBDA6B00A11CF7 = {
 			isa = PBXGroup;
 			children = (
-				FA404F631E2E5772006B34ED /* Zip.framework */,
 				FA2D0F6D1E1BFD88006A8260 /* iOSDFULibrary.framework */,
 				FA2EEF771DA3FF9A0096B67F /* CryptoSwift.framework */,
 				FA2EEF781DA3FF9A0096B67F /* PromiseKit.framework */,
