@@ -298,7 +298,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = FA3C188D1CBBDA6B00A11CF7 /* Build configuration list for PBXNativeTarget "BluenetLibIOS" */;
 			buildPhases = (
-				FA404F651E2E5AC7006B34ED /* ShellScript */,
 				FA3C18741CBBDA6B00A11CF7 /* Sources */,
 				FA3C18751CBBDA6B00A11CF7 /* Frameworks */,
 				FA3C18761CBBDA6B00A11CF7 /* Headers */,
@@ -386,22 +385,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		FA404F651E2E5AC7006B34ED /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# this is used to remove a conflicting file that is introduced with the carthage install of\n# Nordics DFU lib\n# Nordic claims this is a minor issue which will not be fixed. (issue #49)\n\n# required to build framework in xcode\nrm -rf Carthage/Checkouts/IOS-Pods-DFU-Library/Example/Pods/\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		FA3C18741CBBDA6B00A11CF7 /* Sources */ = {

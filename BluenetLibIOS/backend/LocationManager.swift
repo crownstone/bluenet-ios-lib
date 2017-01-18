@@ -161,7 +161,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
                 showLocationAlert()
             case .authorizedAlways:
                 Log("------ BLUENET_LIB_NAV: location AuthorizedAlways")
-                self.eventBus.emit("locationStatus", "background");
+                self.eventBus.emit("locationStatus", "on");
                 start()
             case .authorizedWhenInUse:
                 Log("------ BLUENET_LIB_NAV: location AuthorizedWhenInUse")
