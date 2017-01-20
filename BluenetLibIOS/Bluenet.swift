@@ -258,7 +258,10 @@ open class Bluenet  {
     
     // MARK: util
     func _parseAdvertisement(_ data: Any) {
+        // first we check if the data is conforming to an advertisment
         if let castData = data as? Advertisement {
+            
+            // check if we already know this Crownstone
             if deviceList[castData.handle] != nil {
                 deviceList[castData.handle]!.update(castData)
                 if (deviceList[castData.handle]!.verified) {
@@ -269,7 +272,10 @@ open class Bluenet  {
                     }
                     self.eventBus.emit("verifiedAdvertisementData",castData)
                     
+                    // if we have a valid RSSI measurement:
                     if (castData.rssi.intValue < 0) {
+                        
+                        // handling setup packages
                         if (castData.isSetupPackage()) {
                             // log debug for nearest setup
                             if (DEBUG_LOG_ENABLED) {
@@ -284,23 +290,30 @@ open class Bluenet  {
                             self._emitNearestSetupCrownstone()
                         }
                         else {
+                            // handling normal packages, we emit nearest Crownstone (since verifieds are also Crownstones) and verified nearest.
+                            self._emitNearestCrownstone(topic: "nearestCrownstone", verifiedOnly: false);
                             self._emitNearestCrownstone(topic: "nearestVerifiedCrownstone", verifiedOnly: true);
                             self.setupList.removeValue(forKey: castData.handle)
                         }
                     }
                 }
                 else if (castData.isCrownstoneFamily) {
+                    // if the Crownstone is not verified yet, we can still emit a nearest Crownstone event if the RSSI is valid.
                     if (castData.rssi.intValue < 0) {
                         self._emitNearestCrownstone(topic: "nearestCrownstone", verifiedOnly: false);
                     }
                 }
             }
             else {
+                // add this Crownstone to the list that we keep track of.
                 deviceList[castData.handle] = AvailableDevice(castData, {_ in self.deviceList.removeValue(forKey: castData.handle)})
             }
         }
     }
     
+    
+    // TODO: can be optimized so it does not use a loop.
+    // TODO: move this logic into a specific container class instead of the setupList dictionary
     func _emitNearestSetupCrownstone() {
         var nearestRSSI = -1000
         var nearestHandle = ""
@@ -318,6 +331,8 @@ open class Bluenet  {
         }
     }
     
+    // TODO: can be optimized so it does not use a loop.
+    // TODO: move this logic into a specific container class instead of the devicelist dictionary
     func _emitNearestCrownstone(topic: String, verifiedOnly: Bool = true) {
         var nearestRSSI = -1000
         var nearestHandle = ""
