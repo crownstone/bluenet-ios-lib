@@ -60,16 +60,16 @@ open class Bluenet  {
      * permissions are set correctly.
      */
     public init() {
-        self.settings = BluenetSettings()
-        self.eventBus = EventBus()
+        self.settings   = BluenetSettings()
+        self.eventBus   = EventBus()
         self.bleManager = BleManager(eventBus: self.eventBus)
         
         // pass on the shared objects to the worker classes
-        self.dfu     = DfuHandler(    bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
-        self.config  = ConfigHandler( bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
-        self.setup   = SetupHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
-        self.control = ControlHandler(bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
-        self.power   = PowerHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
+        self.dfu     = DfuHandler(     bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
+        self.config  = ConfigHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
+        self.setup   = SetupHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
+        self.control = ControlHandler( bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
+        self.power   = PowerHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
 
         
         // subscribe to BLE advertisements (TODO: add encryption)

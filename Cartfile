@@ -9,4 +9,3 @@ github "SwiftyJSON/SwiftyJSON"
 
 # DFU code from Nordic
 github "NordicSemiconductor/IOS-Pods-DFU-Library"
-

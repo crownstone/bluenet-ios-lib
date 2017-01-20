@@ -37,7 +37,7 @@ open class iBeaconContainer {
     }
 }
 
-open class iBeaconPacket {
+open class iBeaconPacket: iBeaconPacketProtocol {
     open var uuid : String
     open var major: NSNumber
     open var minor: NSNumber
