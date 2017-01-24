@@ -215,7 +215,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
                     minor: beacon.minor,
                     distance: NSNumber(value: beacon.accuracy),
                     rssi: NSNumber(value: beacon.rssi),
-                    referenceId: region.identifier
+                    collectionId: region.identifier
                 ))
             }
         }

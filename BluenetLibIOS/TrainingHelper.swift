@@ -65,7 +65,7 @@ open class TrainingHelper {
    
     
     /**
-     * Finalize collecting a TrainingData and store it in the appropriate classifier based on the referenceId and the locationId.
+     * Finalize collecting a TrainingData and store it in the appropriate classifier based on the collectionId and the locationId.
      */
     open func finishCollectingTrainingData() -> String? {
         var returnData : String? = nil

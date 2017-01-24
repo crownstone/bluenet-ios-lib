@@ -1,5 +1,5 @@
 //
-//  Fingerprint.swift
+//  TrainingData.swift
 //  BluenetLibIOS
 //
 //  Created by Alex de Mulder on 17/06/16.

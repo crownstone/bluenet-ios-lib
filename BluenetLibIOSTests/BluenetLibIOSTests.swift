@@ -63,38 +63,4 @@ class BluenetLibIOSTests: XCTestCase {
         print(Conversion.uint8_array_to_hex_string(aInv))
     }
     
-    func testFingerprint() {
-        var a = Fingerprint()
-        var b = [iBeaconPacket]()
-        
-        b.append(iBeaconPacket(uuid: "782995c1-4f88-47dc-8cc1-426a520ec57f", major: 1, minor: 2, distance: 3, rssi: -12, referenceId: "test"))
-        b.append(iBeaconPacket(uuid: "782995c1-4f88-47dc-8cc1-426a520ec57f", major: 5, minor: 2, distance: 3, rssi: -32, referenceId: "test"))
-        
-        a.collect(b)
-        a.collect(b)
-        a.collect(b)
-        a.collect(b)
-        
-        let c = a.stringify()
-        print("A STRINGIFIED: \(c)")
-        
-        let d = Fingerprint(stringifiedData: c)
-        
-        XCTAssertEqual(c,d.stringify())
-        let x : [String: [NSNumber]] = ["782995c1-4f88-47dc-8cc1-426a520ec57f.Maj:5.Min:2": [-32, -32, -32, -32], "782995c1-4f88-47dc-8cc1-426a520ec57f.Maj:1.Min:2": [-12, -12, -12, -12]]
-        let y = NaiveBayes._translateFingerPrint(a)
-        var success = true
-        
-        for (id, _) in x {
-            if (y[id] == nil) {
-                success = false
-            }
-            else {
-                XCTAssertEqual(x[id]!, y[id]!)
-            }
-        }
-        XCTAssertEqual(success, true)
-        
-
-    }
 }

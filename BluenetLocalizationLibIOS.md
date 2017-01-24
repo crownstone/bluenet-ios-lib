@@ -1,13 +1,13 @@
 # Bluenet Localization
 
 This lib is used to interact with the indoor localization algorithms of the Crownstone.
-With this lib you train fingerprints, get and load them and determine in which location you are.
+With this lib you train TrainingData, get and load them and determine in which location you are.
 It wraps around the CoreLocation services to handle all iBeacon logic.
 As long as you can ensure that each beacon's UUID+major+minor combination is unique, you can use this
 localization lib.
 
 You input groups by adding their tracking UUIDs
-You input locations by providing their fingerprints or training them.
+You input locations by providing their TrainingDatas or training them.
 
 This lib broadcasts the following data:
 
@@ -15,8 +15,8 @@ This lib broadcasts the following data:
 |  topic:                  |    dataType:          |    when:
 | :---------- | ---------- | :---------- |
 |  "iBeaconAdvertisement"  |    [iBeaconPacket]    |    Once a second when the iBeacon's are ranged   (array of iBeaconPacket objects)
-|  "enterRegion"           |    String             |    When a region (denoted by referenceId) is entered (data is the referenceId as String)
-|  "exitRegion"            |    String             |    When a region (denoted by referenceId) is no longer detected (data is the referenceId as String)
+|  "enterRegion"           |    String             |    When a region (denoted by collectionId) is entered (data is the collectionId as String)
+|  "exitRegion"            |    String             |    When a region (denoted by collectionId) is no longer detected (data is the collectionId as String)
 |  "enterLocation"         |    String             |    When the classifier determines the user has entered a new location (data is the locationId as String)
 |  "exitLocation"          |    String             |    When the classifier determines the user has left his location in favor of a new one. Not triggered when region is left (data is the locationId as String)
 |  "currentLocation"       |    String             |    Once a second when the iBeacon's are ranged and the classifier makes a prediction (data is the locationId as String)
@@ -70,7 +70,7 @@ unsubscribe() // now you are unsubscribed and the callback will not be invoked a
 
 ### Tracking iBeacons
 
-#### trackIBeacon(uuid: String, referenceId: String)
+#### trackIBeacon(uuid: String, collectionId: String)
 > This method configures starts tracking the iBeaconUUID you provide. The dataId is used to notify
 > you when this region is entered as well as to keep track of which classifiers belong to which data point in your reference.
 > When this method has been used, the iBeaconAdvertisement event will update you when new data comes in.
@@ -107,22 +107,22 @@ unsubscribe() // now you are unsubscribed and the callback will not be invoked a
 ## Indoor localization
 
 Starting and stopping the usasge of the classifier will also start and stop the emitting of the "enterLocation", "exitLocation"
-and "currentLocation" events. If there is no fingerprint loaded, none of these events will be emitted regardless. The default state of the
+and "currentLocation" events. If there is no TrainingData loaded, none of these events will be emitted regardless. The default state of the
 indoor localization is **OFF**.
 
 #### startIndoorLocalization()
-> This will enable the classifier. It requires the fingerprints to be setup and will trigger the current/enter/exitRoom events
-> This should be used if the user is sure the fingerprinting process has been finished.
+> This will enable the classifier. It requires the TrainingData to be setup and will trigger the current/enter/exitRoom events
+> This should be used if the user is sure the TrainingData collection process has been finished.
 
 
 #### stopIndoorLocalization()
 > This will disable the classifier. The current/enter/exitRoom events will no longer be fired.
 
 
-## Fingerprinting
+## Collecting Training Data
 
-You do not need to know the format of the fingerprint in order to use them.
-You can tell the lib to start collecting a fingerprint by calling this method:
+You do not need to know the format of the TrainingData in order to use it.
+You can tell the lib to start collecting a Training Dataset by calling this method:
 
 #### startCollectingFingerprint()
 > Start collecting a fingerprint.
@@ -136,24 +136,20 @@ You can tell the lib to start collecting a fingerprint by calling this method:
 #### abortCollectingFingerprint()
 > Stop collecting a fingerprint without loading it into the classifier.
 
-Once your usecase has determined that the fingerprint is big enough, you call the finalize method.
-This will also load and initialize the fingerprint. Only at this point do you give the fingerprint a referenceId and a locationId.
+Once your usecase has determined that the Training Dataset is big enough, you call the finalize method.
+This will also load and initialize the fingerprint. Only at this point do you give the fingerprint a collectionId and a locationId.
 These are commonly used for region and location ids.
 
-#### finalizeFingerprint(referenceId: String, locationId: String)
-> Finalize collecting a fingerprint and store it in the appropriate classifier based on the referenceId and the locationId.
+#### finalizeFingerprint(collectionId: String, locationId: String) -> String?
+> Finalize collecting a fingerprint and store it in the appropriate classifier based on the collectionId and the locationId.
 
 ### Storage of fingerprints
 
-The lib does not store the fingerprints. This is up to your app. You can get the fingerprint using the getFingerprint method.
+The lib does not store the fingerprints. This is up to your app. You can get the fingerprint using the finalizeFingerprint method.
 You can use the Fingerprint class to stringify the data and store it as a string.
-
-#### getFingerprint(referenceId: String, locationId: String) -> Fingerprint?
-> Obtain the fingerprint for this referenceId and locationId. usually done after collecting it.
-> The user is responsible for persistently storing and loading the fingerprints.
 
 You can use the string you stored to initialize a new Fingerprint Object which you can then load back into the lib using the loadFingerprint:
 
-#### loadFingerprint(referenceId: String, locationId: String, fingerprint: Fingerprint)
-> Load a fingerprint into the classifier(s) for the specified referenceId and locationId.
+#### loadFingerprint(collectionId: String, locationId: String, fingerprint: String)
+> Load a fingerprint into the classifier(s) for the specified collectionId and locationId.
 > The fingerprint can be constructed from a string by using the initializer when creating the Fingerprint object

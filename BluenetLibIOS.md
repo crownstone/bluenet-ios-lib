@@ -36,13 +36,13 @@ let bluenet = Bluenet()
 
 ### After this, you set the settings for bluenet
 
-##### setSettings(encryptionEnabled: Bool, adminKey: String?, memberKey: String?, guestKey: String?, referenceId: String)
+##### setSettings(encryptionEnabled: Bool, adminKey: String?, memberKey: String?, guestKey: String?, collectionId: String)
 
 ```
-bluenet.setSettings(encryptionEnabled: true, adminKey: "1234567890abcdef", memberKey: "1234567890abcdef", guestKey: "1234567890abcdef", referenceId: "test")
+bluenet.setSettings(encryptionEnabled: true, adminKey: "1234567890abcdef", memberKey: "1234567890abcdef", guestKey: "1234567890abcdef", collectionId: "test")
 ```
 
-Here you define if encryption is enabled, set the keys as either 16 character string or hexstring representing 16 bytes and finally the referenceId.
+Here you define if encryption is enabled, set the keys as either 16 character string or hexstring representing 16 bytes and finally the collectionId.
 This is an ID that is added to the advertisement data of the verifiedAdvertisementData event so you can see which set of keys has decrypted the advertisement.
 
 <hr>

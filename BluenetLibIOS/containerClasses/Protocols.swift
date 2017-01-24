@@ -15,9 +15,9 @@ public protocol iBeaconPacketProtocol {
     var rssi : NSNumber { get }
     var distance : NSNumber { get }
     var idString: String { get }
-    var referenceId: String { get }
+    var collectionId: String { get }
 }
 
 public protocol LocalizationClassifier {
-    func classify(_ inputVector: [iBeaconPacketProtocol], referenceId : String?) -> String?
+    func classify(_ inputVector: [iBeaconPacketProtocol], collectionId: String) -> String?
 }

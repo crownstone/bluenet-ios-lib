@@ -16,19 +16,19 @@ import SwiftyJSON
  * This lib is used to interact with the indoor localization algorithms of the Crownstone.
  *
  *
- * With this lib you train fingerprints, get and load them and determine in which location you are.
+ * With this lib you train TrainingData, get and load them and determine in which location you are.
  * It wraps around the CoreLocation services to handle all iBeacon logic.
  * As long as you can ensure that each beacon's UUID+major+minor combination is unique, you can use this
  * localization lib.
  *
  * You input groups by adding their tracking UUIDS
- * You input locations by providing their fingerprints or training them.
+ * You input locations by providing their TrainingData or training them.
  *
  * This lib broadcasts the following data:
     topic:                      dataType:               when:
     "iBeaconAdvertisement"      [iBeaconPacket]         Once a second when the iBeacon's are ranged (array of iBeaconPacket objects)
-    "enterRegion"               String                  When a region (denoted by referenceId) is entered (data is the referenceId as String)
-    "exitRegion"                String                  When a region (denoted by referenceId) is no longer detected (data is the referenceId as String)
+    "enterRegion"               String                  When a region (denoted by collectionId) is entered (data is the collectionId as String)
+    "exitRegion"                String                  When a region (denoted by collectionId) is no longer detected (data is the collectionId as String)
  */
 open class BluenetLocalization {
     // Modules
@@ -74,12 +74,12 @@ open class BluenetLocalization {
      * This method configures an ibeacon with the ibeaconUUID you provide. The dataId is used to notify
      * you when this region is entered as well as to keep track of which classifiers belong to which datapoint in your reference.
      */
-    open func trackIBeacon(uuid: String, referenceId: String) {        
+    open func trackIBeacon(uuid: String, collectionId: String) {
         if (uuid.characters.count < 30) {
-            Log("BLUENET LOCALIZATION ---- Cannot track \(referenceId) with UUID \(uuid)")
+            Log("BLUENET LOCALIZATION ---- Cannot track \(collectionId) with UUID \(uuid)")
         }
         else {
-            let trackStone = iBeaconContainer(referenceId: referenceId, uuid: uuid)
+            let trackStone = iBeaconContainer(collectionId: collectionId, uuid: uuid)
             self.locationManager.trackBeacon(trackStone)
         }
     }
@@ -143,8 +143,8 @@ open class BluenetLocalization {
     
     
     /**
-     * This will enable the classifier. It requires the fingerprints to be setup and will trigger the current/enter/exitRoom events
-     * This should be used if the user is sure the fingerprinting process has been finished.
+     * This will enable the classifier. It requires the TrainingData to be setup and will trigger the current/enter/exitRoom events
+     * This should be used if the user is sure the TrainingData process has been finished.
      */
     open func startIndoorLocalization() {
         activeLocationId = nil
@@ -174,14 +174,14 @@ open class BluenetLocalization {
                 self.counter += 1
                 LogFile("received iBeacon nr: \(self.counter) classifierState: \(indoorLocalizationEnabled) amountOfBeacons: \(data.count) activeRegionId: \(self.activeGroupId)")
                 for packet in data {
-                    LogFile("received iBeacon DETAIL \(packet.idString) \(packet.rssi) \(packet.referenceId)")
+                    LogFile("received iBeacon DETAIL \(packet.idString) \(packet.rssi) \(packet.collectionId)")
                 }
             }
             
             if (self.activeGroupId != nil) {
                 // if we have data in this payload.
                 if (data.count > 0 && self.classifier != nil && self.indoorLocalizationEnabled) {
-                    let currentLocation = self.classifier!.classify(data, referenceId: self.activeGroupId)
+                    let currentLocation = self.classifier!.classify(data, collectionId: self.activeGroupId!)
                     if (currentLocation != nil) {
                         if (self.activeLocationId != currentLocation) {
                             self._moveToNewLocation(currentLocation!)
