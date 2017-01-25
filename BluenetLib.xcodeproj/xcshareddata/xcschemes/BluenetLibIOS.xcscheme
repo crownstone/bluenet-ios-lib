@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "FA3C18781CBBDA6B00A11CF7"
-               BuildableName = "BluenetLibIOS.framework"
-               BlueprintName = "BluenetLibIOS"
-               ReferencedContainer = "container:BluenetLibIOS.xcodeproj">
+               BuildableName = "BluenetLib.framework"
+               BlueprintName = "BluenetLib"
+               ReferencedContainer = "container:BluenetLib.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "FA3C18821CBBDA6B00A11CF7"
-               BuildableName = "BluenetLibIOSTests.xctest"
-               BlueprintName = "BluenetLibIOSTests"
-               ReferencedContainer = "container:BluenetLibIOS.xcodeproj">
+               BuildableName = "BluenetLibTests.xctest"
+               BlueprintName = "BluenetLibTests"
+               ReferencedContainer = "container:BluenetLib.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -43,9 +43,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "FA3C18781CBBDA6B00A11CF7"
-            BuildableName = "BluenetLibIOS.framework"
-            BlueprintName = "BluenetLibIOS"
-            ReferencedContainer = "container:BluenetLibIOS.xcodeproj">
+            BuildableName = "BluenetLib.framework"
+            BlueprintName = "BluenetLib"
+            ReferencedContainer = "container:BluenetLib.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -65,9 +65,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "FA3C18781CBBDA6B00A11CF7"
-            BuildableName = "BluenetLibIOS.framework"
-            BlueprintName = "BluenetLibIOS"
-            ReferencedContainer = "container:BluenetLibIOS.xcodeproj">
+            BuildableName = "BluenetLib.framework"
+            BlueprintName = "BluenetLib"
+            ReferencedContainer = "container:BluenetLib.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -83,9 +83,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "FA3C18781CBBDA6B00A11CF7"
-            BuildableName = "BluenetLibIOS.framework"
-            BlueprintName = "BluenetLibIOS"
-            ReferencedContainer = "container:BluenetLibIOS.xcodeproj">
+            BuildableName = "BluenetLib.framework"
+            BlueprintName = "BluenetLib"
+            ReferencedContainer = "container:BluenetLib.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

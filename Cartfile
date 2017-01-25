@@ -9,3 +9,6 @@ github "SwiftyJSON/SwiftyJSON"
 
 # DFU code from Nordic
 github "NordicSemiconductor/IOS-Pods-DFU-Library"
+
+# Bluenet Shared protocols
+github "crownstone/bluenet-ios-shared"

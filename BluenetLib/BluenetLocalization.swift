@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 import CoreLocation
 import SwiftyJSON
+import BluenetShared
 
 
 /**

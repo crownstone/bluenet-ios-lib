@@ -9,6 +9,7 @@
 import Foundation
 import CoreLocation
 import SwiftyJSON
+import BluenetShared
 
 open class iBeaconContainer {
     var UUID : Foundation.UUID;
