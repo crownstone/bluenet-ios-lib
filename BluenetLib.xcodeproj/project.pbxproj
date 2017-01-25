@@ -31,7 +31,6 @@
 		FA5882CA1E38C0F100913AE6 /* NearestItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58829E1E38C0F100913AE6 /* NearestItem.swift */; };
 		FA5882CB1E38C0F100913AE6 /* PowerSamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58829F1E38C0F100913AE6 /* PowerSamples.swift */; };
 		FA5882CC1E38C0F100913AE6 /* PromiseContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882A01E38C0F100913AE6 /* PromiseContainer.swift */; };
-		FA5882CD1E38C0F100913AE6 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882A11E38C0F100913AE6 /* Protocols.swift */; };
 		FA5882CE1E38C0F100913AE6 /* TrainingData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882A21E38C0F100913AE6 /* TrainingData.swift */; };
 		FA5882CF1E38C0F100913AE6 /* EncryptionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882A41E38C0F100913AE6 /* EncryptionHandler.swift */; };
 		FA5882D01E38C0F100913AE6 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882A51E38C0F100913AE6 /* Globals.swift */; };
@@ -94,7 +93,6 @@
 		FA58829E1E38C0F100913AE6 /* NearestItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearestItem.swift; sourceTree = "<group>"; };
 		FA58829F1E38C0F100913AE6 /* PowerSamples.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PowerSamples.swift; sourceTree = "<group>"; };
 		FA5882A01E38C0F100913AE6 /* PromiseContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseContainer.swift; sourceTree = "<group>"; };
-		FA5882A11E38C0F100913AE6 /* Protocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
 		FA5882A21E38C0F100913AE6 /* TrainingData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingData.swift; sourceTree = "<group>"; };
 		FA5882A41E38C0F100913AE6 /* EncryptionHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptionHandler.swift; sourceTree = "<group>"; };
 		FA5882A51E38C0F100913AE6 /* Globals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
@@ -186,10 +184,10 @@
 				FA5882961E38C0F000913AE6 /* classifiers */,
 				FA5882971E38C0F000913AE6 /* containerClasses */,
 				FA5882A31E38C0F100913AE6 /* encryption */,
+				FA5882A81E38C0F100913AE6 /* protocol */,
 				FA5882A51E38C0F100913AE6 /* Globals.swift */,
 				FA5882A61E38C0F100913AE6 /* Info.plist */,
 				FA5882A71E38C0F100913AE6 /* Logging.swift */,
-				FA5882A81E38C0F100913AE6 /* protocol */,
 				FA5882AD1E38C0F100913AE6 /* TrainingHelper.swift */,
 				FA5882AE1E38C0F100913AE6 /* util */,
 			);
@@ -237,7 +235,6 @@
 				FA58829E1E38C0F100913AE6 /* NearestItem.swift */,
 				FA58829F1E38C0F100913AE6 /* PowerSamples.swift */,
 				FA5882A01E38C0F100913AE6 /* PromiseContainer.swift */,
-				FA5882A11E38C0F100913AE6 /* Protocols.swift */,
 				FA5882A21E38C0F100913AE6 /* TrainingData.swift */,
 			);
 			path = containerClasses;
@@ -427,7 +424,6 @@
 				FA5882B91E38C0F100913AE6 /* BleMangager.swift in Sources */,
 				FA5882D01E38C0F100913AE6 /* Globals.swift in Sources */,
 				FA5882D51E38C0F100913AE6 /* Characteristics.swift in Sources */,
-				FA5882CD1E38C0F100913AE6 /* Protocols.swift in Sources */,
 				FA5882C41E38C0F100913AE6 /* Advertisement.swift in Sources */,
 				FA5882C01E38C0F100913AE6 /* Bluenet.swift in Sources */,
 				FA5882C71E38C0F100913AE6 /* EncryptedPackage.swift in Sources */,
