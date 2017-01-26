@@ -3,8 +3,6 @@
 
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
-Current implementation is in prototype stage. First actual release expected in July.
-
 # Getting started
 
 The Bluenet ios lib uses Carthage to handle it's dependencies. It's also the way you install Bluenet ios in other projects.
@@ -19,7 +17,7 @@ To add the dependency to the Cartfile, copy paste the lines below into it, save 
 # BluenetLibIOS
 github "crownstone/bluenet-ios-lib"
 ```
-Q
+
 Once this is finished, run the following command in your terminal (in the same folder as the Cartfile)
 
 ```
@@ -28,9 +26,11 @@ carthage bootstrap --platform iOS --no-use-binaries
 
 All dependencies will then be downloaded, built and placed in a Carthage/Build folder. You then drag the frameworks into your XCode project and you're good to go!
 
+For more information on this process, take a look at the Carthage repo.
+
 #### If you're more of a copy-paste starter
 There is an example app available that has the library implemented:
-https://github.com/crownstone/bluenet-example-ios
+https://github.com/crownstone/bluenet-ios-example
 
 ## IMPORTANT
 
