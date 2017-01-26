@@ -50,5 +50,4 @@ func LogFile(_ data: String, filename: String = "BluenetLog.log") {
             }
         }
     }
-
 }

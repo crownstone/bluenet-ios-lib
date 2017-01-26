@@ -23,9 +23,9 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>We're spying on you</string>
+	<string>Insert always use string here</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We're awesome</string>
+	<string>Insert when open in use string here</string>
 	<key>NSPrincipalClass</key>
 	<string></string>
 </dict>
