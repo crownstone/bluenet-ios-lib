@@ -34,10 +34,10 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     
     open func requestLocationPermission() {
         if (self.manager == nil) {
+            Log("------ BLUENET_LIB_NAV: requestLocationPermission, Creating CLLocationManager");
             self.manager = CLLocationManager()
             self.manager!.delegate = self
         }
-        
         self.locationManager(self.manager!, didChangeAuthorization: CLLocationManager.authorizationStatus())
     }
     
@@ -150,11 +150,13 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     func start() {
+        Log("------ BLUENET_LIB_NAV: Start called")
         // ask for permission if the manager does not exist and create the manager
         if (self.manager == nil) { self.requestLocationPermission() }
         
         self.manager!.startUpdatingLocation()
         if (self.manager!.responds(to: #selector(getter: CLLocationManager.allowsBackgroundLocationUpdates))) {
+            Log("------ BLUENET_LIB_NAV: Manager allows background location updates")
             self.manager!.allowsBackgroundLocationUpdates = true
         }
         
@@ -163,6 +165,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     func startWithoutBackground() {
+        Log("------ BLUENET_LIB_NAV: startWithoutBackground called")
         // ask for permission if the manager does not exist and create the manager
         if (self.manager == nil) { self.requestLocationPermission() }
         
@@ -172,6 +175,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     open func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        Log("------ BLUENET_LIB_NAV: Changed AuthorizationL \(status)")
         switch (CLLocationManager.authorizationStatus()) {
             case .notDetermined:
                 Log("------ BLUENET_LIB_NAV: location NotDetermined")
@@ -215,7 +219,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
                     minor: beacon.minor,
                     distance: NSNumber(value: beacon.accuracy),
                     rssi: NSNumber(value: beacon.rssi),
-                    collectionId: region.identifier
+                    referenceId: region.identifier
                 ))
             }
         }

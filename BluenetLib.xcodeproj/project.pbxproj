@@ -81,7 +81,7 @@
 		FA5882901E38C0F000913AE6 /* PowerHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PowerHandler.swift; sourceTree = "<group>"; };
 		FA5882911E38C0F000913AE6 /* SetupHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetupHandler.swift; sourceTree = "<group>"; };
 		FA5882921E38C0F000913AE6 /* Bluenet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bluenet.swift; sourceTree = "<group>"; };
-		FA5882931E38C0F000913AE6 /* BluenetLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BluenetLib.h; sourceTree = "<group>"; };
+		FA5882931E38C0F000913AE6 /* BluenetLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BluenetLib.h; path = ../BluenetLib.h; sourceTree = "<group>"; };
 		FA5882941E38C0F000913AE6 /* BluenetLocalization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluenetLocalization.swift; sourceTree = "<group>"; };
 		FA5882951E38C0F000913AE6 /* BluenetMotion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluenetMotion.swift; sourceTree = "<group>"; };
 		FA5882981E38C0F000913AE6 /* Advertisement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Advertisement.swift; sourceTree = "<group>"; };
@@ -176,11 +176,10 @@
 		FA5882881E38C0F000913AE6 /* BluenetLib */ = {
 			isa = PBXGroup;
 			children = (
-				FA5882891E38C0F000913AE6 /* backend */,
 				FA5882921E38C0F000913AE6 /* Bluenet.swift */,
-				FA5882931E38C0F000913AE6 /* BluenetLib.h */,
 				FA5882941E38C0F000913AE6 /* BluenetLocalization.swift */,
 				FA5882951E38C0F000913AE6 /* BluenetMotion.swift */,
+				FA5882891E38C0F000913AE6 /* backend */,
 				FA5882961E38C0F000913AE6 /* classifiers */,
 				FA5882971E38C0F000913AE6 /* containerClasses */,
 				FA5882A31E38C0F100913AE6 /* encryption */,
@@ -251,6 +250,7 @@
 		FA5882A81E38C0F100913AE6 /* protocol */ = {
 			isa = PBXGroup;
 			children = (
+				FA5882931E38C0F000913AE6 /* BluenetLib.h */,
 				FA5882A91E38C0F100913AE6 /* BlePackets.swift */,
 				FA5882AA1E38C0F100913AE6 /* BluenetTypes.swift */,
 				FA5882AB1E38C0F100913AE6 /* Characteristics.swift */,

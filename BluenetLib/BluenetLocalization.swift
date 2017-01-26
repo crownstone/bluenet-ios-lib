@@ -28,8 +28,8 @@ import BluenetShared
  * This lib broadcasts the following data:
     topic:                      dataType:               when:
     "iBeaconAdvertisement"      [iBeaconPacket]         Once a second when the iBeacon's are ranged (array of iBeaconPacket objects)
-    "enterRegion"               String                  When a region (denoted by collectionId) is entered (data is the collectionId as String)
-    "exitRegion"                String                  When a region (denoted by collectionId) is no longer detected (data is the collectionId as String)
+    "enterRegion"               String                  When a region (denoted by referenceId) is entered (data is the referenceId as String)
+    "exitRegion"                String                  When a region (denoted by referenceId) is no longer detected (data is the referenceId as String)
  */
 open class BluenetLocalization {
     // Modules
@@ -75,12 +75,12 @@ open class BluenetLocalization {
      * This method configures an ibeacon with the ibeaconUUID you provide. The dataId is used to notify
      * you when this region is entered as well as to keep track of which classifiers belong to which datapoint in your reference.
      */
-    open func trackIBeacon(uuid: String, collectionId: String) {
+    open func trackIBeacon(uuid: String, referenceId: String) {
         if (uuid.characters.count < 30) {
-            Log("BLUENET LOCALIZATION ---- Cannot track \(collectionId) with UUID \(uuid)")
+            Log("BLUENET LOCALIZATION ---- Cannot track \(referenceId) with UUID \(uuid)")
         }
         else {
-            let trackStone = iBeaconContainer(collectionId: collectionId, uuid: uuid)
+            let trackStone = iBeaconContainer(referenceId: referenceId, uuid: uuid)
             self.locationManager.trackBeacon(trackStone)
         }
     }
@@ -175,23 +175,23 @@ open class BluenetLocalization {
                 self.counter += 1
                 LogFile("received iBeacon nr: \(self.counter) classifierState: \(indoorLocalizationEnabled) amountOfBeacons: \(data.count) activeRegionId: \(self.activeGroupId)")
                 for packet in data {
-                    LogFile("received iBeacon DETAIL \(packet.idString) \(packet.rssi) \(packet.collectionId)")
+                    LogFile("received iBeacon DETAIL \(packet.idString) \(packet.rssi) \(packet.referenceId)")
                 }
             }
             
             if (self.activeGroupId != nil) {
                 // if we have data in this payload.
                 if (data.count > 0 && self.classifier != nil && self.indoorLocalizationEnabled) {
-                    let currentLocation = self.classifier!.classify(data, collectionId: self.activeGroupId!)
+                    let currentLocation = self.classifier!.classify(data, referenceId: self.activeGroupId!)
                     if (currentLocation != nil) {
                         if (self.activeLocationId != currentLocation) {
                             self._moveToNewLocation(currentLocation!)
                         }
-                        var locationDict = [String: String?]()
-                        locationDict["region"] = self.activeGroupId
-                        locationDict["location"] = currentLocation
-                        self.eventBus.emit("currentLocation", locationDict)
                     }
+                    var locationDict = [String: String?]()
+                    locationDict["region"] = self.activeGroupId
+                    locationDict["location"] = self.activeLocationId
+                    self.eventBus.emit("currentLocation", locationDict)
                 }
             }
         }

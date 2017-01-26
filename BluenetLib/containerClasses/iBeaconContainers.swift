@@ -13,28 +13,28 @@ import BluenetShared
 
 open class iBeaconContainer {
     var UUID : Foundation.UUID;
-    var collectionId = ""
+    var referenceId = ""
     var region : CLBeaconRegion
     var major  : CLBeaconMajorValue?
     var minor  : CLBeaconMinorValue?
     
-    public init(collectionId: String, uuid: String) {
+    public init(referenceId: String, uuid: String) {
         self.UUID = Foundation.UUID(uuidString : uuid)!
-        self.collectionId = collectionId
-        self.region = CLBeaconRegion(proximityUUID: self.UUID, identifier: collectionId)
+        self.referenceId = referenceId
+        self.region = CLBeaconRegion(proximityUUID: self.UUID, identifier: referenceId)
     }
-    public init(collectionId: String, uuid: String, major: NSNumber) {
+    public init(referenceId: String, uuid: String, major: NSNumber) {
         self.UUID = Foundation.UUID(uuidString : uuid)!
-        self.collectionId = collectionId
+        self.referenceId = referenceId
         self.major = major.uint16Value
-        self.region = CLBeaconRegion(proximityUUID: self.UUID, major: self.major!, identifier: collectionId)
+        self.region = CLBeaconRegion(proximityUUID: self.UUID, major: self.major!, identifier: referenceId)
     }
-    public init(collectionId: String, uuid: String, major: NSNumber, minor: NSNumber) {
+    public init(referenceId: String, uuid: String, major: NSNumber, minor: NSNumber) {
         self.UUID = Foundation.UUID(uuidString : uuid)!
-        self.collectionId = collectionId
+        self.referenceId = referenceId
         self.major = major.uint16Value
         self.minor = minor.uint16Value
-        self.region = CLBeaconRegion(proximityUUID: self.UUID, major: self.major!, minor: self.minor!, identifier: collectionId)
+        self.region = CLBeaconRegion(proximityUUID: self.UUID, major: self.major!, minor: self.minor!, identifier: referenceId)
     }
 }
 
@@ -45,15 +45,15 @@ open class iBeaconPacket: iBeaconPacketProtocol {
     open var rssi : NSNumber
     open var distance : NSNumber
     open var idString: String
-    open var collectionId: String
+    open var referenceId: String
     
-    init(uuid: String, major: NSNumber, minor: NSNumber, distance: NSNumber, rssi: NSNumber, collectionId: String) {
+    init(uuid: String, major: NSNumber, minor: NSNumber, distance: NSNumber, rssi: NSNumber, referenceId: String) {
         self.uuid = uuid
         self.major = major
         self.minor = minor
         self.rssi = rssi
         self.distance = distance
-        self.collectionId = collectionId
+        self.referenceId = referenceId
         
         // we claim that the uuid, major and minor combination is unique.
         self.idString = uuid + ".Maj:" + String(describing: major) + ".Min:" + String(describing: minor)
@@ -67,7 +67,7 @@ open class iBeaconPacket: iBeaconPacketProtocol {
         dataDict["minor"] = self.minor
         dataDict["distance"]  = self.distance
         dataDict["rssi"]  = self.rssi
-        dataDict["collectionId"]  = self.collectionId
+        dataDict["referenceId"]  = self.referenceId
         
         return JSON(dataDict)
     }
@@ -84,7 +84,7 @@ open class iBeaconPacket: iBeaconPacketProtocol {
             "minor" : self.minor,
             "rssi" : self.rssi,
             "distance" : self.distance,
-            "collectionId" : self.collectionId,
+            "referenceId" : self.referenceId,
         ]
         
         return returnDict as NSDictionary

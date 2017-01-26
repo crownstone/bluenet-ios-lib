@@ -15,8 +15,8 @@ This lib broadcasts the following data:
 |  topic:                  |    dataType:          |    when:
 | :---------- | ---------- | :---------- |
 |  "iBeaconAdvertisement"  |    [iBeaconPacket]    |    Once a second when the iBeacon's are ranged   (array of iBeaconPacket objects)
-|  "enterRegion"           |    String             |    When a region (denoted by collectionId) is entered (data is the collectionId as String)
-|  "exitRegion"            |    String             |    When a region (denoted by collectionId) is no longer detected (data is the collectionId as String)
+|  "enterRegion"           |    String             |    When a region (denoted by referenceId) is entered (data is the referenceId as String)
+|  "exitRegion"            |    String             |    When a region (denoted by referenceId) is no longer detected (data is the referenceId as String)
 |  "enterLocation"         |    String             |    When the classifier determines the user has entered a new location (data is the locationId as String)
 |  "exitLocation"          |    String             |    When the classifier determines the user has left his location in favor of a new one. Not triggered when region is left (data is the locationId as String)
 |  "currentLocation"       |    String             |    Once a second when the iBeacon's are ranged and the classifier makes a prediction (data is the locationId as String)
@@ -70,7 +70,7 @@ unsubscribe() // now you are unsubscribed and the callback will not be invoked a
 
 ### Tracking iBeacons
 
-#### trackIBeacon(uuid: String, collectionId: String)
+#### trackIBeacon(uuid: String, referenceId: String)
 > This method configures starts tracking the iBeaconUUID you provide. The dataId is used to notify
 > you when this region is entered as well as to keep track of which classifiers belong to which data point in your reference.
 > When this method has been used, the iBeaconAdvertisement event will update you when new data comes in.
@@ -137,11 +137,11 @@ You can tell the lib to start collecting a Training Dataset by calling this meth
 > Stop collecting a fingerprint without loading it into the classifier.
 
 Once your usecase has determined that the Training Dataset is big enough, you call the finalize method.
-This will also load and initialize the fingerprint. Only at this point do you give the fingerprint a collectionId and a locationId.
+This will also load and initialize the fingerprint. Only at this point do you give the fingerprint a referenceId and a locationId.
 These are commonly used for region and location ids.
 
-#### finalizeFingerprint(collectionId: String, locationId: String) -> String?
-> Finalize collecting a fingerprint and store it in the appropriate classifier based on the collectionId and the locationId.
+#### finalizeFingerprint(referenceId: String, locationId: String) -> String?
+> Finalize collecting a fingerprint and store it in the appropriate classifier based on the referenceId and the locationId.
 
 ### Storage of fingerprints
 
@@ -150,6 +150,6 @@ You can use the Fingerprint class to stringify the data and store it as a string
 
 You can use the string you stored to initialize a new Fingerprint Object which you can then load back into the lib using the loadFingerprint:
 
-#### loadFingerprint(collectionId: String, locationId: String, fingerprint: String)
-> Load a fingerprint into the classifier(s) for the specified collectionId and locationId.
+#### loadFingerprint(referenceId: String, locationId: String, fingerprint: String)
+> Load a fingerprint into the classifier(s) for the specified referenceId and locationId.
 > The fingerprint can be constructed from a string by using the initializer when creating the Fingerprint object
