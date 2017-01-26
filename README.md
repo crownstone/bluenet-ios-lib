@@ -1,6 +1,8 @@
 # Bluenet-lib-ios
 ### Bluenet lib for iOS
 
+# 2.0 documentation coming soon!
+
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
 # Getting started
