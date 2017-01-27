@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import BluenetShared
 
 // these globals are used to trigger pop up alerts and to show the app name inside of them
 

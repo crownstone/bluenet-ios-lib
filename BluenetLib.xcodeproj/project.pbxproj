@@ -35,7 +35,6 @@
 		FA5882CF1E38C0F100913AE6 /* EncryptionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882A41E38C0F100913AE6 /* EncryptionHandler.swift */; };
 		FA5882D01E38C0F100913AE6 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882A51E38C0F100913AE6 /* Globals.swift */; };
 		FA5882D11E38C0F100913AE6 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FA5882A61E38C0F100913AE6 /* Info.plist */; };
-		FA5882D21E38C0F100913AE6 /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882A71E38C0F100913AE6 /* Logging.swift */; };
 		FA5882D31E38C0F100913AE6 /* BlePackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882A91E38C0F100913AE6 /* BlePackets.swift */; };
 		FA5882D41E38C0F100913AE6 /* BluenetTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882AA1E38C0F100913AE6 /* BluenetTypes.swift */; };
 		FA5882D51E38C0F100913AE6 /* Characteristics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882AB1E38C0F100913AE6 /* Characteristics.swift */; };
@@ -97,7 +96,6 @@
 		FA5882A41E38C0F100913AE6 /* EncryptionHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptionHandler.swift; sourceTree = "<group>"; };
 		FA5882A51E38C0F100913AE6 /* Globals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		FA5882A61E38C0F100913AE6 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		FA5882A71E38C0F100913AE6 /* Logging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
 		FA5882A91E38C0F100913AE6 /* BlePackets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlePackets.swift; sourceTree = "<group>"; };
 		FA5882AA1E38C0F100913AE6 /* BluenetTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluenetTypes.swift; sourceTree = "<group>"; };
 		FA5882AB1E38C0F100913AE6 /* Characteristics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Characteristics.swift; sourceTree = "<group>"; };
@@ -186,7 +184,6 @@
 				FA5882A81E38C0F100913AE6 /* protocol */,
 				FA5882A51E38C0F100913AE6 /* Globals.swift */,
 				FA5882A61E38C0F100913AE6 /* Info.plist */,
-				FA5882A71E38C0F100913AE6 /* Logging.swift */,
 				FA5882AD1E38C0F100913AE6 /* TrainingHelper.swift */,
 				FA5882AE1E38C0F100913AE6 /* util */,
 			);
@@ -405,7 +402,6 @@
 				FA5882D71E38C0F100913AE6 /* TrainingHelper.swift in Sources */,
 				FA5882CF1E38C0F100913AE6 /* EncryptionHandler.swift in Sources */,
 				FA5882BF1E38C0F100913AE6 /* SetupHandler.swift in Sources */,
-				FA5882D21E38C0F100913AE6 /* Logging.swift in Sources */,
 				FA5882BB1E38C0F100913AE6 /* ConfigHandler.swift in Sources */,
 				FA5882BE1E38C0F100913AE6 /* PowerHandler.swift in Sources */,
 				FA5882C21E38C0F100913AE6 /* BluenetLocalization.swift in Sources */,
