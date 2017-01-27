@@ -77,7 +77,7 @@ open class BluenetLocalization {
      */
     open func trackIBeacon(uuid: String, referenceId: String) {
         if (uuid.characters.count < 30) {
-            Log("BLUENET LOCALIZATION ---- Cannot track \(referenceId) with UUID \(uuid)")
+            LOG.info("BLUENET LOCALIZATION ---- Cannot track \(referenceId) with UUID \(uuid)")
         }
         else {
             let trackStone = iBeaconContainer(referenceId: referenceId, uuid: uuid)
@@ -170,14 +170,13 @@ open class BluenetLocalization {
     
     func _updateState(_ ibeaconData: Any) {
         if let data = ibeaconData as? [iBeaconPacket] {
-            // log ibeacon receiving for debugging purposes
-            if (DEBUG_LOG_ENABLED) {
-                self.counter += 1
-                LogFile("received iBeacon nr: \(self.counter) classifierState: \(indoorLocalizationEnabled) amountOfBeacons: \(data.count) activeRegionId: \(self.activeGroupId)")
-                for packet in data {
-                    LogFile("received iBeacon DETAIL \(packet.idString) \(packet.rssi) \(packet.referenceId)")
-                }
+            // log ibeacon receiving for debugging purposes {
+            self.counter += 1
+            LOG.debug("received iBeacon nr: \(self.counter) classifierState: \(indoorLocalizationEnabled) amountOfBeacons: \(data.count) activeRegionId: \(self.activeGroupId)")
+            for packet in data {
+                LOG.verbose("received iBeacon DETAIL \(packet.idString) \(packet.rssi) \(packet.referenceId)")
             }
+            
             
             if (self.activeGroupId != nil) {
                 // if we have data in this payload.
@@ -219,17 +218,14 @@ open class BluenetLocalization {
     
     func _handleRegionExit(_ regionId: Any) {
         if regionId is String {
-            if (DEBUG_LOG_ENABLED) {
-                Log("REGION EXIT \(regionId)")
-            }
+            LOG.info("REGION EXIT \(regionId)")
+            
             if (self.activeGroupId != nil) {
                 self.eventBus.emit("exitRegion", regionId)
             }
         }
         else {
-            if (DEBUG_LOG_ENABLED) {
-                Log("REGION EXIT (id not string)")
-            }
+            LOG.info("REGION EXIT (id not string)")
             if (self.activeGroupId != nil) {
                 self.eventBus.emit("exitRegion", self.activeGroupId!)
             }
@@ -251,14 +247,10 @@ open class BluenetLocalization {
             }
             self.activeGroupId = regionString
             
-            if (DEBUG_LOG_ENABLED) {
-                Log("REGION ENTER \(regionString)")
-            }
+            LOG.info("REGION ENTER \(regionString)")
         }
         else {
-            if (DEBUG_LOG_ENABLED) {
-                Log("REGION ENTER region not string")
-            }
+            LOG.info("REGION ENTER region not string")
         }
     }
 

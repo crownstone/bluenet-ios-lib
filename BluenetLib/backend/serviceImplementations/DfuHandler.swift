@@ -55,7 +55,7 @@ open class DfuHandler {
     }
     
     func enableCccdNotifications() -> Promise<voidPromiseCallback> {
-        let callback = {result in Log(result)}
+        let callback = {result in LOG.info(result)}
         return self.bleManager.enableNotifications(
             DFUServices.DFU,
             characteristicId: DFUCharacteristics.ControlPoint,
@@ -109,7 +109,7 @@ open class DfuHandler {
      * TODO: currently only relay is supported.
      */
     open func writePacket(_ state: NSNumber) -> Promise<Void> {
-        Log("------ BLUENET_LIB: switching to \(state)")
+        LOG.info("BLUENET_LIB: switching to \(state)")
         let roundedState = max(0, min(255, round(state.doubleValue * 255)))
         let switchState = UInt8(roundedState)
         let packet : [UInt8] = [switchState]

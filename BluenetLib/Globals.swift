@@ -13,14 +13,9 @@ import UIKit
 
 var APPNAME = "Crownstone"
 var VIEWCONTROLLER : UIViewController?
-var LOGGING_PRINT = true
-var LOGGING_FILE = false
-var DEBUG_LOG_ENABLED = false
+public var LOG = LogClass()
 
-public func setBluenetGlobals(viewController: UIViewController, appName: String, loggingPrint: Bool = true, loggingFile: Bool = false, debugLogEnabled: Bool = false) {
+public func setBluenetGlobals(viewController: UIViewController, appName: String) {
     VIEWCONTROLLER = viewController
     APPNAME        = appName
-    LOGGING_PRINT  = loggingPrint
-    LOGGING_FILE   = loggingFile
-    DEBUG_LOG_ENABLED = debugLogEnabled
 }

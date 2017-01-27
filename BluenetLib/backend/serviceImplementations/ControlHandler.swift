@@ -109,29 +109,29 @@ open class ControlHandler {
     }
     
     open func reset() -> Promise<Void> {
-        Log("------ BLUENET_LIB: requesting reset")
+        LOG.info("BLUENET_LIB: requesting reset")
         return self._writeControlPacket(ControlPacket(type: .reset).getPacket())
     }
     
     open func putInDFU() -> Promise<Void> {
-        Log("------ BLUENET_LIB: switching to DFU")
+        LOG.info("BLUENET_LIB: switching to DFU")
         return self._writeControlPacket(ControlPacket(type: .goto_DFU).getPacket())
     }
     
     open func disconnect() -> Promise<Void> {
-        Log("------ BLUENET_LIB: REQUESTING IMMEDIATE DISCONNECT")
+        LOG.info("BLUENET_LIB: REQUESTING IMMEDIATE DISCONNECT")
         return self._writeControlPacket(ControlPacket(type: .disconnect).getPacket()).then{_ in self.bleManager.disconnect()}
     }
     
     open func switchRelay(_ state: UInt8) -> Promise<Void> {
-        Log("------ BLUENET_LIB: switching relay to \(state)")
+        LOG.info("BLUENET_LIB: switching relay to \(state)")
         return self._writeControlPacket(ControlPacket(type: .relay, payload8: state).getPacket())
     }
     
     
     open func switchPWM(_ state: Float) -> Promise<Void> {
         let switchState = min(1,max(0,state))*100
-        Log("------ BLUENET_LIB: switching PWM to \(switchState)")
+        LOG.info("BLUENET_LIB: switching PWM to \(switchState)")
         return self._writeControlPacket(ControlPacket(type: .pwm, payload8: NSNumber(value: switchState as Float).uint8Value).getPacket())
     }
 
@@ -151,7 +151,7 @@ open class ControlHandler {
         // temporary to disable dimming
         switchState = ceil(switchState)
         
-        Log("------ BLUENET_LIB: Keep alive state")
+        LOG.info("BLUENET_LIB: Keep alive state")
         let keepalivePacket = keepAliveStatePacket(action: actionState,
                                                    state: NSNumber(value: switchState as Float).uint8Value,
                                                    timeout: timeout).getPacket()
@@ -159,7 +159,7 @@ open class ControlHandler {
     }
     
     open func keepAlive() -> Promise<Void> {
-        Log("------ BLUENET_LIB: Keep alive")
+        LOG.info("BLUENET_LIB: Keep alive")
         return self._writeControlPacket(ControlPacket(type: .keep_ALIVE).getPacket())
     }
     
@@ -168,7 +168,7 @@ open class ControlHandler {
      * The session nonce is the only char that is ECB encrypted. We therefore read it without the libraries decryption (AES CTR) and decrypt it ourselves.
      **/
     open func getAndSetSessionNonce() -> Promise<Void> {
-//        Log("------ BLUENET_LIB: Get Session Nonce")
+//        LOG.info("BLUENET_LIB: Get Session Nonce")
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.CrownstoneService, characteristic: CrownstoneCharacteristics.SessionNonce)
             .then{(sessionNonce : [UInt8]) -> Promise<Void> in
                 return Promise <Void> { fulfill, reject in

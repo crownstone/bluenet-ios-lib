@@ -32,7 +32,7 @@ class NotificationMerger {
                     self.data += data[1...data.count-1]
                 }
                 else {
-                    Log("----- BLUENET NotificationMerger: missed packet, invalid payload")
+                    LOG.warn("----- BLUENET NotificationMerger: missed packet, invalid payload")
                 }
             }
             self.lastPacketIndex = data[0]

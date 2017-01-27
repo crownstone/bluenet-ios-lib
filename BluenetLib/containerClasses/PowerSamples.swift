@@ -36,7 +36,7 @@ open class PowerSamples {
             self.valid = true
         }
         else {
-            Log("invalid power sample package")
+            LOG.warn("invalid power sample package")
         }
     }
     

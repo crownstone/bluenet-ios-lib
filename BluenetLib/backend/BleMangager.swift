@@ -137,7 +137,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     open func waitToWrite(_ iteration: UInt8?) -> Promise<Void> {
         if (iteration != nil) {
             if (iteration! > 0) {
-                Log("------ BLUENET_LIB: Could not verify immediatly, waiting longer between steps...")
+                LOG.info("BLUENET_LIB: Could not verify immediatly, waiting longer between steps...")
                 return Promise<Void> { fulfill, reject in delay(2 * timeoutDurations.waitForWrite, fulfill) }
             }
         }
@@ -150,7 +150,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
      *
      */
     open func connect(_ uuid: String) -> Promise<Void> {
-        Log("------ BLUENET_LIB: starting to connect")
+        LOG.info("BLUENET_LIB: starting to connect")
         return Promise<Void> { fulfill, reject in
             if (self.BleState != .poweredOn) {
                 reject(BleError.NOT_INITIALIZED)
@@ -159,11 +159,11 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                 // start the connection
                 if (connectedPeripheral != nil) {
                     if (connectedPeripheral!.identifier.uuidString == uuid) {
-                        Log("------ BLUENET_LIB: Already connected to this peripheral")
+                        LOG.info("BLUENET_LIB: Already connected to this peripheral")
                         fulfill();
                     }
                     else {
-                        Log("------ BLUENET_LIB: Something is connected")
+                        LOG.info("BLUENET_LIB: Something is connected")
                         disconnect()
                             .then{ _ in self._connect(uuid)}
                             .then{ _ in fulfill()}
@@ -172,14 +172,14 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                 }
                 // cancel any connection attempt in progress.
                 else if (connectingPeripheral != nil) {
-                    Log("------ BLUENET_LIB: connection attempt in progress")
+                    LOG.info("BLUENET_LIB: connection attempt in progress")
                     abortConnecting()
                         .then{ _ in return self._connect(uuid)}
                         .then{ _ in fulfill()}
                         .catch{ err in reject(err)}
                 }
                 else {
-                    Log("------ BLUENET_LIB: connecting...")
+                    LOG.info("BLUENET_LIB: connecting...")
                     self._connect(uuid)
                         .then{ _ in fulfill()}
                         .catch{ err in reject(err)}
@@ -196,16 +196,16 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
      */
     func abortConnecting()  -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
-            Log("------ BLUENET_LIB: starting to abort pending connection request")
+            LOG.info("BLUENET_LIB: starting to abort pending connection request")
             if (connectingPeripheral != nil) {
-                Log("------ BLUENET_LIB: pending connection detected")
+                LOG.info("BLUENET_LIB: pending connection detected")
                 // if there was a connection in progress, cancel it with an error
                 if (pendingPromise.type == .CONNECT) {
-                    Log("------ BLUENET_LIB: rejecting the connection promise")
+                    LOG.info("BLUENET_LIB: rejecting the connection promise")
                     pendingPromise.reject(BleError.CONNECTION_CANCELLED)
                 }
                 
-                Log("------ BLUENET_LIB: Waiting to cancel connection....")
+                LOG.info("BLUENET_LIB: Waiting to cancel connection....")
                 pendingPromise = promiseContainer(fulfill, reject, type: .CANCEL_PENDING_CONNECTION)
                 pendingPromise.setDelayedReject(timeoutDurations.cancelPendingConnection, errorOnReject: .CANCEL_PENDING_CONNECTION_TIMEOUT)
                 
@@ -260,7 +260,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         return Promise<Void> { fulfill, reject in
             // cancel any pending connections
             if (self.connectingPeripheral != nil) {
-                Log("------ BLUENET_LIB: disconnecting from connecting peripheral")
+                LOG.info("BLUENET_LIB: disconnecting from connecting peripheral")
                 abortConnecting()
                     .then{ _ in return self._disconnect() }
                     .then{_ -> Void in fulfill()}
@@ -276,7 +276,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         return Promise<Void> { fulfill, reject in
             // only disconnect if we are actually connected!
             if (self.connectedPeripheral != nil) {
-                Log("------ BLUENET_LIB: disconnecting from connected peripheral")
+                LOG.info("BLUENET_LIB: disconnecting from connected peripheral")
                 let disconnectPromise = Promise<Void> { success, failure in
                     self.pendingPromise = promiseContainer(success, failure, type: .DISCONNECT)
                     self.pendingPromise.setDelayedReject(timeoutDurations.disconnect, errorOnReject: .DISCONNECT_TIMEOUT)
@@ -476,13 +476,13 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                         }
                     }
                     else {
-                        Log("------ BLUENET_LIB: writing \(data) ")
+                        LOG.info("BLUENET_LIB: writing \(data) ")
                         self.connectedPeripheral!.writeValue(data, for: characteristic, type: type)
                     }
 
                 }
                 .catch{(error: Error) -> Void in
-                    Log("~~~~~~ BLUENET_LIB: FAILED writing to characteristic \(error)")
+                    LOG.error("BLUENET_LIB: FAILED writing to characteristic \(error)")
                     reject(error)
                 }
         }
@@ -560,18 +560,18 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     // MARK: scanning
     
     open func startScanning() {
-        Log("------ BLUENET_LIB: start scanning everything")
+        LOG.info("BLUENET_LIB: start scanning everything")
         centralManager.scanForPeripherals(withServices: nil, options:[CBCentralManagerScanOptionAllowDuplicatesKey: true])
     }
     
     open func startScanningForService(_ serviceUUID: String, uniqueOnly: Bool = false) {
-        Log("------ BLUENET_LIB: start scanning for services \(serviceUUID)")
+        LOG.info("BLUENET_LIB: start scanning for services \(serviceUUID)")
         let service = CBUUID(string: serviceUUID)
         centralManager.scanForPeripherals(withServices: [service], options:[CBCentralManagerScanOptionAllowDuplicatesKey: !uniqueOnly])
     }
     
     open func startScanningForServices(_ serviceUUIDs: [String], uniqueOnly: Bool = false) {
-        Log("------ BLUENET_LIB: start scanning for multiple services \(serviceUUIDs)")
+        LOG.info("BLUENET_LIB: start scanning for multiple services \(serviceUUIDs)")
         var services = [CBUUID]()
         for service in serviceUUIDs {
             services.append(CBUUID(string: service))
@@ -583,7 +583,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     }
     
     open func stopScanning() {
-        Log("------ BLUENET_LIB: stopping scan")
+        LOG.info("BLUENET_LIB: stopping scan")
         centralManager.stopScan()
     }
 
@@ -596,15 +596,15 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             case CBManagerState.unauthorized:
                 self.BleState = .unauthorized
                 self.eventBus.emit("bleStatus", "unauthorized");
-                Log("------ BLUENET_LIB: This app is not authorised to use Bluetooth low energy")
+                LOG.info("BLUENET_LIB: This app is not authorised to use Bluetooth low energy")
             case CBManagerState.poweredOff:
                 self.BleState = .poweredOff
                 self.eventBus.emit("bleStatus", "poweredOff");
-                Log("------ BLUENET_LIB: Bluetooth is currently powered off.")
+                LOG.info("BLUENET_LIB: Bluetooth is currently powered off.")
             case CBManagerState.poweredOn:
                 self.BleState = .poweredOn
                 self.eventBus.emit("bleStatus", "poweredOn");
-                Log("------ BLUENET_LIB: Bluetooth is currently powered on and available to use.")
+                LOG.info("BLUENET_LIB: Bluetooth is currently powered on and available to use.")
             default:
                 self.eventBus.emit("bleStatus", "unknown");
                 break
@@ -615,15 +615,15 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             case 3: // CBCentralManagerState.unauthorized :
                 self.BleState = .unauthorized
                 self.eventBus.emit("bleStatus", "unauthorized");
-                Log("------ BLUENET_LIB: This app is not authorised to use Bluetooth low energy")
+                LOG.info("BLUENET_LIB: This app is not authorised to use Bluetooth low energy")
             case 4: // CBCentralManagerState.poweredOff:
                 self.BleState = .poweredOff
                 self.eventBus.emit("bleStatus", "poweredOff");
-                Log("------ BLUENET_LIB: Bluetooth is currently powered off.")
+                LOG.info("BLUENET_LIB: Bluetooth is currently powered off.")
             case 5: //CBCentralManagerState.poweredOn:
                 self.BleState = .poweredOn
                 self.eventBus.emit("bleStatus", "poweredOn");
-                Log("------ BLUENET_LIB: Bluetooth is currently powered on and available to use.")
+                LOG.info("BLUENET_LIB: Bluetooth is currently powered on and available to use.")
             default:
                 self.eventBus.emit("bleStatus", "unknown");
                 break
@@ -657,9 +657,9 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     }
     
     open func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        Log("------ BLUENET_LIB: in didConnectPeripheral")
+        LOG.info("BLUENET_LIB: in didConnectPeripheral")
         if (pendingPromise.type == .CONNECT) {
-            Log("------ BLUENET_LIB: connected")
+            LOG.info("BLUENET_LIB: connected")
             connectedPeripheral = peripheral
             connectingPeripheral = nil
             pendingPromise.fulfill()
@@ -667,7 +667,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     }
     
     open func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
-        Log("------ BLUENET_LIB: in didFailToConnectPeripheral")
+        LOG.info("BLUENET_LIB: in didFailToConnectPeripheral")
         if (error != nil) {
             pendingPromise.reject(error!)
         }
@@ -684,17 +684,17 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         self.connectedPeripheral = nil;
         self.settings.invalidateSessionNonce()
         
-        Log("------ BLUENET_LIB: in didDisconnectPeripheral")
+        LOG.info("BLUENET_LIB: in didDisconnectPeripheral")
         if (pendingPromise.type == .CANCEL_PENDING_CONNECTION) {
             pendingPromise.fulfill()
         }
         else {
             if (error != nil) {
-                Log("------ BLUENET_LIB: Disconnected with error \(error!)")
+                LOG.info("BLUENET_LIB: Disconnected with error \(error!)")
                 pendingPromise.reject(error!)
             }
             else {
-                Log("------ BLUENET_LIB: Disconnected succesfully")
+                LOG.info("BLUENET_LIB: Disconnected succesfully")
                 // if the pending promise is NOT for disconnect, a disconnection event is a rejection.
                 if (pendingPromise.type != .DISCONNECT) {
                     pendingPromise.reject(BleError.DISCONNECTED)
@@ -707,7 +707,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     }
     
     open func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]) {
-        Log("------ BLUENET_LIB: WILL RESTORE STATE \(dict)");
+        LOG.info("BLUENET_LIB: WILL RESTORE STATE \(dict)");
     }
 
     
@@ -801,7 +801,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     
     
     open func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
-        Log("------ BLUENET_LIB: written")
+        LOG.info("BLUENET_LIB: written")
         if (pendingPromise.type == .WRITE_CHARACTERISTIC) {
             if (error != nil) {
                 pendingPromise.reject(error!)

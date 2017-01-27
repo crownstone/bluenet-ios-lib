@@ -266,10 +266,8 @@ open class Bluenet  {
                 deviceList[castData.handle]!.update(castData)
                 if (deviceList[castData.handle]!.verified) {
                     // log debug for verified advertisement
-                    if (DEBUG_LOG_ENABLED) {
-                        self.counter += 1
-                        LogFile("received verifiedAdvertisementData nr: \(self.counter)")
-                    }
+                    self.counter += 1
+                    LOG.debug("received verifiedAdvertisementData nr: \(self.counter)")
                     self.eventBus.emit("verifiedAdvertisementData",castData)
                     
                     // if we have a valid RSSI measurement:
@@ -278,15 +276,13 @@ open class Bluenet  {
                         // handling setup packages
                         if (castData.isSetupPackage()) {
                             // log debug for nearest setup
-                            if (DEBUG_LOG_ENABLED) {
-                                LogFile("received SetupAdvertisement nr: \(self.counter)")
-                            }
+                            LOG.debug("received SetupAdvertisement nr: \(self.counter)")
+                            
                             
                             self.setupList[castData.handle] = NearestItem(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue, setupMode: true)
                             // log debug for nearest setup
-                            if (DEBUG_LOG_ENABLED) {
-                                LogFile("received nearestSetupCrownstone nr: \(self.counter)")
-                            }
+                            LOG.debug("received nearestSetupCrownstone nr: \(self.counter)")
+                            
                             self._emitNearestSetupCrownstone()
                         }
                         else {
