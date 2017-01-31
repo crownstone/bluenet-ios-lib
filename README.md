@@ -28,16 +28,21 @@ All dependencies will then be downloaded, built and placed in a Carthage/Build f
 
 For more information on this process, take a look at the Carthage repo.
 
-#### If you're more of a copy-paste starter
-There is an example app available that has the library implemented:
-https://github.com/crownstone/bluenet-ios-example
 
 ## IMPORTANT
 
 If you want to be able to receive location updates (iBeaconPackets or the room events) you NEED to add the "Location updates" to the "Background Modes" in the capabilities. Keep in mind that doing so may
 complicate the acceptance process in the App Store if you cannot prove that using the background location benefits the end user.
 
-# Logging and Bluenet-ios-shared
+
+
+## If you're more of a copy-paste starter
+
+There is an example app available that has the library implemented:
+https://github.com/crownstone/bluenet-ios-example
+
+
+## Logging and Bluenet-ios-shared
 
 For a clean split of modules, we have a core of shared data models and the logging class. This can be found here: https://github.com/crownstone/bluenet-ios-shared
 

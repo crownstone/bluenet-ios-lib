@@ -1,6 +1,4 @@
-# BluenetLibIOS
-
-# DOCUMENTATION IS OUTDATED, WILL BE UPDATED SHORTLY
+# BluenetLib
 
 This lib is used to interact with the Crownstone family of devices.
 There are convenience methods that wrap the CoreBluetooth backend as well as
@@ -8,40 +6,26 @@ methods that simplify the services and characteristics.
 
 With this lib you can setup, pair, configure and control the Crownstone family of products.
 
-This lib broadcasts the following data using its own eventbus:
-
-|  topic                        |     dataType        |     when
-| ------------- |:------------- | :-----
-|  bleStatus                   |     String           |     Is emitted when the state of the BLE changes. Possible values: "unauthorized", "poweredOff", "poweredOn", "unknown"
-|  setupProgress               |     NSNumber         |     Phases in the setup process, numbers from 1 - 13, 0 for error.
-|  advertisementData           |     Advertisement    |     When an advertisement packet is received
-|  verifiedAdvertisementData   |     Advertisement    |     When an advertisement has been decrypted successfully 3 consecutive times it is verified. Setup and DFU are also included since they don't need to be decrypted. This sorts out only your Crownstones.
-|  nearestSetupCrownstone      |     NearestItem      |     When a verified advertisement packet in setup mode is received, we check the list of available stones in setup mode and return the closest based on RSSI.
-|  nearestCrownstone           |     NearestItem      |     When a verified advertisement packet is received, we check the list of available stones and return the closest based on RSSI.
-
-You can subscribe to these events with the **on*>method descibed below.
-
 This lib implements protocol 0.7.0 of Bluenet which can be found here:
 https://github.com/crownstone/bluenet/blob/f600fef8ddfc5fdfa1604ab1db47966eba6c75f4/docs/PROTOCOL.md
 
 
 ### Bluenet is initialized without arguments.
-```
+```swift
 // this passes a view controller and app name to the lib.
 // This is used for the pop ups for location usage and bluetooth warnings.
 // Remember to add the capability and to add the description in your info.plist.
-BluenetLibIOS.setBluenetGlobals(viewController: self, appName: "Crownstone")
+BluenetLib.setBluenetGlobals(viewController: self, appName: "Crownstone")
 
 // start Bluenet
 let bluenet = Bluenet()
-
 ```
 
 ### After this, you set the settings for bluenet
 
 ##### setSettings(encryptionEnabled: Bool, adminKey: String?, memberKey: String?, guestKey: String?, referenceId: String)
 
-```
+```swift
 bluenet.setSettings(encryptionEnabled: true, adminKey: "1234567890abcdef", memberKey: "1234567890abcdef", guestKey: "1234567890abcdef", referenceId: "test")
 ```
 
@@ -99,13 +83,13 @@ We can now start scanning for bluetooth devices and Crownstones. There are a num
 
 Using these methods can look like:
 
-```
+```swift
 _ = bluenet.isReady()
-      .then{_ in bluenet.startScanningForCrownstones()}
+.then{_ in bluenet.startScanningForCrownstones()}
 ```
 
 The ```_ = ``` is used to indicate to PromiseKit that we will not be using the result of the promise.
-```
+```swift
 .then{_ in bluenet.startScanningForCrownstones()} // this is a swift callback using trailing syntax
 ```
 
@@ -113,6 +97,18 @@ The ```_ = ``` is used to indicate to PromiseKit that we will not be using the r
 
 
 ## Using the events
+
+This lib broadcasts the following data using its own eventbus:
+
+|  topic                       |     dataType         |     when
+|  --------------------------- |   :---------------   |    :-----
+|  bleStatus                   |     String           |     Is emitted when the state of the BLE changes. Possible values: "unauthorized", "poweredOff", "poweredOn", "unknown"
+|  setupProgress               |     NSNumber         |     Phases in the setup process, numbers from 1 - 13, 0 for error.
+|  advertisementData           |     Advertisement    |     When an advertisement packet is received
+|  verifiedAdvertisementData   |     Advertisement    |     When an advertisement has been decrypted successfully 3 consecutive times it is verified. Setup and DFU are also included since they don't need to be decrypted. This sorts out only your Crownstones.
+|  nearestSetupCrownstone      |     NearestItem      |     When a verified advertisement packet in setup mode is received, we check the list of available stones in setup mode and return the closest based on RSSI.
+|  nearestVerifiedCrownstone   |     NearestItem      |     When a verified advertisement packet is received, we check the list of available verified stones and return the closest based on RSSI.
+|  nearestCrownstone           |     NearestItem      |     When a Crownstone advertisement (verified or not) packet is received, we check the list of available stones and return the closest based on RSSI.
 
 You subscribe to the events using this method:
 
@@ -122,18 +118,18 @@ You subscribe to the events using this method:
 
 A voidCallback is defined as:
 
-```
+```swift
 public typealias voidCallback = () -> Void
 ```
 
 This callback can be invoked to unsubscribe from the event.
 
 Example:
-```
+```swift
 let unsubscribe = bluenet.on("advertisementData", {data -> Void in
-    if let castData = data as? Advertisement {
-        // Do something with the Advertisement
-    }
+if let castData = data as? Advertisement {
+// Do something with the Advertisement
+}
 })
 
 // a while later
@@ -184,7 +180,7 @@ when using the methods in this lib. The required rights for certain commands can
 
 The modules are called as follows:
 
-```js
+```swift
 bluenet.<moduleName>.<methodName>(args)
 
 // so for example:
@@ -258,17 +254,17 @@ what it is, what it's encryption keys are and on which mesh address it should br
 
 The setupProgress event is used to keep the user informed of the process.
 #### setup(...) 
-```
+```swift
 setup(
-        _ crownstoneId: UInt16,
-        adminKey: String,
-        memberKey: String,
-        guestKey: String,
-        meshAccessAddress: UInt32,
-        ibeaconUUID: String,
-        ibeaconMajor: UInt16,
-        ibeaconMinor: UInt16
-    ) -> Promise<Void>
+_ crownstoneId: UInt16,
+adminKey: String,
+memberKey: String,
+guestKey: String,
+meshAccessAddress: UInt32,
+ibeaconUUID: String,
+ibeaconMajor: UInt16,
+ibeaconMinor: UInt16
+) -> Promise<Void>
 ```
 
 #### getMACAddress() -> Promise\<String> {
@@ -289,20 +285,20 @@ This is a lower level service, which requires admin access. In production Crowns
 
 So how do we use this? Here is an example for the setup of a Crownstone:
 
-```
+```swift
 let uuid = <something>
 
 bluenet.isReady() // first check if the bluenet lib is ready before using it for BLE things.
-    .then{_ in return bluenet.connect(uuid)} // once the lib is ready, connect to the crownstone
-    .then{_ in bluenet.setup.setup(32, adminKey: "1234567890abcdef", memberKey: "1234567890abcdef", guestKey: "guestKeyForGirls", meshAccessAddress: 12324, ibeaconUUID: "b643423e-e175-4af0-a2e4-31e32f729a8a", ibeaconMajor: 123, ibeaconMinor: 456)} // once the lib is ready, start scanning
-    .then{_ -> Void in
-        print("DONE")
-        _ = self.bluenet.disconnect()
-    }
-    .catch{err in
-        print("end of line \(err)")
-        _ = self.bluenet.disconnect()
-    }
+.then{_ in return bluenet.connect(uuid)} // once the lib is ready, connect to the crownstone
+.then{_ in bluenet.setup.setup(32, adminKey: "1234567890abcdef", memberKey: "1234567890abcdef", guestKey: "guestKeyForGirls", meshAccessAddress: 12324, ibeaconUUID: "b643423e-e175-4af0-a2e4-31e32f729a8a", ibeaconMajor: 123, ibeaconMinor: 456)} // once the lib is ready, start scanning
+.then{_ -> Void in
+print("DONE")
+_ = self.bluenet.disconnect()
+}
+.catch{err in
+print("end of line \(err)")
+_ = self.bluenet.disconnect()
+}
 
 // similarly we can use:
 //   bluenet.control.setSwitchState(...)

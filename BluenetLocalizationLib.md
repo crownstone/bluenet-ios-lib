@@ -1,28 +1,16 @@
 # Bluenet Localization
 
-This lib is used to interact with the indoor localization algorithms of the Crownstone.
-With this lib you train TrainingData, get and load them and determine in which location you are.
-It wraps around the CoreLocation services to handle all iBeacon logic.
+Bluenet Localization.
+This lib is used to handle the iBeacon functionality of the Crownstone. It wraps around the CoreLocation services to handle all iBeacon logic.
+
+You can load a classifier into this module using the insertClassifier method.
+
+You can use the TrainingHelper class to train a set of TrainingData which you can put into the basic classifier.
+
 As long as you can ensure that each beacon's UUID+major+minor combination is unique, you can use this
 localization lib.
 
-You input groups by adding their tracking UUIDs
-You input locations by providing their TrainingDatas or training them.
-
-This lib broadcasts the following data:
-
-
-|  topic:                  |    dataType:          |    when:
-| :---------- | ---------- | :---------- |
-|  "iBeaconAdvertisement"  |    [iBeaconPacket]    |    Once a second when the iBeacon's are ranged   (array of iBeaconPacket objects)
-|  "enterRegion"           |    String             |    When a region (denoted by referenceId) is entered (data is the referenceId as String)
-|  "exitRegion"            |    String             |    When a region (denoted by referenceId) is no longer detected (data is the referenceId as String)
-|  "enterLocation"         |    String             |    When the classifier determines the user has entered a new location (data is the locationId as String)
-|  "exitLocation"          |    String             |    When the classifier determines the user has left his location in favor of a new one. Not triggered when region is left (data is the locationId as String)
-|  "currentLocation"       |    String             |    Once a second when the iBeacon's are ranged and the classifier makes a prediction (data is the locationId as String)
- 
-
-## Getting Started
+# Getting Started
 
 ### BluenetLocalization is initialized without arguments.
 ```
@@ -36,7 +24,21 @@ let bluenetLocalization = BluenetLocalization()
 ```
 
 
-## Using the events
+# Using the events
+
+This lib broadcasts the following events:
+
+
+|  topic:                  |    dataType:          |    when:
+| :----------------------- | --------------------- | :-------------------------------------- |
+|  "iBeaconAdvertisement"  |    [iBeaconPacket]    |    Once a second when the iBeacon's are ranged   (array of iBeaconPacket objects)
+|  "enterRegion"           |    String             |    When a region (denoted by referenceId) is entered (data is the referenceId as String)
+|  "exitRegion"            |    String             |    When a region (denoted by referenceId) is no longer detected (data is the referenceId as String)
+|  "enterLocation"         |    Dictionary         |    ["region": String, "location": String] when a classifier returns a new location, we emit the enter location event. If we were in a location before, there will be an exit location event as well. The region field is the referenceId of the region.
+|  "exitLocation"          |    Dictionary         |    ["region": String, "location": String] when a classifier returns a new location, we emit the exit location event if we were in a different location before.
+|  "currentLocation"       |    Dictionary         |    ["region": String, "location": String] returns the result of the classifier each second as long as it is a valid measurement.
+
+
 
 You subscribe to the events using this method:
 
@@ -55,9 +57,9 @@ This callback can be invoked to unsubscribe from the event.
 Example:
 ```
 let unsubscribe = BluenetLocalization.on("enterRegion", {data -> Void in
-    if let castData = data as? String {
-        // Do something with the region
-    }
+if let castData = data as? String {
+// Do something with the region
+}
 })
 
 // a while later
@@ -65,10 +67,20 @@ let unsubscribe = BluenetLocalization.on("enterRegion", {data -> Void in
 unsubscribe() // now you are unsubscribed and the callback will not be invoked again!
 ```
 
+# Permissions
+
+If you want to be able to receive location updates (iBeaconPackets or the room events) you NEED to add the "Location updates" to the "Background Modes" in the capabilities. Keep in mind that doing so may
+complicate the acceptance process in the App Store if you cannot prove that using the background location benefits the end user.
+
+You can manually request the permission using the following method.
+
+#### requestLocationPermission() {
+> The user can use this method to request the permission for the usage of the location.
+
+If you do not use this method, the permission will be asked on calling any of the tracking iBeacon methods below.
 
 
-
-### Tracking iBeacons
+# Tracking iBeacons
 
 #### trackIBeacon(uuid: String, referenceId: String)
 > This method configures starts tracking the iBeaconUUID you provide. The dataId is used to notify
@@ -104,9 +116,9 @@ unsubscribe() // now you are unsubscribed and the callback will not be invoked a
 > The app can correct for this and implement it's own exitRegion logic. By calling this method afterwards the lib will fire a new enter region event when it sees new beacons.
 
 
-## Indoor localization
+# Indoor localization
 
-Starting and stopping the usasge of the classifier will also start and stop the emitting of the "enterLocation", "exitLocation"
+Starting and stopping the usage of the classifier will also start and stop the emitting of the "enterLocation", "exitLocation"
 and "currentLocation" events. If there is no TrainingData loaded, none of these events will be emitted regardless. The default state of the
 indoor localization is **OFF**.
 
@@ -121,35 +133,45 @@ indoor localization is **OFF**.
 
 ## Collecting Training Data
 
-You do not need to know the format of the TrainingData in order to use it.
-You can tell the lib to start collecting a Training Dataset by calling this method:
+If you decide to use our basic classifier (available here: https://github.com/crownstone/bluenet-ios-basic-localization) you can collect training data using the
+TrainingHelper class. You do not need to know the format of the TrainingData in order to use it. The storage of the TrainingData is just storing a String with the appropriate referenceId and locationId.
 
-#### startCollectingFingerprint()
-> Start collecting a fingerprint.
+To start collecting trainingData, you first make a trainingHelper and supply it with a reference to your BluenetLocalization variable:
 
-#### pauseCollectingFingerprint()
-> Pause collecting a fingerprint. Usually when something in the app would interrupt the user.
+```swift
+// bluenetLocalization is defined at the top of this document.
+let trainingHelper = TrainingHelper(bluenetLocalization: bluenetLocalization)
 
-#### resumeCollectingFingerprint()
-> Resume collecting a fingerprint.
+```
 
-#### abortCollectingFingerprint()
-> Stop collecting a fingerprint without loading it into the classifier.
+In order to collect trainingData, you will need to be tracking an iBeacon region. For successful classification, there should be at least 3 iBeacons visible to the phone during the training process.
+If there are less iBeacons, our basic classifier will return **nil**.
 
-Once your usecase has determined that the Training Dataset is big enough, you call the finalize method.
-This will also load and initialize the fingerprint. Only at this point do you give the fingerprint a referenceId and a locationId.
-These are commonly used for region and location ids.
+#### startCollectingTrainingData()
+> Start collecting the training dataset.
 
-#### finalizeFingerprint(referenceId: String, locationId: String) -> String?
-> Finalize collecting a fingerprint and store it in the appropriate classifier based on the referenceId and the locationId.
+#### pauseCollectingTrainingData()
+> Pause collecting a training dataset. Usually when something in the app would interrupt the user.
 
-### Storage of fingerprints
+#### resumeCollectingTrainingData()
+> Resume collecting a training dataset.
 
-The lib does not store the fingerprints. This is up to your app. You can get the fingerprint using the finalizeFingerprint method.
-You can use the Fingerprint class to stringify the data and store it as a string.
+#### abortCollectingTrainingData()
+> Stop collecting a training dataset without loading it into the classifier.
 
-You can use the string you stored to initialize a new Fingerprint Object which you can then load back into the lib using the loadFingerprint:
+Once your usecase has determined that the Training Dataset is big enough, you call the finish method:
 
-#### loadFingerprint(referenceId: String, locationId: String, fingerprint: String)
-> Load a fingerprint into the classifier(s) for the specified referenceId and locationId.
-> The fingerprint can be constructed from a string by using the initializer when creating the Fingerprint object
+#### finishCollectingTrainingData() -> String?
+> Finalize collecting a training dataset. Returns a stringified JSON dataset which you can load into our basic classifier.
+
+## Storage of fingerprints
+
+The lib does not store the training dataset. This is up to your app. You get the training dataset after collection using the finishCollectingTrainingData method.
+
+## Usage of Training Data
+
+You can read how to use the classifier here: https://github.com/crownstone/bluenet-ios-basic-localization
+
+Alternatively, you can create your own classifier by adhering to the protocols of this shared module:
+
+https://github.com/crownstone/bluenet-ios-shared
