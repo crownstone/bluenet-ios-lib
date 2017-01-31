@@ -14,22 +14,27 @@ import BluenetShared
 
 /**
  * Bluenet Localization.
- * This lib is used to interact with the indoor localization algorithms of the Crownstone.
+ * This lib is used to handle the iBeacon functionality of the Crownstone. It wraps around the CoreLocation services to handle all iBeacon logic.
  *
+ * You can load a classifier into this module using the insertClassifier method.
  *
- * With this lib you train TrainingData, get and load them and determine in which location you are.
- * It wraps around the CoreLocation services to handle all iBeacon logic.
+ * You can use the TrainingHelper class to train a set of TrainingData which you can put into the basic classifier.
+ *
  * As long as you can ensure that each beacon's UUID+major+minor combination is unique, you can use this
  * localization lib.
  *
  * You input groups by adding their tracking UUIDS
- * You input locations by providing their TrainingData or training them.
  *
  * This lib broadcasts the following data:
     topic:                      dataType:               when:
     "iBeaconAdvertisement"      [iBeaconPacket]         Once a second when the iBeacon's are ranged (array of iBeaconPacket objects)
     "enterRegion"               String                  When a region (denoted by referenceId) is entered (data is the referenceId as String)
     "exitRegion"                String                  When a region (denoted by referenceId) is no longer detected (data is the referenceId as String)
+    "enterLocation"             Dictionary              ["region": String, "location": String], when a classifier returns a new location, we emit the enter location event. 
+                                                        If we were in a location before, there will be an exit location event as well. The region field is the referenceId of the region.
+    "exitLocation"              Dictionary              ["region": String, "location": String], when a classifier returns a new location, 
+                                                        we emit the exit location event if we were in a different location before.
+    "currentLocation"           Dictionary              ["region": String, "location": String], returns the result of the classifier each second as long as it is a valid measurement.
  */
 open class BluenetLocalization {
     // Modules
@@ -60,6 +65,9 @@ open class BluenetLocalization {
     }
     
     
+    /**
+     * This method allows you to load a custom classifier into the module. A classifier is optional but required for the enter/exit/current location events.
+     */
     open func insertClassifier( classifier : LocalizationClassifier ) {
         self.classifier = classifier
     }

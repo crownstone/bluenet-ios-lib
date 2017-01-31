@@ -1,8 +1,6 @@
 # Bluenet-lib-ios
 ### Bluenet lib for iOS
 
-# 2.0 documentation coming soon!
-
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
 # Getting started
@@ -39,6 +37,19 @@ https://github.com/crownstone/bluenet-ios-example
 If you want to be able to receive location updates (iBeaconPackets or the room events) you NEED to add the "Location updates" to the "Background Modes" in the capabilities. Keep in mind that doing so may
 complicate the acceptance process in the App Store if you cannot prove that using the background location benefits the end user.
 
+# Logging and Bluenet-ios-shared
+
+For a clean split of modules, we have a core of shared data models and the logging class. This can be found here: https://github.com/crownstone/bluenet-ios-shared
+
+The docs of the Logging are there as well. Log methods of bluenet-ios-lib can be called as shown below:
+
+```swift
+BluenetLib.LOG.<method>
+
+// example: 
+BluenetLib.LOG.setPrintLevel(level: .INFO)
+```
+
 # API
 
 This lib has two parts, the BLE one called Bluenet and the location one called BluenetLocalization.
@@ -47,13 +58,13 @@ means this method is asynchronous and you'll have to use promises.
 
 To use the lib, you will need to define a few of it's globals using the method below.
 
-#### setBluenetGlobals(viewController: UIViewController, appName: String, loggingPrint: Bool = true, loggingFile: Bool = false)
+#### setBluenetGlobals(viewController: UIViewController, appName: String)
 The viewcontroller is used to trigger the permission alerts and the appName is used in these alerts. The logging commands are for writing logs to file or logs to console. By default, console is enabled and to file is disabled.
 
 # Bluenet (BLE)
 
-[Read the docs here](./BluenetLibIOS.md)
+[Read the docs here](./BluenetLib.md)
 
 # BluenetLocalization (iBeacon and indoor localization)
 
-[Read the docs here](./BluenetLocalizationLibIOS.md)
+[Read the docs here](./BluenetLocalizationLib.md)

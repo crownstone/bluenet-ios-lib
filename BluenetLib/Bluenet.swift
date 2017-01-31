@@ -146,7 +146,6 @@ open class Bluenet  {
     }
     
     
-    
     /**
      * Start actively scanning for BLE devices containing a specific serviceUUID.
      * Scan results will be broadcasted on the "advertisementData" topic. 
@@ -157,6 +156,7 @@ open class Bluenet  {
         self.bleManager.stopScanning()
         self.bleManager.startScanningForService(serviceUUID, uniqueOnly: true)
     }
+    
     
     /**
      * Start actively scanning for BLE devices containing a specific serviceUUID.
