@@ -20,6 +20,9 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     var started = false
     var trackingState = false
     
+    // cache for the location
+    var coordinates = CLLocationCoordinate2D()
+    
     public init(eventBus: EventBus) {
         super.init()
         
@@ -30,6 +33,13 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         LOG.info("BLUENET_LIB_NAV: location services enabled: \(CLLocationManager.locationServicesEnabled())");
         LOG.info("BLUENET_LIB_NAV: ranging services enabled: \(CLLocationManager.isRangingAvailable())");
 
+    }
+    
+    open func requestLocation() -> CLLocationCoordinate2D {
+        // ask for permission if the manager does not exist and create the manager
+        if (self.manager == nil) { self.requestLocationPermission() }
+        
+        return coordinates
     }
     
     open func requestLocationPermission() {
@@ -74,9 +84,6 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
             self.manager!.requestState(for: region)
         }
     }
-    
-    
-  
     
     open func stopTrackingAllRegions() {
         // ask for permission if the manager does not exist and create the manager
@@ -163,6 +170,8 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         // ask for permission if the manager does not exist and create the manager
         if (self.manager == nil) { self.requestLocationPermission() }
         
+        self.manager!.desiredAccuracy = kCLLocationAccuracyThreeKilometers
+        self.manager!.pausesLocationUpdatesAutomatically = true
         self.manager!.startUpdatingLocation()
         if (self.manager!.responds(to: #selector(getter: CLLocationManager.allowsBackgroundLocationUpdates))) {
             LOG.info("BLUENET_LIB_NAV: Manager allows background location updates")
@@ -300,6 +309,12 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
 
+    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.first {
+            print("Found user's location: \(location.coordinate)")
+            coordinates = location.coordinate
+        }
+    }
     
     
     

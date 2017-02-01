@@ -59,6 +59,10 @@ open class BluenetLocalization {
         self.eventBus = EventBus()
         self.locationManager = LocationManager(eventBus: self.eventBus)
         
+        // clean the logs every enter region event
+        _ = self.eventBus.on("lowLevelEnterRegion",  { _ in LOG.cleanLogs() })
+        
+        // use the ibeacon advertisements for the module logic.
         _ = self.eventBus.on("lowLevelEnterRegion",  self._handleRegionEnter)
         _ = self.eventBus.on("lowLevelExitRegion",   self._handleRegionExit)
         _ = self.eventBus.on("iBeaconAdvertisement", self._updateState)
@@ -77,6 +81,14 @@ open class BluenetLocalization {
      */
     open func requestLocationPermission() {
         self.locationManager.requestLocationPermission()
+    }
+    
+    
+    /**
+     * This provides a very rough estimate of the users location. The location is cached for battery saving. This is accurate up to 3km radius (kCLLocationAccuracyThreeKilometers).
+     */
+    open func requestLocation() -> CLLocationCoordinate2D {
+        return self.locationManager.requestLocation()
     }
     
     /**

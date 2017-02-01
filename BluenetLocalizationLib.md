@@ -79,6 +79,10 @@ You can manually request the permission using the following method.
 
 If you do not use this method, the permission will be asked on calling any of the tracking iBeacon methods below.
 
+# User Location
+
+#### requestLocation() -> CLLocationCoordinate2D 
+> This provides a very rough estimate of the users location. The location is cached for battery saving. This is accurate up to 3km radius (kCLLocationAccuracyThreeKilometers).
 
 # Tracking iBeacons
 
