@@ -311,7 +311,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
 
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.first {
-            print("Found user's location: \(location.coordinate)")
+            LOG.info("BLUENET_LIB_NAV: update user's location: \(location.coordinate)")
             coordinates = location.coordinate
         }
     }
