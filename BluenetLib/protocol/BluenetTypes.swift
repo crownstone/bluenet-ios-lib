@@ -98,13 +98,32 @@ enum StateType : UInt8 {
     case tracked_DEVICES
     case schedule
     case operation_MODE
-    case temperature}
+    case temperature
+}
 
 enum OpCode : UInt8 {
     case read = 0
     case write
     case notify
 }
+
+//*********** Mesh ***********//
+
+enum MeshCommandType : UInt16 {
+    case control = 0
+    case beacon
+    case config
+    case state
+}
+
+public enum IntentType : UInt8 {
+    case manual = 0
+    case regionEnter
+    case regionExit
+    case enter
+    case exit
+}
+
 
 //*********** DFU ************//
 

@@ -18,6 +18,15 @@ open class Conversion {
         ]
     }
     
+    open static func uint16_array_to_uint8_array(_ valueArray: [UInt16]) -> [UInt8] {
+        var returnArray = [UInt8]();
+        for uint16 in valueArray {
+            returnArray += Conversion.uint16_to_uint8_array(uint16)
+        }
+        return returnArray
+    }
+    
+    
     // Convert a number into an array of 4 bytes.
     open static func uint32_to_uint8_array(_ value: UInt32) -> [UInt8] {
         return [

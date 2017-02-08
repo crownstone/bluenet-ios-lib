@@ -61,6 +61,10 @@ public enum BleError : Error {
     
     // input errors
     case INVALID_TX_POWER_VALUE
+    
+    // mesh
+    case NO_KEEPALIVE_STATE_ITEMS
+    case NO_SWITCH_STATE_ITEMS
 }
 
 struct timeoutDurations {

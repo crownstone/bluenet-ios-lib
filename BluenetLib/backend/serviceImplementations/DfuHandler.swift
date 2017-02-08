@@ -99,10 +99,7 @@ open class DfuHandler {
     
     
    
-    
-   // public func writePackets(firmware: [UInt8]) -> Promise<Void> {
-        
-   // }
+
     
     /**
      * Set the switch state. If 0 or 1, switch on or off. If 0 < x < 1 then dim.

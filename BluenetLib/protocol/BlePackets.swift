@@ -111,7 +111,7 @@ class keepAliveStatePacket {
     }
     
     func getPacket() -> [UInt8] {
-        return data;
+        return data
     }
 
 }
@@ -127,14 +127,6 @@ class EnableScannerPacket : ControlPacket {
 
 class EnableScannerDelayPacket : ControlPacket {
     init(delayInMs: Int) {super.init(type: ControlType.enable_SCANNER, payload16: UInt16(delayInMs))}
-}
-
-class MeshControlPacket {
-    
-}
-
-class MeshPayloadPacket {
-    
 }
 
 class ReadConfigPacket : BLEPacket {

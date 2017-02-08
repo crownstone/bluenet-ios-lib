@@ -69,7 +69,7 @@ open class ControlHandler {
     }
     
     func _recoverByFactoryReset() -> Promise<Void> {
-        let packet = Conversion.reverse(Conversion.hex_string_to_uint8_array("deadbeef"));
+        let packet = ControlPacketsGenerator.getFactoryResetPacket()
         return self.bleManager.writeToCharacteristic(
             CSServices.CrownstoneService,
             characteristicId: CrownstoneCharacteristics.FactoryReset,
@@ -79,7 +79,7 @@ open class ControlHandler {
     }
     
     open func commandFactoryReset() -> Promise<Void> {
-        return self._writeControlPacket(FactoryResetPacket().getPacket())
+        return self._writeControlPacket(ControlPacketsGenerator.getCommandFactoryResetPacket())
             .then{(_) -> Promise<[UInt8]> in return self._readControlPacket()}
             .then{(response: [UInt8]) -> Promise<Void> in
                 return Promise<Void> {fulfill, reject in
@@ -98,41 +98,35 @@ open class ControlHandler {
      * Switches power intelligently.
      * State has to be between 0 and 1
      */
-    open func setSwitchState(_ state: Float) -> Promise<Void> {
-        var switchState = min(1,max(0,state))*100
-        
-        // temporary to disable dimming
-        switchState = ceil(switchState)
-        
-        let packet = ControlPacket(type: .switch, payload8: NSNumber(value: switchState as Float).uint8Value)
-        return self._writeControlPacket(packet.getPacket())
+    open func setSwitchState(_ state: Float, intent: IntentType) -> Promise<Void> {
+        let packet = ControlPacketsGenerator.getSwitchStatePacket(state, intent: intent)
+        return self._writeControlPacket(packet)
     }
     
     open func reset() -> Promise<Void> {
         LOG.info("BLUENET_LIB: requesting reset")
-        return self._writeControlPacket(ControlPacket(type: .reset).getPacket())
+        return self._writeControlPacket(ControlPacketsGenerator.getResetPacket())
     }
     
     open func putInDFU() -> Promise<Void> {
         LOG.info("BLUENET_LIB: switching to DFU")
-        return self._writeControlPacket(ControlPacket(type: .goto_DFU).getPacket())
+        return self._writeControlPacket(ControlPacketsGenerator.getPutInDFUPacket())
     }
     
     open func disconnect() -> Promise<Void> {
         LOG.info("BLUENET_LIB: REQUESTING IMMEDIATE DISCONNECT")
-        return self._writeControlPacket(ControlPacket(type: .disconnect).getPacket()).then{_ in self.bleManager.disconnect()}
+        return self._writeControlPacket(ControlPacketsGenerator.getPutInDFUPacket()).then{_ in self.bleManager.disconnect()}
     }
     
     open func switchRelay(_ state: UInt8) -> Promise<Void> {
         LOG.info("BLUENET_LIB: switching relay to \(state)")
-        return self._writeControlPacket(ControlPacket(type: .relay, payload8: state).getPacket())
+        return self._writeControlPacket(ControlPacketsGenerator.getRelaySwitchPacket(state))
     }
     
     
     open func switchPWM(_ state: Float) -> Promise<Void> {
-        let switchState = min(1,max(0,state))*100
-        LOG.info("BLUENET_LIB: switching PWM to \(switchState)")
-        return self._writeControlPacket(ControlPacket(type: .pwm, payload8: NSNumber(value: switchState as Float).uint8Value).getPacket())
+        LOG.info("BLUENET_LIB: switching PWM to \(state)")
+        return self._writeControlPacket(ControlPacketsGenerator.getPwmSwitchPacket(state))
     }
 
     
@@ -140,27 +134,12 @@ open class ControlHandler {
      * If the changeState is true, then the state and timeout will be used. If it is false, the keepaliveState on the Crownstone will be cleared and nothing will happen when the timer runs out.
      */
     open func keepAliveState(changeState: Bool, state: Float, timeout: UInt16) -> Promise<Void> {
-        var switchState = min(1,max(0,state))*100
-        
-        // make sure we do not
-        var actionState : UInt8 = 0
-        if (changeState == true) {
-            actionState = 1
-        }
-        
-        // temporary to disable dimming
-        switchState = ceil(switchState)
-        
-        LOG.info("BLUENET_LIB: Keep alive state")
-        let keepalivePacket = keepAliveStatePacket(action: actionState,
-                                                   state: NSNumber(value: switchState as Float).uint8Value,
-                                                   timeout: timeout).getPacket()
-        return self._writeControlPacket(ControlPacket(type: .keep_ALIVE_STATE, payloadArray: keepalivePacket).getPacket())
+        return self._writeControlPacket(ControlPacketsGenerator.getKeepAliveStatePacket(changeState: changeState, state: state, timeout: timeout))
     }
     
     open func keepAlive() -> Promise<Void> {
         LOG.info("BLUENET_LIB: Keep alive")
-        return self._writeControlPacket(ControlPacket(type: .keep_ALIVE).getPacket())
+        return self._writeControlPacket(ControlPacketsGenerator.getKeepAlivePacket())
     }
     
     

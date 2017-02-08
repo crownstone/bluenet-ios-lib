@@ -11,7 +11,7 @@ import Foundation
 /*
  *
  *
- *  These are valid for SDK 0.4.1
+ *  These are valid for SDK 0.8.0
  *
  *
  */
