@@ -60,7 +60,7 @@ open class MeshHandler {
      */
     open func keepAlive() -> Promise<Void> {
         let data = MeshControlPacket(channel: .KeepAlive, payload: [UInt8]())
-        return self._writeToMesh(channel: .KeepAlive, payload: [UInt8]())
+        return self._writeToMesh(channel: .KeepAlive, payload: data.getPacket())
     }
     
     /**
@@ -126,7 +126,7 @@ open class MeshHandler {
     /**
      * Send the same control command to multiple crownstones defined by their ids
      */
-    open func meshCommandSetSwitchState(crownstoneIds: [UInt16], state: Float, intent: IntentType) -> Promise<Void> {
+    open func meshCommandSetSwitchState(crownstoneIds: [UInt16], state: Float, intent: UInt8) -> Promise<Void> {
         let commandPacket = ControlPacketsGenerator.getSwitchStatePacket(state, intent: intent)
         let payload = MeshCommandPacket(messageType: .control, crownstoneIds: crownstoneIds, payload:commandPacket)
         return self._writeToMesh(channel: .Command, payload: payload.getPacket())

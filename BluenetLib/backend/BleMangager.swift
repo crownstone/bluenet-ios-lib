@@ -115,9 +115,9 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
    
     
     // MARK: API
+    
     /**
      * This method will fulfill when the bleManager is ready. It polls itself every 0.25 seconds. Never rejects.
-     *
      */
     open func isReady() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
