@@ -34,7 +34,7 @@ class StoneKeepAlivePacket {
     var actionAndState : UInt8 = 0
     
     convenience init(crownstoneId: UInt16, action: Bool, state: Float) {
-        var switchState = NSNumber(value: min(1,max(0,state))*100).uint8Value
+        let switchState = NSNumber(value: min(1,max(0,state))*100).uint8Value
         self.init(crownstoneId: crownstoneId, action: action, state: switchState)
     }
     
@@ -110,25 +110,27 @@ class MeshCommandPacket {
 class StoneSwitchPacket {
     var timeout : UInt16 = 0
     var crownstoneId : UInt16
-    var state : UInt8
+    var state   : UInt8
+    var intent  : UInt8
     
-    convenience init(crownstoneId: UInt16, state: UInt8) {
-        self.init(crownstoneId: crownstoneId, state: state, timeout:0)
+    convenience init(crownstoneId: UInt16, state: UInt8, intent: UInt8) {
+        self.init(crownstoneId: crownstoneId, state: state, timeout:0, intent: intent)
     }
     
-    convenience init(crownstoneId: UInt16, state: Float) {
-        self.init(crownstoneId: crownstoneId, state: state, timeout:0)
+    convenience init(crownstoneId: UInt16, state: Float, intent: UInt8) {
+        self.init(crownstoneId: crownstoneId, state: state, timeout:0, intent: intent)
     }
     
-    convenience init(crownstoneId: UInt16, state: Float, timeout: UInt16) {
-        var switchState = NSNumber(value: min(1,max(0,state))*100).uint8Value
-        self.init(crownstoneId: crownstoneId, state: switchState, timeout: timeout)
+    convenience init(crownstoneId: UInt16, state: Float, timeout: UInt16, intent: UInt8) {
+        let switchState = NSNumber(value: min(1,max(0,state))*100).uint8Value
+        self.init(crownstoneId: crownstoneId, state: switchState, timeout: timeout, intent: intent)
     }
     
-    init(crownstoneId: UInt16, state: UInt8, timeout: UInt16) {
+    init(crownstoneId: UInt16, state: UInt8, timeout: UInt16, intent: UInt8) {
         self.timeout = timeout
         self.crownstoneId = crownstoneId
         self.state = state
+        self.intent = intent
     }
     
     func getPacket() -> [UInt8] {
@@ -136,25 +138,24 @@ class StoneSwitchPacket {
         arr += Conversion.uint16_to_uint8_array(self.crownstoneId)
         arr.append(self.state)
         arr += Conversion.uint16_to_uint8_array(self.timeout)
+        arr.append(self.intent)
+
         return arr
     }
 }
 
 
 class MeshSwitchPacket {
-    var intent : IntentType!
     var size : UInt8
     var packets : [StoneSwitchPacket]!
     
-    init(intent: IntentType, packets: [StoneSwitchPacket]) {
-        self.intent = intent
+    init(packets: [StoneSwitchPacket]) {
         self.size = NSNumber(value: packets.count).uint8Value
         self.packets = packets
     }
     
     func getPacket() -> [UInt8] {
         var arr = [UInt8]()
-        arr.append(self.intent.rawValue)
         arr.append(self.size)
         for packet in self.packets {
             arr += packet.getPacket()
@@ -179,3 +180,5 @@ class beaconConfigPacket {
         
     }
 }
+
+

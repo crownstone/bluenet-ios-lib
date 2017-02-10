@@ -20,6 +20,8 @@ public func delay(_ delay:Double, _ closure: @escaping ()->()) {
 }
 
 
+
+
 /**
  * This will show an alert about location and forward the user to the settings page
  **/

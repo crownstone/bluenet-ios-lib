@@ -82,6 +82,7 @@ struct timeoutDurations {
     static let waitForWrite            : Double = 0.35
     static let waitForReconnect        : Double = 2.0
     static let waitForRestart          : Double = 2
+    static let waitForMeshPropagation  : Double = 0.5
 }
 
 
@@ -129,11 +130,11 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         }
     }
     
-    open func waitToReconnect()  -> Promise<Void> {
+    open func waitToReconnect() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in delay(timeoutDurations.waitForReconnect, fulfill) }
     }
     
-    open func waitForRestart()  -> Promise<Void> {
+    open func waitForRestart() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in delay(timeoutDurations.waitForRestart, fulfill) }
     }
     

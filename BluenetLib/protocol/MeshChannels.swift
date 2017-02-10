@@ -4,7 +4,6 @@
 //
 //  Created by Alex de Mulder on 02/02/17.
 //  Copyright © 2016 Alex de Mulder. All rights reserved.
-//
 
 import Foundation
 
@@ -24,4 +23,7 @@ enum MeshChannel : UInt8 {
     case CommandReply    = 5
     case ScanResult      = 6
     case BigData         = 7
+    case MultiSwitch     = 8
 }
+
+

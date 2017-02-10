@@ -117,11 +117,11 @@ enum MeshCommandType : UInt16 {
 }
 
 public enum IntentType : UInt8 {
-    case manual = 0
-    case regionEnter
+    case regionEnter = 0
     case regionExit
     case enter
     case exit
+    case manual
 }
 
 
