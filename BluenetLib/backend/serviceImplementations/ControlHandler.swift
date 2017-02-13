@@ -115,7 +115,7 @@ open class ControlHandler {
     
     open func disconnect() -> Promise<Void> {
         LOG.info("BLUENET_LIB: REQUESTING IMMEDIATE DISCONNECT")
-        return self._writeControlPacket(ControlPacketsGenerator.getPutInDFUPacket()).then{_ in self.bleManager.disconnect()}
+        return self._writeControlPacket(ControlPacketsGenerator.getDisconnectPacket()).then{_ in self.bleManager.disconnect()}
     }
     
     open func switchRelay(_ state: UInt8) -> Promise<Void> {
