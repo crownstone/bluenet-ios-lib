@@ -21,6 +21,7 @@ public let CrownstoneBuiltinAdvertisementServiceUUID = "C002"
 public let GuidestoneAdvertisementServiceUUID = "C003"
 
 public struct CSServices {
+    public static let DeviceInformation         = "0x180a"
     public static let CrownstoneService         = "24f00000-7d10-4805-bfc1-7663a01c3bff"
     public static let SetupService              = "24f10000-7d10-4805-bfc1-7663a01c3bff"
     public static let GeneralService            = "24f20000-7d10-4805-bfc1-7663a01c3bff"
