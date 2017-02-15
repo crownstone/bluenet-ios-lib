@@ -201,7 +201,10 @@ open class Bluenet  {
                 return Promise<Void> {fulfill, reject in
                     if (self.settings.isEncryptionEnabled()) {
                         self.control.getAndSetSessionNonce()
-                            .then{_ in fulfill()}
+                            .then{_ -> Void in
+                                LOG.verbose("BLUENET_LIB: got and set sessionNonce")
+                                fulfill()
+                            }
                             .catch{err in reject(err)}
                     }
                     else {

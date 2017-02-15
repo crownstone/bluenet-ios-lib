@@ -470,11 +470,9 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                         self.pendingPromise.setDelayedFulfill(timeoutDurations.writeCharacteristicWithout)
                     }
                     
-                    LOG.verbose("")
-                    
                     // the fulfil and reject are handled in the peripheral delegate
                     if (self.settings.isEncryptionEnabled()) {
-                         LOG.info("BLUENET_LIB: writing \(data) which will be encrypted")
+                         LOG.verbose("BLUENET_LIB: writing \(data.bytes) which will be encrypted.")
                         do {
                             let encryptedData = try EncryptionHandler.encrypt(data, settings: self.settings)
                             self.connectedPeripheral!.writeValue(encryptedData, for: characteristic, type: type)
@@ -484,7 +482,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                         }
                     }
                     else {
-                        LOG.info("BLUENET_LIB: writing \(data) ")
+                        LOG.verbose("BLUENET_LIB: writing \(data.bytes)")
                         self.connectedPeripheral!.writeValue(data, for: characteristic, type: type)
                     }
 
