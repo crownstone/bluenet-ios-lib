@@ -97,7 +97,7 @@ open class BluenetLocalization {
      */
     open func trackIBeacon(uuid: String, referenceId: String) {
         if (uuid.characters.count < 30) {
-            LOG.verbose("BLUENET LOCALIZATION ---- Cannot track \(referenceId) with UUID \(uuid)")
+            LOG.warn("BLUENET LOCALIZATION ---- Cannot track \(referenceId) with UUID \(uuid)")
         }
         else {
             let trackStone = iBeaconContainer(referenceId: referenceId, uuid: uuid)
@@ -192,7 +192,7 @@ open class BluenetLocalization {
         if let data = ibeaconData as? [iBeaconPacket] {
             // log ibeacon receiving for debugging purposes {
             self.counter += 1
-            LOG.debug("received iBeacon nr: \(self.counter) classifierState: \(indoorLocalizationEnabled) amountOfBeacons: \(data.count) activeRegionId: \(self.activeGroupId)")
+            LOG.verbose("received iBeacon nr: \(self.counter) classifierState: \(indoorLocalizationEnabled) amountOfBeacons: \(data.count) activeRegionId: \(self.activeGroupId)")
             for packet in data {
                 LOG.verbose("received iBeacon DETAIL \(packet.idString) \(packet.rssi) \(packet.referenceId)")
             }

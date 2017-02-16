@@ -45,6 +45,11 @@ open class Conversion {
         }
         return arr
     }
+
+    
+    open static func uint8_array_to_string(_ data: [UInt8]) -> String {
+        return String(cString: data)
+    }
     
     open static func uint8_array_to_hex_string(_ data: [UInt8]) -> String {
         var stringResult = ""

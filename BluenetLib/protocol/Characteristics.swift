@@ -11,10 +11,15 @@ import Foundation
 /*
  *
  *
- *  These are valid for SDK 0.8.0
+ *  These are valid for SDK 0.8.1
  *
  *
  */
+
+public struct DeviceCharacteristics {
+    public static let HardwareRevision = "2a27"
+    public static let FirmwareRevision = "2a26"
+}
 
 public struct CrownstoneCharacteristics {
     public static let Control          = "24f00001-7d10-4805-bfc1-7663a01c3bff"

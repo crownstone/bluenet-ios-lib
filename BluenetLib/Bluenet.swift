@@ -52,6 +52,7 @@ open class Bluenet  {
     open let control  : ControlHandler!
     open let power    : PowerHandler!
     open let mesh     : MeshHandler!
+    open let device   : DeviceHandler!
 
     
     // MARK: API
@@ -72,6 +73,7 @@ open class Bluenet  {
         self.control = ControlHandler( bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.power   = PowerHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.mesh    = MeshHandler(    bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
+        self.device  = DeviceHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         
         // subscribe to BLE advertisements (TODO: add encryption)
         _ = self.eventBus.on("advertisementData", self._parseAdvertisement)

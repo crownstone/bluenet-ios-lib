@@ -270,6 +270,32 @@ ibeaconMinor: UInt16
 #### getMACAddress() -> Promise\<String> {
 >Get the MAC address as a F3:D4:A1:CC:FF:32 String
 
+### Device
+
+This module allows you to get the firmware version.
+
+#### getFirmwareRevision() -> Promise\<String>
+> Returns a symvar version number like  "1.1.0"
+
+This version is not encrypted. If you want to read it from a Crownstone that does not belong to your Sphere (so if you don't have it's encryption keys), you can get the version like this:
+
+```swift
+
+var revisionString = ""
+bluenet.isReady()
+    .then{ _ -> Promise<Void> in 
+        bluenet.settings.disableEncryptionTemporarily()
+        return bluenet.connect(<target>) 
+    }
+    .then{ _ -> Promise<String> in return bluenet.device.getFirmwareRevision() }
+    .then{ firmwareRevisionString: String -> Promise<Void> in 
+        bluenet.settings.restoreEncryption()
+        revisionString = firmwareRevisionString
+        return bluenet.disconnect()
+    }
+    .catch{ err in bluenet.settings.restoreEncryption() }
+
+```
 
 ### Power
 
