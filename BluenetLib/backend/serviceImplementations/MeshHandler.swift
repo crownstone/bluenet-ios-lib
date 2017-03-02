@@ -97,11 +97,9 @@ open class MeshHandler {
     
   
     /**
-     * This allows you to send a keepAliveState message to multiple Crownstones via the Mesh network.
-     * The timeout is usually per region, stones are in the format:
-     * [ [crownstoneId: Number(UInt16), timeout: Number(UInt16), state: Number(Float: [0 .. 1])] ]
+     * This channel is used to send different switch commands with individual timeouts, switch states and intents to different crownstones in one message
      */
-    open func MultiSwitch(intent: UInt8, stones:[[String: NSNumber]]) -> Promise<Void> {
+    open func multiSwitch(stones:[[String: NSNumber]]) -> Promise<Void> {
         var packets = [StoneSwitchPacket]()
         for stone in stones {
             let crownstoneId = stone["crownstoneId"]
