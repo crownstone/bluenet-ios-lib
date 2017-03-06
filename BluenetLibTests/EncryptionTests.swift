@@ -8,7 +8,7 @@
 
 import XCTest
 import CryptoSwift
-@testable import BluenetLibIOS
+@testable import BluenetLib
 
 class EncryptionTests: XCTestCase {
     var settings : BluenetSettings!

@@ -67,7 +67,7 @@ class BLEPacket {
     func getPacket() -> [UInt8] {
         var arr = [UInt8]()
         arr.append(self.type)
-        arr.append(0)
+        arr.append(0) // reserved
         arr += self.length
         arr += self.payload
         return arr
@@ -91,7 +91,7 @@ class ControlPacket : BLEPacket {
     override func getPacket() -> [UInt8] {
         var arr = [UInt8]()
         arr.append(self.type)
-        arr.append(0)
+        arr.append(0) // reserved
         arr += self.length
         arr += self.payload
         return arr

@@ -22,6 +22,7 @@ class MeshControlPacket {
     func getPacket() -> [UInt8] {
         var arr = [UInt8]()
         arr.append(self.channel.rawValue)
+        arr.append(0) // reserved
         arr += Conversion.uint16_to_uint8_array(self.length)
         arr += self.payload
         return arr
@@ -88,6 +89,8 @@ class MeshCommandPacket {
     var idCounter      : UInt8 = 0
     var crownstoneIds  : [UInt16]!
     var payload : [UInt8]!
+    
+    
     
     init(messageType: MeshCommandType, crownstoneIds: [UInt16], payload: [UInt8]) {
         self.messageType = messageType

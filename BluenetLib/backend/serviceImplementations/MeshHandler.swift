@@ -145,11 +145,12 @@ open class MeshHandler {
         // delay the mesh message if required to ensure propagation
         return Promise<Void> { fulfill, reject in
             if (timeoutDurations.waitForMeshPropagation - dt > 0) {
+                LOG.info("BLUENET_LIB Mesh: delaying this command \(timeoutDurations.waitForMeshPropagation) \(dt)")
                 delay(timeoutDurations.waitForMeshPropagation - dt, fulfill)
             }
             else { fulfill() }
         }
-        .then{ _ in return self._writeToMesh(channel: channel, payload: payload)}
+        .then{ _ in return self._writeToMeshWithoutDelayCheck(channel: channel, payload: payload)}
     }
         
     func _writeToMeshWithoutDelayCheck(channel: MeshChannel, payload: [UInt8]) -> Promise<Void> {

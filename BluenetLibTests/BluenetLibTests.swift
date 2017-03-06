@@ -8,13 +8,13 @@
 
 import XCTest
 import SwiftyJSON
-@testable import BluenetLibIOS
+@testable import BluenetLib
 
 func XCTAssertEqualDictionaries<S: Equatable, T: Equatable>(first: [S:T], _ second: [S:T]) {
     XCTAssert(first == second)
 }
 
-class BluenetLibIOSTests: XCTestCase {
+class BluenetLibTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
@@ -31,6 +31,8 @@ class BluenetLibIOSTests: XCTestCase {
         // Use XCTAssert and related functions to verify your tests produce the correct results.
         let uint8Array16 : [UInt8] = [10,32]
         let uint8Array32 : [UInt8] = [10,32,0,2]
+
+        XCTAssertEqual(Conversion.uint16_to_uint8_array(MeshCommandType.config.rawValue),[2 as UInt8, 0 as UInt8])
         XCTAssertEqual(Conversion.uint8_array_to_uint16(uint8Array16), UInt16(8202))
         XCTAssertEqual(Conversion.uint8_array_to_uint32(uint8Array32), UInt32(33562634))
         XCTAssertEqual(Conversion.uint32_to_int32(UInt32(3147483647)), Int32(-1147483649))
