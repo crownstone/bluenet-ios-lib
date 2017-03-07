@@ -155,6 +155,7 @@ open class MeshHandler {
         
     func _writeToMeshWithoutDelayCheck(channel: MeshChannel, payload: [UInt8]) -> Promise<Void> {
         let packet = MeshControlPacket(channel: channel, payload: payload).getPacket()
+        LOG.info("BLUENET_LIB Mesh: sending to meshCharacteristic \(packet)")
         return self.bleManager.writeToCharacteristic(
             CSServices.CrownstoneService,
             characteristicId: CrownstoneCharacteristics.MeshControl,

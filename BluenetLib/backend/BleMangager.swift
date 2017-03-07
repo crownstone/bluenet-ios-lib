@@ -65,6 +65,12 @@ public enum BleError : Error {
     // mesh
     case NO_KEEPALIVE_STATE_ITEMS
     case NO_SWITCH_STATE_ITEMS
+    
+    // DFU
+    case DFU_OVERRULED
+    case DFU_ABORTED
+    case DFU_ERROR
+    case COULD_NOT_FIND_PERIPHERAL
 }
 
 struct timeoutDurations {
@@ -88,7 +94,7 @@ struct timeoutDurations {
 
 
 open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
-    var centralManager : CBCentralManager!
+    open var centralManager : CBCentralManager!
     var connectedPeripheral: CBPeripheral?
     var connectingPeripheral: CBPeripheral?
     
@@ -96,6 +102,9 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     var pendingPromise : promiseContainer!
     var eventBus : EventBus!
     open var settings : BluenetSettings!
+    
+    var uniquenessReference = [String: String]()
+    var scanUniqueOnly = false
 
     public init(eventBus: EventBus) {
         super.init();
@@ -111,6 +120,10 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     
     open func setSettings(_ settings: BluenetSettings) {
         self.settings = settings
+    }
+    
+    open func reassignDelegate() {
+        self.centralManager.delegate = self
     }
    
     
@@ -149,6 +162,21 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         return Promise<Void> { fulfill, reject in delay(timeoutDurations.waitForWrite, fulfill) }
     }
 
+    
+    open func getPeripheral(_ uuid: String) -> CBPeripheral? {
+        let nsUuid = UUID(uuidString: uuid)
+        if (nsUuid == nil) {
+            return nil
+        }
+
+        // get a peripheral from the known list (TODO: check what happens if it requests an unknown one)
+        let peripherals = centralManager.retrievePeripherals(withIdentifiers: [nsUuid!]);
+        if (peripherals.count == 0) {
+            return nil
+        }
+        
+        return peripherals[0]
+    }
     
     /**
      * Connect to a ble device. The uuid is the Apple UUID which differs between phones for a single device
@@ -566,17 +594,23 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     // MARK: scanning
     
     open func startScanning() {
+        self.scanUniqueOnly = false
+        
         LOG.info("BLUENET_LIB: start scanning everything")
         centralManager.scanForPeripherals(withServices: nil, options:[CBCentralManagerScanOptionAllowDuplicatesKey: true])
     }
     
     open func startScanningForService(_ serviceUUID: String, uniqueOnly: Bool = false) {
+        self.scanUniqueOnly = uniqueOnly
+        
         LOG.info("BLUENET_LIB: start scanning for services \(serviceUUID)")
         let service = CBUUID(string: serviceUUID)
         centralManager.scanForPeripherals(withServices: [service], options:[CBCentralManagerScanOptionAllowDuplicatesKey: !uniqueOnly])
     }
     
     open func startScanningForServices(_ serviceUUIDs: [String], uniqueOnly: Bool = false) {
+        self.scanUniqueOnly = uniqueOnly
+        
         LOG.info("BLUENET_LIB: start scanning for multiple services \(serviceUUIDs)")
         var services = [CBUUID]()
         for service in serviceUUIDs {
@@ -652,6 +686,18 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             serviceUUID: advertisementData["kCBAdvDataServiceUUIDs"] as Any,
             referenceId: settings.referenceId
         );
+        
+        // Because crownstones alternate between connectable and nonconnectable to match iBeacon spec, the ios duplicate filtering does not work completely. This workaround implements uniqueness checking before decryption. 
+        if (self.scanUniqueOnly == true) {
+            let randomString = emitData.getServiceDataRandomString()
+            if (self.uniquenessReference[emitData.handle] != nil) {
+                if (self.uniquenessReference[emitData.handle] == randomString) {
+                    return
+                }
+            }
+            self.uniquenessReference[emitData.handle] = randomString
+        }
+        
 
         if (self.settings.isEncryptionEnabled() && emitData.isSetupPackage() == false && settings.guestKey != nil) {
             emitData.decrypt(settings.guestKey!)

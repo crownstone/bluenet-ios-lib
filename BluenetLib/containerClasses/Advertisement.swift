@@ -98,6 +98,13 @@ open class Advertisement {
         return JSON([])
     }
     
+    open func getServiceDataRandomString() -> String {
+        if ((scanResponse) != nil) {
+            return scanResponse!.getRandomString()
+        }
+        return ""
+    }
+    
     open func getJSON() -> JSON {
         var dataDict = [String : Any]()
         dataDict["handle"] = self.handle
@@ -188,25 +195,29 @@ open class Advertisement {
 
 
 open class ScanResponcePacket {
-    var firmwareVersion     : UInt8  = 0
-    var crownstoneId        : UInt16 = 0
-    var switchState         : UInt8  = 0
-    var eventBitmask        : UInt8  = 0
-    var temperature         : Int8   = 0
-    var powerUsage          : Int32  = 0
-    var accumulatedEnergy   : Int32  = 0
-    var random              : String = ""
-    var newDataAvailable    : Bool   = false
-    var setupFlag           : Bool   = false
-    var dfuMode             : Bool   = false
-    var stateOfExternalCrownstone : Bool = false
-    var data                : [UInt8]!
+    open var firmwareVersion     : UInt8  = 0
+    open var crownstoneId        : UInt16 = 0
+    open var switchState         : UInt8  = 0
+    open var eventBitmask        : UInt8  = 0
+    open var temperature         : Int8   = 0
+    open var powerUsage          : Int32  = 0
+    open var accumulatedEnergy   : Int32  = 0
+    open var random              : String = ""
+    open var newDataAvailable    : Bool   = false
+    open var setupFlag           : Bool   = false
+    open var dfuMode             : Bool   = false
+    open var stateOfExternalCrownstone : Bool = false
+    open var data                : [UInt8]!
     
     var validData = false
     
     init(_ data: [UInt8]) {
         self.data = data
         self.parse()
+    }
+    
+    open func getRandomString() -> String {
+        return self.random
     }
     
     func parse() {
