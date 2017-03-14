@@ -29,6 +29,10 @@ enum ControlType : UInt8 {
     case validate_SETUP = 17
     case request_SERVICE_DATA = 18
     case disconnect = 19
+    case set_LED = 20
+    case no_OPERATION = 21
+    case increase_TX = 22
+    case reset_ERRORS = 23
 }
 
 enum ConfigurationType : UInt8 {

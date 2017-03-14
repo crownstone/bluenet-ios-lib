@@ -20,7 +20,7 @@ open class ControlPacketsGenerator {
         return FactoryResetPacket().getPacket()
     }
     
-    open static func getSwitchStatePacket(_ state: Float, intent: UInt8) -> [UInt8] {
+    open static func getSwitchStatePacket(_ state: Float) -> [UInt8] {
         var switchState = min(1,max(0,state))*100
         
         // temporary to disable dimming

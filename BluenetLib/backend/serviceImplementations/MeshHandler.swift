@@ -59,8 +59,7 @@ open class MeshHandler {
      * It will make the Crownstone repeat it's last known mesh message.
      */
     open func keepAlive() -> Promise<Void> {
-        let data = MeshControlPacket(channel: .KeepAlive, payload: [UInt8]())
-        return self._writeToMesh(channel: .KeepAlive, payload: data.getPacket())
+        return self._writeToMesh(channel: .KeepAlive, payload: [UInt8]())
     }
     
     /**
@@ -124,8 +123,8 @@ open class MeshHandler {
     /**
      * Send the same control command to multiple crownstones defined by their ids
      */
-    open func meshCommandSetSwitchState(crownstoneIds: [UInt16], state: Float, intent: UInt8) -> Promise<Void> {
-        let commandPacket = ControlPacketsGenerator.getSwitchStatePacket(state, intent: intent)
+    open func meshCommandSetSwitchState(crownstoneIds: [UInt16], state: Float) -> Promise<Void> {
+        let commandPacket = ControlPacketsGenerator.getSwitchStatePacket(state)
         let payload = MeshCommandPacket(messageType: .control, crownstoneIds: crownstoneIds, payload:commandPacket)
         return self._writeToMesh(channel: .Command, payload: payload.getPacket())
     }

@@ -39,8 +39,8 @@ open class SetupHandler {
                     self.eventBus.emit("setupProgress", 2)
                     self.bleManager.settings.setSessionNonce(nonce)
                     self.bleManager.settings.restoreEncryption()
-                    
                 }
+                .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 3);  return self.setHighTX()}
                 .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 3);  return self.writeCrownstoneId(crownstoneId)}
                 .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 4);  return self.writeAdminKey(adminKey)}
                 .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 5);  return self.writeMemberKey(memberKey)}
@@ -111,6 +111,17 @@ open class SetupHandler {
         }
     }
     
+    
+    open func setHighTX() -> Promise<Void> {
+        LOG.info("setHighTX")
+        let packet = ControlPacket(type: .increase_TX).getPacket()
+        return self.bleManager.writeToCharacteristic(
+            CSServices.SetupService,
+            characteristicId: SetupCharacteristics.Control,
+            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+            type: CBCharacteristicWriteType.withResponse
+        )
+    }
     open func writeCrownstoneId(_ id: UInt16) -> Promise<Void> {
         LOG.info("writeCrownstoneId")
         return self._writeAndVerify(.crownstone_IDENTIFIER, payload: Conversion.uint16_to_uint8_array(id))

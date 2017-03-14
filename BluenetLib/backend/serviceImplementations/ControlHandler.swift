@@ -98,8 +98,8 @@ open class ControlHandler {
      * Switches power intelligently.
      * State has to be between 0 and 1
      */
-    open func setSwitchState(_ state: Float, intent: UInt8) -> Promise<Void> {
-        let packet = ControlPacketsGenerator.getSwitchStatePacket(state, intent: intent)
+    open func setSwitchState(_ state: Float) -> Promise<Void> {
+        let packet = ControlPacketsGenerator.getSwitchStatePacket(state)
         return self._writeControlPacket(packet)
     }
     
