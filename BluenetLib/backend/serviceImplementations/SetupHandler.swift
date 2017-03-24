@@ -16,6 +16,13 @@ open class SetupHandler {
     let eventBus : EventBus!
     var deviceList : [String: AvailableDevice]!
     
+    var unsubscribeNotificationCallback : voidPromiseCallback?
+    
+    var matchPacket : [UInt8] = [UInt8]()
+    var validationResult : (Bool) -> Void = { _ in }
+    var validationComplete = false
+    var step = 0
+    
     init (bleManager:BleManager, eventBus: EventBus, settings: BluenetSettings, deviceList: [String: AvailableDevice]) {
         self.bleManager = bleManager
         self.settings   = settings
@@ -23,10 +30,12 @@ open class SetupHandler {
         self.deviceList = deviceList
     }
     
+    
     /**
      * This will handle the complete setup. We expect bonding has already been done by now.
      */
     open func setup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
+        self.step = 0
         return Promise<Void> { fulfill, reject in
             self.bleManager.settings.disableEncryptionTemporarily()
             self.getSessionKey()
@@ -40,7 +49,8 @@ open class SetupHandler {
                     self.bleManager.settings.setSessionNonce(nonce)
                     self.bleManager.settings.restoreEncryption()
                 }
-                .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 3);  return self.setHighTX()}
+                .then{(_) -> Promise<Void> in return self.setHighTX()}
+                .then{(_) -> Promise<Void> in return self.setupNotifications()}
                 .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 3);  return self.writeCrownstoneId(crownstoneId)}
                 .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 4);  return self.writeAdminKey(adminKey)}
                 .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 5);  return self.writeMemberKey(memberKey)}
@@ -49,8 +59,7 @@ open class SetupHandler {
                 .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 8);  return self.writeIBeaconUUID(ibeaconUUID)}
                 .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 9);  return self.writeIBeaconMajor(ibeaconMajor)}
                 .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 10); return self.writeIBeaconMinor(ibeaconMinor)}
-                .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 11); return self.finalizeSetup()}
-                .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 12); return self.bleManager.disconnect()}
+                .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 11); return self.wrapUp()}
                 .then{(_) -> Void in
                     LOG.info("BLUENET_LIB: Setup Finished")
                     self.eventBus.emit("setupProgress", 13);
@@ -59,12 +68,19 @@ open class SetupHandler {
                 }
                 .catch{(err: Error) -> Void in
                     self.eventBus.emit("setupProgress", 0);
+                    _ = self.clearNotifications()
                     self.bleManager.settings.exitSetup()
                     self.bleManager.settings.restoreEncryption()
                     _ = self.bleManager.disconnect()
                     reject(err)
                 }
         }
+    }
+    
+    func wrapUp() -> Promise<Void> {
+        return self.clearNotifications()
+            .then{(_) -> Promise<Void> in return self.finalizeSetup()}
+            .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 12); return self.bleManager.disconnect()}
     }
     
     open func getSessionKey() -> Promise<[UInt8]> {
@@ -78,7 +94,7 @@ open class SetupHandler {
     }
     
     
-    open func goToDFU() -> Promise<Void> {
+    open func putInDFU() -> Promise<Void> {
         LOG.info("put in DFU during setup.")
         let packet : [UInt8] = [66]
         self.bleManager.settings.disableEncryptionTemporarily()
@@ -165,31 +181,98 @@ open class SetupHandler {
         )
     }
     
+    func setupNotifications() -> Promise<Void> {
+        // use the notification merger to handle the full packet once we have received it.
+        let merger = NotificationMerger(callback: { data -> Void in
+            do {
+                // attempt to decrypt it
+                let decryptedData = try EncryptionHandler.decrypt(Data(data), settings: self.bleManager.settings)
+                if (self._checkMatch(input: decryptedData.bytes, target: self.matchPacket)) {
+                    self.matchPacket = []
+                    self.validationComplete = true
+                    self.validationResult(true)
+                }
+            }
+            catch let err {
+                self.matchPacket = []
+                self.validationComplete = true
+                self.validationResult(false)
+            }
+        })
+        
+        let notificationCallback = {(data: Any) -> Void in
+            if let castData = data as? Data {
+                merger.merge(castData.bytes)
+            }
+        }
+        
+        return self.clearNotifications()
+            .then{ _ in
+                return self.bleManager.enableNotifications(
+                    CSServices.SetupService,
+                    characteristicId: SetupCharacteristics.ConfigRead,
+                    callback: notificationCallback
+                )
+            }
+            .then{ callback -> Void in self.unsubscribeNotificationCallback = callback }
+    }
+    
+    func clearNotifications() -> Promise<Void> {
+        return Promise<Void> { fulfill, reject in
+            if (unsubscribeNotificationCallback != nil) {
+                unsubscribeNotificationCallback!()
+                    .then{ _ -> Void in
+                        self.unsubscribeNotificationCallback = nil
+                        fulfill()
+                }
+            }
+            else {
+                fulfill()
+            }
+        }
+    }
+    
     // MARK : Support functions
     
     func _writeAndVerify(_ type: ConfigurationType, payload: [UInt8], iteration: UInt8 = 0) -> Promise<Void> {
+        self.step += 1
         let initialPacket = WriteConfigPacket(type: type, payloadArray: payload).getPacket()
         return _writeConfigPacket(initialPacket)
-            .then{_ -> Promise<Void> in self.bleManager.waitToWrite(iteration)}
-            .then{_ -> Promise<Void> in
-                let packet = ReadConfigPacket(type: type).getPacket()
-                return self._writeConfigPacket(packet)
-            }
-            .then{_ -> Promise<Void> in self.bleManager.waitToWrite(iteration)}
+            .then{_ -> Promise<Void> in self.bleManager.waitToWrite()}
             .then{_ -> Promise<Bool> in
-                return self._verifyResult(initialPacket)
+                let packet = ReadConfigPacket(type: type).getPacket()
+                // Make sure we first provide the fulfillment function before we ask for the notifications.
+                return Promise<Bool> { fulfill, reject in
+                    self.matchPacket = initialPacket
+                    self.validationResult = fulfill
+                    self.validationComplete = false
+                    let stepId = self.step
+                    
+                    // fallback delay to cancel the wait for incoming notifications.
+                    delay(2*timeoutDurations.waitForWrite, { _ in
+                        if (self.validationComplete == false && self.step == stepId) {
+                            self.validationResult = { _ in }
+                            self.matchPacket = []
+                            fulfill(false)
+                        }
+                    })
+                    self._writeConfigPacket(packet).catch{ err in reject(err) }
+                }
             }
-            .then{match -> Promise<Void> in
+            .then{ match -> Promise<Void> in
                 if (match) {
+                    LOG.info("validated.")
                     return Promise<Void> { fulfill, reject in fulfill() }
                 }
                 else {
                     if (iteration > 2) {
+                        LOG.info("failed.")
                         return Promise<Void> { fulfill, reject in reject(BleError.CANNOT_WRITE_AND_VERIFY) }
                     }
+                    LOG.info("retrying...")
                     return self._writeAndVerify(type, payload:payload, iteration: iteration+1)
                 }
-            }
+        }
     }
     
     func _writeConfigPacket(_ packet: [UInt8]) -> Promise<Void> {
@@ -201,25 +284,22 @@ open class SetupHandler {
         )
     }
     
-    func _verifyResult(_ target: [UInt8]) -> Promise<Bool> {
-        return Promise<Bool> { fulfill, reject in
-            self.bleManager.readCharacteristic(CSServices.SetupService, characteristicId: SetupCharacteristics.ConfigRead)
-                .then{data -> Void in
-                    let prefixLength = 4
-                    let dataLength = Int(Conversion.uint8_array_to_uint16([data[2],data[3]]))
-                    var match = (data.count >= prefixLength + dataLength && target.count >= prefixLength + dataLength)
-                    if (match == true) {
-                        for i in [Int](0...dataLength-1) {
-                            if (data[i+prefixLength] != target[i+prefixLength]){
-                                match = false
-                            }
-                        }
-                    }
-                    fulfill(match)
+    func _checkMatch(input: [UInt8], target: [UInt8]) -> Bool {
+        let prefixLength = 4
+        let dataLength = Int(Conversion.uint8_array_to_uint16([input[2],input[3]]))
+        var match = (input.count >= prefixLength + dataLength && target.count >= prefixLength + dataLength)
+        if (match == true) {
+            for i in [Int](0...dataLength-1) {
+                if (input[i+prefixLength] != target[i+prefixLength]){
+                    match = false
                 }
-                .catch{(error: Error) -> Void in reject(error)}
+            }
         }
+        return match
     }
+    
+    
+    
     
     
 

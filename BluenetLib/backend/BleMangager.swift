@@ -71,6 +71,8 @@ public enum BleError : Error {
     case DFU_ABORTED
     case DFU_ERROR
     case COULD_NOT_FIND_PERIPHERAL
+    
+    case PACKETS_DO_NOT_MATCH
 }
 
 struct timeoutDurations {
@@ -105,6 +107,8 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     
     var uniquenessReference = [String: String]()
     var scanUniqueOnly = false
+    var scanning = false
+    var scanningForServices : [CBUUID]? = nil
 
     public init(eventBus: EventBus) {
         super.init();
@@ -123,7 +127,9 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     }
     
     open func reassignDelegate() {
+        LOG.info("Reassigning Delegate")
         self.centralManager.delegate = self
+        self.restoreScanning()
     }
    
     
@@ -152,13 +158,12 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     }
     
     // this delay is set up for calls that need to write to storage.
-    open func waitToWrite(_ iteration: UInt8?) -> Promise<Void> {
-        if (iteration != nil) {
-            if (iteration! > 0) {
-                LOG.info("BLUENET_LIB: Could not verify immediatly, waiting longer between steps...")
-                return Promise<Void> { fulfill, reject in delay(2 * timeoutDurations.waitForWrite, fulfill) }
-            }
+    open func waitToWrite(_ iteration: UInt8 = 0) -> Promise<Void> {
+        if (iteration > 0) {
+            LOG.info("BLUENET_LIB: Could not verify immediatly, waiting longer between steps...")
+            return Promise<Void> { fulfill, reject in delay(2 * timeoutDurations.waitForWrite, fulfill) }
         }
+        
         return Promise<Void> { fulfill, reject in delay(timeoutDurations.waitForWrite, fulfill) }
     }
 
@@ -594,21 +599,27 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     // MARK: scanning
     
     open func startScanning() {
+        self.scanning = true
         self.scanUniqueOnly = false
+        self.scanningForServices = nil
         
         LOG.info("BLUENET_LIB: start scanning everything")
         centralManager.scanForPeripherals(withServices: nil, options:[CBCentralManagerScanOptionAllowDuplicatesKey: true])
     }
     
     open func startScanningForService(_ serviceUUID: String, uniqueOnly: Bool = false) {
+        self.scanning = true
         self.scanUniqueOnly = uniqueOnly
+        let service = CBUUID(string: serviceUUID)
+        self.scanningForServices = [service]
         
         LOG.info("BLUENET_LIB: start scanning for services \(serviceUUID)")
-        let service = CBUUID(string: serviceUUID)
+        
         centralManager.scanForPeripherals(withServices: [service], options:[CBCentralManagerScanOptionAllowDuplicatesKey: !uniqueOnly])
     }
     
     open func startScanningForServices(_ serviceUUIDs: [String], uniqueOnly: Bool = false) {
+        self.scanning = true
         self.scanUniqueOnly = uniqueOnly
         
         LOG.info("BLUENET_LIB: start scanning for multiple services \(serviceUUIDs)")
@@ -617,14 +628,29 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             services.append(CBUUID(string: service))
         }
         
+        self.scanningForServices = services
         centralManager.scanForPeripherals(withServices: services, options:[CBCentralManagerScanOptionAllowDuplicatesKey: !uniqueOnly])
         
         
     }
     
+
     open func stopScanning() {
+        self.scanning = false
+        self.scanUniqueOnly = false
+        self.scanningForServices = nil
         LOG.info("BLUENET_LIB: stopping scan")
         centralManager.stopScan()
+    }
+    
+    open func restoreScanning() {
+        if (self.scanning == false) {
+            self.stopScanning()
+        }
+        else {
+            centralManager.stopScan()
+            centralManager.scanForPeripherals(withServices: self.scanningForServices, options:[CBCentralManagerScanOptionAllowDuplicatesKey: !self.scanUniqueOnly])
+        }
     }
 
     

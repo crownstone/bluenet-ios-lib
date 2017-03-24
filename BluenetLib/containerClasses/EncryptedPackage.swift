@@ -18,9 +18,13 @@ class EncryptedPackage {
     var payload : [UInt8]?
     
     init(data: Data) throws {
+        let prefixLength = PACKET_NONCE_LENGTH + PACKET_USERLEVEL_LENGTH
+        if (data.count < prefixLength) {
+            throw BleError.INVALID_PACKAGE_FOR_ENCRYPTION_TOO_SHORT
+        }
+        
         nonce = [UInt8](repeating: 0, count: PACKET_NONCE_LENGTH);
         var dataArray = Array(UnsafeBufferPointer(start: (data as NSData).bytes.bindMemory(to: UInt8.self, capacity: data.count), count: data.count))
-        let prefixLength = PACKET_NONCE_LENGTH + PACKET_USERLEVEL_LENGTH
         var payloadData = [UInt8](repeating: 0, count: dataArray.count - prefixLength)
         
         // 20 is the minimal size of a packet (3+1+16)

@@ -17,6 +17,7 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
     var settings : BluenetSettings!
     let eventBus : EventBus!
     var deviceList : [String: AvailableDevice]!
+    var wasScanning = false
     
     fileprivate var dfuController : DFUServiceController?
     var pendingDFUPromiseFulfill : (Void) -> Void = {_ in }
@@ -59,12 +60,12 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
                 return
             }
             
-         
         
             let dfuInitiator = DFUServiceInitiator(centralManager: self.bleManager.centralManager!, target: dfuPeripheral!)
             dfuInitiator.delegate = self
             dfuInitiator.progressDelegate = self
             dfuInitiator.logger = self
+            dfuInitiator.packetReceiptNotificationParameter = 22
             
             // This enables the experimental Buttonless DFU feature from SDK 12.
             // Please, read the field documentation before use.
@@ -115,9 +116,9 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
         data["progress"]    = NSNumber(value: progress)
         data["currentSpeedBytesPerSecond"] = NSNumber(value: currentSpeedBytesPerSecond)
         data["avgSpeedBytesPerSecond"]     = NSNumber(value: avgSpeedBytesPerSecond)
-        self.eventBus.emit("setupProgress", data)
+        self.eventBus.emit("dfuProgress", data)
         
-        LOG.info(String(format: "Part: %d/%d\nSpeed: %.1f KB/s\nAverage Speed: %.1f KB/s", part, totalParts, currentSpeedBytesPerSecond/1024, avgSpeedBytesPerSecond/1024))
+        LOG.info("\(part) out of \(totalParts) so progress \(progress) at a speed of \(currentSpeedBytesPerSecond/1024)")
     }
     
     //MARK: - LoggerDelegate
@@ -136,6 +137,7 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
     }
     
     func fulfillPromise() {
+        print("HERE")
         if (self.promisePending) {
             self.promisePending = false
             self.pendingDFUPromiseFulfill()
