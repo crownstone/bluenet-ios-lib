@@ -305,7 +305,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
      *    Invoked when a region monitoring error has occurred. Error types are defined in "CLError.h".
      */
     open func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error){
-        LOG.error("BLUENET_LIB_NAV: did monitoringDidFailForRegion \(region)  withError: \(error)\n");
+        LOG.error("BLUENET_LIB_NAV: did monitoringDidFailForRegion \(String(describing: region))  withError: \(error)\n");
     }
     
 

@@ -193,7 +193,7 @@ open class SetupHandler {
                     self.validationResult(true)
                 }
             }
-            catch let err {
+            catch _ {
                 self.matchPacket = []
                 self.validationComplete = true
                 self.validationResult(false)
@@ -224,7 +224,8 @@ open class SetupHandler {
                     .then{ _ -> Void in
                         self.unsubscribeNotificationCallback = nil
                         fulfill()
-                }
+                    }
+                    .catch{ _ in }
             }
             else {
                 fulfill()

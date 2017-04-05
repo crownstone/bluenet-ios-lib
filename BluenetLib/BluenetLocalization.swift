@@ -192,7 +192,7 @@ open class BluenetLocalization {
         if let data = ibeaconData as? [iBeaconPacket] {
             // log ibeacon receiving for debugging purposes {
             self.counter += 1
-            LOG.verbose("received iBeacon nr: \(self.counter) classifierState: \(indoorLocalizationEnabled) amountOfBeacons: \(data.count) activeRegionId: \(self.activeGroupId)")
+            LOG.verbose("received iBeacon nr: \(self.counter) classifierState: \(indoorLocalizationEnabled) amountOfBeacons: \(data.count) activeRegionId: \(String(describing: self.activeGroupId))")
             for packet in data {
                 LOG.verbose("received iBeacon DETAIL \(packet.idString) \(packet.rssi) \(packet.referenceId)")
             }
