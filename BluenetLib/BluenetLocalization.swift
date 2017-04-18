@@ -46,6 +46,8 @@ open class BluenetLocalization {
     var activeGroupId : String?
     var activeLocationId : String?
     open var indoorLocalizationEnabled : Bool = false
+    var initializedLocation : Bool = false
+    
     
     // used for debug prints
     var counter : Int64 = 0;
@@ -240,15 +242,13 @@ open class BluenetLocalization {
         if regionId is String {
             LOG.info("REGION EXIT \(regionId)")
             
-            if (self.activeGroupId != nil) {
+            if (self.activeGroupId != nil || self.initializedLocation == false) {
                 self.eventBus.emit("exitRegion", regionId)
             }
+            self.initializedLocation = true
         }
         else {
             LOG.info("REGION EXIT (id not string)")
-            if (self.activeGroupId != nil) {
-                self.eventBus.emit("exitRegion", self.activeGroupId!)
-            }
         }
         self.activeGroupId = nil
         
@@ -265,6 +265,7 @@ open class BluenetLocalization {
             else {
                 self.eventBus.emit("enterRegion", regionString)
             }
+            self.initializedLocation = true
             self.activeGroupId = regionString
             
             LOG.info("REGION ENTER \(regionString)")
