@@ -344,7 +344,9 @@ open class ScanResponcePacket {
                 // parse the data again based on the decrypted result
                 self.parse()
             }
-            catch {}
+            catch let err {
+                print(err)
+            }
         }
         else {
             

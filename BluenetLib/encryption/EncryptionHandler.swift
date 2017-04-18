@@ -54,6 +54,7 @@ open class zeroPadding: Padding {
             let paddedData = data + padding
             return paddedData
         }
+        
         return data
     }
     
@@ -115,8 +116,11 @@ class EncryptionHandler {
             paddedPayload[index+4] = element
         }
         
+        // manually padd the payload since the CryptoSwift version is not working for CTR.
+        let finalPayloadForEncryption = zeroPadding().add(to: paddedPayload, blockSize: 16);
+        
         // do the actual encryption
-        let encryptedPayload = try AES(key: key, iv: IV, blockMode: CryptoSwift.BlockMode.CTR, padding: zeroPadding()).encrypt(paddedPayload)
+        let encryptedPayload = try AES(key: key, iv: IV, blockMode: CryptoSwift.BlockMode.CTR, padding: NoPadding()).encrypt(finalPayloadForEncryption)
         var result = [UInt8](repeating: 0, count: PACKET_NONCE_LENGTH+PACKET_USERLEVEL_LENGTH + encryptedPayload.count)
         
         // copy nonce into result
@@ -137,12 +141,12 @@ class EncryptionHandler {
     }
     
     static func decryptAdvertisement(_ input: [UInt8], key: [UInt8]) throws -> [UInt8] {
-        return try AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: zeroPadding()).decrypt(input)
+        return try AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: NoPadding()).decrypt(input)
     }
     
     static func decryptSessionNonce(_ input: [UInt8], key: [UInt8]) throws -> [UInt8] {
         if (input.count == 16) {
-            let result = try AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: zeroPadding()).decrypt(input)
+            let result = try AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: NoPadding()).decrypt(input)
             let checksum = Conversion.uint8_array_to_uint32(result)
             if (checksum == CHECKSUM) {
                 return [result[4], result[5], result[6], result[7], result[8]]

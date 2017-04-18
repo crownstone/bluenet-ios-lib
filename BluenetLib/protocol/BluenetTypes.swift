@@ -95,14 +95,16 @@ enum MeshHandle : UInt8 {
 }
 
 enum StateType : UInt8 {
-    case reset_COUNTER = 0
-    case switch_STATE
-    case accumulated_ENERGY
-    case power_USAGE
-    case tracked_DEVICES
-    case schedule
-    case operation_MODE
-    case temperature
+    case reset_COUNTER = 128
+    case switch_STATE = 129
+    case accumulated_ENERGY = 130
+    case power_USAGE = 131
+    case tracked_DEVICES = 132
+    case schedule = 133
+    case operation_MODE = 134
+    case temperature = 135
+    case time = 136
+    case error_BITMASK = 139
 }
 
 enum OpCode : UInt8 {

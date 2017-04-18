@@ -124,6 +124,33 @@ open class ControlHandler {
     }
     
     
+    /**
+     * This method will ask the current switch state and listen to the notification response. 
+     * It will then switch the crownstone. If it was > 0 --> 0 if it was 0 --> 1.
+     **/
+    open func toggleSwitchState() -> Promise<Void> {
+        return Promise<Void> { fulfill, reject in
+            let writeCommand : voidPromiseCallback = { _ in
+                return self.bleManager.writeToCharacteristic(
+                    CSServices.CrownstoneService,
+                    characteristicId: CrownstoneCharacteristics.StateControl,
+                    data: NotificationStatePacket(type: .switch_STATE).getNSData(),
+                    type: CBCharacteristicWriteType.withResponse);
+            }
+            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.StateRead, writeCommand: writeCommand)
+                .then{ data -> Promise<Void> in
+                    let currentSwitchState = data[4];
+                    var newSwitchState : Float = 0;
+                    if (currentSwitchState == 0) {
+                        newSwitchState = 1.0
+                    }
+                    return self.setSwitchState(newSwitchState)
+                }
+                .then{ _ in fulfill() }
+                .catch{ err in reject(err) }
+        }
+    }
+    
     open func switchPWM(_ state: Float) -> Promise<Void> {
         LOG.info("BLUENET_LIB: switching PWM to \(state)")
         return self._writeControlPacket(ControlPacketsGenerator.getPwmSwitchPacket(state))

@@ -596,6 +596,48 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         }
     }
     
+    
+    open func setupSingleNotification(_ serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback) -> Promise<[UInt8]> {
+        return Promise<[UInt8]> { fulfill, reject in
+            var unsubscribe : voidPromiseCallback? = nil
+            var collectedData = [UInt8]();
+            
+            // use the notification merger to handle the full packet once we have received it.
+            let merger = NotificationMerger(callback: { data -> Void in
+                if (self.settings.isEncryptionEnabled()) {
+                    do {
+                        // attempt to decrypt it
+                        let decryptedData = try EncryptionHandler.decrypt(Data(data), settings: self.settings)
+                        collectedData = decryptedData.bytes;
+                    }
+                    catch _ {
+                        print("Error decrypting single notification!")
+                    }
+                }
+                else {
+                    collectedData = data
+                }
+                unsubscribe!()
+                    .then{ _  in fulfill(collectedData) }
+                    .catch{ err in reject(err) }
+            })
+            
+            
+            let notificationCallback = {(data: Any) -> Void in
+                if let castData = data as? Data {
+                    merger.merge(castData.bytes)
+                }
+            }
+            
+            self.enableNotifications(serviceId, characteristicId: characteristicId, callback: notificationCallback)
+                .then{ unsub -> Promise<Void> in
+                    unsubscribe = unsub
+                    return writeCommand()
+                }
+                .catch{ err in reject(err) }
+        }
+    }
+    
     // MARK: scanning
     
     open func startScanning() {
