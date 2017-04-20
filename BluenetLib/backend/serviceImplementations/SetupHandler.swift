@@ -31,11 +31,7 @@ open class SetupHandler {
     }
     
     
-    /**
-     * This will handle the complete setup. We expect bonding has already been done by now.
-     */
-    open func setup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
-        self.step = 0
+    func handleSetupPhaseEncryption() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             self.bleManager.settings.disableEncryptionTemporarily()
             self.getSessionKey()
@@ -44,11 +40,26 @@ open class SetupHandler {
                     self.bleManager.settings.loadSetupKey(key)
                     return self.getSessionNonce()
                 }
-                .then{(nonce: [UInt8]) ->  Void in
+                .then{(nonce: [UInt8]) -> Void in
                     self.eventBus.emit("setupProgress", 2)
                     self.bleManager.settings.setSessionNonce(nonce)
                     self.bleManager.settings.restoreEncryption()
+                    fulfill()
                 }
+                .catch{(err: Error) -> Void in
+                    self.bleManager.settings.restoreEncryption()
+                    reject(err)
+            }
+        }
+    }
+    
+    /**
+     * This will handle the complete setup. We expect bonding has already been done by now.
+     */
+    open func setup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
+        self.step = 0
+        return Promise<Void> { fulfill, reject in
+            self.handleSetupPhaseEncryption()
                 .then{(_) -> Promise<Void> in return self.setHighTX()}
                 .then{(_) -> Promise<Void> in return self.setupNotifications()}
                 .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 3);  return self.writeCrownstoneId(crownstoneId)}
@@ -76,6 +87,8 @@ open class SetupHandler {
                 }
         }
     }
+    
+    
     
     func wrapUp() -> Promise<Void> {
         return self.clearNotifications()
@@ -127,6 +140,27 @@ open class SetupHandler {
         }
     }
     
+    
+    /**
+     * This will handle the factory reset during setup mode.
+     */
+    open func factoryReset() -> Promise<Void> {
+        return self.handleSetupPhaseEncryption()
+            .then{(_) -> Promise<Void> in return self._factoryReset() }
+            .then{(_) -> Void in _ = self.bleManager.disconnect() }
+    }
+
+    
+    open func _factoryReset() -> Promise<Void> {
+        LOG.info("factoryReset in setup")
+        let packet = ControlPacket(type: .factory_RESET).getPacket()
+        return self.bleManager.writeToCharacteristic(
+            CSServices.SetupService,
+            characteristicId: SetupCharacteristics.Control,
+            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+            type: CBCharacteristicWriteType.withResponse
+        )
+    }
     
     open func setHighTX() -> Promise<Void> {
         LOG.info("setHighTX")

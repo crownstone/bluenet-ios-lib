@@ -81,14 +81,16 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
     
     public func dfuStateDidChange(to state: DFUState) {
         if (self.promisePending) {
-            
             switch state {
             case .disconnecting:
+                self.eventBus.emit("dfuStateDidChange", "disconnecting")
                 print("disconnecting")
             case .completed:
+                self.eventBus.emit("dfuStateDidChange", "completed")
                 self.fulfillPromise()
                 print("completed")
             case .aborted:
+                self.eventBus.emit("dfuStateDidChange", "aborted")
                 self.rejectPromise(BleError.DFU_ABORTED)
                 print("aborted")
             default:
@@ -102,6 +104,7 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
     
     public func dfuError(_ error: DFUError, didOccurWithMessage message: String) {
         LOG.error("Error \(error.rawValue): \(message)")
+        self.eventBus.emit("dfuError", "\(error.rawValue): \(message)")
         self.rejectPromise(BleError.DFU_ERROR)
     }
     
@@ -137,7 +140,6 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
     }
     
     func fulfillPromise() {
-        print("HERE")
         if (self.promisePending) {
             self.promisePending = false
             self.pendingDFUPromiseFulfill()
