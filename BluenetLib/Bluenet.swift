@@ -44,6 +44,7 @@ open class Bluenet  {
     let eventBus : EventBus!
     var deviceList = [String: AvailableDevice]()
     var setupList = [String: NearestItem]()
+    var dfuList = [String: NearestItem]()
 
     // declare the classes handling the library protocol
     open let dfu      : DfuHandler!
@@ -66,6 +67,9 @@ open class Bluenet  {
         self.eventBus   = EventBus()
         self.bleManager = BleManager(eventBus: self.eventBus)
         
+        // give the BLE manager a reference to the settings.
+        self.bleManager.setSettings(settings)
+        
         // pass on the shared objects to the worker classes
         self.dfu     = DfuHandler(     bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.config  = ConfigHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
@@ -84,12 +88,14 @@ open class Bluenet  {
      * Load a settings object into Bluenet
      */
     open func setSettings(encryptionEnabled: Bool, adminKey: String?, memberKey: String?, guestKey: String?, referenceId: String) {
-        let settings = BluenetSettings(encryptionEnabled: encryptionEnabled, adminKey: adminKey, memberKey: memberKey, guestKey: guestKey, referenceId: referenceId)
-        self.settings = settings
-        self.bleManager.setSettings(settings)
+        self.settings.loadKeys(
+            encryptionEnabled: encryptionEnabled,
+            adminKey: adminKey,
+            memberKey: memberKey,
+            guestKey: guestKey,
+            referenceId: referenceId
+        )
     }
-    
-    
     
     
     /**
@@ -291,6 +297,18 @@ open class Bluenet  {
                             
                             self._emitNearestSetupCrownstone()
                         }
+                        else if (castData.isDFUPackage()) {
+                            // log debug for nearest setup
+                            LOG.debug("received DFUadvertisement nr: \(self.counter)")
+                            
+                            
+                            self.dfuList[castData.handle] = NearestItem(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue, setupMode: true)
+                            // log debug for nearest setup
+                            LOG.debug("received nearestSetupCrownstone nr: \(self.counter)")
+                            
+                            self._emitNearestDFUCrownstone()
+
+                        }
                         else {
                             // handling normal packages, we emit nearest Crownstone (since verifieds are also Crownstones) and verified nearest.
                             self._emitNearestCrownstone(topic: "nearestCrownstone", verifiedOnly: false);
@@ -330,6 +348,25 @@ open class Bluenet  {
         if (nearestHandle != "" && nearestRSSI < 0) {
             let data = NearestItem(name: nearestName, handle: nearestHandle, rssi: nearestRSSI, setupMode: true)
             self.eventBus.emit("nearestSetupCrownstone", data)
+        }
+    }
+    
+    // TODO: can be optimized so it does not use a loop.
+    // TODO: move this logic into a specific container class instead of the setupList dictionary
+    func _emitNearestDFUCrownstone() {
+        var nearestRSSI = -1000
+        var nearestHandle = ""
+        var nearestName = ""
+        for (_ , nearestItem) in self.dfuList {
+            if (nearestItem.rssi > nearestRSSI) {
+                nearestRSSI = nearestItem.rssi
+                nearestHandle = nearestItem.handle
+                nearestName = nearestItem.name
+            }
+        }
+        if (nearestHandle != "" && nearestRSSI < 0) {
+            let data = NearestItem(name: nearestName, handle: nearestHandle, rssi: nearestRSSI, dfuMode: true)
+            self.eventBus.emit("nearestDFUCrownstone", data)
         }
     }
     

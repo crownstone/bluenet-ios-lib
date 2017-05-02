@@ -199,7 +199,6 @@ open class BluenetLocalization {
                 LOG.verbose("received iBeacon DETAIL \(packet.idString) \(packet.rssi) \(packet.referenceId)")
             }
             
-            
             if (self.activeGroupId != nil) {
                 // if we have data in this payload.
                 if (data.count > 0 && self.classifier != nil && self.indoorLocalizationEnabled) {

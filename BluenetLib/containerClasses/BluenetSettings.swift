@@ -24,7 +24,7 @@ open class BluenetSettings {
     
     init() {}
     
-    public init(encryptionEnabled: Bool, adminKey: String?, memberKey: String?, guestKey: String?, referenceId: String) {
+    public func loadKeys(encryptionEnabled: Bool, adminKey: String?, memberKey: String?, guestKey: String?, referenceId: String) {
         self.encryptionEnabled = encryptionEnabled
         self.referenceId = referenceId
         
