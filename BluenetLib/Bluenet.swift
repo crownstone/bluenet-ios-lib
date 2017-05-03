@@ -116,7 +116,8 @@ open class Bluenet  {
         self.startScanningForServices([
             CrownstoneBuiltinAdvertisementServiceUUID,
             CrownstonePlugAdvertisementServiceUUID,
-            GuidestoneAdvertisementServiceUUID
+            GuidestoneAdvertisementServiceUUID,
+            DFUServiceUUID
         ])
     }
     
@@ -131,7 +132,8 @@ open class Bluenet  {
         self.startScanningForServicesUniqueOnly([
             CrownstoneBuiltinAdvertisementServiceUUID,
             CrownstonePlugAdvertisementServiceUUID,
-            GuidestoneAdvertisementServiceUUID
+            GuidestoneAdvertisementServiceUUID,
+            DFUServiceUUID
         ])
     }
     
@@ -302,7 +304,7 @@ open class Bluenet  {
                             LOG.debug("received DFUadvertisement nr: \(self.counter)")
                             
                             
-                            self.dfuList[castData.handle] = NearestItem(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue, setupMode: true)
+                            self.dfuList[castData.handle] = NearestItem(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue, dfuMode: true)
                             // log debug for nearest setup
                             LOG.debug("received nearestSetupCrownstone nr: \(self.counter)")
                             

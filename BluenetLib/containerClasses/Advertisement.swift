@@ -24,6 +24,7 @@ open class Advertisement {
     open var isCrownstonePlug    : Bool = false
     open var isCrownstoneBuiltin : Bool = false
     open var isGuidestone        : Bool = false
+    open var isInDFUMode         : Bool = false
     
     open var serviceData = [String: [UInt8]]()
     open var serviceDataAvailable : Bool
@@ -45,6 +46,7 @@ open class Advertisement {
 
         if let castData = serviceUUID as? [CBUUID] {
             self.serviceUUID = castData[0].uuidString // assuming only one service data uuid
+            self.isInDFUMode = self.serviceUUID == DFUServiceUUID
         }
         
         if let castData = serviceData as? [CBUUID: Data] {
@@ -114,7 +116,8 @@ open class Advertisement {
         dataDict["isCrownstonePlug"]    = self.isCrownstonePlug
         dataDict["isCrownstoneBuiltin"] = self.isCrownstoneBuiltin
         dataDict["isGuidestone"]        = self.isGuidestone
-        dataDict["referenceId"]        = self.referenceId
+        dataDict["isInDFUMode"]         = self.isInDFUMode
+        dataDict["referenceId"]         = self.referenceId
         
         if (self.serviceUUID != nil) {
             dataDict["serviceUUID"] = self.serviceUUID
@@ -142,7 +145,8 @@ open class Advertisement {
             "isCrownstonePlug"     : self.isCrownstonePlug,
             "isCrownstoneBuiltin"  : self.isCrownstoneBuiltin,
             "isGuidestone"         : self.isGuidestone,
-            "referenceId"         : self.referenceId
+            "isInDFUMode"          : self.isInDFUMode,
+            "referenceId"          : self.referenceId
         ]
         
         if (self.serviceUUID != nil) {
@@ -174,10 +178,7 @@ open class Advertisement {
     }
     
     open func isDFUPackage() -> Bool {
-        if (serviceDataAvailable && self.scanResponse != nil) {
-            return self.scanResponse!.isDFUPackage()
-        }
-        return false
+        return self.isInDFUMode
     }
     
     open func hasScanResponse() -> Bool {
@@ -205,7 +206,6 @@ open class ScanResponcePacket {
     open var random              : String = ""
     open var newDataAvailable    : Bool   = false
     open var setupFlag           : Bool   = false
-    open var dfuMode             : Bool   = false
     open var stateOfExternalCrownstone : Bool = false
     open var data                : [UInt8]!
     
@@ -251,8 +251,7 @@ open class ScanResponcePacket {
             newDataAvailable = bitmaskArray[0]
             stateOfExternalCrownstone = bitmaskArray[1]
             setupFlag = bitmaskArray[7]
-        
-            dfuMode = false
+   
             validData = true
         }
         else {
@@ -278,7 +277,6 @@ open class ScanResponcePacket {
         returnDict["newDataAvailable"] = NSNumber(value: self.newDataAvailable)
         returnDict["stateOfExternalCrownstone"] = NSNumber(value: self.stateOfExternalCrownstone)
         returnDict["setupMode"] = NSNumber(value: self.isSetupPackage())
-        returnDict["dfuMode"] = NSNumber(value: self.isDFUPackage())
         
         // random flag:
         var dataJSON = JSON(returnDict)
@@ -299,7 +297,6 @@ open class ScanResponcePacket {
             "newDataAvailable" : self.newDataAvailable,
             "stateOfExternalCrownstone" : self.stateOfExternalCrownstone,
             "setupMode" : self.isSetupPackage(),
-            "dfuMode" : self.isDFUPackage(),
             "random" : self.random
         ]
         
@@ -319,11 +316,6 @@ open class ScanResponcePacket {
             return true
         }
         
-        return false
-    }
-    
-    open func isDFUPackage() -> Bool {
-        // TODO: define.
         return false
     }
     

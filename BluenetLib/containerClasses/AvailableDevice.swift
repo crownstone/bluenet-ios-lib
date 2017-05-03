@@ -67,7 +67,14 @@ open class AvailableDevice {
         
         self.rssiHistory[self.lastUpdate] = self.rssi;
         
-        self.verify(data.scanResponse)
+        if (data.isInDFUMode == true) {
+            self.verified = true;
+            self.consecutiveMatches = 0
+        }
+        else {
+            self.verify(data.scanResponse)
+        }
+        
         self.calculateRssiAverage()
         
         delay(self.timeout, {_ in self.checkTimeout(updatetime)});
@@ -79,10 +86,6 @@ open class AvailableDevice {
     func verify(_ data: ScanResponcePacket?) {
         if let response = data {
             if (response.isSetupPackage()) {
-                self.verified = true
-                self.consecutiveMatches = 0
-            }
-            else if (response.isDFUPackage()) {
                 self.verified = true
                 self.consecutiveMatches = 0
             }
