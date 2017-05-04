@@ -53,7 +53,7 @@ open class Conversion {
             dataCopy.append(byte)
         }
         dataCopy.append(0)
-        return String(cString: data)
+        return String(cString: dataCopy)
     }
     
     open static func uint8_array_to_hex_string(_ data: [UInt8]) -> String {
