@@ -128,8 +128,9 @@ open class ControlHandler {
      * This method will ask the current switch state and listen to the notification response. 
      * It will then switch the crownstone. If it was > 0 --> 0 if it was 0 --> 1.
      **/
-    open func toggleSwitchState() -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
+    open func toggleSwitchState() -> Promise<Float> {
+        return Promise<Float> { fulfill, reject in
+            var newSwitchStateSend : Float = 0
             let writeCommand : voidPromiseCallback = { _ in
                 return self.bleManager.writeToCharacteristic(
                     CSServices.CrownstoneService,
@@ -144,9 +145,10 @@ open class ControlHandler {
                     if (currentSwitchState == 0) {
                         newSwitchState = 1.0
                     }
+                    newSwitchStateSend = newSwitchState
                     return self.setSwitchState(newSwitchState)
                 }
-                .then{ _ in fulfill() }
+                .then{ _ in fulfill(newSwitchStateSend) }
                 .catch{ err in reject(err) }
         }
     }

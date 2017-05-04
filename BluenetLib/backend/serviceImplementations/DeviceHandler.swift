@@ -32,7 +32,9 @@ open class DeviceHandler {
      */
     open func getFirmwareRevision() -> Promise<String> {
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.DeviceInformation, characteristic: DeviceCharacteristics.FirmwareRevision)
-            .then{ data -> Promise<String> in return Promise<String>{fulfill, reject in fulfill(Conversion.uint8_array_to_string(data)) }}
+            .then{ data -> Promise<String> in
+                return Promise<String>{fulfill, reject in fulfill(Conversion.uint8_array_to_string(data))
+            }}
     }
     
     /**
@@ -61,7 +63,9 @@ open class DeviceHandler {
      */
     open func getHardwareRevision() -> Promise<String> {
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.DeviceInformation, characteristic: DeviceCharacteristics.HardwareRevision)
-            .then{ data -> Promise<String> in return Promise<String>{fulfill, reject in fulfill(Conversion.uint8_array_to_string(data)) }}
+            .then{ data -> Promise<String> in
+                return Promise<String>{fulfill, reject in fulfill(Conversion.uint8_array_to_string(data))
+            }}
     }
 
     

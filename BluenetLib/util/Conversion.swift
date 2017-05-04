@@ -48,6 +48,11 @@ open class Conversion {
 
     
     open static func uint8_array_to_string(_ data: [UInt8]) -> String {
+        var dataCopy = [UInt8]()
+        for byte in data {
+            dataCopy.append(byte)
+        }
+        dataCopy.append(0)
         return String(cString: data)
     }
     
