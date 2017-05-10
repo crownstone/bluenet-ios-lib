@@ -84,20 +84,20 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
             switch state {
             case .disconnecting:
                 self.eventBus.emit("dfuStateDidChange", "disconnecting")
-                print("disconnecting")
+                LOG.verbose("DFU: disconnecting")
             case .completed:
                 self.eventBus.emit("dfuStateDidChange", "completed")
                 self.fulfillPromise()
-                print("completed")
+                LOG.verbose("DFU: completed")
             case .aborted:
                 self.eventBus.emit("dfuStateDidChange", "aborted")
                 self.rejectPromise(BleError.DFU_ABORTED)
-                print("aborted")
+                LOG.verbose("DFU: aborted")
             default:
-                print("default")
+                LOG.verbose("DFU: default")
             }
             
-            print("Changed state to: \(state.description())")
+            LOG.verbose("DFU: Changed state to: \(state.description())")
 
         }
     }
@@ -107,6 +107,68 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
         self.eventBus.emit("dfuError", "\(error.rawValue): \(message)")
         self.rejectPromise(BleError.DFU_ERROR)
     }
+    
+    public func bootloaderToNormalMode(uuid: String) -> Promise<Void> {
+        var cleanup : voidPromiseCallback?
+        self.bleManager.settings.disableEncryptionTemporarily()
+        var success = false
+        return Promise<Void> { fulfill, reject in
+            self.bleManager.isReady() // first check if the bluenet lib is ready before using it for BLE things.
+                .then {(_) -> Promise<Void> in return self.bleManager.connect(uuid)}
+                .then {(_) -> Promise<voidPromiseCallback> in return self.setupNotifications()}
+                .then {cleanupCallback -> Promise<Void> in
+                    cleanup = cleanupCallback
+                    return self._writeResetCommand()
+                }
+                .then {(_) -> Promise<Void> in
+                    success = true
+                    self.bleManager.settings.restoreEncryption()
+                    return cleanup!()
+                }
+                .then {(_) -> Promise<Void> in
+                    cleanup = nil
+                    return self.bleManager.disconnect()
+                }
+                .then {(_) -> Void in fulfill()}
+                .catch {(err) -> Void in
+                    self.bleManager.settings.restoreEncryption()
+                    if (cleanup != nil) {
+                        _ = cleanup!()
+                    }
+                    self.bleManager.disconnect()
+                        .then{_ -> Void in
+                            if (success) { fulfill() }
+                            else { reject(err) }
+                        }
+                        .catch{_ in
+                            if (success) { fulfill() }
+                            else { reject(err) }
+                        }
+            }
+        }
+    }
+    
+    func _writeResetCommand() -> Promise<Void> {
+        let packet : [UInt8] = [0x06]
+        LOG.info("BLUENET_LIB: Writing DFU reset command. \(packet)")
+        return self.bleManager.writeToCharacteristic(
+            DFUServices.DFU,
+            characteristicId: DFUCharacteristics.ControlPoint,
+            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+            type: CBCharacteristicWriteType.withResponse
+        )
+    }
+    
+    func setupNotifications() -> Promise<voidPromiseCallback> {
+        print("Setting up notifications")
+        let notificationCallback = {(data: Any) -> Void in }
+        return self.bleManager.enableNotifications(
+            DFUServices.DFU,
+            characteristicId: DFUCharacteristics.ControlPoint,
+            callback: notificationCallback
+        )
+    }
+    
     
     //MARK: - DFUProgressDelegate
     

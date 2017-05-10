@@ -337,7 +337,7 @@ open class ScanResponcePacket {
                 self.parse()
             }
             catch let err {
-                print(err)
+                LOG.error("Could not decrypt advertisement \(err)")
             }
         }
         else {

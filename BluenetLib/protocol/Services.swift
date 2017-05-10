@@ -33,5 +33,5 @@ public struct CSServices {
 }
 
 public struct DFUServices {
-    public static let DFU   = "00001530-1212-efde-1523-785feabcd123"
+    public static let DFU = DFUServiceUUID
 }

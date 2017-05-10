@@ -11,9 +11,8 @@ import Foundation
 open class EventBus {
     init() {}
     
-    var idCounter : Int = 0
-    var subscribers = [Int:    String]()
-    var topics      = [String: [Int: eventCallback]]()
+    var subscribers = [String: String]()
+    var topics      = [String: [String: eventCallback]]()
     
     func emit(_ topic: String, _ data: Any) {
         if (self.topics[topic] != nil) {
@@ -25,7 +24,7 @@ open class EventBus {
     
     func on(_ topic: String, _ callback: @escaping (_ notification: Any) -> Void) -> voidCallback {
         if (self.topics[topic] == nil) {
-            self.topics[topic] = [Int: eventCallback]()
+            self.topics[topic] = [String: eventCallback]()
         }
         let id = self._getId()
 
@@ -37,22 +36,19 @@ open class EventBus {
         }
     }
     
-   
-    
-    
     func hasListeners(_ topic: String) -> Bool {
         return (self.topics[topic] != nil)
     }
     
     func reset() {
-        self.topics = [String: [Int: eventCallback]]()
-        self.subscribers = [Int: String]()
+        self.topics = [String: [String: eventCallback]]()
+        self.subscribers = [String: String]()
     }
     
     
     // MARK: Util
     
-    func _off(_ id: Int) {
+    func _off(_ id: String) {
         if (self.subscribers[id] != nil) {
             let topic = self.subscribers[id]!;
             if (self.topics[topic] != nil) {
@@ -70,8 +66,7 @@ open class EventBus {
         }
     }
     
-    func _getId() -> Int {
-        self.idCounter += 1
-        return self.idCounter
+    func _getId() -> String {
+        return "\(UInt32(arc4random_uniform(UInt32(INT_MAX))))-\(UInt32(arc4random_uniform(UInt32(INT_MAX))))-\(UInt32(arc4random_uniform(UInt32(INT_MAX))))"
     }
 }

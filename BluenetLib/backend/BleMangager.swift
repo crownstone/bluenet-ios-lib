@@ -103,6 +103,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     var BleState : CBCentralManagerState = .unknown
     var pendingPromise : promiseContainer!
     var eventBus : EventBus!
+    var notificationEventBus : EventBus!
     open var settings : BluenetSettings!
     
     var uniquenessReference = [String: String]()
@@ -113,6 +114,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     public init(eventBus: EventBus) {
         super.init();
         
+        self.notificationEventBus = EventBus()
         self.settings = BluenetSettings()
         self.eventBus = eventBus
         // TODO: Make restoration optional.
@@ -292,7 +294,6 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     
     /**
      *  Disconnect from the connected BLE device
-     *
      */
     open func disconnect() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
@@ -531,8 +532,8 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         var unsubscribeCallback : voidCallback? = nil
         return Promise<voidPromiseCallback> { fulfill, reject in
             // if there is already a listener on this topic, we assume notifications are already enabled. We just add another listener
-            if (self.eventBus.hasListeners(serviceId + "_" + characteristicId)) {
-                unsubscribeCallback = self.eventBus.on(serviceId + "_" + characteristicId, callback)
+            if (self.notificationEventBus.hasListeners(serviceId + "_" + characteristicId)) {
+                unsubscribeCallback = self.notificationEventBus.on(serviceId + "_" + characteristicId, callback)
                 
                 // create the cleanup callback and return it.
                 let cleanupCallback : voidPromiseCallback = { _ in
@@ -545,7 +546,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                 self.getChacteristic(serviceId, characteristicId)
                     // then we subscribe to the feed before we know it works to miss no data.
                     .then{(characteristic: CBCharacteristic) -> Promise<Void> in
-                        unsubscribeCallback = self.eventBus.on(characteristic.service.uuid.uuidString + "_" + characteristic.uuid.uuidString, callback)
+                        unsubscribeCallback = self.notificationEventBus.on(characteristic.service.uuid.uuidString + "_" + characteristic.uuid.uuidString, callback)
                         
                         // we now tell the device to notify us.
                         return Promise<Void> { success, failure in
@@ -576,7 +577,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             unsubscribeCallback()
             
             // if there are still other callbacks listening, we're done!
-            if (self.eventBus.hasListeners(serviceId + "_" + characteristicId)) {
+            if (self.notificationEventBus.hasListeners(serviceId + "_" + characteristicId)) {
                 fulfill()
             }
             else {
@@ -597,6 +598,10 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     }
     
     
+    /**
+     * This will just subscribe for a single notification and clean up after itself. 
+     * The merged, finalized reply to the write command will be in the fulfill of this promise.
+     */
     open func setupSingleNotification(_ serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback) -> Promise<[UInt8]> {
         return Promise<[UInt8]> { fulfill, reject in
             var unsubscribe : voidPromiseCallback? = nil
@@ -611,7 +616,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                         collectedData = decryptedData.bytes;
                     }
                     catch _ {
-                        print("Error decrypting single notification!")
+                        LOG.error("Error decrypting single notification!")
                     }
                 }
                 else {
@@ -803,6 +808,8 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         self.connectingPeripheral = nil;
         self.connectedPeripheral = nil;
         self.settings.invalidateSessionNonce()
+        
+        self.notificationEventBus.reset()
         
         LOG.info("BLUENET_LIB: in didDisconnectPeripheral")
         if (pendingPromise.type == .CANCEL_PENDING_CONNECTION) {

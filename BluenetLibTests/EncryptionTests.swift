@@ -17,8 +17,9 @@ class EncryptionTests: XCTestCase {
         super.setUp()
         
         // Put setup code here. This method is called before the invocation of each test method in the class.
-        settings = BluenetSettings(encryptionEnabled: true, adminKey: "AdminKeyOf16Byte", memberKey: "MemberKeyOf16Byt", guestKey: "GuestKeyOf16Byte", referenceId: "test")
-
+        settings = BluenetSettings()
+        settings.loadKeys(encryptionEnabled: true, adminKey: "AdminKeyOf16Byte", memberKey: "MemberKeyOf16Byt", guestKey: "GuestKeyOf16Byte", referenceId: "test")
+        
         BLUENET_ENCRYPTION_TESTING = true
         
     }
@@ -91,7 +92,7 @@ class EncryptionTests: XCTestCase {
         settings.setSessionNonce([64,64,64,64,64])
         settings.adminKey = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
         let payloadData = Data(payload)
-        let data = try! EncryptionHandler.encrypt(payloadData, settings: settings)
+        _ = try! EncryptionHandler.encrypt(payloadData, settings: settings)
         
 
         print(Conversion.uint32_to_uint8_array(0xcafebabe))
@@ -103,7 +104,7 @@ class EncryptionTests: XCTestCase {
         let payload : [UInt8] = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]
         settings.adminKey = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
         let payloadData = Data(bytes: payload)
-        let data = try! EncryptionHandler.encrypt(payloadData, settings: settings)
+        _ = try! EncryptionHandler.encrypt(payloadData, settings: settings)
 
     }
     
