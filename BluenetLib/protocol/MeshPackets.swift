@@ -64,19 +64,22 @@ class StoneKeepAlivePacket {
 
 class MeshKeepAlivePacket {
     var timeout : UInt16 = 0
-    var size    : UInt8  = 0
+    var numberOfItems : UInt8  = 0
+    var reserved : [UInt8]!
     var packets : [StoneKeepAlivePacket]!
     
     init(timeout: UInt16, packets: [StoneKeepAlivePacket]) {
         self.timeout = timeout
-        self.size = NSNumber(value: packets.count).uint8Value
+        self.numberOfItems = NSNumber(value: packets.count).uint8Value
+        self.reserved = [0,0]
         self.packets = packets
     }
     
     func getPacket() -> [UInt8] {
         var arr = [UInt8]()
         arr += Conversion.uint16_to_uint8_array(self.timeout)
-        arr.append(self.size)
+        arr.append(self.numberOfItems)
+        arr += self.reserved
         for packet in self.packets {
             arr += packet.getPacket()
         }
@@ -149,17 +152,19 @@ class StoneSwitchPacket {
 
 
 class MeshSwitchPacket {
-    var size : UInt8
+    var numberOfItems : UInt8
+    var reserved : UInt8 = 0
     var packets : [StoneSwitchPacket]!
     
     init(packets: [StoneSwitchPacket]) {
-        self.size = NSNumber(value: packets.count).uint8Value
+        self.numberOfItems = NSNumber(value: packets.count).uint8Value
         self.packets = packets
     }
     
     func getPacket() -> [UInt8] {
         var arr = [UInt8]()
-        arr.append(self.size)
+        arr.append(self.numberOfItems)
+        arr.append(self.reserved)
         for packet in self.packets {
             arr += packet.getPacket()
         }
