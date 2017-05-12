@@ -891,10 +891,10 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         let serviceId = characteristic.service.uuid.uuidString
         let characteristicId = characteristic.uuid.uuidString
         let topicString = serviceId + "_" + characteristicId
-        if (self.eventBus.hasListeners(topicString)) {
+        if (self.notificationEventBus.hasListeners(topicString)) {
             if let data = characteristic.value {
                 // notifications are a chopped up encrypted message. We leave decryption for the handling methods.
-                self.eventBus.emit(topicString, data)
+                self.notificationEventBus.emit(topicString, data)
             }
         }
         

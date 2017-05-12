@@ -224,6 +224,7 @@ open class SetupHandler {
                 if (self._checkMatch(input: decryptedData.bytes, target: self.matchPacket)) {
                     self.matchPacket = []
                     self.validationComplete = true
+                    
                     self.validationResult(true)
                 }
             }
@@ -291,6 +292,7 @@ open class SetupHandler {
                             fulfill(false)
                         }
                     })
+                    
                     self._writeConfigPacket(packet).catch{ err in reject(err) }
                 }
             }
