@@ -42,48 +42,60 @@ class promiseContainer {
     fileprivate var _fulfillCharacteristicPromise   : (CBCharacteristic) -> Void    = {_ in }
     fileprivate var _fulfillDataPromise             : ([UInt8]) -> Void    = {_ in }
     fileprivate var _rejectPromise                  : (Error) -> Void           = {_ in }
+    fileprivate var rejectId : String = ""
     var type = RequestType.NONE
     var promiseType = PromiseType.NONE
     var completed = false
+    var loadedPromise = false
     
-    init(_ fulfill: @escaping (Void) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
+    func load(_ fulfill: @escaping (Void) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
+        _cancelAnyPreviousPromise(newPromiseType: type)
         _fulfillVoidPromise = fulfill
         promiseType = .VOID
         initShared(reject, type)
     }
     
-    init(_ fulfill: @escaping (Int) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
+    func load(_ fulfill: @escaping (Int) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
+        _cancelAnyPreviousPromise(newPromiseType: type)
         _fulfillIntPromise = fulfill
         promiseType = .INT
         initShared(reject, type)
     }
     
-    init(_ fulfill: @escaping ([CBService]) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
+    func load(_ fulfill: @escaping ([CBService]) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
+        _cancelAnyPreviousPromise(newPromiseType: type)
         _fulfillServiceListPromise = fulfill
         promiseType = .SERVICELIST
         initShared(reject, type)
     }
     
-    init(_ fulfill: @escaping ([CBCharacteristic]) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
+    func load(_ fulfill: @escaping ([CBCharacteristic]) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
+        _cancelAnyPreviousPromise(newPromiseType: type)
         _fulfillCharacteristicListPromise = fulfill
         promiseType = .CHARACTERISTICLIST
         initShared(reject, type)
     }
     
-    init(_ fulfill: @escaping (CBCharacteristic) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
+    func load(_ fulfill: @escaping (CBCharacteristic) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
+        _cancelAnyPreviousPromise(newPromiseType: type)
         _fulfillCharacteristicPromise = fulfill
         promiseType = .CHARACTERISTIC
         initShared(reject, type)
     }
     
     
-    init(_ fulfill: @escaping ([UInt8]) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
+    func load(_ fulfill: @escaping ([UInt8]) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
+        _cancelAnyPreviousPromise(newPromiseType: type)
         _fulfillDataPromise = fulfill
         promiseType = .DATA
         initShared(reject, type)
     }
     
+    
+    
     func initShared(_ reject: @escaping (Error) -> Void, _ type: RequestType) {
+        completed = false
+        self.loadedPromise = true
         _rejectPromise = reject
         self.type = type
     }
@@ -98,23 +110,51 @@ class promiseContainer {
     }
     
     func setDelayedReject(_ delayTimeInSeconds: Double, errorOnReject: BleError) {
-        delay(delayTimeInSeconds, {_ in self.reject(errorOnReject as Error)})
+        let rejectId = getUUID()
+        self.rejectId = rejectId
+        delay(delayTimeInSeconds, {_ in
+            if (rejectId == self.rejectId) {
+                self.reject(errorOnReject as Error)
+            }
+        })
     }
     
     
     init() {
-        self.clear()
+        self._clear()
     }
     
     
-    func clear() {
+    func _clear() {
         type = .NONE
         promiseType = .NONE
-        _fulfillVoidPromise  = {_ in }
-        _fulfillServiceListPromise = {_ in }
+        rejectId = ""
+        completed = false
+        loadedPromise = false
+        _fulfillVoidPromise               = {_ in }
+        _fulfillIntPromise                = {_ in }
+        _fulfillServiceListPromise        = {_ in }
         _fulfillCharacteristicListPromise = {_ in }
-        _fulfillCharacteristicPromise = {_ in }
-        _rejectPromise = {_ in }
+        _fulfillCharacteristicPromise     = {_ in }
+        _fulfillDataPromise               = {_ in }
+        _rejectPromise                    = {_ in }
+    
+    }
+    
+    func _cancelAnyPreviousPromise(newPromiseType: RequestType) {
+        if (self.completed == false && self.loadedPromise == true) {
+            // An exception is added so disconnect is always safe to repeat.
+            // Usually, there is an extra disconnect in catch statements just in case.
+            if (self.type == .DISCONNECT && newPromiseType == self.type) {
+                self.fulfill()
+                self._clear()
+            }
+            else {
+                LOG.error("DEALLOCATING PROMISE OF TYPE \(self.type) \(self.promiseType) TO SET: \(newPromiseType)")
+                self.reject(BleError.REPLACED_WITH_OTHER_PROMISE)
+                self._clear()
+            }
+        }
     }
     
     func fulfill(_ data: Void) {
@@ -126,7 +166,7 @@ class promiseContainer {
             else {
                 _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
             }
-            clear()
+            _clear()
         }
     }
     
@@ -140,7 +180,7 @@ class promiseContainer {
                 _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
             }
         }
-        clear()
+        _clear()
     }
     
     func fulfill(_ data: [CBService]) {
@@ -153,7 +193,7 @@ class promiseContainer {
                 _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
             }
         }
-        clear()
+        _clear()
     }
     
     func fulfill(_ data: [CBCharacteristic]) {
@@ -166,7 +206,7 @@ class promiseContainer {
                 _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
             }
         }
-        clear()
+        _clear()
     }
     
     func fulfill(_ data: CBCharacteristic) {
@@ -179,7 +219,7 @@ class promiseContainer {
                 _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
             }
         }
-        clear()
+        _clear()
     }
     
     func fulfill(_ data: [UInt8]) {
@@ -192,7 +232,7 @@ class promiseContainer {
                 _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
             }
         }
-        clear()
+        _clear()
     }
 
     
@@ -201,7 +241,7 @@ class promiseContainer {
             self.completed = true
             _rejectPromise(error)
         }
-        clear()
+        _clear()
     }
     
 }

@@ -26,7 +26,7 @@ open class EventBus {
         if (self.topics[topic] == nil) {
             self.topics[topic] = [String: eventCallback]()
         }
-        let id = self._getId()
+        let id = getUUID()
 
         self.subscribers[id] = topic;
         self.topics[topic]![id] = callback
@@ -66,7 +66,4 @@ open class EventBus {
         }
     }
     
-    func _getId() -> String {
-        return "\(UInt32(arc4random_uniform(UInt32(INT_MAX))))-\(UInt32(arc4random_uniform(UInt32(INT_MAX))))-\(UInt32(arc4random_uniform(UInt32(INT_MAX))))"
-    }
 }

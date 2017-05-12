@@ -43,3 +43,11 @@ public func showLocationAlert() {
     
     VIEWCONTROLLER!.present(alertController, animated: true, completion: nil)
 }
+
+
+/**
+ *
+ **/
+public func getUUID() -> String {
+    return UUID().uuidString
+}

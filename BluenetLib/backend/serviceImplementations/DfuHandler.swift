@@ -160,7 +160,6 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
     }
     
     func setupNotifications() -> Promise<voidPromiseCallback> {
-        print("Setting up notifications")
         let notificationCallback = {(data: Any) -> Void in }
         return self.bleManager.enableNotifications(
             DFUServices.DFU,

@@ -73,6 +73,10 @@ public enum BleError : Error {
     case COULD_NOT_FIND_PERIPHERAL
     
     case PACKETS_DO_NOT_MATCH
+    
+    
+    // promise errors
+    case REPLACED_WITH_OTHER_PROMISE
 }
 
 struct timeoutDurations {
@@ -246,7 +250,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                 }
                 
                 LOG.info("BLUENET_LIB: Waiting to cancel connection....")
-                pendingPromise = promiseContainer(fulfill, reject, type: .CANCEL_PENDING_CONNECTION)
+                pendingPromise.load(fulfill, reject, type: .CANCEL_PENDING_CONNECTION)
                 pendingPromise.setDelayedReject(timeoutDurations.cancelPendingConnection, errorOnReject: .CANCEL_PENDING_CONNECTION_TIMEOUT)
                 
                 centralManager.cancelPeripheralConnection(connectingPeripheral!)
@@ -282,7 +286,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                     connectingPeripheral!.delegate = self
                     
                     // setup the pending promise for connection
-                    pendingPromise = promiseContainer(fulfill, reject, type: .CONNECT)
+                    pendingPromise.load(fulfill, reject, type: .CONNECT)
                     pendingPromise.setDelayedReject(timeoutDurations.connect, errorOnReject: .CONNECT_TIMEOUT)
                     
                     centralManager.connect(connectingPeripheral!, options: nil)
@@ -317,7 +321,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             if (self.connectedPeripheral != nil) {
                 LOG.info("BLUENET_LIB: disconnecting from connected peripheral")
                 let disconnectPromise = Promise<Void> { success, failure in
-                    self.pendingPromise = promiseContainer(success, failure, type: .DISCONNECT)
+                    self.pendingPromise.load(success, failure, type: .DISCONNECT)
                     self.pendingPromise.setDelayedReject(timeoutDurations.disconnect, errorOnReject: .DISCONNECT_TIMEOUT)
                     self.centralManager.cancelPeripheralConnection(connectedPeripheral!)
                 }
@@ -347,7 +351,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                     fulfill(services)
                 }
                 else {
-                    self.pendingPromise = promiseContainer(fulfill, reject, type: .GET_SERVICES)
+                    self.pendingPromise.load(fulfill, reject, type: .GET_SERVICES)
                     self.pendingPromise.setDelayedReject(timeoutDurations.getServices, errorOnReject: .GET_SERVICES_TIMEOUT)
                     // the fulfil and reject are handled in the peripheral delegate
                     connectedPeripheral!.discoverServices(nil) // then return services
@@ -405,7 +409,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                     fulfill(characteristics)
                 }
                 else {
-                    self.pendingPromise = promiseContainer(fulfill, reject, type: .GET_CHARACTERISTICS)
+                    self.pendingPromise.load(fulfill, reject, type: .GET_CHARACTERISTICS)
                     self.pendingPromise.setDelayedReject(timeoutDurations.getCharacteristics, errorOnReject: .GET_CHARACTERISTICS_TIMEOUT)
 
                     // the fulfil and reject are handled in the peripheral delegate
@@ -479,8 +483,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         return Promise<[UInt8]> { fulfill, reject in
             self.getChacteristic(serviceId, characteristicId)
                 .then{characteristic -> Void in
-                    
-                    self.pendingPromise = promiseContainer(fulfill, reject, type: .READ_CHARACTERISTIC)
+                    self.pendingPromise.load(fulfill, reject, type: .READ_CHARACTERISTIC)
                     self.pendingPromise.setDelayedReject(timeoutDurations.readCharacteristic, errorOnReject: .READ_CHARACTERISTIC_TIMEOUT)
                     
                     // the fulfil and reject are handled in the peripheral delegate
@@ -494,7 +497,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         return Promise<Void> { fulfill, reject in
             self.getChacteristic(serviceId, characteristicId)
                 .then{characteristic -> Void in
-                    self.pendingPromise = promiseContainer(fulfill, reject, type: .WRITE_CHARACTERISTIC)
+                    self.pendingPromise.load(fulfill, reject, type: .WRITE_CHARACTERISTIC)
                     
                     if (type == .withResponse) {
                         self.pendingPromise.setDelayedReject(timeoutDurations.writeCharacteristic, errorOnReject: .WRITE_CHARACTERISTIC_TIMEOUT)
@@ -551,7 +554,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                         // we now tell the device to notify us.
                         return Promise<Void> { success, failure in
                             // the success and failure are handled in the peripheral delegate
-                            self.pendingPromise = promiseContainer(success, failure, type: .ENABLE_NOTIFICATIONS)
+                            self.pendingPromise.load(success, failure, type: .ENABLE_NOTIFICATIONS)
                             self.pendingPromise.setDelayedReject(timeoutDurations.enableNotifications, errorOnReject: .ENABLE_NOTIFICATIONS_TIMEOUT)
                             self.connectedPeripheral!.setNotifyValue(true, for: characteristic)
                         }
@@ -580,15 +583,24 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             if (self.notificationEventBus.hasListeners(serviceId + "_" + characteristicId)) {
                 fulfill()
             }
+            // if we are no longer connected we dont need to clean up.
+            else if (self.connectedPeripheral == nil) {
+                fulfill()
+            }
             else {
                 // if there are no more people listening, we tell the device to stop the notifications.
                 self.getChacteristic(serviceId, characteristicId)
                     .then{characteristic -> Void in
-                        self.pendingPromise = promiseContainer(fulfill, reject, type: .DISABLE_NOTIFICATIONS)
-                        self.pendingPromise.setDelayedReject(timeoutDurations.disableNotifications, errorOnReject: .DISABLE_NOTIFICATIONS_TIMEOUT)
-                        
-                        // the fulfil and reject are handled in the peripheral delegate
-                        self.connectedPeripheral!.setNotifyValue(false, for: characteristic)
+                        if (self.connectedPeripheral == nil) {
+                            fulfill()
+                        }
+                        else {
+                            self.pendingPromise.load(fulfill, reject, type: .DISABLE_NOTIFICATIONS)
+                            self.pendingPromise.setDelayedReject(timeoutDurations.disableNotifications, errorOnReject: .DISABLE_NOTIFICATIONS_TIMEOUT)
+                            
+                            // the fulfil and reject are handled in the peripheral delegate
+                            self.connectedPeripheral!.setNotifyValue(false, for: characteristic)
+                        }
                     }
                     .catch{(error: Error) -> Void in
                         reject(error)
@@ -808,9 +820,8 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         self.connectingPeripheral = nil;
         self.connectedPeripheral = nil;
         self.settings.invalidateSessionNonce()
-        
         self.notificationEventBus.reset()
-        
+    
         LOG.info("BLUENET_LIB: in didDisconnectPeripheral")
         if (pendingPromise.type == .CANCEL_PENDING_CONNECTION) {
             pendingPromise.fulfill()
