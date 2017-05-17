@@ -71,9 +71,7 @@ public enum BleError : Error {
     case DFU_ABORTED
     case DFU_ERROR
     case COULD_NOT_FIND_PERIPHERAL
-    
     case PACKETS_DO_NOT_MATCH
-    
     
     // promise errors
     case REPLACED_WITH_OTHER_PROMISE
@@ -110,6 +108,8 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     var notificationEventBus : EventBus!
     open var settings : BluenetSettings!
     
+    var decoupledDelegate = false
+    
     var uniquenessReference = [String: String]()
     var scanUniqueOnly = false
     var scanning = false
@@ -132,8 +132,14 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         self.settings = settings
     }
     
+    open func decoupleFromDelegate() {
+        LOG.info("Decoupling from Delegate")
+        self.decoupledDelegate = true
+    }
+    
     open func reassignDelegate() {
         LOG.info("Reassigning Delegate")
+        self.decoupledDelegate = false
         self.centralManager.delegate = self
         self.restoreScanning()
     }
@@ -662,6 +668,11 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         self.scanUniqueOnly = false
         self.scanningForServices = nil
         
+        if (self.decoupledDelegate == true) {
+            LOG.info("BLUENET_LIB: ignored startScanning because the delegate is decoupled (likely due to DFU in progress)")
+            return
+        }
+        
         LOG.info("BLUENET_LIB: start scanning everything")
         centralManager.scanForPeripherals(withServices: nil, options:[CBCentralManagerScanOptionAllowDuplicatesKey: true])
     }
@@ -672,22 +683,31 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         let service = CBUUID(string: serviceUUID)
         self.scanningForServices = [service]
         
-        LOG.info("BLUENET_LIB: start scanning for services \(serviceUUID)")
+        if (self.decoupledDelegate == true) {
+            LOG.info("BLUENET_LIB: ignored startScanningForService because the delegate is decoupled (likely due to DFU in progress)")
+            return
+        }
         
+        LOG.info("BLUENET_LIB: start scanning for services \(serviceUUID)")
         centralManager.scanForPeripherals(withServices: [service], options:[CBCentralManagerScanOptionAllowDuplicatesKey: !uniqueOnly])
     }
     
     open func startScanningForServices(_ serviceUUIDs: [String], uniqueOnly: Bool = false) {
         self.scanning = true
         self.scanUniqueOnly = uniqueOnly
-        
-        LOG.info("BLUENET_LIB: start scanning for multiple services \(serviceUUIDs)")
         var services = [CBUUID]()
         for service in serviceUUIDs {
             services.append(CBUUID(string: service))
         }
         
         self.scanningForServices = services
+        
+        if (self.decoupledDelegate == true) {
+            LOG.info("BLUENET_LIB: ignored startScanningForServices because the delegate is decoupled (likely due to DFU in progress)")
+            return
+        }
+        
+        LOG.info("BLUENET_LIB: start scanning for multiple services \(serviceUUIDs)")
         centralManager.scanForPeripherals(withServices: services, options:[CBCentralManagerScanOptionAllowDuplicatesKey: !uniqueOnly])
         
         
@@ -698,6 +718,12 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         self.scanning = false
         self.scanUniqueOnly = false
         self.scanningForServices = nil
+        
+        if (self.decoupledDelegate == true) {
+            LOG.info("BLUENET_LIB: ignored stopScanning because the delegate is decoupled (likely due to DFU in progress)")
+            return
+        }
+        
         LOG.info("BLUENET_LIB: stopping scan")
         centralManager.stopScan()
     }
