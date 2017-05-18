@@ -26,11 +26,15 @@ open class DeviceHandler {
         
     }
     
+    open func getFirmwareRevision() -> Promise<String> {
+        return getSoftwareRevision()
+    }
+    
     
     /**
      * Returns a symvar version number like  "1.1.0"
      */
-    open func getFirmwareRevision() -> Promise<String> {
+    open func getSoftwareRevision() -> Promise<String> {
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.DeviceInformation, characteristic: DeviceCharacteristics.FirmwareRevision)
             .then{ data -> Promise<String> in
                 return Promise<String>{fulfill, reject in fulfill(Conversion.uint8_array_to_string(data))
@@ -66,6 +70,27 @@ open class DeviceHandler {
             .then{ data -> Promise<String> in
                 return Promise<String>{fulfill, reject in fulfill(Conversion.uint8_array_to_string(data))
             }}
+    }
+    
+    
+    
+    open func getBootloaderVersion() -> Promise<String> {
+        return self.bleManager.getServicesFromDevice()
+            .then{ services in
+                var isInDfuMode = false
+                for service in services {
+                    if service.uuid.uuidString == DFUServiceUUID {
+                        isInDfuMode = true
+                        break
+                    }
+                }
+                
+                if (isInDfuMode == false) {
+                    throw BleError.NOT_IN_DFU_MODE
+                }
+                
+                return self.getSoftwareRevision()
+            }
     }
 
     

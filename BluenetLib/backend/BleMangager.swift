@@ -72,6 +72,7 @@ public enum BleError : Error {
     case DFU_ERROR
     case COULD_NOT_FIND_PERIPHERAL
     case PACKETS_DO_NOT_MATCH
+    case NOT_IN_DFU_MODE
     
     // promise errors
     case REPLACED_WITH_OTHER_PROMISE
