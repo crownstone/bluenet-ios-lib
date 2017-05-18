@@ -208,6 +208,7 @@ open class Bluenet  {
      */
     open func connect(_ uuid: String) -> Promise<Void> {
         var delayTime : Double = 0
+        print("GOT CONNET COMMAND \(uuid), \(Date().timeIntervalSince1970), \(self.disconnectCommandTimeList)")
         if let timeOfLastDisconnectCommand = self.disconnectCommandTimeList[uuid] {
             let diff = Date().timeIntervalSince1970 - timeOfLastDisconnectCommand
             if (diff < 0.5) {
