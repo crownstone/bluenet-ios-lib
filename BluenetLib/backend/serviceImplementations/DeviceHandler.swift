@@ -74,7 +74,7 @@ open class DeviceHandler {
     
     
     
-    open func getBootloaderVersion() -> Promise<String> {
+    open func getBootloaderRevision() -> Promise<String> {
         return self.bleManager.getServicesFromDevice()
             .then{ services in
                 var isInDfuMode = false
