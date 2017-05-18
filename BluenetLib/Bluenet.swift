@@ -212,9 +212,10 @@ open class Bluenet  {
         var delayTime : Double = 0
         LOG.info("BLUENET_LIB: GOT CONNECT COMMAND \(uuid), \(Date().timeIntervalSince1970), \(self.disconnectCommandTimeList)")
         if let timeOfLastDisconnectCommand = self.disconnectCommandTimeList[uuid] {
+            let minimumTimeBetweenReconnects = 0.5 // seconds
             let diff = Date().timeIntervalSince1970 - timeOfLastDisconnectCommand
-            if (diff < 0.5) {
-                delayTime = diff
+            if (diff < minimumTimeBetweenReconnects) {
+                delayTime = minimumTimeBetweenReconnects - diff
             }
         }
         
@@ -238,7 +239,7 @@ open class Bluenet  {
         }
         
         if (delayTime != 0) {
-            LOG.info("BLUENET_LIB: Delaying connection to \(uuid) with \(delayTime) since it recently got a disconnectCommand.")
+            LOG.info("BLUENET_LIB: Delaying connection to \(uuid) with \(delayTime) seconds since it recently got a disconnectCommand.")
             return Promise<Void> {fulfill, reject in
                 delay(delayTime, { _ in
                     LOG.info("BLUENET_LIB: Connecting to \(uuid) now.")
