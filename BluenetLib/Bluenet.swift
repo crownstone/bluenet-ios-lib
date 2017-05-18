@@ -45,6 +45,7 @@ open class Bluenet  {
     var deviceList = [String: AvailableDevice]()
     var setupList = [String: NearestItem]()
     var dfuList = [String: NearestItem]()
+    var disconnectCommandTimeList = [String: Double]()
 
     // declare the classes handling the library protocol
     open let dfu      : DfuHandler!
@@ -74,7 +75,7 @@ open class Bluenet  {
         self.dfu     = DfuHandler(     bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.config  = ConfigHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.setup   = SetupHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
-        self.control = ControlHandler( bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
+        self.control = ControlHandler( bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList, disconnectCommandTimeList: self.disconnectCommandTimeList);
         self.power   = PowerHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.mesh    = MeshHandler(    bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.device  = DeviceHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
@@ -206,22 +207,45 @@ open class Bluenet  {
      *   - It will disconnect from a connected device if that is the case
      */
     open func connect(_ uuid: String) -> Promise<Void> {
-        return self.bleManager.connect(uuid)
-            .then{_ -> Promise<Void> in
-                return Promise<Void> {fulfill, reject in
-                    if (self.settings.isEncryptionEnabled()) {
-                        self.control.getAndSetSessionNonce()
-                            .then{_ -> Void in
-                                LOG.verbose("BLUENET_LIB: got and set sessionNonce")
-                                fulfill()
-                            }
-                            .catch{err in reject(err)}
+        var delayTime : Double = 0
+        if let timeOfLastDisconnectCommand = self.disconnectCommandTimeList[uuid] {
+            let diff = Date().timeIntervalSince1970 - timeOfLastDisconnectCommand
+            if (diff < 0.5) {
+                delayTime = diff
+            }
+        }
+        
+        let connectionCommand : voidPromiseCallback = { _ -> Promise<Void> in
+            return self.bleManager.connect(uuid)
+                .then{_ -> Promise<Void> in
+                    return Promise<Void> {fulfill, reject in
+                        if (self.settings.isEncryptionEnabled()) {
+                            self.control.getAndSetSessionNonce()
+                                .then{_ -> Void in
+                                    LOG.verbose("BLUENET_LIB: got and set sessionNonce")
+                                    fulfill()
+                                }
+                                .catch{err in reject(err)}
+                        }
+                        else {
+                            fulfill()
+                        }
                     }
-                    else {
-                        fulfill()
-                    }
-                }
-            };
+                };
+        }
+        
+        if (delayTime != 0) {
+            LOG.info("Delaying connection to \(uuid) with \(delayTime) since it recently got a disconnectCommand.")
+            return Promise<Void> {fulfill, reject in
+                delay(delayTime, { _ in
+                    LOG.info("Connecting to \(uuid) now.")
+                    connectionCommand().then{ _ in fulfill() }.catch{err in reject(err) }
+                })
+            }
+        }
+        else {
+            return connectionCommand()
+        }
     }
     
     
