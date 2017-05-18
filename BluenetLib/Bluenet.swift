@@ -75,10 +75,12 @@ open class Bluenet  {
         self.dfu     = DfuHandler(     bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.config  = ConfigHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.setup   = SetupHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
-        self.control = ControlHandler( bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList, disconnectCommandTimeList: self.disconnectCommandTimeList);
+        self.control = ControlHandler( bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.power   = PowerHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.mesh    = MeshHandler(    bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.device  = DeviceHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
+        
+        _ = eventBus.on("disconnectCommandWritten", self._storeDisconnectCommandList)
         
         // subscribe to BLE advertisements (TODO: add encryption)
         _ = self.eventBus.on("advertisementData", self._parseAdvertisement)
@@ -208,7 +210,7 @@ open class Bluenet  {
      */
     open func connect(_ uuid: String) -> Promise<Void> {
         var delayTime : Double = 0
-        print("GOT CONNET COMMAND \(uuid), \(Date().timeIntervalSince1970), \(self.disconnectCommandTimeList)")
+        LOG.info("BLUENET_LIB: GOT CONNECT COMMAND \(uuid), \(Date().timeIntervalSince1970), \(self.disconnectCommandTimeList)")
         if let timeOfLastDisconnectCommand = self.disconnectCommandTimeList[uuid] {
             let diff = Date().timeIntervalSince1970 - timeOfLastDisconnectCommand
             if (diff < 0.5) {
@@ -236,10 +238,10 @@ open class Bluenet  {
         }
         
         if (delayTime != 0) {
-            LOG.info("Delaying connection to \(uuid) with \(delayTime) since it recently got a disconnectCommand.")
+            LOG.info("BLUENET_LIB: Delaying connection to \(uuid) with \(delayTime) since it recently got a disconnectCommand.")
             return Promise<Void> {fulfill, reject in
                 delay(delayTime, { _ in
-                    LOG.info("Connecting to \(uuid) now.")
+                    LOG.info("BLUENET_LIB: Connecting to \(uuid) now.")
                     connectionCommand().then{ _ in fulfill() }.catch{err in reject(err) }
                 })
             }
@@ -296,6 +298,14 @@ open class Bluenet  {
     }
     
     // MARK: util
+    func _storeDisconnectCommandList(_ data: Any) {
+        LOG.info("Received event with data: \(data)")
+        if let handleString = data as? String {
+            LOG.info("Storing \(handleString)")
+            self.disconnectCommandTimeList[handleString] = Date().timeIntervalSince1970
+        }
+    }
+    
     func _parseAdvertisement(_ data: Any) {
         // first we check if the data is conforming to an advertisment
         if let castData = data as? Advertisement {
@@ -306,7 +316,7 @@ open class Bluenet  {
                 if (deviceList[castData.handle]!.verified) {
                     // log debug for verified advertisement
                     self.counter += 1
-                    LOG.debug("received verifiedAdvertisementData nr: \(self.counter)")
+                    LOG.debug("BLUENET_LIB: received verifiedAdvertisementData nr: \(self.counter)")
                     self.eventBus.emit("verifiedAdvertisementData",castData)
                     
                     // if we have a valid RSSI measurement:
@@ -315,23 +325,23 @@ open class Bluenet  {
                         // handling setup packages
                         if (castData.isSetupPackage()) {
                             // log debug for nearest setup
-                            LOG.debug("received SetupAdvertisement nr: \(self.counter)")
+                            LOG.debug("BLUENET_LIB: received SetupAdvertisement nr: \(self.counter)")
                             
                             
                             self.setupList[castData.handle] = NearestItem(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue, setupMode: true)
                             // log debug for nearest setup
-                            LOG.debug("received nearestSetupCrownstone nr: \(self.counter)")
+                            LOG.debug("BLUENET_LIB: received nearestSetupCrownstone nr: \(self.counter)")
                             
                             self._emitNearestSetupCrownstone()
                         }
                         else if (castData.isDFUPackage()) {
                             // log debug for nearest setup
-                            LOG.debug("received DFUadvertisement nr: \(self.counter)")
+                            LOG.debug("BLUENET_LIB: received DFUadvertisement nr: \(self.counter)")
                             
                             
                             self.dfuList[castData.handle] = NearestItem(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue, dfuMode: true)
                             // log debug for nearest setup
-                            LOG.debug("received nearestSetupCrownstone nr: \(self.counter)")
+                            LOG.debug("BLUENET_LIB: received nearestSetupCrownstone nr: \(self.counter)")
                             
                             self._emitNearestDFUCrownstone()
 

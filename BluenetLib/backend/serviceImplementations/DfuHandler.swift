@@ -173,9 +173,7 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
     //MARK: - DFUProgressDelegate
     
     public func dfuProgressDidChange(for part: Int, outOf totalParts: Int, to progress: Int, currentSpeedBytesPerSecond: Double, avgSpeedBytesPerSecond: Double) {
-        let percentage = NSNumber(value: part).doubleValue/(NSNumber(value: totalParts).doubleValue);
         var data = [String: NSNumber]()
-        data["percentage"]  = NSNumber(value: percentage)
         data["part"]        = NSNumber(value: part)
         data["totalParts"]  = NSNumber(value: totalParts)
         data["progress"]    = NSNumber(value: progress)

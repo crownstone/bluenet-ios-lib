@@ -17,12 +17,11 @@ open class ControlHandler {
     var deviceList : [String: AvailableDevice]!
     var disconnectCommandTimeList : [String: Double]!
     
-    init (bleManager:BleManager, eventBus: EventBus, settings: BluenetSettings, deviceList: [String: AvailableDevice], disconnectCommandTimeList: [String: Double]!) {
+    init (bleManager:BleManager, eventBus: EventBus, settings: BluenetSettings, deviceList: [String: AvailableDevice]) {
         self.bleManager = bleManager
         self.settings   = settings
         self.eventBus   = eventBus
         self.deviceList = deviceList
-        self.disconnectCommandTimeList = disconnectCommandTimeList
     }
     
     open func recoverByFactoryReset(_ uuid: String) -> Promise<Void> {
@@ -120,11 +119,12 @@ open class ControlHandler {
         if (self.bleManager.connectedPeripheral != nil) {
             connectedHandle = self.bleManager.connectedPeripheral!.identifier.uuidString
         }
-        LOG.info("BLUENET_LIB: REQUESTING IMMEDIATE DISCONNECT")
+        LOG.info("BLUENET_LIB: REQUESTING IMMEDIATE DISCONNECT FROM \(String(describing: connectedHandle))")
         return self._writeControlPacket(ControlPacketsGenerator.getDisconnectPacket())
             .then{_ in
+                LOG.info("BLUENET_LIB: Written disconnect command, emitting event for... \(String(describing: connectedHandle))")
                 if (connectedHandle != nil) {
-                    self.disconnectCommandTimeList[connectedHandle!] = Date().timeIntervalSince1970
+                    self.eventBus.emit("disconnectCommandWritten", connectedHandle!)
                 }
                 
                 return self.bleManager.disconnect()
