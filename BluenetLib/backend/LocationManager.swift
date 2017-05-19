@@ -57,7 +57,14 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
                 }
             }
         }
-        self.locationManager(self.manager!, didChangeAuthorization: CLLocationManager.authorizationStatus())
+        if (Thread.isMainThread == true) {
+            self.locationManager(self.manager!, didChangeAuthorization: CLLocationManager.authorizationStatus())
+        }
+        else {
+            DispatchQueue.main.sync{
+                self.locationManager(self.manager!, didChangeAuthorization: CLLocationManager.authorizationStatus())
+            }
+        }
     }
     
     
