@@ -24,7 +24,7 @@ open class StateHandler {
     }
     
     
-    open func getError() -> Promise<CrownstoneErrors> {
+    open func getErrors() -> Promise<CrownstoneErrors> {
         return Promise<CrownstoneErrors> { fulfill, reject in
             self.getErrorBitmask()
                 .then{ data -> Void in
