@@ -161,6 +161,21 @@ open class Conversion {
         return result
     }
     
+    open static func uint32_to_bit_array(_ val: UInt32) -> [Bool] {
+        var result = [Bool]()
+        let uint8Array = Conversion.uint32_to_uint8_array(val)
+        for byte in uint8Array {
+            let bitArray = Conversion.uint8_to_bit_array(byte)
+            for bit in bitArray {
+                result.insert(bit, at: 0)
+            }
+        }
+        
+        
+        
+        return result
+    }
+    
     
     open static func uint8_to_int8(_ val: UInt8) -> Int8 {
         let ns = NSNumber(value: val as UInt8)

@@ -200,6 +200,7 @@ open class ScanResponcePacket {
     open var crownstoneId        : UInt16 = 0
     open var switchState         : UInt8  = 0
     open var eventBitmask        : UInt8  = 0
+    open var hasError            : Bool   = false
     open var temperature         : Int8   = 0
     open var powerUsage          : Int32  = 0
     open var accumulatedEnergy   : Int32  = 0
@@ -250,6 +251,7 @@ open class ScanResponcePacket {
             
             newDataAvailable = bitmaskArray[0]
             stateOfExternalCrownstone = bitmaskArray[1]
+            hasError = bitmaskArray[2]
             setupFlag = bitmaskArray[7]
    
             validData = true
@@ -276,6 +278,7 @@ open class ScanResponcePacket {
         // bitmask flags:
         returnDict["newDataAvailable"] = NSNumber(value: self.newDataAvailable)
         returnDict["stateOfExternalCrownstone"] = NSNumber(value: self.stateOfExternalCrownstone)
+        returnDict["hasError"] = NSNumber(value: self.hasError)
         returnDict["setupMode"] = NSNumber(value: self.isSetupPackage())
         
         // random flag:
@@ -296,6 +299,7 @@ open class ScanResponcePacket {
             "accumulatedEnergy" : NSNumber(value: self.accumulatedEnergy),
             "newDataAvailable" : self.newDataAvailable,
             "stateOfExternalCrownstone" : self.stateOfExternalCrownstone,
+            "hasError": self.hasError,
             "setupMode" : self.isSetupPackage(),
             "random" : self.random
         ]
