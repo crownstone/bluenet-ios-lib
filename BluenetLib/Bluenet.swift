@@ -55,6 +55,7 @@ open class Bluenet  {
     open let power    : PowerHandler!
     open let mesh     : MeshHandler!
     open let device   : DeviceHandler!
+    open let state    : StateHandler!
 
     
     // MARK: API
@@ -79,6 +80,7 @@ open class Bluenet  {
         self.power   = PowerHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.mesh    = MeshHandler(    bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         self.device  = DeviceHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
+        self.state   = StateHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
         
         _ = eventBus.on("disconnectCommandWritten", self._storeDisconnectCommandList)
         
