@@ -74,6 +74,7 @@ open class Conversion {
             return String(format:"%2X", byte)
         }
     }
+
     
     open static func hex_string_to_uint8_array(_ input: String) -> [UInt8] {
         var hexNumber = ""
@@ -171,11 +172,8 @@ open class Conversion {
             }
         }
         
-        
-        
         return result
-    }
-    
+    }    
     
     open static func uint8_to_int8(_ val: UInt8) -> Int8 {
         let ns = NSNumber(value: val as UInt8)

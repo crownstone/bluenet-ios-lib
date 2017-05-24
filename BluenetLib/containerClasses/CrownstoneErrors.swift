@@ -26,10 +26,10 @@ open class CrownstoneErrors {
         
         let bitArray = Conversion.uint32_to_bit_array(bitMask)
         
-        overCurrent       = bitArray[0]
-        overCurrentDimmer = bitArray[1]
-        temperatureChip   = bitArray[2]
-        temperatureDimmer = bitArray[3]
+        overCurrent       = bitArray[31-0]
+        overCurrentDimmer = bitArray[31-1]
+        temperatureChip   = bitArray[31-2]
+        temperatureDimmer = bitArray[31-3]
     }
     
     open func hasErrors() -> Bool {

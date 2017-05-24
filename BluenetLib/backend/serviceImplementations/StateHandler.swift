@@ -28,7 +28,8 @@ open class StateHandler {
         return Promise<CrownstoneErrors> { fulfill, reject in
             self.getErrorBitmask()
                 .then{ data -> Void in
-                    let uint32 = Conversion.uint8_array_to_uint32(data)
+                    let relevantDataArray = [data[4],data[5],data[6],data[7]]
+                    let uint32 = Conversion.uint8_array_to_uint32(relevantDataArray)
                     let csError = CrownstoneErrors(bitMask: uint32)
                     fulfill(csError)
                 }
@@ -37,13 +38,12 @@ open class StateHandler {
     }
     
     
-    open func getErrorBitmask() -> Promise<[UInt8]> {
+    open func getErrorBitmask() -> Promise<[UInt8]> {        
         return self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.StateRead) { () -> Promise<Void> in
-            let packet = WriteStatePacket(type: StateType.error_BITMASK).getPacket()
             return self.bleManager.writeToCharacteristic(
                 CSServices.CrownstoneService,
                 characteristicId: CrownstoneCharacteristics.StateControl,
-                data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                data: NotificationStatePacket(type: StateType.error_BITMASK).getNSData(),
                 type: CBCharacteristicWriteType.withResponse
             )
         }
