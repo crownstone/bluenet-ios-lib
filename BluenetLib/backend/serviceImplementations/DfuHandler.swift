@@ -116,13 +116,35 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
         return Promise<Void> { fulfill, reject in
             self.bleManager.isReady() // first check if the bluenet lib is ready before using it for BLE things.
                 .then {(_) -> Promise<Void> in return self.bleManager.connect(uuid)}
+                .then {(_) -> Promise<Void> in
+                    return Promise<Void> {fulfill, reject in
+                        self.bleManager.getServicesFromDevice()
+                            .then{ services -> Void in
+                                var isInDfuMode = false
+                                for service in services {
+                                    if service.uuid.uuidString == DFUServiceUUID {
+                                        isInDfuMode = true
+                                        break
+                                    }
+                                }
+                                
+                                if (isInDfuMode == false) {
+                                    reject(BleError.NOT_IN_DFU_MODE)
+                                }
+                                else {
+                                    fulfill()
+                                }
+                            }
+                            .catch{ err in reject(err) }
+                    }
+                }
                 .then {(_) -> Promise<voidPromiseCallback> in return self.setupNotifications()}
                 .then {cleanupCallback -> Promise<Void> in
                     cleanup = cleanupCallback
+                    success = true
                     return self._writeResetCommand()
                 }
                 .then {(_) -> Promise<Void> in
-                    success = true
                     self.bleManager.settings.restoreEncryption()
                     return cleanup!()
                 }
