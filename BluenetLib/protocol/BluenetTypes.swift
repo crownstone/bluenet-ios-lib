@@ -33,6 +33,9 @@ enum ControlType : UInt8 {
     case no_OPERATION = 21
     case increase_TX = 22
     case reset_ERRORS = 23
+    case keepAlive_MESH = 24
+    case multiswitch_MESH = 25
+    
 }
 
 enum ConfigurationType : UInt8 {
@@ -88,7 +91,6 @@ enum ConfigurationType : UInt8 {
     case mesh_ACCESS_ADDRESS = 49
 }
 
-//TODO: update to 0.4.0
 enum MeshHandle : UInt8 {
     case hub = 1
     case data

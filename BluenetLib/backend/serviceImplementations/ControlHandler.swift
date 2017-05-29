@@ -172,6 +172,12 @@ open class ControlHandler {
     }
 
     
+    open func clearError(errorDict: NSDictionary) -> Promise<Void> {
+        let resetErrorMask = CrownstoneErrors(dictionary: errorDict).getResetMask()
+        return _writeControlPacket(ControlPacketsGenerator.getResetErrorPacket(errorMask: resetErrorMask))
+    }
+    
+    
     /**
      * If the changeState is true, then the state and timeout will be used. If it is false, the keepaliveState on the Crownstone will be cleared and nothing will happen when the timer runs out.
      */

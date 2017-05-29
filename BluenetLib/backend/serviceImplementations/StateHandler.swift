@@ -37,7 +37,6 @@ open class StateHandler {
         }
     }
     
-    
     open func getErrorBitmask() -> Promise<[UInt8]> {        
         return self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.StateRead) { () -> Promise<Void> in
             return self.bleManager.writeToCharacteristic(

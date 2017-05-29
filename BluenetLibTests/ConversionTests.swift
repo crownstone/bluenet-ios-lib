@@ -24,15 +24,15 @@ class ConversionTests: XCTestCase {
         super.tearDown()
     }
     
-    func testConversion() {
+    func testConversionUInt32_to_bitarray() {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
         let bitmask32_1 : UInt32 = 0x80000000
-        let bitmask32_16 : UInt32 = 0x00010000
+        let bitmask32_64 : UInt32 = 64
         
         var maskAt1 = [Bool](repeating: false, count: 32)
         maskAt1[0] = true;
-        let maskAt16 = [
+        let maskAt64 = [
             false,   // 31
             false,   // 30
             false,   // 29
@@ -48,27 +48,39 @@ class ConversionTests: XCTestCase {
             false,   // 19
             false,   // 18
             false,   // 17
-            true,    // 16
-            false,   // 15
-            false,   // 14
-            false,   // 13
-            false,   // 12
-            false,   // 11
-            false,   // 10
-            false,   // 9
-            false,   // 8
-            false,   // 7
-            false,   // 6
-            false,   // 5
-            false,   // 4
-            false,   // 3
-            false,   // 2
-            false,   // 1
-            false    // 0
+            false,   // 16 == 65536
+            false,   // 15 == 32768
+            false,   // 14 == 16384
+            false,   // 13 == 8192
+            false,   // 12 == 4096
+            false,   // 11 == 2048
+            false,   // 10 == 1024
+            false,   // 9  == 512
+            false,   // 8  == 255
+            false,   // 7  == 128
+            true,    // 6  == 64
+            false,   // 5  == 32
+            false,   // 4  == 16
+            false,   // 3  == 8
+            false,   // 2  == 4
+            false,   // 1  == 2
+            false    // 0  == 1
         ]
+        
         XCTAssertEqual(Conversion.uint32_to_bit_array(bitmask32_1),maskAt1)
-        XCTAssertEqual(Conversion.uint32_to_bit_array(bitmask32_16),maskAt16)
+        XCTAssertEqual(Conversion.uint32_to_bit_array(bitmask32_64),maskAt64)
+
+        XCTAssertEqual(Conversion.bit_array_to_uint32(maskAt1), bitmask32_1)
+        XCTAssertEqual(Conversion.bit_array_to_uint32(maskAt64),bitmask32_64)
+
+        XCTAssertEqual(bitmask32_1,  Conversion.bit_array_to_uint32(Conversion.uint32_to_bit_array(bitmask32_1 )))
+        XCTAssertEqual(bitmask32_64, Conversion.bit_array_to_uint32(Conversion.uint32_to_bit_array(bitmask32_64)))
     }
     
-    
+    func testConversionUInt8_to_bitarray() {
+        let test : UInt8 = 241
+        print(Conversion.uint8_to_bit_array(test))
+        
+        XCTAssertEqual(test,Conversion.bit_array_to_uint8(Conversion.uint8_to_bit_array(test)))
+    }
 }

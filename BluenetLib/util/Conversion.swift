@@ -162,18 +162,55 @@ open class Conversion {
         return result
     }
     
+    open static func bit_array_to_uint8(_ bitArray: [Bool]) -> UInt8 {
+        var result : UInt8 = 0
+        let one : UInt8 = 1
+        
+        if (bitArray[0]) { result = result | (one << 0) }
+        if (bitArray[1]) { result = result | (one << 1) }
+        if (bitArray[2]) { result = result | (one << 2) }
+        if (bitArray[3]) { result = result | (one << 3) }
+        if (bitArray[4]) { result = result | (one << 4) }
+        if (bitArray[5]) { result = result | (one << 5) }
+        if (bitArray[6]) { result = result | (one << 6) }
+        if (bitArray[7]) { result = result | (one << 7) }
+        
+        return result
+    }
+    
     open static func uint32_to_bit_array(_ val: UInt32) -> [Bool] {
-        var result = [Bool]()
-        let uint8Array = Conversion.uint32_to_uint8_array(val)
-        for byte in uint8Array {
-            let bitArray = Conversion.uint8_to_bit_array(byte)
-            for bit in bitArray {
-                result.insert(bit, at: 0)
-            }
+        var result = [Bool](repeating: false, count: 32)
+        let one : UInt32 = 1
+        
+        for i in 0...31 {
+            result[i] = (val & (one << NSNumber(value: 31-i).uint32Value)) != 0
         }
         
         return result
-    }    
+    }
+    
+    open static func bit_array_to_uint32(_ bitArray: [Bool]) -> UInt32 {
+        var result : UInt32 = 0
+        let one : UInt32 = 1
+        
+        for i in 0...31 {
+            if (bitArray[i]) { result = result | (one << NSNumber(value: 31 - i).uint32Value) }
+        }
+        
+        return result
+    }
+    
+    
+    
+    open static func flip_bit_array(_ bitArray: [Bool]) -> [Bool] {
+        var result = [Bool](repeating: false, count: bitArray.count)
+        
+        for i in 0...(bitArray.count - 1) {
+            result[i] = !bitArray[i]
+        }
+        
+        return result
+    }
     
     open static func uint8_to_int8(_ val: UInt8) -> Int8 {
         let ns = NSNumber(value: val as UInt8)

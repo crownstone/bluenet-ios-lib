@@ -69,5 +69,9 @@ open class ControlPacketsGenerator {
     open static func getKeepAlivePacket() -> [UInt8] {
         return ControlPacket(type: .keep_ALIVE).getPacket()
     }
+    
+    open static func getResetErrorPacket(errorMask: UInt32) -> [UInt8] {
+        return ControlPacket(type: .reset_ERRORS, payload32: errorMask).getPacket()
+    }
 
 }

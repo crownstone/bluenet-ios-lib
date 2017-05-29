@@ -32,6 +32,29 @@ open class CrownstoneErrors {
         temperatureDimmer = bitArray[31-3]
     }
     
+    init(dictionary: NSDictionary) {
+        self.overCurrent =       ((dictionary["overCurrent"]       as? Bool) != nil) || false
+        self.overCurrentDimmer = ((dictionary["overCurrentDimmer"] as? Bool) != nil) || false
+        self.temperatureChip =   ((dictionary["temperatureChip"]   as? Bool) != nil) || false
+        self.temperatureDimmer = ((dictionary["temperatureDimmer"] as? Bool) != nil) || false
+        
+        var bitArray = [Bool](repeating: false, count: 32)
+        bitArray[31-0] = self.overCurrent
+        bitArray[31-1] = self.overCurrentDimmer
+        bitArray[31-2] = self.temperatureChip
+        bitArray[31-3] = self.temperatureDimmer
+        
+        self.bitMask = Conversion.bit_array_to_uint32(bitArray)
+    }
+    
+    open func getResetMask() -> UInt32 {
+        let bitArray = Conversion.uint32_to_bit_array(self.bitMask)
+        let flippedArray = Conversion.flip_bit_array(bitArray)
+        
+        let flippedMask = Conversion.bit_array_to_uint32(flippedArray)
+        return flippedMask
+    }
+    
     open func hasErrors() -> Bool {
         return self.bitMask == 0
     }
@@ -49,5 +72,7 @@ open class CrownstoneErrors {
     }
     
   }
+
+
 
 
