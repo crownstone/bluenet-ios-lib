@@ -33,10 +33,10 @@ open class CrownstoneErrors {
     }
     
     init(dictionary: NSDictionary) {
-        self.overCurrent =       ((dictionary["overCurrent"]       as? Bool) != nil) || false
-        self.overCurrentDimmer = ((dictionary["overCurrentDimmer"] as? Bool) != nil) || false
-        self.temperatureChip =   ((dictionary["temperatureChip"]   as? Bool) != nil) || false
-        self.temperatureDimmer = ((dictionary["temperatureDimmer"] as? Bool) != nil) || false
+        self.overCurrent =       (dictionary["overCurrent"]       as? Bool) != nil ? (dictionary["overCurrent"] as! Bool) : false
+        self.overCurrentDimmer = (dictionary["overCurrentDimmer"] as? Bool) != nil ? (dictionary["overCurrentDimmer"] as! Bool) : false
+        self.temperatureChip =   (dictionary["temperatureChip"]   as? Bool) != nil ? (dictionary["temperatureChip"] as! Bool) : false
+        self.temperatureDimmer = (dictionary["temperatureDimmer"] as? Bool) != nil ? (dictionary["temperatureDimmer"] as! Bool) : false
         
         var bitArray = [Bool](repeating: false, count: 32)
         bitArray[31-0] = self.overCurrent
@@ -48,11 +48,7 @@ open class CrownstoneErrors {
     }
     
     open func getResetMask() -> UInt32 {
-        let bitArray = Conversion.uint32_to_bit_array(self.bitMask)
-        let flippedArray = Conversion.flip_bit_array(bitArray)
-        
-        let flippedMask = Conversion.bit_array_to_uint32(flippedArray)
-        return flippedMask
+        return self.bitMask
     }
     
     open func hasErrors() -> Bool {
