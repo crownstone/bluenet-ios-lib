@@ -73,5 +73,9 @@ open class ControlPacketsGenerator {
     open static func getResetErrorPacket(errorMask: UInt32) -> [UInt8] {
         return ControlPacket(type: .reset_ERRORS, payload32: errorMask).getPacket()
     }
+    
+    open static func getSetTimePacket(_ time: UInt32) -> [UInt8] {
+        return ControlPacket(type: .set_TIME, payload32: time).getPacket()
+    }
 
 }

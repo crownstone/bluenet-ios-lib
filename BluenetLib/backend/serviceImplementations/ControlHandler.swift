@@ -186,6 +186,12 @@ open class ControlHandler {
         LOG.info("BLUENET_LIB: switching PWM to \(state)")
         return self._writeControlPacket(ControlPacketsGenerator.getPwmSwitchPacket(state))
     }
+    
+    open func setTime(_ newTime: NSNumber) -> Promise<Void> {
+        LOG.info("BLUENET_LIB: setting the to \(newTime.uint32Value)")
+        return self._writeControlPacket(ControlPacketsGenerator.getSetTimePacket(newTime.uint32Value))
+    }
+
 
     
     open func clearError(errorDict: NSDictionary) -> Promise<Void> {
