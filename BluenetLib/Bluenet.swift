@@ -301,9 +301,7 @@ open class Bluenet  {
     
     // MARK: util
     func _storeDisconnectCommandList(_ data: Any) {
-        LOG.info("Received event with data: \(data)")
         if let handleString = data as? String {
-            LOG.info("Storing \(handleString)")
             self.disconnectCommandTimeList[handleString] = Date().timeIntervalSince1970
         }
     }

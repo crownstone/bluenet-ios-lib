@@ -18,14 +18,13 @@ open class BluenetMotion  {
         motionManager = CMMotionManager()
         
         motionManager.deviceMotionUpdateInterval = 1.0
+    }
     
+    public func startMotion() {
         motionManager.startDeviceMotionUpdates(to: OperationQueue.main, withHandler: {motion, error in
-//            LogFile("motion \(motion)", filename: "motion.log")
+            LOG.info("BLUENET_LIB: motion \(String(describing: motion))")
         })
-        
-       
-
     }
 }
 
-    
+

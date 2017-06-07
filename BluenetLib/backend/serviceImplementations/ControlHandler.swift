@@ -110,8 +110,24 @@ open class ControlHandler {
     }
     
     open func putInDFU() -> Promise<Void> {
-        LOG.info("BLUENET_LIB: switching to DFU")
-        return self._writeControlPacket(ControlPacketsGenerator.getPutInDFUPacket())
+        return self.bleManager.getServicesFromDevice()
+            .then{ services in
+                var isInDfuMode = false
+                for service in services {
+                    if service.uuid.uuidString == DFUServiceUUID {
+                        isInDfuMode = true
+                        break
+                    }
+                }
+                
+                if (isInDfuMode == true) {
+                    LOG.info("BLUENET_LIB: Already in DFU.")
+                    return Promise<Void> { fulfill, reject in fulfill() }
+                }
+                
+                LOG.info("BLUENET_LIB: switching to DFU")
+                return self._writeControlPacket(ControlPacketsGenerator.getPutInDFUPacket())
+        }
     }
     
     open func disconnect() -> Promise<Void> {
