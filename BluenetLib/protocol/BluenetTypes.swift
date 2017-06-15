@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum ControlType : UInt8 {
+public enum ControlType : UInt8 {
     case `switch` = 0
     case pwm = 1
     case set_TIME = 2
@@ -38,7 +38,7 @@ enum ControlType : UInt8 {
     
 }
 
-enum ConfigurationType : UInt8 {
+public enum ConfigurationType : UInt8 {
     case device_NAME = 0
     case device_TYPE = 1
     case room = 2
@@ -91,12 +91,12 @@ enum ConfigurationType : UInt8 {
     case mesh_ACCESS_ADDRESS = 49
 }
 
-enum MeshHandle : UInt8 {
+public enum MeshHandle : UInt8 {
     case hub = 1
     case data
 }
 
-enum StateType : UInt8 {
+public enum StateType : UInt8 {
     case reset_COUNTER = 128
     case switch_STATE = 129
     case accumulated_ENERGY = 130
@@ -109,7 +109,7 @@ enum StateType : UInt8 {
     case error_BITMASK = 139
 }
 
-enum OpCode : UInt8 {
+public enum OpCode : UInt8 {
     case read = 0
     case write
     case notify
@@ -117,7 +117,7 @@ enum OpCode : UInt8 {
 
 //*********** Mesh ***********//
 
-enum MeshCommandType : UInt16 {
+public enum MeshCommandType : UInt16 {
     case control = 0
     case beacon
     case config
@@ -135,7 +135,7 @@ public enum IntentType : UInt8 {
 
 //*********** DFU ************//
 
-enum DfuOpcode : UInt8 {
+public enum DfuOpcode : UInt8 {
     case start_DFU = 1
     case initialize_DFU = 2
     case receive_FIRMWARE_IMAGE = 3
@@ -148,7 +148,7 @@ enum DfuOpcode : UInt8 {
     case packet_RECEIPT_NOTIFICATION = 17
 }
 
-enum DfuImageType : UInt8 {
+public enum DfuImageType : UInt8 {
     case none = 0
     case softdevice = 1
     case bootloader = 2
@@ -156,7 +156,7 @@ enum DfuImageType : UInt8 {
     case application = 4
 }
 
-enum DfuResponseValue : UInt8 {
+public enum DfuResponseValue : UInt8 {
     case success = 1
     case invalid_STATE = 2
     case not_SUPPORTED = 3
@@ -165,7 +165,7 @@ enum DfuResponseValue : UInt8 {
     case operation_FAILED = 6
 }
 
-enum DfuInitPacket : UInt8 {
+public enum DfuInitPacket : UInt8 {
     case receive_INIT_PACKET = 0
     case init_PACKET_COMPLETE = 1
 }

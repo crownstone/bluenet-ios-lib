@@ -194,7 +194,6 @@
 				FA5882941E38C0F000913AE6 /* BluenetLocalization.swift */,
 				FA5882951E38C0F000913AE6 /* BluenetMotion.swift */,
 				FA5882891E38C0F000913AE6 /* backend */,
-				FA5882961E38C0F000913AE6 /* classifiers */,
 				FA5882971E38C0F000913AE6 /* containerClasses */,
 				FA5882A31E38C0F100913AE6 /* encryption */,
 				FA5882A81E38C0F100913AE6 /* protocol */,
@@ -230,13 +229,6 @@
 				FA3FC25A1ED3499C00DD2F76 /* StateHandler.swift */,
 			);
 			path = serviceImplementations;
-			sourceTree = "<group>";
-		};
-		FA5882961E38C0F000913AE6 /* classifiers */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = classifiers;
 			sourceTree = "<group>";
 		};
 		FA5882971E38C0F000913AE6 /* containerClasses */ = {

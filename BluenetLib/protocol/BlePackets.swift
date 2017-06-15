@@ -153,6 +153,7 @@ class WriteConfigPacket : ReadConfigPacket {
 }
 
 
+
 class ReadStatePacket : BLEPacket {
 
     init(type: StateType)                        { super.init(type: type.rawValue) }

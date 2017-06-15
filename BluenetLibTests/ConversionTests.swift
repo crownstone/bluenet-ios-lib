@@ -83,4 +83,9 @@ class ConversionTests: XCTestCase {
         
         XCTAssertEqual(test,Conversion.bit_array_to_uint8(Conversion.uint8_to_bit_array(test)))
     }
+    
+    func testTemplateConverter() {
+        print(Conversion.uint8_to_int8(133))
+        print(Conversion.uint8_to_int8(0))
+    }
 }

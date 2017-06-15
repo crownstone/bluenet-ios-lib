@@ -36,6 +36,8 @@ public enum BleError : Error {
     case CANNOT_WRITE_AND_VERIFY
     case CAN_NOT_CONNECT_TO_UUID
     case COULD_NOT_FACTORY_RESET
+    case INCORRECT_RESPONSE_LENGTH
+    case UNKNOWN_TYPE
     
     // encryption errors
     case INVALID_SESSION_DATA
@@ -76,6 +78,7 @@ public enum BleError : Error {
     
     // promise errors
     case REPLACED_WITH_OTHER_PROMISE
+    
 }
 
 struct timeoutDurations {

@@ -213,6 +213,7 @@ open class Conversion {
     }
     
     open static func uint8_to_int8(_ val: UInt8) -> Int8 {
+        
         let ns = NSNumber(value: val as UInt8)
         return ns.int8Value
     }
@@ -220,5 +221,53 @@ open class Conversion {
     open static func int8_to_uint8(_ val: Int8) -> UInt8 {
         let ns = NSNumber(value: val as Int8)
         return ns.uint8Value
+    }
+}
+
+
+public func Convert<T>(_ input: [UInt8]) throws -> T {
+    let type = "\(T.self)"
+    
+    switch(type) {
+        case "Int8","UInt8":
+            if (input.count == 0) {
+                throw BleError.INCORRECT_RESPONSE_LENGTH
+            }
+        break
+        case "Int16","UInt16":
+        if (input.count < 2) {
+            throw BleError.INCORRECT_RESPONSE_LENGTH
+        }
+        break
+        case "Int32","UInt32","Float":
+            if (input.count < 4) {
+                throw BleError.INCORRECT_RESPONSE_LENGTH
+            }
+            break
+    default:
+        break
+    }
+    
+    switch(type) {
+        case "Int8":
+            return Conversion.uint8_to_int8(input[0]) as! T
+        case "UInt8":
+            return input[0] as! T
+        case "UInt16":
+            return Conversion.uint8_array_to_uint16(input) as! T
+        case "UInt32":
+            return Conversion.uint8_array_to_uint32(input) as! T
+        case "String":
+            return Conversion.uint8_array_to_string(input) as! T
+        case "Array<UInt8>":
+            return input as! T
+        case "Float":
+            var floatValue : Float = 0.0
+            memcpy(&floatValue, input, 4)
+            return floatValue as! T
+        case "Int32":
+            return Conversion.uint32_to_int32(Conversion.uint8_array_to_uint32(input)) as! T
+        default:
+            return input as! T
     }
 }

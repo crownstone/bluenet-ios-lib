@@ -42,6 +42,14 @@ open class ConfigHandler {
         let data = WriteConfigPacket(type: ConfigurationType.pwm_PERIOD, payload32: pwmPeriod.uint32Value)
         return self._writeToConfig(packet: data.getPacket())
     }
+
+    
+    open func getPWMPeriod() -> Promise<NSNumber> {
+        return Promise<NSNumber> { fulfill, reject in
+            let configPromise : Promise<UInt32> = self._getConfig(ConfigurationType.pwm_PERIOD)
+            configPromise.then{ period -> Void in fulfill(NSNumber(value: period)) }.catch{err in reject(err)}
+        }
+    }
     
     open func setScanDuration(_ scanDurationsMs: NSNumber) -> Promise<Void> {
         let data = WriteConfigPacket(type: ConfigurationType.scan_DURATION, payload16: scanDurationsMs.uint16Value)
@@ -90,6 +98,40 @@ open class ConfigHandler {
             type: CBCharacteristicWriteType.withResponse
         )
     }
+    
+    public func _getConfig<T>(_ config : ConfigurationType) -> Promise<T> {
+        return Promise<T> { fulfill, reject in
+            let writeCommand : voidPromiseCallback = { _ in
+                return self.bleManager.writeToCharacteristic(
+                    CSServices.CrownstoneService,
+                    characteristicId: CrownstoneCharacteristics.ConfigControl,
+                    data: ReadConfigPacket(type: config).getNSData(),
+                    type: CBCharacteristicWriteType.withResponse);
+            }
+            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ConfigRead, writeCommand: writeCommand)
+                .then{ data -> Void in
+                    var validData = [UInt8]()
+                    if (data.count > 3) {
+                        for i in (4...data.count - 1) {
+                            validData.append(data[i])
+                        }
+                        
+                        do {
+                            let result : T = try Convert(validData)
+                            fulfill(result)
+                        }
+                        catch let err {
+                            reject(err)
+                        }
+                    }
+                    else {
+                        reject(BleError.INCORRECT_RESPONSE_LENGTH)
+                    }
+                }
+                .catch{ err in reject(err) }
+        }
+    }
+
 
     
     
