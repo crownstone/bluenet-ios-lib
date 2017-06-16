@@ -48,15 +48,53 @@ open class StateHandler {
         }
     }
     
+    open func getTime() -> Promise<NSNumber> {
+        return Promise<NSNumber> { fulfill, reject in
+            let timePromise : Promise<UInt32> = self._getState(StateType.time)
+            timePromise.then{ time -> Void in fulfill(NSNumber(value: time))}.catch{ err in reject(err) }
+        }
+    }
+    
     func _writeToState(packet: [UInt8]) -> Promise<Void> {
         return self.bleManager.writeToCharacteristic(
             CSServices.CrownstoneService,
-            characteristicId: CrownstoneCharacteristics.ConfigControl,
+            characteristicId: CrownstoneCharacteristics.StateControl,
             data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
             type: CBCharacteristicWriteType.withResponse
         )
     }
     
-    
+    public func _getState<T>(_ state : StateType) -> Promise<T> {
+        return Promise<T> { fulfill, reject in
+            let writeCommand : voidPromiseCallback = { _ in
+                return self.bleManager.writeToCharacteristic(
+                    CSServices.CrownstoneService,
+                    characteristicId: CrownstoneCharacteristics.StateControl,
+                    data: NotificationStatePacket(type: state).getNSData(),
+                    type: CBCharacteristicWriteType.withResponse);
+            }
+            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.StateRead, writeCommand: writeCommand)
+                .then{ data -> Void in
+                    var validData = [UInt8]()
+                    if (data.count > 3) {
+                        for i in (4...data.count - 1) {
+                            validData.append(data[i])
+                        }
+                        
+                        do {
+                            let result : T = try Convert(validData)
+                            fulfill(result)
+                        }
+                        catch let err {
+                            reject(err)
+                        }
+                    }
+                    else {
+                        reject(BleError.INCORRECT_RESPONSE_LENGTH)
+                    }
+                }
+                .catch{ err in reject(err) }
+        }
+    }
     
 }
