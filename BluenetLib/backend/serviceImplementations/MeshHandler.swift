@@ -94,6 +94,13 @@ open class MeshHandler {
         return self._writeToMesh(channel: .Command, payload: payload.getPacket())
     }
     
+    /**
+     * Send the a keepalive Command over the Batch Command Channel.
+     */
+    open func keepAliveBatchCommand(crownstoneIds: [UInt16]) -> Promise<Void> {
+        return self.batchControlCommand(crownstoneIds: crownstoneIds, commandPacket: ControlPacketsGenerator.getKeepAlivePacket())
+    }
+    
   
     /**
      * This channel is used to send different switch commands with individual timeouts, switch states and intents to different crownstones in one message
