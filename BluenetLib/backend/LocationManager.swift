@@ -52,14 +52,14 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
                 LOG.info("BLUENET_LIB_NAV: requestLocationPermission, Creating CLLocationManager");
                 self.manager = CLLocationManager()
                 self.manager!.delegate = self
-                print("1: \(self.manager!.rangedRegions)")
+                print("1: \(self.manager!.rangedRegions) \(self.manager!.monitoredRegions)")
             }
             else {
                 DispatchQueue.main.sync{
                     LOG.info("BLUENET_LIB_NAV: requestLocationPermission, Creating CLLocationManager");
                     self.manager = CLLocationManager()
                     self.manager!.delegate = self
-                    print("2: \(self.manager!.rangedRegions)")
+                    print("2: \(self.manager!.rangedRegions) \(self.manager!.monitoredRegions)")
                 }
             }
         }
