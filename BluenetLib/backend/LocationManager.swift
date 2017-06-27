@@ -18,26 +18,34 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     var trackingBeacons = [iBeaconContainer]()
     var appName = "Crownstone"
     var started = false
+    var startedStateBackground = true
     var trackingState = false
+    
+    var backgroundEnabled = false
     
     // cache for the location
     var coordinates = CLLocationCoordinate2D()
     
-    public init(eventBus: EventBus) {
+    public init(eventBus: EventBus, backgroundEnabled: Bool = false) {
         super.init()
         
         self.eventBus = eventBus
-        
-        CLLocationManager.locationServicesEnabled()
+        self.backgroundEnabled = backgroundEnabled
         
         LOG.info("BLUENET_LIB_NAV: location services enabled: \(CLLocationManager.locationServicesEnabled())");
         LOG.info("BLUENET_LIB_NAV: ranging services enabled: \(CLLocationManager.isRangingAvailable())");
 
     }
     
-    open func clearAllRegions() {
-        
+    open func setBackgroundScanning(newBackgroundState: Bool) {
+        if (self.backgroundEnabled == newBackgroundState) {
+            return
+        }
+        self.backgroundEnabled = newBackgroundState
+        self.requestLocationPermission()
     }
+    
+
     
     open func requestLocation() -> CLLocationCoordinate2D {
         // ask for permission if the manager does not exist and create the manager
@@ -46,23 +54,30 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         return coordinates
     }
     
-    open func requestLocationPermission() {
-        if (self.manager == nil) {
-            if (Thread.isMainThread == true) {
+    func setLocationManager() {
+        if (Thread.isMainThread == true) {
+            LOG.info("BLUENET_LIB_NAV: requestLocationPermission, Creating CLLocationManager");
+            self.manager = CLLocationManager()
+            self.manager!.delegate = self
+            self.stopTrackingAllRegions()
+        }
+        else {
+            DispatchQueue.main.sync{
                 LOG.info("BLUENET_LIB_NAV: requestLocationPermission, Creating CLLocationManager");
                 self.manager = CLLocationManager()
                 self.manager!.delegate = self
                 self.stopTrackingAllRegions()
             }
-            else {
-                DispatchQueue.main.sync{
-                    LOG.info("BLUENET_LIB_NAV: requestLocationPermission, Creating CLLocationManager");
-                    self.manager = CLLocationManager()
-                    self.manager!.delegate = self
-                    self.stopTrackingAllRegions()
-                }
-            }
         }
+    }
+    
+    open func requestLocationPermission() {
+        LOG.info("BLUENET_LIB_NAV: INITIALIZATION: stop monitoring old region")
+        if (self.manager == nil) {
+            self.setLocationManager()
+        }
+        
+        LOG.info("BLUENET_LIB_NAV: Requesting permission from requestLocationPermission")
         if (Thread.isMainThread == true) {
             self.locationManager(self.manager!, didChangeAuthorization: CLLocationManager.authorizationStatus())
         }
@@ -85,7 +100,10 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
                 self.manager!.requestState(for: beacon.region)
             }
         }
-        self.start();
+        
+        if (self.started == false) {
+            self.start();
+        }
     }
 
     
@@ -146,7 +164,10 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     
     open func pauseTrackingIBeacons() {
         // ask for permission if the manager does not exist and create the manager
-        if (self.manager == nil) { self.requestLocationPermission() }
+        if (self.manager == nil) {
+            LOG.info("BLUENET_LIB_NAV: Requesting permission from pauseTrackingIBeacons")
+            self.requestLocationPermission()
+        }
         
         // stop monitoring all becons
         for beacon in self.trackingBeacons {
@@ -179,6 +200,11 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     func start() {
+        if (self.backgroundEnabled == false) {
+            self.startWithoutBackground()
+            return
+        }
+
         LOG.info("BLUENET_LIB_NAV: Start called")
         // ask for permission if the manager does not exist and create the manager
         if (self.manager == nil) { self.requestLocationPermission() }
@@ -187,20 +213,40 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         self.manager!.pausesLocationUpdatesAutomatically = true
         self.manager!.startUpdatingLocation()
         if (self.manager!.responds(to: #selector(getter: CLLocationManager.allowsBackgroundLocationUpdates))) {
-            LOG.info("BLUENET_LIB_NAV: Manager allows background location updates")
+            LOG.info("BLUENET_LIB_NAV: Manager allows background location updates. We enable it.")
             self.manager!.allowsBackgroundLocationUpdates = true
         }
         
         self.resetBeaconRanging();
         self.started = true
+        self.startedStateBackground = false
     }
     
     func startWithoutBackground() {
         LOG.info("BLUENET_LIB_NAV: startWithoutBackground called")
         // ask for permission if the manager does not exist and create the manager
-        if (self.manager == nil) { self.requestLocationPermission() }
+        if (self.manager == nil) {
+            LOG.info("BLUENET_LIB_NAV: Requesting permission from startWithoutBackground")
+            self.requestLocationPermission()
+        }
         
+        // This will reset the location manager if required. Once a location manager has received background permission, we cannot unset it.
+        if (self.startedStateBackground == false) {
+            self.startedStateBackground = true
+            LOG.info("BLUENET_LIB_NAV: Resetting the location manager")
+            
+            // Setting the location manager will trigger a cycle of location permission -> start so we return this start method after setting the location manager.
+            self.setLocationManager()
+            return
+        }
+        
+        self.manager!.pausesLocationUpdatesAutomatically = true
         self.manager!.startUpdatingLocation()
+        if (self.manager!.responds(to: #selector(getter: CLLocationManager.allowsBackgroundLocationUpdates))) {
+            LOG.info("BLUENET_LIB_NAV: Manager allows background location updates. we disable it.")
+            self.manager!.allowsBackgroundLocationUpdates = false
+        }
+        
         self.resetBeaconRanging();
         self.started = true
     }
@@ -213,7 +259,10 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
                 /*
                  First you need to add NSLocationWhenInUseUsageDescription or NSLocationAlwaysUsageDescription(if you want to use in background) in your info.plist file OF THE PROGRAM THAT IMPLEMENTS THIS!
                  */
+                
+                // when just requesting in use, iBeacon permission is DENIED! We need ALWAYS!
                 manager.requestAlwaysAuthorization()
+
                 self.eventBus.emit("locationStatus", "unknown");
             case .restricted:
                 LOG.info("BLUENET_LIB_NAV: location Restricted")
@@ -229,6 +278,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
             case .authorizedWhenInUse:
                 LOG.info("BLUENET_LIB_NAV: location AuthorizedWhenInUse")
                 self.eventBus.emit("locationStatus", "foreground");
+                manager.requestAlwaysAuthorization()
                 showLocationAlert()
         }
     }
@@ -324,7 +374,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
 
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.first {
-            LOG.info("BLUENET_LIB_NAV: update user's location: \(location.coordinate)")
+            LOG.verbose("BLUENET_LIB_NAV: update user's location: \(location.coordinate)")
             coordinates = location.coordinate
         }
     }

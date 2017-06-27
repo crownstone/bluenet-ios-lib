@@ -120,26 +120,72 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     var scanningForServices : [CBUUID]? = nil
     
     var batterySaving = false
+    var backgroundEnabled = true
 
-    public init(eventBus: EventBus) {
+    public init(eventBus: EventBus, backgroundEnabled: Bool = true) {
         super.init();
         
         self.notificationEventBus = EventBus()
         self.settings = BluenetSettings()
         self.eventBus = eventBus
-        // TODO: Make restoration optional.
-        self.centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true, CBCentralManagerOptionRestoreIdentifierKey: "BluenetIOS"])
+        
+        self.backgroundEnabled = backgroundEnabled
+        self.setCentralManager()
         
         // initialize the pending promise containers
         pendingPromise = promiseContainer()
     }
     
-    open func enableBatterySaving() {
-        self.batterySaving = true
+    open func setBackgroundScanning(newBackgroundState: Bool) {
+        if (self.backgroundEnabled == newBackgroundState) {
+            return
+        }
+        self.backgroundEnabled = newBackgroundState
+        self.setCentralManager()
     }
     
-    open func disableBatterySaving() {
+    func setCentralManager() {
+        if (self.backgroundEnabled) {
+            /**
+             * The system uses this UID to identify a specific central manager.
+             * As a result, the UID must remain the same for subsequent executions of the app
+             * in order for the central manager to be successfully restored.
+             **/
+            self.centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true, CBCentralManagerOptionRestoreIdentifierKey: APPNAME +  "BluenetIOS"])
+        }
+        else {
+            self.centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true])
+        }
+    }
+    
+    /**
+     *
+     * Battery saving means that initially, the lib will ignore any ble advertisements. No events originating from BLE advertisements 
+     * will be propagated and nothing will be decrypted.
+     *
+     * Additionally, if background mode is disabled, it will also disable scanning alltogether. This will cause the app to fall asleep.
+     * This can be disabled by passing the optional doNotChangeScanning parameter.
+     *
+    **/
+    open func enableBatterySaving(doNotChangeScanning: Bool = false) {
+        self.batterySaving = true
+        if (doNotChangeScanning == false) {
+            if (self.backgroundEnabled == false) {
+                self.pauseScanning()
+            }
+        }
+    }
+    
+    /**
+     * Similar to enable, this will revert the changes done by enable.
+     **/
+    open func disableBatterySaving(doNotChangeScanning : Bool = false) {
         self.batterySaving = false
+        if (doNotChangeScanning == false) {
+            if (self.backgroundEnabled == false) {
+                self.restoreScanning()
+            }
+        }
     }
     
     open func setSettings(_ settings: BluenetSettings) {
@@ -726,8 +772,11 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         
         LOG.info("BLUENET_LIB: start scanning for multiple services \(serviceUUIDs)")
         centralManager.scanForPeripherals(withServices: services, options:[CBCentralManagerScanOptionAllowDuplicatesKey: !uniqueOnly])
-        
-        
+    }
+    
+    open func pauseScanning() {
+        LOG.info("BLUENET_LIB: pausing scan")
+        centralManager.stopScan()
     }
     
 

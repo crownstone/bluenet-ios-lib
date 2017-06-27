@@ -59,15 +59,18 @@ open class Bluenet  {
 
     
     // MARK: API
-    
     /**
-     * We use the appname in the popup messages that can be generated to check if the bluetooth is on and
-     * permissions are set correctly.
-     */
-    public init() {
+     *
+     * BackgroundEnabled is passed to the BLE Central Manager. If backgroundEnabled is true:
+       - it will have a restoration token (CBCentralManagerOptionRestoreIdentifierKey)
+       - it will not disable scanning when batterySaving mode is engaged (to keep the ibeacon functionality alive, we NEED scanning)
+      This can also be set later on, using the setBackgroundScanning method.
+     *
+    **/
+    public init(backgroundEnabled: Bool = true) {
         self.settings   = BluenetSettings()
         self.eventBus   = EventBus()
-        self.bleManager = BleManager(eventBus: self.eventBus)
+        self.bleManager = BleManager(eventBus: self.eventBus, backgroundEnabled: backgroundEnabled)
         
         // give the BLE manager a reference to the settings.
         self.bleManager.setSettings(settings)
@@ -94,6 +97,10 @@ open class Bluenet  {
     
     open func disableBatterySaving() {
         self.bleManager.disableBatterySaving()
+    }
+    
+    open func setBackgroundScanning(newBackgroundState: Bool) {
+        self.bleManager.setBackgroundScanning(newBackgroundState: newBackgroundState)
     }
     
     /**

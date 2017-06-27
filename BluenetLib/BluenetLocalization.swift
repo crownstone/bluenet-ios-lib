@@ -57,18 +57,23 @@ open class BluenetLocalization {
     /**
      * On init the handlers and interpreters are bound to the events broadcasted by this lib.
      */
-    public init() {
+    public init(backgroundEnabled: Bool = true) {
         self.eventBus = EventBus()
-        self.locationManager = LocationManager(eventBus: self.eventBus)
+        self.locationManager = LocationManager(eventBus: self.eventBus, backgroundEnabled: backgroundEnabled)
         
         // clean the logs every enter region event
-        _ = self.eventBus.on("lowLevelEnterRegion",  { _ in LOG.cleanLogs() })
+        _ = self.eventBus.on("lowLevelEnterRegion",  { _ in LOG.cleanLogs() }) // clean means delete logs that are too old (> 3 days).
         
         // use the ibeacon advertisements for the module logic.
         _ = self.eventBus.on("lowLevelEnterRegion",  self._handleRegionEnter)
         _ = self.eventBus.on("lowLevelExitRegion",   self._handleRegionExit)
         _ = self.eventBus.on("iBeaconAdvertisement", self._updateState)
     }
+    
+    open func setBackgroundScanning(newBackgroundState: Bool) {
+        self.locationManager.setBackgroundScanning(newBackgroundState: newBackgroundState)
+    }
+    
     
     
     /**

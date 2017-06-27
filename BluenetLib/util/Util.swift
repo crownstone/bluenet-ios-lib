@@ -27,7 +27,7 @@ public func delay(_ delay:Double, _ closure: @escaping ()->()) {
  **/
 public func showLocationAlert() {
     let alertController = UIAlertController(title: "Allow \(APPNAME) to use your location",
-                                            message: "The location permission was not authorized. Please set it to \"Always\" in Settings to continue.",
+                                            message: "The location permission was not authorized. Please set it to \"Always\" in Settings to continue. You can choose to use the continuous background events in the app, but the permission is required in order to use the Crownstones.",
                                             preferredStyle: .alert)
     
     let settingsAction = UIAlertAction(title: "Settings", style: .default) { (alertAction) in
