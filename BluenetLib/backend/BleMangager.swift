@@ -118,6 +118,8 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     var scanUniqueOnly = false
     var scanning = false
     var scanningForServices : [CBUUID]? = nil
+    
+    var batterySaving = false
 
     public init(eventBus: EventBus) {
         super.init();
@@ -130,6 +132,14 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         
         // initialize the pending promise containers
         pendingPromise = promiseContainer()
+    }
+    
+    open func enableBatterySaving() {
+        self.batterySaving = true
+    }
+    
+    open func disableBatterySaving() {
+        self.batterySaving = false
     }
     
     open func setSettings(_ settings: BluenetSettings) {
@@ -668,6 +678,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     // MARK: scanning
     
     open func startScanning() {
+        self.disableBatterySaving()
         self.scanning = true
         self.scanUniqueOnly = false
         self.scanningForServices = nil
@@ -682,6 +693,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     }
     
     open func startScanningForService(_ serviceUUID: String, uniqueOnly: Bool = false) {
+        self.disableBatterySaving()
         self.scanning = true
         self.scanUniqueOnly = uniqueOnly
         let service = CBUUID(string: serviceUUID)
@@ -697,6 +709,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     }
     
     open func startScanningForServices(_ serviceUUIDs: [String], uniqueOnly: Bool = false) {
+        self.disableBatterySaving()
         self.scanning = true
         self.scanUniqueOnly = uniqueOnly
         var services = [CBUUID]()
@@ -793,6 +806,11 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             return
         }
         
+        // battery saving means we do not decrypt everything nor do we emit the data into the app. All incoming advertisements are ignored
+        if (self.batterySaving == true) {
+            return
+        }
+        
         let emitData = Advertisement(
             handle: peripheral.identifier.uuidString,
             name: peripheral.name,
@@ -802,7 +820,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             referenceId: settings.referenceId
         );
         
-        // Because crownstones alternate between connectable and nonconnectable to match iBeacon spec, the ios duplicate filtering does not work completely. This workaround implements uniqueness checking before decryption. 
+        // Because crownstones alternate between connectable and nonconnectable to match iBeacon spec, the ios duplicate filtering does not work completely. This workaround implements uniqueness checking before decryption.
         if (self.scanUniqueOnly == true) {
             let randomString = emitData.getServiceDataRandomString()
             if (self.uniquenessReference[emitData.handle] != nil) {
@@ -812,8 +830,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             }
             self.uniquenessReference[emitData.handle] = randomString
         }
-        
-
+    
         if (self.settings.isEncryptionEnabled() && emitData.isSetupPackage() == false && settings.guestKey != nil) {
             emitData.decrypt(settings.guestKey!)
             self.eventBus.emit("advertisementData",emitData)

@@ -60,7 +60,6 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
                 return
             }
             
-        
             self.bleManager.decoupleFromDelegate()
             let dfuInitiator = DFUServiceInitiator(centralManager: self.bleManager.centralManager!, target: dfuPeripheral!)
             dfuInitiator.delegate = self
