@@ -144,6 +144,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         }
         self.backgroundEnabled = newBackgroundState
         self.setCentralManager()
+        self.restoreScanning()
     }
     
     func setCentralManager() {

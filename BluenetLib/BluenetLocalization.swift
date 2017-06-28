@@ -74,8 +74,6 @@ open class BluenetLocalization {
         self.locationManager.setBackgroundScanning(newBackgroundState: newBackgroundState)
     }
     
-    
-    
     /**
      * This method allows you to load a custom classifier into the module. A classifier is optional but required for the enter/exit/current location events.
      */
