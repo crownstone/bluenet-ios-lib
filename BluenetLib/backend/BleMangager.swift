@@ -117,10 +117,12 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     var uniquenessReference = [String: String]()
     var scanUniqueOnly = false
     var scanning = false
+    var scanningStateStored = false
     var scanningForServices : [CBUUID]? = nil
     
     var batterySaving = false
     var backgroundEnabled = true
+    
 
     public init(eventBus: EventBus, backgroundEnabled: Bool = true) {
         super.init();
@@ -728,6 +730,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         self.scanning = true
         self.scanUniqueOnly = false
         self.scanningForServices = nil
+        self.scanningStateStored = true
         
         if (self.decoupledDelegate == true) {
             LOG.info("BLUENET_LIB: ignored startScanning because the delegate is decoupled (likely due to DFU in progress)")
@@ -744,6 +747,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         self.scanUniqueOnly = uniqueOnly
         let service = CBUUID(string: serviceUUID)
         self.scanningForServices = [service]
+        self.scanningStateStored = true
         
         if (self.decoupledDelegate == true) {
             LOG.info("BLUENET_LIB: ignored startScanningForService because the delegate is decoupled (likely due to DFU in progress)")
@@ -762,6 +766,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         for service in serviceUUIDs {
             services.append(CBUUID(string: service))
         }
+        self.scanningStateStored = true
         
         self.scanningForServices = services
         
@@ -784,6 +789,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         self.scanning = false
         self.scanUniqueOnly = false
         self.scanningForServices = nil
+        self.scanningStateStored = true
         
         if (self.decoupledDelegate == true) {
             LOG.info("BLUENET_LIB: ignored stopScanning because the delegate is decoupled (likely due to DFU in progress)")
@@ -795,6 +801,11 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     }
     
     open func restoreScanning() {
+        // only restore scanning if we have a valid restoration state.
+        if (self.scanningStateStored == false) {
+            return
+        }
+        
         if (self.scanning == false) {
             self.stopScanning()
         }
