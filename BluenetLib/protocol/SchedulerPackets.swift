@@ -70,7 +70,7 @@ open class ScheduleConfigurator {
     private var actionPayload = [UInt8]()
     
     
-    init(timerIndex: UInt8, startTime: TimeInterval, switchState: Float) {
+    public init(timerIndex: UInt8, startTime: TimeInterval, switchState: Float) {
         if (timerIndex > 9) {
             LOG.error("SchedulerPackets: ID CANNOT BE LARGER THAN 9!")
         }
@@ -87,7 +87,7 @@ open class ScheduleConfigurator {
         self.repeatPayload = [UInt8]()
     }
     
-    init(index: UInt8, data: [UInt8]) {
+    public init(index: UInt8, data: [UInt8]) {
         if (data.count == 12) {
             self.timerIndex = index
             
