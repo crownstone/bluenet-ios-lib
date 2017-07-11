@@ -35,6 +35,7 @@ public enum ControlType : UInt8 {
     case reset_ERRORS = 23
     case keepAlive_MESH = 24
     case multiswitch_MESH = 25
+    case schedule_REMOVE = 26
     
 }
 

@@ -55,6 +55,61 @@ open class StateHandler {
         }
     }
     
+    open func getAllSchedules() -> Promise<[ScheduleConfigurator]> {
+        return Promise<[ScheduleConfigurator]> { fulfill, reject in
+            let dataPromise : Promise<[UInt8]> = self._getState(StateType.schedule)
+            dataPromise
+                .then{ data -> Void in
+                    if (data.count == 0) {
+                        LOG.error("Got empty list from scheduler state")
+                        reject(BleError.INCORRECT_DATA_COUNT_FOR_ALL_TIMERS)
+                        return
+                    }
+                    let amountOfTimers : UInt8 = data[0]
+                    let amountOfDatapoints : UInt8 = 12
+                    
+                    let amountOfTimersInt : Int = NSNumber(value: amountOfTimers).intValue
+                    let amountOfDatapointsInt : Int = NSNumber(value: amountOfDatapoints).intValue
+                    
+                    let totalCount : Int = 1 + amountOfTimersInt * amountOfDatapointsInt
+                    
+                    if (data.count != totalCount) {
+                        LOG.error("Got list of size \(data.count) from scheduler state")
+                        reject(BleError.INCORRECT_DATA_COUNT_FOR_ALL_TIMERS)
+                        return
+                    }
+                    
+                    var result = [ScheduleConfigurator]()
+                    for i in [Int](0...amountOfTimersInt-1) {
+                        var datablock = [UInt8]()
+                        for j in [Int](0...amountOfDatapointsInt-1) {
+                            datablock.append(data[i*amountOfDatapointsInt + j])
+                        }
+                        result.append(ScheduleConfigurator(index: NSNumber(value: i).uint8Value, data: datablock))
+                    }
+                    fulfill(result)
+                    
+                }
+                .catch{ err in reject(err) }
+        }
+    }
+    
+    open func getAvailableSchedulerIndex() -> Promise<UInt8> {
+        return Promise<UInt8> { fulfill, reject in
+            self.getAllSchedules()
+                .then{ schedules -> Void in
+                    for schedule in schedules {
+                        if (schedule.isAvailable()) {
+                            fulfill(schedule.timerIndex)
+                            return
+                        }
+                    }
+                    reject(BleError.NO_TIMERS_AVAILABLE)
+                }
+                .catch{ err in reject(err) }
+        }
+    }
+    
     func _writeToState(packet: [UInt8]) -> Promise<Void> {
         return self.bleManager.writeToCharacteristic(
             CSServices.CrownstoneService,

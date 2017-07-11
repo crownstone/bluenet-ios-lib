@@ -244,8 +244,30 @@ open class ControlHandler {
                 }
             }
     }
-
     
+    /**
+     * This is used to configure the scheduler. The ScheduleConfigurator can be used to configure the data without knowing the protocol.
+     **/
+    open func setSchedule(scheduleConfig: ScheduleConfigurator) -> Promise<Void> {
+        if (scheduleConfig.timerIndex > 9) {
+            return Promise<Void> { fulfill, reject in reject(BleError.INCORRECT_TIMER_INDEX) }
+        }
+        
+        return _writeControlPacket(scheduleConfig.getPacket())
+    }
+    
+    
+    /**
+     * There are 10 schedulers. You pick which one you want to clear with the timerIndex which can be 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+     **/
+    open func clearSchedule(timerIndex: UInt8) -> Promise<Void> {
+        if (timerIndex > 9 && timerIndex != 255) {
+            return Promise<Void> { fulfill, reject in reject(BleError.INCORRECT_TIMER_INDEX) }
+        }
+        
+        return _writeControlPacket(ControlPacketsGenerator.getScheduleRemovePacket(timerIndex: timerIndex))
+    }
+
     func _writeControlPacket(_ packet: [UInt8]) -> Promise<Void> {
         return self.bleManager.writeToCharacteristic(
             CSServices.CrownstoneService,

@@ -60,6 +60,7 @@
 		FA7BE69A1E4487B8009E633D /* MeshHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7BE6991E4487B8009E633D /* MeshHandler.swift */; };
 		FA7BE69C1E44902E009E633D /* MeshChannels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7BE69B1E44902E009E633D /* MeshChannels.swift */; };
 		FA7BE69E1E449287009E633D /* MeshPackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7BE69D1E449287009E633D /* MeshPackets.swift */; };
+		FA8A9E061F15007E002028F6 /* SchedulerPackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA8A9E051F15007E002028F6 /* SchedulerPackets.swift */; };
 		FAE862621CF4B3830027539D /* Cartfile in Resources */ = {isa = PBXBuildFile; fileRef = FAE862611CF4B3830027539D /* Cartfile */; };
 /* End PBXBuildFile section */
 
@@ -130,6 +131,7 @@
 		FA7BE6991E4487B8009E633D /* MeshHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeshHandler.swift; sourceTree = "<group>"; };
 		FA7BE69B1E44902E009E633D /* MeshChannels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeshChannels.swift; sourceTree = "<group>"; };
 		FA7BE69D1E449287009E633D /* MeshPackets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeshPackets.swift; sourceTree = "<group>"; };
+		FA8A9E051F15007E002028F6 /* SchedulerPackets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SchedulerPackets.swift; sourceTree = "<group>"; };
 		FAE862611CF4B3830027539D /* Cartfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Cartfile; sourceTree = "<group>"; };
 		FAE9371D1D14453000945989 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -267,6 +269,7 @@
 				FA5882AA1E38C0F100913AE6 /* BluenetTypes.swift */,
 				FA5882AB1E38C0F100913AE6 /* Characteristics.swift */,
 				FA5882AC1E38C0F100913AE6 /* Services.swift */,
+				FA8A9E051F15007E002028F6 /* SchedulerPackets.swift */,
 			);
 			path = protocol;
 			sourceTree = "<group>";
@@ -427,6 +430,7 @@
 				FA5882D71E38C0F100913AE6 /* TrainingHelper.swift in Sources */,
 				FA5882CF1E38C0F100913AE6 /* EncryptionHandler.swift in Sources */,
 				FA2261C11E55A7B9001D0262 /* DeviceHandler.swift in Sources */,
+				FA8A9E061F15007E002028F6 /* SchedulerPackets.swift in Sources */,
 				FA7BE69E1E449287009E633D /* MeshPackets.swift in Sources */,
 				FA5882BF1E38C0F100913AE6 /* SetupHandler.swift in Sources */,
 				FA5882BB1E38C0F100913AE6 /* ConfigHandler.swift in Sources */,

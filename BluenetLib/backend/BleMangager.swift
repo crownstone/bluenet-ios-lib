@@ -79,6 +79,10 @@ public enum BleError : Error {
     // promise errors
     case REPLACED_WITH_OTHER_PROMISE
     
+    // timer errors
+    case INCORRECT_TIMER_INDEX
+    case INCORRECT_DATA_COUNT_FOR_ALL_TIMERS
+    case NO_TIMERS_AVAILABLE
 }
 
 struct timeoutDurations {
