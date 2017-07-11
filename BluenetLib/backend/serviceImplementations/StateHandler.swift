@@ -94,7 +94,7 @@ open class StateHandler {
         }
     }
     
-    open func getAvailableSchedulerIndex() -> Promise<UInt8> {
+    open func getAvailableScheduleEntryIndex() -> Promise<UInt8> {
         return Promise<UInt8> { fulfill, reject in
             self.getAllSchedules()
                 .then{ schedules -> Void in
