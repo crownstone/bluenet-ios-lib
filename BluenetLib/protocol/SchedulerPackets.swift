@@ -53,7 +53,7 @@ class ScheduleEntryPacket {
  * intervalInMinutes: UInt16. If this is set larger than 0, the schedule will NOT repeat daily, but every intervalInMinutes minutes.
  * toggle: Boolean. If this is true, the fadeDuration and the switchState are not used. If the Crownstone is ON and the scheduled event fires, it will turn OFF. The next time it will fire, it will turn ON.
 **/
-open class ScheduleConfigurator {
+public class ScheduleConfigurator {
     public var timerIndex : UInt8 = 0
     public var nextTime : UInt32 = 0
     public var switchState : Float = 1.0
@@ -196,8 +196,8 @@ open class ScheduleConfigurator {
     
 }
 
-open class ScheduleOverrideMask {
-    var location = false
+public class ScheduleOverrideMask {
+    public var location = false
     
     init() {}
     
@@ -217,15 +217,15 @@ open class ScheduleOverrideMask {
     }
 }
 
-open class ScheduleRepeatDayMask {
-    var Monday    = false
-    var Tuesday   = false
-    var Wednesday = false
-    var Thursday  = false
-    var Friday    = false
-    var Saturday  = false
-    var Sunday    = false
-    var Everyday  = false
+public class ScheduleRepeatDayMask {
+    public var Monday    = false
+    public var Tuesday   = false
+    public var Wednesday = false
+    public var Thursday  = false
+    public var Friday    = false
+    public var Saturday  = false
+    public var Sunday    = false
+    public var Everyday  = false
     
     init() {}
     
