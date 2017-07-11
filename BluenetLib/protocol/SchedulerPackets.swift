@@ -32,7 +32,7 @@ class ScheduleEntryPacket {
 
 
 /**
- * timerIndex: [ 0 .. 9 ] UInt8. Must be smaller than 10. This indicates which timer will be set.
+ * scheduleEntryIndex: [ 0 .. 9 ] UInt8. Must be smaller than 10. This indicates which timer will be set.
  * nextTime: UInt32. Tells the Crownstone when the first upcoming event will be triggered.
  * switchState: [ 0 .. 1 ] Float. Tells the Crownstone the state to switch to when the scheduled event fires. 0 is off, 1 is on, in between is dimming
  * override: Subclass. Can be used to set the override settings. Default all overrides are off.
@@ -54,7 +54,7 @@ class ScheduleEntryPacket {
  * toggle: Boolean. If this is true, the fadeDuration and the switchState are not used. If the Crownstone is ON and the scheduled event fires, it will turn OFF. The next time it will fire, it will turn ON.
 **/
 public class ScheduleConfigurator {
-    public var timerIndex : UInt8 = 0
+    public var scheduleEntryIndex : UInt8 = 0
     public var nextTime : UInt32 = 0
     public var switchState : Float = 1.0
     
@@ -70,12 +70,12 @@ public class ScheduleConfigurator {
     private var actionPayload = [UInt8]()
     
     
-    public init(timerIndex: UInt8, startTime: TimeInterval, switchState: Float) {
-        if (timerIndex > 9) {
+    public init(scheduleEntryIndex: UInt8, startTime: TimeInterval, switchState: Float) {
+        if (scheduleEntryIndex > 9) {
             LOG.error("SchedulerPackets: ID CANNOT BE LARGER THAN 9!")
         }
         
-        self.timerIndex = timerIndex
+        self.scheduleEntryIndex = scheduleEntryIndex
         
         self.override = ScheduleOverrideMask()
         self.repeatDay = ScheduleRepeatDayMask()
@@ -87,9 +87,9 @@ public class ScheduleConfigurator {
         self.repeatPayload = [UInt8]()
     }
     
-    public init(index: UInt8, data: [UInt8]) {
+    public init(scheduleEntryIndex: UInt8, data: [UInt8]) {
         if (data.count == 12) {
-            self.timerIndex = index
+            self.scheduleEntryIndex = scheduleEntryIndex
             
             // data[0] is reserved.
             
@@ -183,7 +183,7 @@ public class ScheduleConfigurator {
         self._setRepeatType()
         
         var arr = [UInt8]()
-        arr.append(self.timerIndex)
+        arr.append(self.scheduleEntryIndex)
         arr.append(0) // reserved
         arr.append(self.override.getMask())
         arr.append(self._getType())

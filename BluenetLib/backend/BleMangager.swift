@@ -80,9 +80,9 @@ public enum BleError : Error {
     case REPLACED_WITH_OTHER_PROMISE
     
     // timer errors
-    case INCORRECT_TIMER_INDEX
+    case INCORRECT_SCHEDULE_ENTRY_INDEX
     case INCORRECT_DATA_COUNT_FOR_ALL_TIMERS
-    case NO_TIMERS_AVAILABLE
+    case NO_SCHEDULE_ENTRIES_AVAILABLE
 }
 
 struct timeoutDurations {

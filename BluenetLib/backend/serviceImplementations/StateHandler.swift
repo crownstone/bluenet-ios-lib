@@ -85,7 +85,7 @@ open class StateHandler {
                         for j in [Int](0...amountOfDatapointsInt-1) {
                             datablock.append(data[i*amountOfDatapointsInt + j])
                         }
-                        result.append(ScheduleConfigurator(index: NSNumber(value: i).uint8Value, data: datablock))
+                        result.append(ScheduleConfigurator(scheduleEntryIndex: NSNumber(value: i).uint8Value, data: datablock))
                     }
                     fulfill(result)
                     
@@ -100,11 +100,11 @@ open class StateHandler {
                 .then{ schedules -> Void in
                     for schedule in schedules {
                         if (schedule.isAvailable()) {
-                            fulfill(schedule.timerIndex)
+                            fulfill(schedule.scheduleEntryIndex)
                             return
                         }
                     }
-                    reject(BleError.NO_TIMERS_AVAILABLE)
+                    reject(BleError.NO_SCHEDULE_ENTRIES_AVAILABLE)
                 }
                 .catch{ err in reject(err) }
         }
