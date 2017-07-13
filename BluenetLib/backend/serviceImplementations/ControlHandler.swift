@@ -164,7 +164,7 @@ open class ControlHandler {
                 return self.bleManager.writeToCharacteristic(
                     CSServices.CrownstoneService,
                     characteristicId: CrownstoneCharacteristics.StateControl,
-                    data: NotificationStatePacket(type: .switch_STATE).getNSData(),
+                    data: ReadStatePacket(type: .switch_STATE).getNSData(),
                     type: CBCharacteristicWriteType.withResponse);
             }
             self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.StateRead, writeCommand: writeCommand)

@@ -37,15 +37,8 @@ open class StateHandler {
         }
     }
     
-    open func getErrorBitmask() -> Promise<[UInt8]> {        
-        return self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.StateRead) { () -> Promise<Void> in
-            return self.bleManager.writeToCharacteristic(
-                CSServices.CrownstoneService,
-                characteristicId: CrownstoneCharacteristics.StateControl,
-                data: NotificationStatePacket(type: StateType.error_BITMASK).getNSData(),
-                type: CBCharacteristicWriteType.withResponse
-            )
-        }
+    open func getErrorBitmask() -> Promise<[UInt8]> {
+        return self._getState(StateType.error_BITMASK)
     }
     
     open func getTime() -> Promise<NSNumber> {
@@ -65,7 +58,14 @@ open class StateHandler {
                         reject(BleError.INCORRECT_DATA_COUNT_FOR_ALL_TIMERS)
                         return
                     }
+                    
                     let amountOfTimers : UInt8 = data[0]
+                    
+                    if (amountOfTimers == 0) {
+                        reject(BleError.NO_TIMER_FOUND)
+                        return
+                    }
+                    
                     let amountOfDatapoints : UInt8 = 12
                     
                     let amountOfTimersInt : Int = NSNumber(value: amountOfTimers).intValue
@@ -73,8 +73,8 @@ open class StateHandler {
                     
                     let totalCount : Int = 1 + amountOfTimersInt * amountOfDatapointsInt
                     
-                    if (data.count != totalCount) {
-                        LOG.error("Got list of size \(data.count) from scheduler state")
+                    if (data.count < totalCount) {
+                        LOG.error("Got list of size \(data.count) from scheduler state: \(data)")
                         reject(BleError.INCORRECT_DATA_COUNT_FOR_ALL_TIMERS)
                         return
                     }
@@ -125,12 +125,13 @@ open class StateHandler {
                 return self.bleManager.writeToCharacteristic(
                     CSServices.CrownstoneService,
                     characteristicId: CrownstoneCharacteristics.StateControl,
-                    data: NotificationStatePacket(type: state).getNSData(),
+                    data: ReadStatePacket(type: state).getNSData(),
                     type: CBCharacteristicWriteType.withResponse);
             }
             self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.StateRead, writeCommand: writeCommand)
                 .then{ data -> Void in
                     var validData = [UInt8]()
+                    // remove the state preamble
                     if (data.count > 3) {
                         for i in (4...data.count - 1) {
                             validData.append(data[i])

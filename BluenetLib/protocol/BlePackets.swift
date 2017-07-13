@@ -181,7 +181,20 @@ class WriteStatePacket : ReadStatePacket {
     override func getOpCode() -> OpCode { return .write }
 }
 
+
+/**
+ * Not required for actual notifications. This is only used to be notified on dynamic changes of state variables. Not just to get those you want to read.
+ *
+ **/
 class NotificationStatePacket : ReadStatePacket {
+    init(type: StateType, subscribe: Bool) {
+        if (subscribe) {
+            super.init(type: type, payload8: 1)
+        }
+        else {
+            super.init(type: type, payload8: 0)
+        }
+    }
     override func getOpCode() -> OpCode { return .notify }
 }
 

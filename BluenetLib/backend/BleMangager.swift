@@ -83,6 +83,7 @@ public enum BleError : Error {
     case INCORRECT_SCHEDULE_ENTRY_INDEX
     case INCORRECT_DATA_COUNT_FOR_ALL_TIMERS
     case NO_SCHEDULE_ENTRIES_AVAILABLE
+    case NO_TIMER_FOUND
 }
 
 struct timeoutDurations {
