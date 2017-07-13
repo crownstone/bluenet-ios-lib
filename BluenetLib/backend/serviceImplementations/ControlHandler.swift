@@ -253,7 +253,7 @@ open class ControlHandler {
             return Promise<Void> { fulfill, reject in reject(BleError.INCORRECT_SCHEDULE_ENTRY_INDEX) }
         }
         
-        return _writeControlPacket(scheduleConfig.getPacket())
+        return _writeControlPacket(ControlPacketsGenerator.getSetSchedulePacket(data: scheduleConfig.getPacket()))
     }
     
     

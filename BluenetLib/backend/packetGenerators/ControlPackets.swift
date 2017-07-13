@@ -16,6 +16,10 @@ open class ControlPacketsGenerator {
         return Conversion.reverse(Conversion.hex_string_to_uint8_array("deadbeef"));
     }
     
+    open static func getSetSchedulePacket(data: [UInt8]) -> [UInt8] {
+        return ControlPacket(type: .schedule_ENTRY, payloadArray: data).getPacket()
+    }
+    
     open static func getScheduleRemovePacket(timerIndex: UInt8) -> [UInt8] {
         return ControlPacket(type: .schedule_REMOVE, payload8: timerIndex).getPacket()
     }
