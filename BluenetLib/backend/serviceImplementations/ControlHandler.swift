@@ -252,8 +252,9 @@ open class ControlHandler {
         if (scheduleConfig.scheduleEntryIndex > 9) {
             return Promise<Void> { fulfill, reject in reject(BleError.INCORRECT_SCHEDULE_ENTRY_INDEX) }
         }
-        
-        return _writeControlPacket(ControlPacketsGenerator.getSetSchedulePacket(data: scheduleConfig.getPacket()))
+        let packet = ControlPacketsGenerator.getSetSchedulePacket(data: scheduleConfig.getPacket())
+
+        return _writeControlPacket(packet)
     }
     
     

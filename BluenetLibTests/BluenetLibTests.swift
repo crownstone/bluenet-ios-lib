@@ -89,4 +89,31 @@ class BluenetLibTests: XCTestCase {
         print("\(errors3.getDictionary()), \(errors3.getResetMask())")
     }
     
+    func testScheduleConfig() {
+        let config = ScheduleConfigurator(
+            scheduleEntryIndex: 0,
+            startTime: 1499903011,
+            switchState: 1.0
+        )
+        
+        config.fadeDuration = 0
+        config.intervalInMinutes = 0
+        config.override.location = false
+        config.repeatDay.Monday = true
+        config.repeatDay.Tuesday = true
+        config.repeatDay.Wednesday = true
+        config.repeatDay.Thursday = true
+        config.repeatDay.Friday = true
+        config.repeatDay.Saturday = false
+        config.repeatDay.Sunday = false
+        
+        
+        print("packet: \(config.getPacket())")
+        print("repeatType: \(config.repeatType)")
+        print("actionType: \(config.actionType)")
+        print("override.getMask(): \(config.override.getMask())")
+        print("repeatDay(): \(config.repeatDay.getMask())")
+       
+    }
+    
 }

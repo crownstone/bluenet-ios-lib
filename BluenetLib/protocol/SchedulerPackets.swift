@@ -64,9 +64,9 @@ public class ScheduleConfigurator {
     public var intervalInMinutes : UInt16 = 0
     public var toggle = false
     
-    private var repeatType : UInt8 = 0
+    var repeatType : UInt8 = 0
     private var repeatPayload = [UInt8]()
-    private var actionType : UInt8 = 0
+    var actionType : UInt8 = 0
     private var actionPayload = [UInt8]()
     
     
@@ -160,7 +160,7 @@ public class ScheduleConfigurator {
         let switchState = NSNumber(value: min(1,max(0,self.switchState))*100).uint8Value
         if (self.toggle) {
             self.actionType = 2
-            self.actionPayload = [switchState,0,0]
+            self.actionPayload = [0,0,0]
         }
         else if (self.fadeDuration > 0) {
             self.actionType = 1
@@ -170,7 +170,7 @@ public class ScheduleConfigurator {
         }
         else {
             self.actionType = 0
-            self.actionPayload = [0,0,0]
+            self.actionPayload = [switchState,0,0]
         }
     }
     
@@ -185,8 +185,8 @@ public class ScheduleConfigurator {
         var arr = [UInt8]()
         arr.append(self.scheduleEntryIndex)
         arr.append(0) // reserved
-        arr.append(self.override.getMask())
         arr.append(self._getType())
+        arr.append(self.override.getMask())
         arr += Conversion.uint32_to_uint8_array(self.nextTime)
         arr += self.repeatPayload
         arr += self.actionPayload
