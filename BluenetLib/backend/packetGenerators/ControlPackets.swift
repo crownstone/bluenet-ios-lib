@@ -29,10 +29,7 @@ open class ControlPacketsGenerator {
     }
     
     open static func getSwitchStatePacket(_ state: Float) -> [UInt8] {
-        var switchState = min(1,max(0,state))*100
-        
-        // temporary to disable dimming
-        switchState = ceil(switchState)
+        let switchState = min(1,max(0,state))*100
         
         let packet = ControlPacket(type: .switch, payload8: NSNumber(value: switchState as Float).uint8Value)
         return packet.getPacket()
@@ -60,16 +57,13 @@ open class ControlPacketsGenerator {
     }
     
     open static func getKeepAliveStatePacket(changeState: Bool, state: Float, timeout: UInt16) -> [UInt8] {
-        var switchState = min(1,max(0,state))*100
+        let switchState = min(1,max(0,state))*100
         
         // make sure we do not
         var actionState : UInt8 = 0
         if (changeState == true) {
             actionState = 1
         }
-        
-        // temporary to disable dimming
-        switchState = ceil(switchState)
         
         return keepAliveStatePacket(action: actionState, state: NSNumber(value: switchState as Float).uint8Value, timeout: timeout).getPacket()
     }
