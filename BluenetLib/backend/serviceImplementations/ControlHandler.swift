@@ -189,7 +189,7 @@ open class ControlHandler {
     
     open func switchPWMDirect(_ state: Float) -> Promise<Void> {
         LOG.info("BLUENET_LIB: switching PWM to \(state)")
-        return self._writeControlPacketNoResponse(ControlPacketsGenerator.getPwmSwitchPacket(state))
+        return self._writeControlPacketNoResponse(ControlPacketsGenerator.getPwmSwitchPacket(state), customDelay: 0.1)
     }
     
     open func setTime(_ newTime: NSNumber) -> Promise<Void> {
@@ -283,12 +283,13 @@ open class ControlHandler {
         )
     }
     
-    func _writeControlPacketNoResponse(_ packet: [UInt8]) -> Promise<Void> {
+    func _writeControlPacketNoResponse(_ packet: [UInt8], customDelay: Double = timeoutDurations.writeCharacteristicWithout) -> Promise<Void> {
         return self.bleManager.writeToCharacteristic(
             CSServices.CrownstoneService,
             characteristicId: CrownstoneCharacteristics.Control,
             data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-            type: CBCharacteristicWriteType.withoutResponse
+            type: CBCharacteristicWriteType.withoutResponse,
+            customDelay: customDelay
         )
     }
     

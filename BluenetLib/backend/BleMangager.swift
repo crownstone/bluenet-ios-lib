@@ -567,7 +567,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         }
     }
     
-    open func writeToCharacteristic(_ serviceId: String, characteristicId: String, data: Data, type: CBCharacteristicWriteType) -> Promise<Void> {
+    open func writeToCharacteristic(_ serviceId: String, characteristicId: String, data: Data, type: CBCharacteristicWriteType, customDelay: Double = timeoutDurations.writeCharacteristicWithout) -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             self.getChacteristic(serviceId, characteristicId)
                 .then{characteristic -> Void in
@@ -578,7 +578,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                     }
                     else {
                         // if we write without notification, the delegate will not be invoked.
-                        self.pendingPromise.setDelayedFulfill(timeoutDurations.writeCharacteristicWithout)
+                        self.pendingPromise.setDelayedFulfill(customDelay)
                     }
                     
                     // the fulfil and reject are handled in the peripheral delegate
