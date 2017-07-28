@@ -114,6 +114,10 @@ class BluenetLibTests: XCTestCase {
         print("override.getMask(): \(config.override.getMask())")
         print("repeatDay(): \(config.repeatDay.getMask())")
        
+        let x = 0x01
+        print("self.repeatType = \(x & 0x0f)")
+        print("actionType = \((x >> 4) & 0x0f)")
+        
     }
     
 }

@@ -94,10 +94,10 @@ public class ScheduleConfigurator {
             
             // data[0] is reserved.
             
-            self.override = ScheduleOverrideMask(data: data[1])
+            self.repeatType = data[1] & 0x0f
+            self.actionType = (data[1] >> 4) & 0x0f
             
-            self.repeatType = data[2] & 0x0f
-            self.actionType = (data[2] >> 4) & 0x0f
+            self.override = ScheduleOverrideMask(data: data[2])
             
             self.nextTime = Conversion.uint8_array_to_uint32([data[3],data[4],data[5],data[6]])
             switch (self.repeatType) {
