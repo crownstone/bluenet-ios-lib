@@ -182,6 +182,10 @@ public class ScheduleConfigurator {
         return nextTime == 0
     }
     
+    open func isActive() -> Bool {
+        return !self.isAvailable()
+    }
+    
     open func getPacket() -> [UInt8] {
         self._setActionType()
         self._setRepeatType()
