@@ -64,6 +64,7 @@ public class ScheduleConfigurator {
     public var intervalInMinutes : UInt16 = 0
     public var toggle = false
     
+    var repeatMode : String = ""
     var repeatType : UInt8 = 0
     private var repeatPayload = [UInt8]()
     var actionType : UInt8 = 0
@@ -145,14 +146,17 @@ public class ScheduleConfigurator {
         if (repeatDayMask > 0) {
             self.repeatType = 1
             self.repeatPayload = [repeatDayMask,0]
+            self.repeatMode = "24h"
         }
         else if (intervalInMinutes > 0) {
             self.repeatType = 0
             self.repeatPayload = Conversion.uint16_to_uint8_array(self.intervalInMinutes)
+            self.repeatMode = "minute"
         }
         else {
             self.repeatType = 2
             self.repeatPayload = [0,0]
+            self.repeatMode = "none"
         }
     }
     
@@ -192,6 +196,31 @@ public class ScheduleConfigurator {
         arr += self.actionPayload
         
         return arr
+    }
+    
+    open func getScheduleDataFormat() -> NSDictionary {
+        var data = [String: Any]()
+        
+        self._setRepeatType()
+        self._setActionType()
+        
+        data["scheduleEntryIndex"]     = self.scheduleEntryIndex
+        data["nextTime"]               = self.nextTime
+        data["switchState"]            = self.switchState
+        data["fadeDuration"]           = self.fadeDuration
+        data["intervalInMinutes"]      = self.intervalInMinutes
+        data["ignoreLocationTriggers"] = self.override.location
+        data["active"]                 = true
+        data["repeatMode"]             = self.repeatMode
+        data["activeMonday"]           = self.repeatDay.Monday    || self.repeatDay.Everyday
+        data["activeTuesday"]          = self.repeatDay.Tuesday   || self.repeatDay.Everyday
+        data["activeWednesday"]        = self.repeatDay.Wednesday || self.repeatDay.Everyday
+        data["activeThursday"]         = self.repeatDay.Thursday  || self.repeatDay.Everyday
+        data["activeFriday"]           = self.repeatDay.Friday    || self.repeatDay.Everyday
+        data["activeSaturday"]         = self.repeatDay.Saturday  || self.repeatDay.Everyday
+        data["activeSunday"]           = self.repeatDay.Sunday    || self.repeatDay.Everyday
+
+        return data as NSDictionary
     }
     
 }

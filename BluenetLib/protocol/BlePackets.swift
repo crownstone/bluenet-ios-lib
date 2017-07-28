@@ -156,12 +156,12 @@ class WriteConfigPacket : ReadConfigPacket {
 
 class ReadStatePacket : BLEPacket {
 
-    init(type: StateType)                        { super.init(type: type.rawValue) }
-    init(type: StateType, payload:       String) { super.init(type: type.rawValue, payload: payload)   }
-    init(type: StateType, payload8:      UInt8)  { super.init(type: type.rawValue, payload: payload8)  }
-    init(type: StateType, payload16:     UInt16) { super.init(type: type.rawValue, payload: payload16) }
-    init(type: StateType, payload32:     UInt32) { super.init(type: type.rawValue, payload: payload32) }
-    init(type: StateType, payloadArray: [UInt8]) { super.init(type: type.rawValue, payload: payloadArray) }
+    init(type: StateType)                         { super.init(type: type.rawValue) }
+    init(type: StateType, payload:       String)  { super.init(type: type.rawValue, payload: payload)   }
+    init(type: StateType, payload8:      UInt8 )  { super.init(type: type.rawValue, payload: payload8)  }
+    init(type: StateType, payload16:     UInt16)  { super.init(type: type.rawValue, payload: payload16) }
+    init(type: StateType, payload32:     UInt32)  { super.init(type: type.rawValue, payload: payload32) }
+    init(type: StateType, payloadArray:  [UInt8]) { super.init(type: type.rawValue, payload: payloadArray) }
     
     func getOpCode() -> OpCode {
         return .read
