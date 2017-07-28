@@ -83,7 +83,7 @@ open class StateHandler {
                     for i in [Int](0...amountOfTimersInt-1) {
                         var datablock = [UInt8]()
                         for j in [Int](0...amountOfDatapointsInt-1) {
-                            datablock.append(data[i*amountOfDatapointsInt + j])
+                            datablock.append(data[i*amountOfDatapointsInt + j + 1])
                         }
                         result.append(ScheduleConfigurator(scheduleEntryIndex: NSNumber(value: i).uint8Value, data: datablock))
                     }
