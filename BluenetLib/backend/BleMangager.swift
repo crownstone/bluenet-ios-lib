@@ -176,14 +176,15 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
      *
     **/
     open func enableBatterySaving(doNotChangeScanning: Bool = false) {
-        if (self.decoupledDelegate == true) {
-            LOG.info("BLUENET_LIB: ignored enableBatterySaving because the delegate is decoupled (likely due to DFU in progress)")
-            return
-        }
         LOG.info("BLUENET_LIB: Enabled Battery Saving \(doNotChangeScanning)")
         self.batterySaving = true
+        
         if (doNotChangeScanning == false) {
             if (self.backgroundEnabled == false) {
+                if (self.decoupledDelegate == true) {
+                    LOG.info("BLUENET_LIB: ignored enableBatterySaving scan pausing because the delegate is decoupled (likely due to DFU in progress)")
+                    return
+                }
                 self.pauseScanning()
             }
         }
@@ -193,14 +194,14 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
      * Similar to enable, this will revert the changes done by enable.
      **/
     open func disableBatterySaving(doNotChangeScanning : Bool = false) {
-        if (self.decoupledDelegate == true) {
-            LOG.info("BLUENET_LIB: ignored disableBatterySaving because the delegate is decoupled (likely due to DFU in progress)")
-            return
-        }
         LOG.info("BLUENET_LIB: Disabled Battery Saving \(doNotChangeScanning)")
         self.batterySaving = false
         if (doNotChangeScanning == false) {
             if (self.backgroundEnabled == false) {
+                if (self.decoupledDelegate == true) {
+                    LOG.info("BLUENET_LIB: ignored disableBatterySaving scan restoration because the delegate is decoupled (likely due to DFU in progress)")
+                    return
+                }
                 self.restoreScanning()
             }
         }
@@ -825,9 +826,11 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         LOG.info("BLUENET_LIB: Restoring scan...")
         
         if (self.scanning == false) {
+            self.enableBatterySaving(doNotChangeScanning: true)
             self.stopScanning()
         }
         else {
+            self.disableBatterySaving(doNotChangeScanning: true)
             centralManager.stopScan()
             centralManager.scanForPeripherals(withServices: self.scanningForServices, options:[CBCentralManagerScanOptionAllowDuplicatesKey: !self.scanUniqueOnly])
         }
