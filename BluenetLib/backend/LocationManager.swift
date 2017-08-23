@@ -57,6 +57,9 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     func setLocationManager() {
         if (Thread.isMainThread == true) {
             LOG.info("BLUENET_LIB_NAV: requestLocationPermission, Creating CLLocationManager");
+            if (self.manager != nil) {
+              self.manager!.stopUpdatingLocation()
+            }
             self.manager = CLLocationManager()
             self.manager!.delegate = self
             self.stopTrackingAllRegions()
@@ -64,6 +67,9 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         else {
             DispatchQueue.main.sync{
                 LOG.info("BLUENET_LIB_NAV: requestLocationPermission, Creating CLLocationManager");
+                if (self.manager != nil) {
+                    self.manager!.stopUpdatingLocation()
+                }
                 self.manager = CLLocationManager()
                 self.manager!.delegate = self
                 self.stopTrackingAllRegions()
