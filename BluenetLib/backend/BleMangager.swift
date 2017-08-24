@@ -751,7 +751,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     // MARK: scanning
     
     open func startScanning() {
-        self.disableBatterySaving()
+        self.disableBatterySaving(doNotChangeScanning: true)
         self.scanning = true
         self.scanUniqueOnly = false
         self.scanningForServices = nil
@@ -767,7 +767,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     }
     
     open func startScanningForService(_ serviceUUID: String, uniqueOnly: Bool = false) {
-        self.disableBatterySaving()
+         self.disableBatterySaving(doNotChangeScanning: true)
         self.scanning = true
         self.scanUniqueOnly = uniqueOnly
         let service = CBUUID(string: serviceUUID)
@@ -784,7 +784,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     }
     
     open func startScanningForServices(_ serviceUUIDs: [String], uniqueOnly: Bool = false) {
-        self.disableBatterySaving()
+        self.disableBatterySaving(doNotChangeScanning: true)
         self.scanning = true
         self.scanUniqueOnly = uniqueOnly
         var services = [CBUUID]()
