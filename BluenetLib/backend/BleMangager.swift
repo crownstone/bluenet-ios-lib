@@ -834,7 +834,6 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         LOG.info("BLUENET_LIB: Restoring scan...")
         
         if (self.scanning == false) {
-            self.enableBatterySaving(doNotChangeScanning: true)
             self.stopScanning()
         }
         else {
