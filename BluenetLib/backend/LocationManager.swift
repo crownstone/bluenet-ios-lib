@@ -19,201 +19,289 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     var appName = "Crownstone"
     var started = false
     var startedStateBackground = true
-    var trackingState = false
+    var monitoringState = false
+    var rangingState = false
     
-    var backgroundEnabled = false
+    var backgroundRangingEnabled = false
+    var appIsInBackground = false
     
     // cache for the location
     var coordinates = CLLocationCoordinate2D()
+    var coordinatesSet = false
     
-    public init(eventBus: EventBus, backgroundEnabled: Bool = false) {
+    public init(eventBus: EventBus, backgroundRangingEnabled: Bool = false) {
         super.init()
         
         self.eventBus = eventBus
-        self.backgroundEnabled = backgroundEnabled
+        self.backgroundRangingEnabled = backgroundRangingEnabled
         
         LOG.info("BLUENET_LIB_NAV: location services enabled: \(CLLocationManager.locationServicesEnabled())");
         LOG.info("BLUENET_LIB_NAV: ranging services enabled: \(CLLocationManager.isRangingAvailable())");
 
     }
     
+    /**
+     * Enable/disable background ranging
+     */
     open func setBackgroundScanning(newBackgroundState: Bool) {
-        if (self.backgroundEnabled == newBackgroundState) {
+        if (self.backgroundRangingEnabled == newBackgroundState) {
             return
         }
-        self.backgroundEnabled = newBackgroundState
+        LOG.info("BLUENET_LIB_NAV: setBackgroundScanning to \(newBackgroundState)")
+        self.backgroundRangingEnabled = newBackgroundState
         self.requestLocationPermission()
     }
     
-
+    /**
+     * Make sure you hook this up to your AppDelegate method for applicationWillEnterForeground. It will re-enable ranging if the backgroundRangingEnabled is not allowed.
+     */
+    open func applicationWillEnterForeground() {
+        self.appIsInBackground = false
+        if (self.backgroundRangingEnabled == false) {
+            LOG.info("BLUENET_LIB_NAV: applicationDidEnterBackground. Will continue pauseRangingRegions.")
+            self.refreshRegionState()
+        }
+    }
     
+    /**
+     * Make sure you hook this up to your AppDelegate method for applicationDidEnterBackground. It will disable ranging if the backgroundRangingEnabled is not allowed.
+     */
+    open func applicationDidEnterBackground() {
+        appIsInBackground = true
+        if (self.backgroundRangingEnabled == false) {
+            LOG.info("BLUENET_LIB_NAV: applicationDidEnterBackground. Will now pauseRangingRegions.")
+            self.pauseRangingRegions()
+        }
+    }
+    
+    /**
+     * Request the GPS coordinates within 3KM radius (least accurate)
+     */
     open func requestLocation() -> CLLocationCoordinate2D {
         // ask for permission if the manager does not exist and create the manager
-        if (self.manager == nil) { self.requestLocationPermission() }
-        
-        return coordinates
-    }
-    
-    func setLocationManager() {
-        if (Thread.isMainThread == true) {
-            LOG.info("BLUENET_LIB_NAV: requestLocationPermission, Creating CLLocationManager");
-            if (self.manager != nil) {
-              self.manager!.stopUpdatingLocation()
-            }
-            self.manager = CLLocationManager()
-            self.manager!.delegate = self
-            self.stopTrackingAllRegions()
+        if (self.coordinatesSet) {
+            return coordinates
         }
         else {
-            DispatchQueue.main.sync{
-                LOG.info("BLUENET_LIB_NAV: requestLocationPermission, Creating CLLocationManager");
-                if (self.manager != nil) {
-                    self.manager!.stopUpdatingLocation()
-                }
-                self.manager = CLLocationManager()
-                self.manager!.delegate = self
-                self.stopTrackingAllRegions()
-            }
+            LOG.error("BLUENET_LIB_NAV: Requesting location while it has not been obtained yet.")
+            return coordinates
         }
     }
     
+    /**
+     * Request Permissions to use the background location. A manager will be instantiated if required and the didChangeAuthorization delegate method will be called.
+     */
     open func requestLocationPermission() {
-        LOG.info("BLUENET_LIB_NAV: INITIALIZATION: stop monitoring old region")
         if (self.manager == nil) {
-            self.setLocationManager()
-        }
-        
-        LOG.info("BLUENET_LIB_NAV: Requesting permission from requestLocationPermission")
-        if (Thread.isMainThread == true) {
-            self.locationManager(self.manager!, didChangeAuthorization: CLLocationManager.authorizationStatus())
+            // initializing a new manager will already invoke the didChangeAuthorization delegate method.
+            self._setLocationManager()
         }
         else {
-            DispatchQueue.main.sync{
+            LOG.info("BLUENET_LIB_NAV: Requesting permission from requestLocationPermission")
+            if (Thread.isMainThread == true) {
                 self.locationManager(self.manager!, didChangeAuthorization: CLLocationManager.authorizationStatus())
             }
+            else {
+                DispatchQueue.main.sync{
+                    self.locationManager(self.manager!, didChangeAuthorization: CLLocationManager.authorizationStatus())
+                }
+            }
         }
     }
     
-    
+    /**
+     * Start monitoring the region for this beacon. 
+     * A manager will be initialized if required. Will only start monitoring if the manager is already started. 
+     * If it is not, we will add this beacon to the list of regions to monitor. Once the manager is started, the list will be monitored.
+     */
     open func trackBeacon(_ beacon: iBeaconContainer) {
+        LOG.info("BLUENET_LIB_NAV: Requesting tracking for \(beacon.UUID)")
         // ask for permission if the manager does not exist and create the manager
         if (self.manager == nil) { self.requestLocationPermission() }
         
         if (!self._beaconInList(beacon, list: self.trackingBeacons)) {
             trackingBeacons.append(beacon);
-            if (self.started == true) {
+            if (self.started == true && self.manager != nil) {
+                LOG.info("BLUENET_LIB_NAV: Manager started. Start monitoring for \(beacon.UUID)")
+                self.monitoringState = true
                 self.manager!.startMonitoring(for: beacon.region)
-                self.manager!.requestState(for: beacon.region)
             }
-        }
-        
-        if (self.started == false) {
-            self.start();
         }
     }
 
     
-    open func refreshLocation() {
-        // ask for permission if the manager does not exist and create the manager
-        if (self.manager == nil) { self.requestLocationPermission() }
-        
-        for region in self.manager!.monitoredRegions {
-            self.manager!.requestState(for: region)
+    /**
+     * Request to invoke the didDetermineState delegate method and fire the events again.
+     */
+    open func refreshRegionState() {
+        if (self.manager != nil) {
+            for region in self.manager!.monitoredRegions {
+                self.manager!.requestState(for: region)
+            }
+        }
+        else {
+            LOG.error("BLUENET_LIB_NAV: refreshRegionState: No manager available.")
         }
     }
     
+    /**
+     * Stop monitoring and ranging all regions that are currently being tracked by the manager. Not neccesarily the ones we know if in our class.
+     */
     open func stopTrackingAllRegions() {
-        // ask for permission if the manager does not exist and create the manager
-        if (self.manager == nil) { self.requestLocationPermission() }
-        
-        // stop monitoring all previous regions
-        for region in self.manager!.monitoredRegions {
-            LOG.info("BLUENET_LIB_NAV: INITIALIZATION: stop monitoring old region: \(region)")
-            self.manager!.stopMonitoring(for: region)
+        if (self.manager != nil) {
+            // stop monitoring all previous regions
+            for region in self.manager!.monitoredRegions {
+                LOG.info("BLUENET_LIB_NAV: INITIALIZATION: stop monitoring old region: \(region)")
+                self.manager!.stopMonitoring(for: region)
+                if let beaconRegion = region as? CLBeaconRegion {
+                    self.manager!.stopRangingBeacons(in: beaconRegion)
+                }
+            }
+            self.monitoringState = false
+            self.rangingState = false
+        }
+        else {
+            LOG.error("BLUENET_LIB_NAV: stopTrackingAllRegions: No manager available.")
         }
     }
     
+    /**
+     * Stop monitoring and ranging all regions we know of in our class (ie. the ones we added)
+     */
     open func clearTrackedBeacons() {
-        self.pauseTrackingIBeacons()
+        self.pauseTrackingRegions()
         self.trackingBeacons.removeAll()
     }
     
+    /**
+     * Stop monitoring and ranging a specific ibeacon region.
+     */
     open func stopTrackingIBeacon(_ uuid: String) {
-        // ask for permission if the manager does not exist and create the manager
-        if (self.manager == nil) { self.requestLocationPermission() }
-        
-        // stop monitoring this beacon
-        var targetIndex : Int? = nil;
-        let uuidObject = UUID(uuidString : uuid)
-        if (uuidObject == nil) {
-            return
+        if (self.manager != nil) {
+            // stop monitoring this beacon
+            var targetIndex : Int? = nil;
+            let uuidObject = UUID(uuidString : uuid)
+            if (uuidObject == nil) {
+                return
+            }
+            
+            let uuidString = uuidObject!.uuidString
+            for (index, beacon) in self.trackingBeacons.enumerated() {
+                if (beacon.UUID.uuidString == uuidString) {
+                    self.manager!.stopRangingBeacons(in: beacon.region)
+                    self.manager!.stopMonitoring(for: beacon.region)
+                    targetIndex = index;
+                    break
+                }
+            }
+
+            if (targetIndex != nil) {
+                self.trackingBeacons.remove(at: targetIndex!)
+                if (self.trackingBeacons.count == 0) {
+                    self.monitoringState = false
+                    self.rangingState = false
+                }
+            }
         }
-        
-        let uuidString = uuidObject!.uuidString
-        for (index, beacon) in self.trackingBeacons.enumerated() {
-            if (beacon.UUID.uuidString == uuidString) {
+        else {
+            LOG.error("BLUENET_LIB_NAV: stopTrackingIBeacon: No manager available.")
+        }
+    }
+    
+    
+    /**
+     * Will stop ranging beacons
+     */
+    open func pauseRangingRegions() {
+        // only do something if beacons are being ranged
+        if (self.manager != nil && self.rangingState == true) {
+            // stop ranging all becons
+            for beacon in self.trackingBeacons {
+                self.manager!.stopRangingBeacons(in: beacon.region)
+            }
+            self.rangingState = false
+        }
+    }
+    
+    open func isMonitoringRegions() -> Bool {
+        return self.monitoringState
+    }
+    
+    
+    /**
+     * Start monitoring all regions we have in our trackingBeacons list.
+     */
+    open func startMonitoringRegions() {
+        LOG.info("BLUENET_LIB_NAV: startMonitoringRegions")
+        // we need a CL location manager for this.
+        if (self.manager != nil) {
+            // reinitialize
+            for beacon in self.trackingBeacons {
+                self.manager!.startMonitoring(for: beacon.region)
+            }
+            self.monitoringState = true
+        }
+        else {
+            LOG.error("BLUENET_LIB_NAV: startMonitoringRegions: No manager available.")
+        }
+    }
+    
+    
+    /**
+     * Pause monitoring and ranging (= tracking) all regions. This is different from clear since we keep them in the trackingBeacons list. With this list, we can resume tracking later on.
+     */
+    open func pauseTrackingRegions() {
+        // we need a CL location manager for this.
+        if (self.manager != nil) {
+            // stop monitoring all becons
+            for beacon in self.trackingBeacons {
                 self.manager!.stopRangingBeacons(in: beacon.region)
                 self.manager!.stopMonitoring(for: beacon.region)
-                targetIndex = index;
-                break
             }
+            self.monitoringState = false
+            self.rangingState = false
         }
-
-        if (targetIndex != nil) {
-            self.trackingBeacons.remove(at: targetIndex!)
-            if (self.trackingBeacons.count == 0) {
-                self.trackingState = false
-            }
-        }
-        
-    }
-    
-    open func pauseTrackingIBeacons() {
-        // ask for permission if the manager does not exist and create the manager
-        if (self.manager == nil) {
-            LOG.info("BLUENET_LIB_NAV: Requesting permission from pauseTrackingIBeacons")
-            self.requestLocationPermission()
-        }
-        
-        // stop monitoring all becons
-        for beacon in self.trackingBeacons {
-            self.manager!.stopRangingBeacons(in: beacon.region)
-            self.manager!.stopMonitoring(for: beacon.region)
-        }
-        self.trackingState = false
-    }
-    
-    open func isTracking() -> Bool {
-        return self.trackingState
-    }
-    
-    open func startTrackingIBeacons() {
-        // ask for permission if the manager does not exist and create the manager
-        if (self.manager == nil) { self.requestLocationPermission() }
-        
-        // reinitialize
-        for beacon in self.trackingBeacons {
-            self.manager!.startMonitoring(for: beacon.region)
-            self.manager!.requestState(for: beacon.region)
+        else {
+            LOG.error("BLUENET_LIB_NAV: pauseTrackingRegions: No manager available.")
         }
     }
     
+    /**
+     * Basically turning it off and on again. Useful for reinitializing the list when a new CL location manager is initialized.
+     */
     func resetBeaconRanging() {
         LOG.info("BLUENET_LIB_NAV: Resetting ibeacon tracking")
-        self.pauseTrackingIBeacons()
-        self.startTrackingIBeacons()
-        self.trackingState = true
+        self.pauseTrackingRegions()
+        self.startMonitoringRegions()
     }
     
+    
+    /**
+     * Start is called once the permissions are obtained (from didChangeAuthorization). 
+     * It will invoke the appropriate start method depending on the backgroundEnabled setting (which is set on init or with setBackgroundScanning).
+     */
     func start() {
-        if (self.backgroundEnabled == false) {
+        // if we do not wish to use background scanning, start the LocationManager without background options.
+        if (self.backgroundRangingEnabled == false) {
             self.startWithoutBackground()
+        }
+        else {
+            self.startWithBackground()
+        }
+    }
+    
+    
+    /**
+     * Start with Background will initialize a location manager if required and instruct it to deliver location updates in the background.
+     */
+    func startWithBackground() {
+        LOG.info("BLUENET_LIB_NAV: Start called")
+        // verify we have a manager. If not, it will be created.
+        if (self.manager == nil) {
+            // Setting the location manager will trigger a cycle of location permission -> start so we return this start method after setting the location manager.
+            self._setLocationManager()
             return
         }
-
-        LOG.info("BLUENET_LIB_NAV: Start called")
-        // ask for permission if the manager does not exist and create the manager
-        if (self.manager == nil) { self.requestLocationPermission() }
         
         self.manager!.desiredAccuracy = kCLLocationAccuracyThreeKilometers
         self.manager!.pausesLocationUpdatesAutomatically = true
@@ -228,21 +316,19 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         self.startedStateBackground = false
     }
     
+    /**
+     * Start without Background will re-initialize a location manager if required and instruct it to deliver location updates in the foreground.
+     */
     func startWithoutBackground() {
         LOG.info("BLUENET_LIB_NAV: startWithoutBackground called")
-        // ask for permission if the manager does not exist and create the manager
-        if (self.manager == nil) {
-            LOG.info("BLUENET_LIB_NAV: Requesting permission from startWithoutBackground")
-            self.requestLocationPermission()
-        }
         
         // This will reset the location manager if required. Once a location manager has received background permission, we cannot unset it.
-        if (self.startedStateBackground == false) {
+        if (self.startedStateBackground == false || self.manager == nil) {
             self.startedStateBackground = true
             LOG.info("BLUENET_LIB_NAV: Resetting the location manager")
             
             // Setting the location manager will trigger a cycle of location permission -> start so we return this start method after setting the location manager.
-            self.setLocationManager()
+            self._setLocationManager()
             return
         }
         
@@ -257,11 +343,14 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         self.started = true
     }
     
+    
+    // MARK: delegate methods
+    
     open func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        LOG.info("BLUENET_LIB_NAV: Changed AuthorizationL \(status)")
+        LOG.info("BLUENET_LIB_NAV: Changed Authorization \(status)")
         switch (CLLocationManager.authorizationStatus()) {
             case .notDetermined:
-                LOG.info("BLUENET_LIB_NAV: location NotDetermined")
+                LOG.info("BLUENET_LIB_NAV: didChangeAuthorization NotDetermined, requesting Always:")
                 /*
                  First you need to add NSLocationWhenInUseUsageDescription or NSLocationAlwaysUsageDescription(if you want to use in background) in your info.plist file OF THE PROGRAM THAT IMPLEMENTS THIS!
                  */
@@ -280,7 +369,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
             case .authorizedAlways:
                 LOG.info("BLUENET_LIB_NAV: location AuthorizedAlways")
                 self.eventBus.emit("locationStatus", "on");
-                start()
+                self.start()
             case .authorizedWhenInUse:
                 LOG.info("BLUENET_LIB_NAV: location AuthorizedWhenInUse")
                 self.eventBus.emit("locationStatus", "foreground");
@@ -349,7 +438,6 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
      *  Discussion:
      *    Invoked when an error has occurred ranging beacons in a region. Error types are defined in "CLError.h".
      */
-
     open func locationManager(_ manager: CLLocationManager, rangingBeaconsDidFailFor region: CLBeaconRegion, withError error: Error) {
          LOG.error("BLUENET_LIB_NAV: did rangingBeaconsDidFailForRegion \(region)  withError: \(error) \n");
     }
@@ -381,7 +469,8 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.first {
             LOG.verbose("BLUENET_LIB_NAV: update user's location: \(location.coordinate)")
-            coordinates = location.coordinate
+            self.coordinates = location.coordinate
+            self.coordinatesSet = true
         }
     }
     
@@ -390,6 +479,39 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     
     // MARK: util
     // --------------UITL -------------------------//
+    
+    /**
+     * Set or re-set the location manager. This will initialize a CL location manager and assign the delegate to this class.
+     * It will also stop tracking all previously active regions so there is a clean start.
+     * In case there was a previous manager, it will stop updating the location before overwriting it.
+     *
+     * This has to be done on the main thread, hence the if else.
+     *
+     * Setting the location manager will trigger a permission request. This means the delegate method didChangeAuthorization will be invoked.
+     */
+    func _setLocationManager() {
+        if (Thread.isMainThread == true) {
+            LOG.info("BLUENET_LIB_NAV: _setLocationManager, Creating CLLocationManager");
+            if (self.manager != nil) {
+                self.manager!.stopUpdatingLocation()
+            }
+            self.manager = CLLocationManager()
+            self.manager!.delegate = self
+            self.stopTrackingAllRegions()
+        }
+        else {
+            DispatchQueue.main.sync{
+                LOG.info("BLUENET_LIB_NAV: _setLocationManager, Creating CLLocationManager");
+                if (self.manager != nil) {
+                    self.manager!.stopUpdatingLocation()
+                }
+                self.manager = CLLocationManager()
+                self.manager!.delegate = self
+                self.stopTrackingAllRegions()
+            }
+        }
+    }
+
     
     
     func _beaconInList(_ beacon: iBeaconContainer, list: [iBeaconContainer]) -> Bool {
@@ -402,46 +524,61 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     }
 
     func _startRanging(_ region: CLRegion) {
-        // ask for permission if the manager does not exist and create the manager
-        if (self.manager == nil) { self.requestLocationPermission() }
-        
-        for element in self.manager!.rangedRegions {
-            if (element.identifier == region.identifier) {
+        if (self.manager != nil) {
+            // do not range in the background if this is explicitly not enabled
+            if (self.backgroundRangingEnabled == false && self.appIsInBackground == true) {
                 return
             }
-        }
-        
-        self.eventBus.emit("lowLevelEnterRegion", region.identifier)
-        for element in self.trackingBeacons {
-            if (element.region.identifier == region.identifier) {
-                LOG.info("BLUENET_LIB_NAV: startRanging region \(region.identifier)")
-                self.manager!.startRangingBeacons(in: element.region)
+            
+            // do not start ranging this if we are already ranging it
+            for element in self.manager!.rangedRegions {
+                if (element.identifier == region.identifier) {
+                    return
+                }
             }
+            
+            self.eventBus.emit("lowLevelEnterRegion", region.identifier)
+            for element in self.trackingBeacons {
+                if (element.region.identifier == region.identifier) {
+                    LOG.info("BLUENET_LIB_NAV: startRanging region \(region.identifier)")
+                    self.manager!.startRangingBeacons(in: element.region)
+                }
+            }
+            self.rangingState = true
+        }
+        else {
+           LOG.error("BLUENET_LIB_NAV: _startRanging: No manager available.")
         }
     }
     
     func _stopRanging(_ region: CLRegion) {
-        // ask for permission if the manager does not exist and create the manager
-        if (self.manager == nil) { self.requestLocationPermission() }
-        
-        var abort = true
-        for element in self.manager!.rangedRegions {
-            if (element.identifier == region.identifier) {
-                abort = false
+        if (self.manager != nil) {
+            var abort = true
+            
+            // only stop ranging if we are already ranging it.
+            for element in self.manager!.rangedRegions {
+                if (element.identifier == region.identifier) {
+                    abort = false
+                }
             }
-        }
-        
-        if (abort) {
-            return
-        }
-        
-        self.eventBus.emit("lowLevelExitRegion", region.identifier)
-        
-        for element in self.trackingBeacons {
-            if (element.region.identifier == region.identifier) {
-                LOG.info("BLUENET_LIB_NAV: stopRanging region \(region.identifier)!")
-                self.manager!.stopRangingBeacons(in: element.region)
+            
+            // abort. We're already ranging this region.
+            if (abort) {
+                return
             }
+            
+            self.eventBus.emit("lowLevelExitRegion", region.identifier)
+            
+            for element in self.trackingBeacons {
+                if (element.region.identifier == region.identifier) {
+                    LOG.info("BLUENET_LIB_NAV: stopRanging region \(region.identifier)!")
+                    self.manager!.stopRangingBeacons(in: element.region)
+                }
+            }
+            self.rangingState = false
+        }
+        else {
+            LOG.error("BLUENET_LIB_NAV: _stopRanging: No manager available.")
         }
     }
 

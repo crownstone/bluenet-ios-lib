@@ -143,6 +143,14 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         pendingPromise = promiseContainer()
     }
     
+    open func applicationWillEnterForeground() {
+        
+    }
+    
+    open func applicationDidEnterBackground() {
+        
+    }
+    
     open func setBackgroundScanning(newBackgroundState: Bool) {
         if (self.backgroundEnabled == newBackgroundState) {
             return
@@ -176,7 +184,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
      *
     **/
     open func enableBatterySaving(doNotChangeScanning: Bool = false) {
-        LOG.info("BLUENET_LIB: Enabled Battery Saving \(doNotChangeScanning)")
+        LOG.info("BLUENET_LIB: Enabled Battery Saving. doNotChangeScanning: \(doNotChangeScanning)")
         self.batterySaving = true
         
         if (doNotChangeScanning == false) {
@@ -194,7 +202,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
      * Similar to enable, this will revert the changes done by enable.
      **/
     open func disableBatterySaving(doNotChangeScanning : Bool = false) {
-        LOG.info("BLUENET_LIB: Disabled Battery Saving \(doNotChangeScanning)")
+        LOG.info("BLUENET_LIB: Disabled Battery Saving. doNotChangeScanning: \(doNotChangeScanning)")
         self.batterySaving = false
         if (doNotChangeScanning == false) {
             if (self.backgroundEnabled == false) {

@@ -59,7 +59,7 @@ open class BluenetLocalization {
      */
     public init(backgroundEnabled: Bool = true) {
         self.eventBus = EventBus()
-        self.locationManager = LocationManager(eventBus: self.eventBus, backgroundEnabled: backgroundEnabled)
+        self.locationManager = LocationManager(eventBus: self.eventBus, backgroundRangingEnabled: backgroundEnabled)
         
         // clean the logs every enter region event
         _ = self.eventBus.on("lowLevelEnterRegion",  { _ in LOG.cleanLogs() }) // clean means delete logs that are too old (> 3 days).
@@ -114,7 +114,7 @@ open class BluenetLocalization {
      * This method will call requestState on every registered region.
      */
     open func refreshLocation() {
-        self.locationManager.refreshLocation()
+        self.locationManager.refreshRegionState()
     }
     
     /**
@@ -151,7 +151,7 @@ open class BluenetLocalization {
      *  the resumeTracking method.
      */
     open func pauseTracking() {
-        self.locationManager.pauseTrackingIBeacons()
+        self.locationManager.pauseTrackingRegions()
     }
     
     /**
@@ -159,11 +159,11 @@ open class BluenetLocalization {
      *  Can be called multiple times without duplicate events.
      */
     open func resumeTracking() {
-        if (self.locationManager.isTracking() == false) {
+        if (self.locationManager.isMonitoringRegions() == false) {
             activeGroupId = nil
             activeLocationId = nil
             
-            self.locationManager.startTrackingIBeacons()
+            self.locationManager.startMonitoringRegions()
         }
     }
     
@@ -189,6 +189,20 @@ open class BluenetLocalization {
      */
     open func on(_ topic: String, _ callback: @escaping eventCallback) -> voidCallback {
         return self.eventBus.on(topic, callback)
+    }
+    
+    /**
+     * Make sure you hook this up to your AppDelegate method for applicationWillEnterForeground. Required for disabling background ranging.
+     */
+    open func applicationWillEnterForeground() {
+        self.locationManager.applicationWillEnterForeground()
+    }
+    
+    /**
+     * Make sure you hook this up to your AppDelegate method for applicationWillEnterForeground. Required for disabling background ranging.
+     */
+    open func applicationDidEnterBackground() {
+        self.locationManager.applicationDidEnterBackground()
     }
     
     // MARK: Util

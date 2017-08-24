@@ -132,7 +132,6 @@ open class Bluenet  {
      * Scan results will be broadcasted on the "advertisementData" topic.
      */
     open func startScanningForCrownstones() {
-        self.disableBatterySaving()
         self.startScanningForServices([
             CrownstoneBuiltinAdvertisementServiceUUID,
             CrownstonePlugAdvertisementServiceUUID,
@@ -149,7 +148,6 @@ open class Bluenet  {
      * This is the battery saving variant, only unique messages are shown.
      */
     open func startScanningForCrownstonesUniqueOnly() {
-        self.disableBatterySaving()
         self.startScanningForServicesUniqueOnly([
             CrownstoneBuiltinAdvertisementServiceUUID,
             CrownstonePlugAdvertisementServiceUUID,
@@ -164,7 +162,6 @@ open class Bluenet  {
      * Scan results will be broadcasted on the "advertisementData" topic.
      */
     open func startScanningForService(_ serviceUUID: String) {
-        self.disableBatterySaving()
         self.bleManager.stopScanning()
         self.bleManager.startScanningForService(serviceUUID, uniqueOnly: false)
     }
@@ -174,7 +171,6 @@ open class Bluenet  {
      * Scan results will be broadcasted on the "advertisementData" topic.
      */
     open func startScanningForServices(_ serviceUUIDs: [String]) {
-        self.disableBatterySaving()
         self.bleManager.stopScanning()
         self.bleManager.startScanningForServices(serviceUUIDs, uniqueOnly: false)
     }
@@ -187,7 +183,6 @@ open class Bluenet  {
      * This is the battery saving variant, only unique messages are shown.
      */
     open func startScanningForServiceUniqueOnly(_ serviceUUID: String) {
-        self.disableBatterySaving()
         self.bleManager.stopScanning()
         self.bleManager.startScanningForService(serviceUUID, uniqueOnly: true)
     }
@@ -200,7 +195,6 @@ open class Bluenet  {
      * This is the battery saving variant, only unique messages are shown.
      */
     open func startScanningForServicesUniqueOnly(_ serviceUUIDs: [String]) {
-        self.disableBatterySaving()
         self.bleManager.stopScanning()
         self.bleManager.startScanningForServices(serviceUUIDs, uniqueOnly: true)
     }
@@ -317,6 +311,14 @@ open class Bluenet  {
     
     open func waitToWrite(_ iteration: UInt8 = 0) -> Promise<Void> {
         return self.bleManager.waitToWrite(iteration)
+    }
+    
+    open func applicationWillEnterForeground() {
+        self.bleManager.applicationWillEnterForeground()
+    }
+    
+    open func applicationDidEnterBackground() {
+        self.bleManager.applicationDidEnterBackground()
     }
     
     // MARK: util
