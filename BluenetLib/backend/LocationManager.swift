@@ -125,6 +125,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
                 LOG.info("BLUENET_LIB_NAV: Manager started. Start monitoring for \(beacon.UUID)")
                 self.monitoringState = true
                 self.manager!.startMonitoring(for: beacon.region)
+                self.manager!.requestState(for: beacon.region)
             }
         }
     }
@@ -238,6 +239,8 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
             // reinitialize
             for beacon in self.trackingBeacons {
                 self.manager!.startMonitoring(for: beacon.region)
+                self.manager!.requestState(for: beacon.region)
+                
             }
             self.monitoringState = true
         }
