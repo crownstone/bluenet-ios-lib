@@ -31,7 +31,7 @@ open class EventBus {
         self.subscribers[id] = topic;
         self.topics[topic]![id] = callback
         
-        return { _ in
+        return { 
             self._off(id);
         }
     }

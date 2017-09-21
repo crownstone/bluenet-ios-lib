@@ -240,10 +240,10 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     open func isReady() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             if (self.BleState != .poweredOn) {
-                delay(0.50, {_ in _ = self.isReady().then{_ -> Void in fulfill()}})
+                delay(0.50, { _ = self.isReady().then{_ -> Void in fulfill(())} })
             }
             else {
-                fulfill()
+                fulfill(())
             }
         }
     }
@@ -297,13 +297,13 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                 if (connectedPeripheral != nil) {
                     if (connectedPeripheral!.identifier.uuidString == uuid) {
                         LOG.info("BLUENET_LIB: Already connected to this peripheral")
-                        fulfill();
+                        fulfill(());
                     }
                     else {
                         LOG.info("BLUENET_LIB: Something is connected")
                         disconnect()
                             .then{ _ in self._connect(uuid)}
-                            .then{ _ in fulfill()}
+                            .then{ _ in fulfill(())}
                             .catch{ err in reject(err)}
                     }
                 }
@@ -312,13 +312,13 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                     LOG.info("BLUENET_LIB: connection attempt in progress")
                     abortConnecting()
                         .then{ _ in return self._connect(uuid)}
-                        .then{ _ in fulfill()}
+                        .then{ _ in fulfill(())}
                         .catch{ err in reject(err)}
                 }
                 else {
                     LOG.info("BLUENET_LIB: connecting...")
                     self._connect(uuid)
-                        .then{ _ in fulfill()}
+                        .then{ _ in fulfill(())}
                         .catch{ err in reject(err)}
                 }
             }
@@ -352,7 +352,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                 connectingPeripheral = nil
             }
             else {
-                fulfill()
+                fulfill(())
             }
         }
     }
@@ -399,11 +399,11 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                 LOG.info("BLUENET_LIB: disconnecting from connecting peripheral")
                 abortConnecting()
                     .then{ _ in return self._disconnect() }
-                    .then{_ -> Void in fulfill()}
+                    .then{_ -> Void in fulfill(())}
                     .catch{err in reject(err)}
             }
             else {
-                self._disconnect().then{_ -> Void in fulfill()}.catch{err in reject(err)}
+                self._disconnect().then{_ -> Void in fulfill(())}.catch{err in reject(err)}
             }
         }
     }
@@ -422,12 +422,12 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                 disconnectPromise.then { _ -> Void in
                     // make sure the connected peripheral is set to nil so we know nothing is connected
                     self.connectedPeripheral = nil
-                    fulfill()
+                    fulfill(())
                 }
                 .catch { err in reject(err) }
             }
             else {
-                fulfill()
+                fulfill(())
             }
         }
     }
@@ -632,7 +632,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                 unsubscribeCallback = self.notificationEventBus.on(serviceId + "_" + characteristicId, callback)
                 
                 // create the cleanup callback and return it.
-                let cleanupCallback : voidPromiseCallback = { _ in
+                let cleanupCallback : voidPromiseCallback = { 
                     return self.disableNotifications(serviceId, characteristicId: characteristicId, unsubscribeCallback: unsubscribeCallback!)
                 }
                 fulfill(cleanupCallback)
@@ -653,7 +653,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                         }
                     }
                     .then{_ -> Void in
-                        let cleanupCallback : voidPromiseCallback = { _ in return self.disableNotifications(serviceId, characteristicId: characteristicId, unsubscribeCallback: unsubscribeCallback!) }
+                        let cleanupCallback : voidPromiseCallback = { self.disableNotifications(serviceId, characteristicId: characteristicId, unsubscribeCallback: unsubscribeCallback!) }
                         fulfill(cleanupCallback)
                     }
                     .catch{(error: Error) -> Void in
@@ -674,18 +674,18 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             
             // if there are still other callbacks listening, we're done!
             if (self.notificationEventBus.hasListeners(serviceId + "_" + characteristicId)) {
-                fulfill()
+                fulfill(())
             }
             // if we are no longer connected we dont need to clean up.
             else if (self.connectedPeripheral == nil) {
-                fulfill()
+                fulfill(())
             }
             else {
                 // if there are no more people listening, we tell the device to stop the notifications.
                 self.getChacteristic(serviceId, characteristicId)
                     .then{characteristic -> Void in
                         if (self.connectedPeripheral == nil) {
-                            fulfill()
+                            fulfill(())
                         }
                         else {
                             self.pendingPromise.load(fulfill, reject, type: .DISABLE_NOTIFICATIONS)
@@ -934,7 +934,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             LOG.info("BLUENET_LIB: connected")
             connectedPeripheral = peripheral
             connectingPeripheral = nil
-            pendingPromise.fulfill()
+            pendingPromise.fulfill(())
         }
     }
     
@@ -959,7 +959,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     
         LOG.info("BLUENET_LIB: in didDisconnectPeripheral")
         if (pendingPromise.type == .CANCEL_PENDING_CONNECTION) {
-            pendingPromise.fulfill()
+            pendingPromise.fulfill(())
         }
         else {
             if (error != nil) {
@@ -973,7 +973,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                     pendingPromise.reject(BleError.DISCONNECTED)
                 }
                 else {
-                    pendingPromise.fulfill()
+                    pendingPromise.fulfill(())
                 }
             }
         }
@@ -1080,7 +1080,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                 pendingPromise.reject(error!)
             }
             else {
-                pendingPromise.fulfill()
+                pendingPromise.fulfill(())
             }
         }
     }
@@ -1091,7 +1091,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                 pendingPromise.reject(error!)
             }
             else {
-                pendingPromise.fulfill()
+                pendingPromise.fulfill(())
             }
         }
     }

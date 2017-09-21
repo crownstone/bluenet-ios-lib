@@ -154,7 +154,7 @@ open class MeshHandler {
                 LOG.info("BLUENET_LIB Mesh: delaying this command \(timeoutDurations.waitForMeshPropagation) \(dt)")
                 delay(timeoutDurations.waitForMeshPropagation - dt, fulfill)
             }
-            else { fulfill() }
+            else { fulfill(()) }
         }
         .then{ _ in return self._writeToMeshWithoutDelayCheck(channel: channel, payload: payload)}
     }

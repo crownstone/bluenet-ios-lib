@@ -33,9 +33,8 @@ enum PromiseType {
     case DATA
 }
 
-
 class promiseContainer {
-    fileprivate var _fulfillVoidPromise             : (Void) -> Void                = {_ in }
+    fileprivate var _fulfillVoidPromise             : () -> Void                  = { }
     fileprivate var _fulfillIntPromise              : (Int) -> Void                 = {_ in }
     fileprivate var _fulfillServiceListPromise      : ([CBService]) -> Void         = {_ in }
     fileprivate var _fulfillCharacteristicListPromise : ([CBCharacteristic]) -> Void = {_ in }
@@ -48,7 +47,7 @@ class promiseContainer {
     var completed = false
     var loadedPromise = false
     
-    func load(_ fulfill: @escaping (Void) -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
+    func load(_ fulfill: @escaping () -> Void, _ reject: @escaping (Error) -> Void, type: RequestType) {
         _cancelAnyPreviousPromise(newPromiseType: type)
         _fulfillVoidPromise = fulfill
         promiseType = .VOID
@@ -102,7 +101,7 @@ class promiseContainer {
     
     func setDelayedFulfill(_ delayTimeInSeconds: Double) {
         if (promiseType == .VOID) {
-            delay(delayTimeInSeconds, {_ in self.fulfill()})
+            delay(delayTimeInSeconds, { self.fulfill(()) })
         }
         else {
             _rejectPromise(BleError.CANNOT_SET_TIMEOUT_WITH_THIS_TYPE_OF_PROMISE)
@@ -112,7 +111,7 @@ class promiseContainer {
     func setDelayedReject(_ delayTimeInSeconds: Double, errorOnReject: BleError) {
         let rejectId = getUUID()
         self.rejectId = rejectId
-        delay(delayTimeInSeconds, {_ in
+        delay(delayTimeInSeconds, {
             if (rejectId == self.rejectId) {
                 self.reject(errorOnReject as Error)
             }
@@ -131,7 +130,7 @@ class promiseContainer {
         rejectId = ""
         completed = false
         loadedPromise = false
-        _fulfillVoidPromise               = {_ in }
+        _fulfillVoidPromise               = { }
         _fulfillIntPromise                = {_ in }
         _fulfillServiceListPromise        = {_ in }
         _fulfillCharacteristicListPromise = {_ in }
@@ -146,7 +145,7 @@ class promiseContainer {
             // An exception is added so disconnect is always safe to repeat.
             // Usually, there is an extra disconnect in catch statements just in case.
             if (self.type == .DISCONNECT && newPromiseType == self.type) {
-                self.fulfill()
+                self.fulfill(())
                 self._clear()
             }
             else {
@@ -161,7 +160,7 @@ class promiseContainer {
         if (self.completed == false) {
             self.completed = true
             if (promiseType == .VOID) {
-                _fulfillVoidPromise(data)
+                _fulfillVoidPromise()
             }
             else {
                 _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)

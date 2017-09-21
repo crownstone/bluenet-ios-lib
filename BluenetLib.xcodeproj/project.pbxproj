@@ -16,7 +16,7 @@
 		FA3FC25B1ED3499C00DD2F76 /* StateHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3FC25A1ED3499C00DD2F76 /* StateHandler.swift */; };
 		FA3FC25D1ED34DEF00DD2F76 /* ConversionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3FC25C1ED34DEF00DD2F76 /* ConversionTests.swift */; };
 		FA3FC25F1ED4346200DD2F76 /* CrownstoneErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3FC25E1ED4346200DD2F76 /* CrownstoneErrors.swift */; };
-		FA5882B91E38C0F100913AE6 /* BleMangager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58828A1E38C0F000913AE6 /* BleMangager.swift */; };
+		FA5882B91E38C0F100913AE6 /* BleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58828A1E38C0F000913AE6 /* BleManager.swift */; };
 		FA5882BA1E38C0F100913AE6 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58828B1E38C0F000913AE6 /* LocationManager.swift */; };
 		FA5882BB1E38C0F100913AE6 /* ConfigHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58828D1E38C0F000913AE6 /* ConfigHandler.swift */; };
 		FA5882BC1E38C0F100913AE6 /* ControlHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58828E1E38C0F000913AE6 /* ControlHandler.swift */; };
@@ -85,7 +85,7 @@
 		FA3FC25A1ED3499C00DD2F76 /* StateHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateHandler.swift; sourceTree = "<group>"; };
 		FA3FC25C1ED34DEF00DD2F76 /* ConversionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConversionTests.swift; sourceTree = "<group>"; };
 		FA3FC25E1ED4346200DD2F76 /* CrownstoneErrors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CrownstoneErrors.swift; sourceTree = "<group>"; };
-		FA58828A1E38C0F000913AE6 /* BleMangager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BleMangager.swift; sourceTree = "<group>"; };
+		FA58828A1E38C0F000913AE6 /* BleManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BleManager.swift; sourceTree = "<group>"; };
 		FA58828B1E38C0F000913AE6 /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		FA58828D1E38C0F000913AE6 /* ConfigHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigHandler.swift; sourceTree = "<group>"; };
 		FA58828E1E38C0F000913AE6 /* ControlHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ControlHandler.swift; sourceTree = "<group>"; };
@@ -210,7 +210,7 @@
 		FA5882891E38C0F000913AE6 /* backend */ = {
 			isa = PBXGroup;
 			children = (
-				FA58828A1E38C0F000913AE6 /* BleMangager.swift */,
+				FA58828A1E38C0F000913AE6 /* BleManager.swift */,
 				FA58828B1E38C0F000913AE6 /* LocationManager.swift */,
 				FA747B141E4B0FBA00255820 /* packetGenerators */,
 				FA58828C1E38C0F000913AE6 /* serviceImplementations */,
@@ -368,11 +368,11 @@
 				TargetAttributes = {
 					FA3C18781CBBDA6B00A11CF7 = {
 						CreatedOnToolsVersion = 7.3;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 0900;
 					};
 					FA3C18821CBBDA6B00A11CF7 = {
 						CreatedOnToolsVersion = 7.3;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 0900;
 					};
 				};
 			};
@@ -452,7 +452,7 @@
 				FA3FC25B1ED3499C00DD2F76 /* StateHandler.swift in Sources */,
 				FA5882D81E38C0F100913AE6 /* Conversion.swift in Sources */,
 				FA5882D91E38C0F100913AE6 /* Eventbus.swift in Sources */,
-				FA5882B91E38C0F100913AE6 /* BleMangager.swift in Sources */,
+				FA5882B91E38C0F100913AE6 /* BleManager.swift in Sources */,
 				FA5882D01E38C0F100913AE6 /* Globals.swift in Sources */,
 				FA5882D51E38C0F100913AE6 /* Characteristics.swift in Sources */,
 				FA5882C41E38C0F100913AE6 /* Advertisement.swift in Sources */,
@@ -602,7 +602,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
@@ -630,7 +631,8 @@
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
@@ -647,7 +649,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks $(PROJECT_DIR)/Carthage/Build/iOS";
 				PRODUCT_BUNDLE_IDENTIFIER = com.crownstone.BluenetLibIOSTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -663,7 +666,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks $(PROJECT_DIR)/Carthage/Build/iOS";
 				PRODUCT_BUNDLE_IDENTIFIER = com.crownstone.BluenetLibIOSTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};

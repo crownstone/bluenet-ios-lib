@@ -44,7 +44,7 @@ open class SetupHandler {
                     self.eventBus.emit("setupProgress", 2)
                     self.bleManager.settings.setSessionNonce(nonce)
                     self.bleManager.settings.restoreEncryption()
-                    fulfill()
+                    fulfill(())
                 }
                 .catch{(err: Error) -> Void in
                     self.bleManager.settings.restoreEncryption()
@@ -75,7 +75,7 @@ open class SetupHandler {
                     LOG.info("BLUENET_LIB: Setup Finished")
                     self.eventBus.emit("setupProgress", 13);
                     self.bleManager.settings.exitSetup()
-                    fulfill()
+                    fulfill(())
                 }
                 .catch{(err: Error) -> Void in
                     self.eventBus.emit("setupProgress", 0);
@@ -120,7 +120,7 @@ open class SetupHandler {
             )
             .then{_ -> Void in
                 self.bleManager.settings.restoreEncryption()
-                fulfill()
+                fulfill(())
             }
             .catch{(err: Error) -> Void in
                 self.bleManager.settings.restoreEncryption()
@@ -258,12 +258,12 @@ open class SetupHandler {
                 unsubscribeNotificationCallback!()
                     .then{ _ -> Void in
                         self.unsubscribeNotificationCallback = nil
-                        fulfill()
+                        fulfill(())
                     }
                     .catch{ _ in }
             }
             else {
-                fulfill()
+                fulfill(())
             }
         }
     }
@@ -285,7 +285,7 @@ open class SetupHandler {
                     let stepId = self.step
                     
                     // fallback delay to cancel the wait for incoming notifications.
-                    delay(2*timeoutDurations.waitForWrite, { _ in
+                    delay(2*timeoutDurations.waitForWrite, { 
                         if (self.validationComplete == false && self.step == stepId) {
                             self.validationResult = { _ in }
                             self.matchPacket = []
@@ -299,7 +299,7 @@ open class SetupHandler {
             .then{ match -> Promise<Void> in
                 if (match) {
                     LOG.info("validated.")
-                    return Promise<Void> { fulfill, reject in fulfill() }
+                    return Promise<Void> { fulfill, reject in fulfill(()) }
                 }
                 else {
                     if (iteration > 2) {

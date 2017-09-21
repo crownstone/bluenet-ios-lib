@@ -20,7 +20,7 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
     var wasScanning = false
     
     fileprivate var dfuController : DFUServiceController?
-    var pendingDFUPromiseFulfill : (Void) -> Void = {_ in }
+    var pendingDFUPromiseFulfill : () -> Void = { }
     var pendingDFUPromiseReject : (BleError) -> Void  = {_ in }
     var promisePending = false
     
@@ -131,7 +131,7 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
                                     reject(BleError.NOT_IN_DFU_MODE)
                                 }
                                 else {
-                                    fulfill()
+                                    fulfill(())
                                 }
                             }
                             .catch{ err in reject(err) }
@@ -151,7 +151,7 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
                     cleanup = nil
                     return self.bleManager.disconnect()
                 }
-                .then {(_) -> Void in fulfill()}
+                .then {(_) -> Void in fulfill(())}
                 .catch {(err) -> Void in
                     self.bleManager.settings.restoreEncryption()
                     if (cleanup != nil) {
@@ -159,11 +159,11 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
                     }
                     self.bleManager.disconnect()
                         .then{_ -> Void in
-                            if (success) { fulfill() }
+                            if (success) { fulfill(()) }
                             else { reject(err) }
                         }
                         .catch{_ in
-                            if (success) { fulfill() }
+                            if (success) { fulfill(()) }
                             else { reject(err) }
                         }
             }

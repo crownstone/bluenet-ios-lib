@@ -40,7 +40,7 @@ open class ControlHandler {
                     self.bleManager.settings.restoreEncryption()
                     return self.bleManager.disconnect()
                 }
-                .then {(_) -> Void in fulfill()}
+                .then {(_) -> Void in fulfill(())}
                 .catch {(err) -> Void in
                     self.bleManager.settings.restoreEncryption()
                     self.bleManager.disconnect().then{_ in reject(err)}.catch{_ in reject(err)}
@@ -54,7 +54,7 @@ open class ControlHandler {
             self.bleManager.readCharacteristic(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.FactoryReset)
                 .then{(result: [UInt8]) -> Void in
                     if (result[0] == 1) {
-                        fulfill()
+                        fulfill(())
                     }
                     else if (result[0] == 2) {
                         reject(BleError.RECOVER_MODE_DISABLED)
@@ -85,7 +85,7 @@ open class ControlHandler {
             .then{(response: [UInt8]) -> Promise<Void> in
                 return Promise<Void> {fulfill, reject in
                     if (response[0] == 0) {
-                        fulfill()
+                        fulfill(())
                     }
                     else {
                         reject(BleError.COULD_NOT_FACTORY_RESET)
@@ -122,7 +122,7 @@ open class ControlHandler {
                 
                 if (isInDfuMode == true) {
                     LOG.info("BLUENET_LIB: Already in DFU.")
-                    return Promise<Void> { fulfill, reject in fulfill() }
+                    return Promise<Void> { fulfill, reject in fulfill(()) }
                 }
                 
                 LOG.info("BLUENET_LIB: switching to DFU")
@@ -160,7 +160,7 @@ open class ControlHandler {
     open func toggleSwitchState() -> Promise<Float> {
         return Promise<Float> { fulfill, reject in
             var newSwitchStateSend : Float = 0
-            let writeCommand : voidPromiseCallback = { _ in
+            let writeCommand : voidPromiseCallback = { 
                 return self.bleManager.writeToCharacteristic(
                     CSServices.CrownstoneService,
                     characteristicId: CrownstoneCharacteristics.StateControl,
@@ -222,7 +222,7 @@ open class ControlHandler {
                     do {
                         let sessionNonce = try EncryptionHandler.decryptSessionNonce(sessionNonce, key: self.bleManager.settings.guestKey!)
                         self.bleManager.settings.setSessionNonce(sessionNonce)
-                        fulfill()
+                        fulfill(())
                     }
                     catch let err {
                         reject(err)
@@ -238,7 +238,7 @@ open class ControlHandler {
                             return
                         }
                     }
-                    fulfill()
+                    fulfill(())
                 }
             }
     }

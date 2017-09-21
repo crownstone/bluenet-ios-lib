@@ -121,7 +121,7 @@ open class StateHandler {
     
     public func _getState<T>(_ state : StateType) -> Promise<T> {
         return Promise<T> { fulfill, reject in
-            let writeCommand : voidPromiseCallback = { _ in
+            let writeCommand : voidPromiseCallback = { 
                 return self.bleManager.writeToCharacteristic(
                     CSServices.CrownstoneService,
                     characteristicId: CrownstoneCharacteristics.StateControl,

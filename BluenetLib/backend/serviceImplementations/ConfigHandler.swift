@@ -81,8 +81,8 @@ open class ConfigHandler {
             if (txPower == -40 || txPower == -30 || txPower == -20 || txPower == -16 || txPower == -12 || txPower == -8 || txPower == -4 || txPower == 0 || txPower == 4) {
                 let data = WriteConfigPacket(type: ConfigurationType.tx_POWER, payload8: txPower.int8Value)
                 self._writeToConfig(packet: data.getPacket())
-                    .then{_ in fulfill()}
-                    .catch{err in reject(err)}
+                    .then{ _ in fulfill(()) }
+                    .catch{ err in reject(err) }
             }
             else {
                 reject(BleError.INVALID_TX_POWER_VALUE)
@@ -101,7 +101,7 @@ open class ConfigHandler {
     
     public func _getConfig<T>(_ config : ConfigurationType) -> Promise<T> {
         return Promise<T> { fulfill, reject in
-            let writeCommand : voidPromiseCallback = { _ in
+            let writeCommand : voidPromiseCallback = { 
                 return self.bleManager.writeToCharacteristic(
                     CSServices.CrownstoneService,
                     characteristicId: CrownstoneCharacteristics.ConfigControl,

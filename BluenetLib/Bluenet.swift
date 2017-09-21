@@ -234,7 +234,7 @@ open class Bluenet  {
             }
         }
         
-        let connectionCommand : voidPromiseCallback = { _ -> Promise<Void> in
+        let connectionCommand : voidPromiseCallback = { 
             return self.bleManager.connect(uuid)
                 .then{_ -> Promise<Void> in
                     return Promise<Void> {fulfill, reject in
@@ -242,12 +242,12 @@ open class Bluenet  {
                             self.control.getAndSetSessionNonce()
                                 .then{_ -> Void in
                                     LOG.verbose("BLUENET_LIB: got and set sessionNonce")
-                                    fulfill()
+                                    fulfill(())
                                 }
                                 .catch{err in reject(err)}
                         }
                         else {
-                            fulfill()
+                            fulfill(())
                         }
                     }
                 };
@@ -256,9 +256,9 @@ open class Bluenet  {
         if (delayTime != 0) {
             LOG.info("BLUENET_LIB: Delaying connection to \(uuid) with \(delayTime) seconds since it recently got a disconnectCommand.")
             return Promise<Void> {fulfill, reject in
-                delay(delayTime, { _ in
+                delay(delayTime, { 
                     LOG.info("BLUENET_LIB: Connecting to \(uuid) now.")
-                    connectionCommand().then{ _ in fulfill() }.catch{err in reject(err) }
+                    connectionCommand().then{ _ in fulfill(()) }.catch{err in reject(err) }
                 })
             }
         }
@@ -385,7 +385,7 @@ open class Bluenet  {
             }
             else {
                 // add this Crownstone to the list that we keep track of.
-                deviceList[castData.handle] = AvailableDevice(castData, {_ in self.deviceList.removeValue(forKey: castData.handle)})
+                deviceList[castData.handle] = AvailableDevice(castData, { self.deviceList.removeValue(forKey: castData.handle)})
             }
         }
     }

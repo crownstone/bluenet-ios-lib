@@ -77,8 +77,8 @@ open class AvailableDevice {
         
         self.calculateRssiAverage()
         
-        delay(self.timeout, {_ in self.checkTimeout(updatetime)});
-        delay(self.rssiTimeout, {_ in self.clearRSSI(updatetime)});
+        delay(self.timeout, { self.checkTimeout(updatetime) });
+        delay(self.rssiTimeout, { self.clearRSSI(updatetime) });
     }
     
     
