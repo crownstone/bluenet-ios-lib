@@ -128,6 +128,8 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     var batterySaving = false
     var backgroundEnabled = true
     
+    var cBmanagerUpdatedState = false
+    
 
     public init(eventBus: EventBus, backgroundEnabled: Bool = true) {
         super.init();
@@ -156,8 +158,18 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             return
         }
         self.backgroundEnabled = newBackgroundState
+        self.BleState = .unknown
+        self.cBmanagerUpdatedState = false
         self.setCentralManager()
-        self.restoreScanning()
+        
+        self.isReady().then{ _ in self.restoreScanning()}.catch{ err in print(err) }
+        
+        // fallback.
+        delay(3, { _ in
+            if (self.cBmanagerUpdatedState == false) {
+                self.BleState = .poweredOn
+            }
+        })
     }
     
     func setCentralManager() {
@@ -847,6 +859,8 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     // MARK: CENTRAL MANAGER DELEGATE
     
     open func centralManagerDidUpdateState(_ central: CBCentralManager) {
+        self.cBmanagerUpdatedState = true
+        
         if #available(iOS 10.0, *) {
             switch central.state{
             case CBManagerState.unauthorized:
