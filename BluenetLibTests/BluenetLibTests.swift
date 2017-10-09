@@ -54,7 +54,7 @@ class BluenetLibTests: XCTestCase {
     }
     
     func testJSON() {
-        let a = JSON.parse("{\"a\":null}")
+        let a = JSON("{\"a\":null}")
         print(a["a"].string)
     }
     
@@ -65,29 +65,7 @@ class BluenetLibTests: XCTestCase {
         print(Conversion.uint8_array_to_hex_string(aInv))
     }
     
-    func testCrownstoneErrors() {
-        let initialBitMask : UInt32 = 15
-        let errors1 = CrownstoneErrors(bitMask: initialBitMask)
-        
-        let dict = errors1.getDictionary()
-        let errors2 = CrownstoneErrors(dictionary: dict)
-        
-        let dict2 : NSDictionary = [
-            "overCurrent" : NSNumber(value: false),
-            "overCurrentDimmer" : NSNumber(value: true),
-            "temperatureChip" : NSNumber(value: true),
-            ]
-        
-        let errors3 = CrownstoneErrors(dictionary: dict2)
-        
-        XCTAssertEqual(errors3.getResetMask(), 6)
-        
-        XCTAssertEqual(initialBitMask,errors1.getResetMask())
-        XCTAssertEqual(initialBitMask,errors2.getResetMask())
-        XCTAssertEqual(errors1.getDictionary(),errors2.getDictionary())
-        
-        print("\(errors3.getDictionary()), \(errors3.getResetMask())")
-    }
+    
     
     func testScheduleConfig() {
         let config = ScheduleConfigurator(

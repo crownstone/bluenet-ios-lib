@@ -47,7 +47,7 @@ open class SessionData {
 }
 
 open class zeroPadding {
-    open func add(to data: [UInt8], blockSize: Int) -> [UInt8] {
+    static open func add(to data: [UInt8], blockSize: Int) -> [UInt8] {
         if (data.count % blockSize != 0) {
             let offset = blockSize - (data.count % blockSize)
             let padding = [UInt8](repeating: 0, count: offset)
@@ -58,7 +58,7 @@ open class zeroPadding {
         return data
     }
     
-    open func remove(from data: [UInt8], blockSize: Int?) -> [UInt8] {
+     static open func remove(from data: [UInt8], blockSize: Int?) -> [UInt8] {
         return data
     }
 }
@@ -117,7 +117,7 @@ class EncryptionHandler {
         }
         
         // manually padd the payload since the CryptoSwift version is not working for CTR.
-        let finalPayloadForEncryption = zeroPadding().add(to: paddedPayload, blockSize: 16);
+        let finalPayloadForEncryption = zeroPadding.add(to: paddedPayload, blockSize: 16);
         
         // do the actual encryption
         let encryptedPayload = try AES(key: key, iv: IV, blockMode: CryptoSwift.BlockMode.CTR, padding: .noPadding).encrypt(finalPayloadForEncryption)

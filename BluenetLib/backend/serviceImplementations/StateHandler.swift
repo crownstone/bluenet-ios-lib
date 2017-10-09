@@ -58,7 +58,7 @@ open class StateHandler {
                         reject(BleError.INCORRECT_DATA_COUNT_FOR_ALL_TIMERS)
                         return
                     }
-                    
+            
                     let amountOfTimers : UInt8 = data[0]
                     
                     if (amountOfTimers == 0) {
@@ -130,6 +130,7 @@ open class StateHandler {
             }
             self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.StateRead, writeCommand: writeCommand)
                 .then{ data -> Void in
+     
                     var validData = [UInt8]()
                     // remove the state preamble
                     if (data.count > 3) {

@@ -861,8 +861,21 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                 self.BleState = .poweredOn
                 self.eventBus.emit("bleStatus", "poweredOn");
                 LOG.info("BLUENET_LIB: Bluetooth is currently powered on and available to use.")
-            default:
+            case CBManagerState.resetting:
+                self.BleState = .resetting
+                self.eventBus.emit("bleStatus", "resetting");
+                LOG.info("BLUENET_LIB: Bluetooth is currently resetting.")
+            case CBManagerState.unknown:
+                self.BleState = .unknown
                 self.eventBus.emit("bleStatus", "unknown");
+                LOG.info("BLUENET_LIB: Bluetooth state is unknown.")
+            case CBManagerState.unsupported:
+                self.BleState = .unsupported
+                self.eventBus.emit("bleStatus", "unsupported");
+                LOG.info("BLUENET_LIB: Bluetooth is unsupported?")
+            default:
+                self.eventBus.emit("bleStatus", "unknown")
+                LOG.info("BLUENET_LIB: Bluetooth is other: \(central.state) ")
                 break
             }
         } else {
