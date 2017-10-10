@@ -98,7 +98,7 @@ struct timeoutDurations {
     static let enableNotifications     : Double = 2
     static let disableNotifications    : Double = 2
     static let waitForBond             : Double = 12
-    static let waitForWrite            : Double = 0.35
+    static let waitForWrite            : Double = 0.6
     static let waitForReconnect        : Double = 2.0
     static let waitForRestart          : Double = 2
     static let waitForMeshPropagation  : Double = 0.5
@@ -165,7 +165,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         self.isReady().then{ _ in self.restoreScanning()}.catch{ err in print(err) }
         
         // fallback.
-        delay(3, { _ in
+        delay(3, { 
             if (self.cBmanagerUpdatedState == false) {
                 self.BleState = .poweredOn
             }

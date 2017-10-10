@@ -224,8 +224,12 @@ open class SetupHandler {
                 if (self._checkMatch(input: decryptedData.bytes, target: self.matchPacket)) {
                     self.matchPacket = []
                     self.validationComplete = true
-                    
                     self.validationResult(true)
+                }
+                else {
+                    self.matchPacket = []
+                    self.validationComplete = true
+                    self.validationResult(false)
                 }
             }
             catch _ {
@@ -273,8 +277,10 @@ open class SetupHandler {
     func _writeAndVerify(_ type: ConfigurationType, payload: [UInt8], iteration: UInt8 = 0) -> Promise<Void> {
         self.step += 1
         let initialPacket = WriteConfigPacket(type: type, payloadArray: payload).getPacket()
-        return _writeConfigPacket(initialPacket)
-            .then{_ -> Promise<Void> in self.bleManager.waitToWrite()}
+        return self._writeConfigPacket(initialPacket)
+            .then{_ -> Promise<Void> in
+                return self.bleManager.waitToWrite()
+            }
             .then{_ -> Promise<Bool> in
                 let packet = ReadConfigPacket(type: type).getPacket()
                 // Make sure we first provide the fulfillment function before we ask for the notifications.
@@ -285,7 +291,7 @@ open class SetupHandler {
                     let stepId = self.step
                     
                     // fallback delay to cancel the wait for incoming notifications.
-                    delay(2*timeoutDurations.waitForWrite, { 
+                    delay(4*timeoutDurations.waitForWrite, {
                         if (self.validationComplete == false && self.step == stepId) {
                             self.validationResult = { _ in }
                             self.matchPacket = []
@@ -298,15 +304,12 @@ open class SetupHandler {
             }
             .then{ match -> Promise<Void> in
                 if (match) {
-                    LOG.info("validated.")
                     return Promise<Void> { fulfill, reject in fulfill(()) }
                 }
                 else {
                     if (iteration > 2) {
-                        LOG.info("failed.")
                         return Promise<Void> { fulfill, reject in reject(BleError.CANNOT_WRITE_AND_VERIFY) }
                     }
-                    LOG.info("retrying...")
                     return self._writeAndVerify(type, payload:payload, iteration: iteration+1)
                 }
         }
@@ -324,10 +327,10 @@ open class SetupHandler {
     func _checkMatch(input: [UInt8], target: [UInt8]) -> Bool {
         let prefixLength = 4
         let dataLength = Int(Conversion.uint8_array_to_uint16([input[2],input[3]]))
-        var match = (input.count >= prefixLength + dataLength && target.count >= prefixLength + dataLength)
+        var match = (input.count >= (prefixLength + dataLength) && target.count >= (prefixLength + dataLength))
         if (match == true) {
             for i in [Int](0...dataLength-1) {
-                if (input[i+prefixLength] != target[i+prefixLength]){
+                if (input[i+prefixLength] != target[i+prefixLength]) {
                     match = false
                 }
             }
@@ -335,9 +338,4 @@ open class SetupHandler {
         return match
     }
     
-    
-    
-    
-    
-
 }

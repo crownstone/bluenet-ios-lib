@@ -423,12 +423,15 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     open func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
         LOG.info("BLUENET_LIB_NAV: State change \(state.rawValue) , \(region)")
         if (state.rawValue == 1) {       // 1 == inside
+            LOG.info("BLUENET_LIB_NAV: State change to inside")
             self._startRanging(region)
         }
         else if (state.rawValue == 2) {  // 2 == outside
+            LOG.info("BLUENET_LIB_NAV: State change to outside")
             self._stopRanging(region)
         }
         else {                           // 0 == unknown,
+            LOG.info("BLUENET_LIB_NAV: State change to unknown")
            // self._stopRanging(region)
         }
     }
