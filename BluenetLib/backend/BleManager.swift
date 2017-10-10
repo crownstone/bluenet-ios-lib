@@ -90,6 +90,7 @@ struct timeoutDurations {
     static let disconnect              : Double = 3
     static let cancelPendingConnection : Double = 3
     static let connect                 : Double = 10
+    static let reconnect               : Double = 0.5
     static let getServices             : Double = 3
     static let getCharacteristics      : Double = 3
     static let readCharacteristic      : Double = 3
@@ -393,7 +394,6 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                     // setup the pending promise for connection
                     pendingPromise.load(fulfill, reject, type: .CONNECT)
                     pendingPromise.setDelayedReject(timeoutDurations.connect, errorOnReject: .CONNECT_TIMEOUT)
-                    
                     centralManager.connect(connectingPeripheral!, options: nil)
 
                 }

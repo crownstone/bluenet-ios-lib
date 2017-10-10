@@ -227,21 +227,22 @@ open class Bluenet  {
     open func connect(_ uuid: String) -> Promise<Void> {
         var delayTime : Double = 0
         if let timeOfLastDisconnectCommand = self.disconnectCommandTimeList[uuid] {
-            let minimumTimeBetweenReconnects = 0.5 // seconds
+            let minimumTimeBetweenReconnects = timeoutDurations.reconnect // seconds
             let diff = Date().timeIntervalSince1970 - timeOfLastDisconnectCommand
             if (diff < minimumTimeBetweenReconnects) {
                 delayTime = minimumTimeBetweenReconnects - diff
             }
         }
         
-        let connectionCommand : voidPromiseCallback = { 
+        let connectionCommand : voidPromiseCallback = {
+            LOG.info("BLUENET_LIB: Connecting to \(uuid) now.")
             return self.bleManager.connect(uuid)
                 .then{_ -> Promise<Void> in
+                    LOG.info("BLUENET_LIB: connected!")
                     return Promise<Void> {fulfill, reject in
                         if (self.settings.isEncryptionEnabled()) {
                             self.control.getAndSetSessionNonce()
                                 .then{_ -> Void in
-                                    LOG.verbose("BLUENET_LIB: got and set sessionNonce")
                                     fulfill(())
                                 }
                                 .catch{err in reject(err)}
@@ -256,8 +257,7 @@ open class Bluenet  {
         if (delayTime != 0) {
             LOG.info("BLUENET_LIB: Delaying connection to \(uuid) with \(delayTime) seconds since it recently got a disconnectCommand.")
             return Promise<Void> {fulfill, reject in
-                delay(delayTime, { 
-                    LOG.info("BLUENET_LIB: Connecting to \(uuid) now.")
+                delay(delayTime, {
                     connectionCommand().then{ _ in fulfill(()) }.catch{err in reject(err) }
                 })
             }
