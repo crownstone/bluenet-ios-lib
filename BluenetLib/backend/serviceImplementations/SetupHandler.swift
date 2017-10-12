@@ -21,6 +21,7 @@ open class SetupHandler {
     var matchPacket : [UInt8] = [UInt8]()
     var validationResult : (Bool) -> Void = { _ in }
     var validationComplete = false
+    var verificationFailed = false
     var step = 0
     
     init (bleManager:BleManager, eventBus: EventBus, settings: BluenetSettings, deviceList: [String: AvailableDevice]) {
@@ -58,6 +59,7 @@ open class SetupHandler {
      */
     open func setup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
         self.step = 0
+        self.verificationFailed = false
         return Promise<Void> { fulfill, reject in
             self.handleSetupPhaseEncryption()
                 .then{(_) -> Promise<Void> in return self.setHighTX()}
@@ -281,6 +283,14 @@ open class SetupHandler {
             .then{_ -> Promise<Void> in
                 return self.bleManager.waitToWrite()
             }
+            .then{_ -> Promise<Void> in
+                if (self.verificationFailed == true) {
+                    return self.bleManager.waitToWrite()
+                }
+                else {
+                    return Promise<Void> { fulfill, reject in fulfill(()) }
+                }
+            }
             .then{_ -> Promise<Bool> in
                 let packet = ReadConfigPacket(type: type).getPacket()
                 // Make sure we first provide the fulfillment function before we ask for the notifications.
@@ -307,6 +317,7 @@ open class SetupHandler {
                     return Promise<Void> { fulfill, reject in fulfill(()) }
                 }
                 else {
+                    self.verificationFailed = true
                     if (iteration > 2) {
                         return Promise<Void> { fulfill, reject in reject(BleError.CANNOT_WRITE_AND_VERIFY) }
                     }

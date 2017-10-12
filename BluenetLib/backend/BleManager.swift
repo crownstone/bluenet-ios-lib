@@ -614,7 +614,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                     
                     // the fulfil and reject are handled in the peripheral delegate
                     if (self.settings.isEncryptionEnabled()) {
-                         LOG.verbose("BLUENET_LIB: writing \(data.bytes) which will be encrypted.")
+                         LOG.debug("BLUENET_LIB: writing \(data.bytes) which will be encrypted.")
                         do {
                             let encryptedData = try EncryptionHandler.encrypt(data, settings: self.settings)
                             self.connectedPeripheral!.writeValue(encryptedData, for: characteristic, type: type)
@@ -624,7 +624,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
                         }
                     }
                     else {
-                        LOG.verbose("BLUENET_LIB: writing \(data.bytes)")
+                        LOG.debug("BLUENET_LIB: writing \(data.bytes)")
                         self.connectedPeripheral!.writeValue(data, for: characteristic, type: type)
                     }
 
