@@ -120,7 +120,7 @@ class EncryptionHandler {
         let finalPayloadForEncryption = zeroPadding.add(to: paddedPayload, blockSize: 16);
         
         // do the actual encryption
-        let encryptedPayload = try AES(key: key, iv: IV, blockMode: CryptoSwift.BlockMode.CTR, padding: .noPadding).encrypt(finalPayloadForEncryption)
+        let encryptedPayload = try AES(key: key, blockMode: CryptoSwift.BlockMode.CTR(iv: IV), padding: .noPadding).encrypt(finalPayloadForEncryption)
         var result = [UInt8](repeating: 0, count: PACKET_NONCE_LENGTH+PACKET_USERLEVEL_LENGTH + encryptedPayload.count)
         
         // copy nonce into result
@@ -196,7 +196,7 @@ class EncryptionHandler {
         let key = try _getKey(package.userLevel, settings)
         let IV = try generateIV(package.nonce, sessionData: sessionData.sessionNonce)
 
-        let decrypted = try AES(key: key, iv: IV, blockMode: CryptoSwift.BlockMode.CTR).decrypt(package.getPayload())
+        let decrypted = try AES(key: key, blockMode: CryptoSwift.BlockMode.CTR(iv: IV)).decrypt(package.getPayload())
         
         return decrypted
     }

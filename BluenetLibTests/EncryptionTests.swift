@@ -125,5 +125,7 @@ class EncryptionTests: XCTestCase {
         print("encryptedData \(encryptedData)")
         let decryptedData = try! AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: .noPadding).decrypt(encryptedData)
         print("decryptedData \(decryptedData)")
+        
+        XCTAssertEqual(decryptedData[0...decryptedData.count-1], paddedData[0...paddedData.count-1], "decryption failed")
     }
 }
