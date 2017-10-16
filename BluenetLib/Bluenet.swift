@@ -281,14 +281,14 @@ open class Bluenet  {
      * Get the state of the BLE controller.
      */
     open func getBleState() -> CBCentralManagerState {
-        return self.bleManager.BleState;
+        return self.bleManager.BleState
     }
     
     /**
      * Re-emit the state of the BLE controller.
      */
     open func emitBleState() {
-        self.bleManager.centralManagerDidUpdateState(self.bleManager.centralManager);
+        self.bleManager.emitBleState()
     }
     
     

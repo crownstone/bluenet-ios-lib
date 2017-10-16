@@ -107,7 +107,7 @@ struct timeoutDurations {
 
 
 
-open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
+open class BleManager: NSObject, CBPeripheralDelegate {
     open var centralManager : CBCentralManager!
     var connectedPeripheral: CBPeripheral?
     var connectingPeripheral: CBPeripheral?
@@ -131,6 +131,8 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     
     var cBmanagerUpdatedState = false
     
+    var CBDelegate : BluenetCBDelegate!
+    var CBDelegateBackground : BluenetCBDelegateBackground!
 
     public init(eventBus: EventBus, backgroundEnabled: Bool = true) {
         super.init();
@@ -140,10 +142,14 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         self.eventBus = eventBus
         
         self.backgroundEnabled = backgroundEnabled
+        
+        self.CBDelegate = BluenetCBDelegate(bleManager: self)
+        self.CBDelegateBackground = BluenetCBDelegateBackground(bleManager: self)
         self.setCentralManager()
         
+        
         // initialize the pending promise containers
-        pendingPromise = promiseContainer()
+        self.pendingPromise = promiseContainer()
     }
     
     open func applicationWillEnterForeground() {
@@ -158,6 +164,7 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
         if (self.backgroundEnabled == newBackgroundState) {
             return
         }
+        centralManager.stopScan()
         self.backgroundEnabled = newBackgroundState
         self.BleState = .unknown
         self.cBmanagerUpdatedState = false
@@ -180,10 +187,18 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
              * As a result, the UID must remain the same for subsequent executions of the app
              * in order for the central manager to be successfully restored.
              **/
-            self.centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true, CBCentralManagerOptionRestoreIdentifierKey: APPNAME +  "BluenetIOS"])
+            self.centralManager = CBCentralManager(
+                delegate: self.CBDelegateBackground,
+                queue: nil,
+                options: [CBCentralManagerOptionShowPowerAlertKey: true, CBCentralManagerOptionRestoreIdentifierKey: APPNAME +  "BluenetIOS"]
+            )
         }
         else {
-            self.centralManager = CBCentralManager(delegate: self, queue: nil, options: [CBCentralManagerOptionShowPowerAlertKey: true])
+            self.centralManager = CBCentralManager(
+                delegate: self.CBDelegate,
+                queue: nil,
+                options: [CBCentralManagerOptionShowPowerAlertKey: true]
+            )
         }
     }
     
@@ -240,10 +255,23 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
     open func reassignDelegate() {
         LOG.info("Reassigning Delegate")
         self.decoupledDelegate = false
-        self.centralManager.delegate = self
+        if (self.backgroundEnabled) {
+            self.centralManager.delegate = self.CBDelegateBackground
+        }
+        else {
+            self.centralManager.delegate = self.CBDelegate
+        }
         self.restoreScanning()
     }
    
+    open func emitBleState() {
+        if (self.backgroundEnabled) {
+            self.CBDelegateBackground.centralManagerDidUpdateState(self.centralManager)
+        }
+        else {
+            self.CBDelegate.centralManagerDidUpdateState(self.centralManager)
+        }
+    }
     
     // MARK: API
     
@@ -854,162 +882,6 @@ open class BleManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate 
             centralManager.scanForPeripherals(withServices: self.scanningForServices, options:[CBCentralManagerScanOptionAllowDuplicatesKey: !self.scanUniqueOnly])
         }
     }
-
-    
-    // MARK: CENTRAL MANAGER DELEGATE
-    
-    open func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        self.cBmanagerUpdatedState = true
-        
-        if #available(iOS 10.0, *) {
-            switch central.state{
-            case CBManagerState.unauthorized:
-                self.BleState = .unauthorized
-                self.eventBus.emit("bleStatus", "unauthorized");
-                LOG.info("BLUENET_LIB: This app is not authorised to use Bluetooth low energy")
-            case CBManagerState.poweredOff:
-                self.BleState = .poweredOff
-                self.eventBus.emit("bleStatus", "poweredOff");
-                LOG.info("BLUENET_LIB: Bluetooth is currently powered off.")
-            case CBManagerState.poweredOn:
-                self.BleState = .poweredOn
-                self.eventBus.emit("bleStatus", "poweredOn");
-                LOG.info("BLUENET_LIB: Bluetooth is currently powered on and available to use.")
-            case CBManagerState.resetting:
-                self.BleState = .resetting
-                self.eventBus.emit("bleStatus", "resetting");
-                LOG.info("BLUENET_LIB: Bluetooth is currently resetting.")
-            case CBManagerState.unknown:
-                self.BleState = .unknown
-                self.eventBus.emit("bleStatus", "unknown");
-                LOG.info("BLUENET_LIB: Bluetooth state is unknown.")
-            case CBManagerState.unsupported:
-                self.BleState = .unsupported
-                self.eventBus.emit("bleStatus", "unsupported");
-                LOG.info("BLUENET_LIB: Bluetooth is unsupported?")
-            default:
-                self.eventBus.emit("bleStatus", "unknown")
-                LOG.info("BLUENET_LIB: Bluetooth is other: \(central.state) ")
-                break
-            }
-        } else {
-            // Fallback on earlier versions
-            switch central.state.rawValue {
-            case 3: // CBCentralManagerState.unauthorized :
-                self.BleState = .unauthorized
-                self.eventBus.emit("bleStatus", "unauthorized");
-                LOG.info("BLUENET_LIB: This app is not authorised to use Bluetooth low energy")
-            case 4: // CBCentralManagerState.poweredOff:
-                self.BleState = .poweredOff
-                self.eventBus.emit("bleStatus", "poweredOff");
-                LOG.info("BLUENET_LIB: Bluetooth is currently powered off.")
-            case 5: //CBCentralManagerState.poweredOn:
-                self.BleState = .poweredOn
-                self.eventBus.emit("bleStatus", "poweredOn");
-                LOG.info("BLUENET_LIB: Bluetooth is currently powered on and available to use.")
-            default:
-                self.eventBus.emit("bleStatus", "unknown");
-                break
-            }
-        }
-    }
-    
-    open func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        // in some processes, the encryption can be disabled temporarily. Advertisements CAN come in in this period and be misfigured by the lack of decryption.
-        // to avoid this, we do not listen to advertisements while the encryption is TEMPORARILY disabled.
-        if (self.settings.isTemporarilyDisabled()) {
-            return
-        }
-        
-        // battery saving means we do not decrypt everything nor do we emit the data into the app. All incoming advertisements are ignored
-        if (self.batterySaving == true) {
-            return
-        }
-        
-        let emitData = Advertisement(
-            handle: peripheral.identifier.uuidString,
-            name: peripheral.name,
-            rssi: RSSI,
-            serviceData: advertisementData["kCBAdvDataServiceData"] as Any,
-            serviceUUID: advertisementData["kCBAdvDataServiceUUIDs"] as Any,
-            referenceId: settings.referenceId
-        );
-        
-        // Because crownstones alternate between connectable and nonconnectable to match iBeacon spec, the ios duplicate filtering does not work completely. This workaround implements uniqueness checking before decryption.
-        if (self.scanUniqueOnly == true) {
-            let randomString = emitData.getServiceDataRandomString()
-            if (self.uniquenessReference[emitData.handle] != nil) {
-                if (self.uniquenessReference[emitData.handle] == randomString) {
-                    return
-                }
-            }
-            self.uniquenessReference[emitData.handle] = randomString
-        }
-    
-        if (self.settings.isEncryptionEnabled() && emitData.isSetupPackage() == false && settings.guestKey != nil) {
-            emitData.decrypt(settings.guestKey!)
-            self.eventBus.emit("advertisementData",emitData)
-        }
-        else {
-            self.eventBus.emit("advertisementData",emitData)
-        }
-    }
-    
-    open func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        LOG.info("BLUENET_LIB: in didConnectPeripheral")
-        if (pendingPromise.type == .CONNECT) {
-            LOG.info("BLUENET_LIB: connected")
-            connectedPeripheral = peripheral
-            connectingPeripheral = nil
-            pendingPromise.fulfill(())
-        }
-    }
-    
-    open func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
-        LOG.info("BLUENET_LIB: in didFailToConnectPeripheral")
-        if (error != nil) {
-            pendingPromise.reject(error!)
-        }
-        else {
-            if (pendingPromise.type == .CONNECT) {
-                pendingPromise.reject(error!)
-            }
-        }
-    }
-    
-    open func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
-        // since we disconnected, we must set the connected peripherals to nil.
-        self.connectingPeripheral = nil;
-        self.connectedPeripheral = nil;
-        self.settings.invalidateSessionNonce()
-        self.notificationEventBus.reset()
-    
-        LOG.info("BLUENET_LIB: in didDisconnectPeripheral")
-        if (pendingPromise.type == .CANCEL_PENDING_CONNECTION) {
-            pendingPromise.fulfill(())
-        }
-        else {
-            if (error != nil) {
-                LOG.info("BLUENET_LIB: Disconnected with error \(error!)")
-                pendingPromise.reject(error!)
-            }
-            else {
-                LOG.info("BLUENET_LIB: Disconnected succesfully")
-                // if the pending promise is NOT for disconnect, a disconnection event is a rejection.
-                if (pendingPromise.type != .DISCONNECT) {
-                    pendingPromise.reject(BleError.DISCONNECTED)
-                }
-                else {
-                    pendingPromise.fulfill(())
-                }
-            }
-        }
-    }
-    
-    open func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]) {
-        LOG.info("BLUENET_LIB: WILL RESTORE STATE \(dict)");
-    }
-
     
     // MARK: peripheral delegate
     

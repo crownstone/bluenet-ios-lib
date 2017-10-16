@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FA0B813B1F94BB510090168B /* BluenetCBDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0B813A1F94BB510090168B /* BluenetCBDelegate.swift */; };
+		FA0B813D1F94BC410090168B /* BluenetCBDelegateBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0B813C1F94BC410090168B /* BluenetCBDelegateBackground.swift */; };
 		FA2261C11E55A7B9001D0262 /* DeviceHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA2261C01E55A7B9001D0262 /* DeviceHandler.swift */; };
 		FA2D0F6E1E1BFD88006A8260 /* iOSDFULibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA2D0F6D1E1BFD88006A8260 /* iOSDFULibrary.framework */; };
 		FA2DCB681DD0C99300D5A893 /* BluenetLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA3C18791CBBDA6B00A11CF7 /* BluenetLib.framework */; };
@@ -75,6 +77,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FA0B813A1F94BB510090168B /* BluenetCBDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluenetCBDelegate.swift; sourceTree = "<group>"; };
+		FA0B813C1F94BC410090168B /* BluenetCBDelegateBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluenetCBDelegateBackground.swift; sourceTree = "<group>"; };
 		FA2261C01E55A7B9001D0262 /* DeviceHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceHandler.swift; sourceTree = "<group>"; };
 		FA2D0F6D1E1BFD88006A8260 /* iOSDFULibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iOSDFULibrary.framework; path = Carthage/Build/iOS/iOSDFULibrary.framework; sourceTree = "<group>"; };
 		FA2EEF771DA3FF9A0096B67F /* CryptoSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoSwift.framework; path = Carthage/Build/iOS/CryptoSwift.framework; sourceTree = "<group>"; };
@@ -161,6 +165,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FA0B81391F94BB2D0090168B /* Delegates */ = {
+			isa = PBXGroup;
+			children = (
+				FA0B813A1F94BB510090168B /* BluenetCBDelegate.swift */,
+				FA0B813C1F94BC410090168B /* BluenetCBDelegateBackground.swift */,
+			);
+			path = Delegates;
+			sourceTree = "<group>";
+		};
 		FA3C186F1CBBDA6B00A11CF7 = {
 			isa = PBXGroup;
 			children = (
@@ -210,6 +223,7 @@
 		FA5882891E38C0F000913AE6 /* backend */ = {
 			isa = PBXGroup;
 			children = (
+				FA0B81391F94BB2D0090168B /* Delegates */,
 				FA58828A1E38C0F000913AE6 /* BleManager.swift */,
 				FA58828B1E38C0F000913AE6 /* LocationManager.swift */,
 				FA747B141E4B0FBA00255820 /* packetGenerators */,
@@ -454,8 +468,10 @@
 				FA5882D91E38C0F100913AE6 /* Eventbus.swift in Sources */,
 				FA5882B91E38C0F100913AE6 /* BleManager.swift in Sources */,
 				FA5882D01E38C0F100913AE6 /* Globals.swift in Sources */,
+				FA0B813D1F94BC410090168B /* BluenetCBDelegateBackground.swift in Sources */,
 				FA5882D51E38C0F100913AE6 /* Characteristics.swift in Sources */,
 				FA5882C41E38C0F100913AE6 /* Advertisement.swift in Sources */,
+				FA0B813B1F94BB510090168B /* BluenetCBDelegate.swift in Sources */,
 				FA5882C01E38C0F100913AE6 /* Bluenet.swift in Sources */,
 				FA5882C71E38C0F100913AE6 /* EncryptedPackage.swift in Sources */,
 				FA5882CB1E38C0F100913AE6 /* PowerSamples.swift in Sources */,
