@@ -616,11 +616,16 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         return Promise<[UInt8]> { fulfill, reject in
             self.getChacteristic(serviceId, characteristicId)
                 .then{characteristic -> Void in
-                    self.pendingPromise.load(fulfill, reject, type: .READ_CHARACTERISTIC)
-                    self.pendingPromise.setDelayedReject(timeoutDurations.readCharacteristic, errorOnReject: .READ_CHARACTERISTIC_TIMEOUT)
-                    
-                    // the fulfil and reject are handled in the peripheral delegate
-                    self.connectedPeripheral!.readValue(for: characteristic)
+                    if (self.connectedPeripheral != nil) {
+                        self.pendingPromise.load(fulfill, reject, type: .READ_CHARACTERISTIC)
+                        self.pendingPromise.setDelayedReject(timeoutDurations.readCharacteristic, errorOnReject: .READ_CHARACTERISTIC_TIMEOUT)
+                        
+                        // the fulfil and reject are handled in the peripheral delegate
+                        self.connectedPeripheral!.readValue(for: characteristic)
+                    }
+                    else {
+                        reject(BleError.NOT_CONNECTED)
+                    }
                 }
                 .catch{err in reject(err)}
         }
@@ -630,32 +635,36 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         return Promise<Void> { fulfill, reject in
             self.getChacteristic(serviceId, characteristicId)
                 .then{characteristic -> Void in
-                    self.pendingPromise.load(fulfill, reject, type: .WRITE_CHARACTERISTIC)
-                    
-                    if (type == .withResponse) {
-                        self.pendingPromise.setDelayedReject(timeoutDurations.writeCharacteristic, errorOnReject: .WRITE_CHARACTERISTIC_TIMEOUT)
+                    if (self.connectedPeripheral != nil) {
+                        self.pendingPromise.load(fulfill, reject, type: .WRITE_CHARACTERISTIC)
+                        
+                        if (type == .withResponse) {
+                            self.pendingPromise.setDelayedReject(timeoutDurations.writeCharacteristic, errorOnReject: .WRITE_CHARACTERISTIC_TIMEOUT)
+                        }
+                        else {
+                            // if we write without notification, the delegate will not be invoked.
+                            self.pendingPromise.setDelayedFulfill(timeoutDurations.writeCharacteristicWithout)
+                        }
+                        
+                        // the fulfil and reject are handled in the peripheral delegate
+                        if (self.settings.isEncryptionEnabled()) {
+                             LOG.debug("BLUENET_LIB: writing \(data.bytes) which will be encrypted.")
+                            do {
+                                let encryptedData = try EncryptionHandler.encrypt(data, settings: self.settings)
+                                self.connectedPeripheral!.writeValue(encryptedData, for: characteristic, type: type)
+                            }
+                            catch let err {
+                                self.pendingPromise.reject(err)
+                            }
+                        }
+                        else {
+                            LOG.debug("BLUENET_LIB: writing \(data.bytes)")
+                            self.connectedPeripheral!.writeValue(data, for: characteristic, type: type)
+                        }
                     }
                     else {
-                        // if we write without notification, the delegate will not be invoked.
-                        self.pendingPromise.setDelayedFulfill(timeoutDurations.writeCharacteristicWithout)
+                        reject(BleError.NOT_CONNECTED)
                     }
-                    
-                    // the fulfil and reject are handled in the peripheral delegate
-                    if (self.settings.isEncryptionEnabled()) {
-                         LOG.debug("BLUENET_LIB: writing \(data.bytes) which will be encrypted.")
-                        do {
-                            let encryptedData = try EncryptionHandler.encrypt(data, settings: self.settings)
-                            self.connectedPeripheral!.writeValue(encryptedData, for: characteristic, type: type)
-                        }
-                        catch let err {
-                            self.pendingPromise.reject(err)
-                        }
-                    }
-                    else {
-                        LOG.debug("BLUENET_LIB: writing \(data.bytes)")
-                        self.connectedPeripheral!.writeValue(data, for: characteristic, type: type)
-                    }
-
                 }
                 .catch{(error: Error) -> Void in
                     LOG.error("BLUENET_LIB: FAILED writing to characteristic \(error)")
@@ -686,10 +695,15 @@ open class BleManager: NSObject, CBPeripheralDelegate {
                         
                         // we now tell the device to notify us.
                         return Promise<Void> { success, failure in
-                            // the success and failure are handled in the peripheral delegate
-                            self.pendingPromise.load(success, failure, type: .ENABLE_NOTIFICATIONS)
-                            self.pendingPromise.setDelayedReject(timeoutDurations.enableNotifications, errorOnReject: .ENABLE_NOTIFICATIONS_TIMEOUT)
-                            self.connectedPeripheral!.setNotifyValue(true, for: characteristic)
+                            if (self.connectedPeripheral != nil) {
+                                // the success and failure are handled in the peripheral delegate
+                                self.pendingPromise.load(success, failure, type: .ENABLE_NOTIFICATIONS)
+                                self.pendingPromise.setDelayedReject(timeoutDurations.enableNotifications, errorOnReject: .ENABLE_NOTIFICATIONS_TIMEOUT)
+                                self.connectedPeripheral!.setNotifyValue(true, for: characteristic)
+                            }
+                            else {
+                                failure(BleError.NOT_CONNECTED)
+                            }
                         }
                     }
                     .then{_ -> Void in
