@@ -37,7 +37,7 @@ class BluenetLibTests: XCTestCase {
         XCTAssertEqual(Conversion.uint8_array_to_uint32(uint8Array32), UInt32(33562634))
         XCTAssertEqual(Conversion.uint32_to_int32(UInt32(3147483647)), Int32(-1147483649))
         XCTAssertEqual(Conversion.ibeaconUUIDString_to_uint8_array("b643423e-e175-4af0-a2e4-31e32f729a8a"), [182, 67, 66, 62, 225, 117, 74, 240, 162, 228, 49, 227, 47, 114, 154, 138])
-        
+        XCTAssertEqual("test".count, 4)
         XCTAssertEqual(Conversion.uint8_to_bit_array(53),[true, false, true, false, true, true, false, false])
     }
     

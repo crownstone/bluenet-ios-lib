@@ -101,7 +101,7 @@ open class BluenetLocalization {
      * you when this region is entered as well as to keep track of which classifiers belong to which datapoint in your reference.
      */
     open func trackIBeacon(uuid: String, referenceId: String) {
-        if (uuid.characters.count < 30) {
+        if (uuid.count < 30) {
             LOG.warn("BLUENET LOCALIZATION ---- Cannot track \(referenceId) with UUID \(uuid)")
         }
         else {

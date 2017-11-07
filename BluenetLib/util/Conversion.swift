@@ -39,7 +39,7 @@ open class Conversion {
     
     open static func string_to_uint8_array(_ string: String) -> [UInt8] {
         var arr = [UInt8]();
-        for c in string.characters {
+        for c in string {
             let scalars = String(c).unicodeScalars
             arr.append(UInt8(scalars[scalars.startIndex].value))
         }
@@ -79,9 +79,9 @@ open class Conversion {
     open static func hex_string_to_uint8_array(_ input: String) -> [UInt8] {
         var hexNumber = ""
         var result = [UInt8]()
-        for letter in input.characters {
+        for letter in input {
             hexNumber += String(letter)
-            if (hexNumber.characters.count == 2) {
+            if (hexNumber.count == 2) {
                 result.append(UInt8(hexNumber,radix:16)!)
                 hexNumber = ""
             }
@@ -90,7 +90,7 @@ open class Conversion {
     }
     
     open static func ascii_or_hex_string_to_16_byte_array(_ input: String) -> [UInt8] {
-        if (input.characters.count == 16) {
+        if (input.count == 16) {
             return Conversion.string_to_uint8_array(input);
         }
         else {

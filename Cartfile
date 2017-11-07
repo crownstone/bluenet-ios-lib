@@ -1,14 +1,14 @@
 # Crypto related functions and helpers for Swift
-github "krzyzanowskim/CryptoSwift"
+github "krzyzanowskim/CryptoSwift" ~> 0.8.0
 
 # We code in Asynchronous world. We promise. [http://promisekit.org/]
-github "mxcl/PromiseKit"
+github "mxcl/PromiseKit" ~> 4.4.3
 
 # JSON Parser
-github "SwiftyJSON/SwiftyJSON"
+github "SwiftyJSON/SwiftyJSON" ~> 3.1.4
 
 # DFU code from Nordic
-github "NordicSemiconductor/IOS-Pods-DFU-Library"
+github "NordicSemiconductor/IOS-Pods-DFU-Library" ~> 4.0.2
 
 # Bluenet Shared protocols
-github "crownstone/bluenet-ios-shared"
+github "crownstone/bluenet-ios-shared" ~> 0.4.0

@@ -16,7 +16,6 @@ open class BluenetMotion  {
     
     public init() {
         motionManager = CMMotionManager()
-        
         motionManager.deviceMotionUpdateInterval = 1.0
     }
     
