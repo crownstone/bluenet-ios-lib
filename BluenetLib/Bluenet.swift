@@ -350,7 +350,7 @@ open class Bluenet  {
                             LOG.debug("BLUENET_LIB: received SetupAdvertisement nr: \(self.counter)")
                             
                             
-                            self.setupList[castData.handle] = NearestItem(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue, setupMode: true)
+                            self.setupList[castData.handle] = NearestItem(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue, setupMode: true, verified: true)
                             // log debug for nearest setup
                             LOG.debug("BLUENET_LIB: received nearestSetupCrownstone nr: \(self.counter)")
                             
@@ -361,7 +361,7 @@ open class Bluenet  {
                             LOG.debug("BLUENET_LIB: received DFUadvertisement nr: \(self.counter)")
                             
                             
-                            self.dfuList[castData.handle] = NearestItem(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue, dfuMode: true)
+                            self.dfuList[castData.handle] = NearestItem(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue, dfuMode: true, verified: true)
                             // log debug for nearest setup
                             LOG.debug("BLUENET_LIB: received nearestSetupCrownstone nr: \(self.counter)")
                             
@@ -405,7 +405,7 @@ open class Bluenet  {
             }
         }
         if (nearestHandle != "" && nearestRSSI < 0) {
-            let data = NearestItem(name: nearestName, handle: nearestHandle, rssi: nearestRSSI, setupMode: true)
+            let data = NearestItem(name: nearestName, handle: nearestHandle, rssi: nearestRSSI, setupMode: true, verified: true)
             self.eventBus.emit("nearestSetupCrownstone", data)
         }
     }
@@ -424,7 +424,7 @@ open class Bluenet  {
             }
         }
         if (nearestHandle != "" && nearestRSSI < 0) {
-            let data = NearestItem(name: nearestName, handle: nearestHandle, rssi: nearestRSSI, dfuMode: true)
+            let data = NearestItem(name: nearestName, handle: nearestHandle, rssi: nearestRSSI, dfuMode: true, verified: true)
             self.eventBus.emit("nearestDFUCrownstone", data)
         }
     }
@@ -435,12 +435,14 @@ open class Bluenet  {
         var nearestRSSI = -1000
         var nearestHandle = ""
         var nearestName : String?
+        var nearestVerified = false
         for (handle, device) in self.deviceList {
             if (device.rssi > nearestRSSI) {
                 if ((verifiedOnly == true && device.verified == true) || verifiedOnly == false) {
                     nearestRSSI = device.rssi
                     nearestHandle = handle
                     nearestName = device.name
+                    nearestVerified = device.verified
                 }
             }
         }
@@ -450,7 +452,7 @@ open class Bluenet  {
         }
         
         if (nearestHandle != "" && nearestRSSI < 0) {
-            let data = NearestItem(name: nearestName!, handle: nearestHandle, rssi: nearestRSSI, setupMode: false)
+            let data = NearestItem(name: nearestName!, handle: nearestHandle, rssi: nearestRSSI, setupMode: false, verified: nearestVerified)
             self.eventBus.emit(topic, data)
         }
     }
