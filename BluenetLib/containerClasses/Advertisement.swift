@@ -202,10 +202,10 @@ open class ScanResponcePacket {
     open var eventBitmask        : UInt8  = 0
     open var hasError            : Bool   = false
     open var temperature         : Int8   = 0
-    open var powerFactor         : Int32  = 0
+    open var powerFactor         : Double = 0
     open var powerUsageReal      : Double = 0
-	open var powerUsageAppearent : Int32  = 0
-	open var powerUsage          : Int32  = 0
+	open var powerUsageAppearent : Double = 0
+	open var powerUsage          : Double = 0
     open var accumulatedEnergy   : Int32  = 0
     open var random              : String = ""
     open var newDataAvailable    : Bool   = false
@@ -229,11 +229,11 @@ open class ScanResponcePacket {
             self.protocolVersion = data[0]
 			switch (self.protocolVersion) {
 				case 1: 
-					self.parseProtocol_1(); break
+					self._parseProtocol_1(); break
 				case 2: 
-					self.parseProtocol_2(); break
+					self._parseProtocol_2(); break
 				default:
-					self.parseProtocol_1();
+					self._parseProtocol_1();
 			}
             validData = true
         }
@@ -242,20 +242,21 @@ open class ScanResponcePacket {
         }
     }
 	
-	func parseProtocol_1() {
+	func _parseProtocol_1() {
 		self.crownstoneId      = Conversion.uint8_array_to_uint16([data[1], data[2]])
 		self.switchState       = data[3]
 		self.eventBitmask      = data[4]
 		self.temperature       = Conversion.uint8_to_int8(data[5])
-		self.powerUsage        = Conversion.uint32_to_int32(
+		let powerUsageMw       = Conversion.uint32_to_int32(
 			Conversion.uint8_array_to_uint32([
 				data[6],
 				data[7],
 				data[8],
 				data[9]
 			])
-		)*1000;
-		
+		)
+        
+        self.powerUsage = NSNumber(value: powerUsageMw).doubleValue * 0.001
 		self.powerUsageAppearent = self.powerUsage
 		
 		self.accumulatedEnergy = Conversion.uint32_to_int32(
@@ -271,7 +272,6 @@ open class ScanResponcePacket {
 		
 		// bitmask states
 		let bitmaskArray = Conversion.uint8_to_bit_array(self.eventBitmask)
-			
 		
 		newDataAvailable = bitmaskArray[0]
 		stateOfExternalCrownstone = bitmaskArray[1]
@@ -279,7 +279,7 @@ open class ScanResponcePacket {
 		setupFlag = bitmaskArray[7]
 	}
 	
-	func parseProtocol_2() {
+	func _parseProtocol_2() {
 		self.crownstoneId      = Conversion.uint8_array_to_uint16([data[1], data[2]])
 		self.switchState       = data[3]
 		self.eventBitmask      = data[4]
@@ -298,10 +298,10 @@ open class ScanResponcePacket {
 			])
 		)
     
-        self.powerFactor         = NSNumber(value: powerFactor as Int16).int32Value / 1024
-		self.powerUsageAppearent = NSNumber(value: appearentPower as Int16).int32Value / 16
-		self.powerUsageReal      = NSNumber(value: self.powerFactor).doubleValue * NSNumber(value: self.powerUsageAppearent).doubleValue
-		self.powerUsage          = self.powerUsageAppearent    
+        self.powerFactor         = NSNumber(value: powerFactor as Int16).doubleValue / 1024
+		self.powerUsageAppearent = NSNumber(value: appearentPower as Int16).doubleValue / 16
+		self.powerUsageReal      = self.powerFactor * self.powerUsageAppearent
+        self.powerUsage          = self.powerUsageAppearent
 
 		self.accumulatedEnergy = Conversion.uint32_to_int32(
 			Conversion.uint8_array_to_uint32([
