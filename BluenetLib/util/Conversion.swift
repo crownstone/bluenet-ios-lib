@@ -222,6 +222,11 @@ open class Conversion {
         let ns = NSNumber(value: val as Int8)
         return ns.uint8Value
     }
+    
+    open static func uint16_to_int16(_ val: UInt16) -> Int16 {
+        let ns = NSNumber(value: val as UInt16)
+        return ns.int16Value
+    }
 }
 
 

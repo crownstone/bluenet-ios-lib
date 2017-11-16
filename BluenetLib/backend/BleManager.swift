@@ -454,9 +454,15 @@ open class BleManager: NSObject, CBPeripheralDelegate {
             if (self.connectedPeripheral != nil) {
                 LOG.info("BLUENET_LIB: disconnecting from connected peripheral")
                 let disconnectPromise = Promise<Void> { success, failure in
-                    self.pendingPromise.load(success, failure, type: .DISCONNECT)
-                    self.pendingPromise.setDelayedReject(timeoutDurations.disconnect, errorOnReject: .DISCONNECT_TIMEOUT)
-                    self.centralManager.cancelPeripheralConnection(connectedPeripheral!)
+                    // in case the connected peripheral has been disconnected beween the start and invocation of this method.
+                    if (self.connectedPeripheral != nil) {
+                        self.pendingPromise.load(success, failure, type: .DISCONNECT)
+                        self.pendingPromise.setDelayedReject(timeoutDurations.disconnect, errorOnReject: .DISCONNECT_TIMEOUT)
+                        self.centralManager.cancelPeripheralConnection(self.connectedPeripheral!)
+                    }
+                    else {
+                        success(())
+                    }
                 }
                 // we clean up (self.connectedPeripheral = nil) inside the disconnect() method, thereby needing this inner promise
                 disconnectPromise.then { _ -> Void in

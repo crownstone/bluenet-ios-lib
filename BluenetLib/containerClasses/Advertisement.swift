@@ -196,13 +196,16 @@ open class Advertisement {
 
 
 open class ScanResponcePacket {
-    open var firmwareVersion     : UInt8  = 0
+    open var protocolVersion     : UInt8  = 0
     open var crownstoneId        : UInt16 = 0
     open var switchState         : UInt8  = 0
     open var eventBitmask        : UInt8  = 0
     open var hasError            : Bool   = false
     open var temperature         : Int8   = 0
-    open var powerUsage          : Int32  = 0
+    open var powerFactor         : Int32  = 0
+    open var powerUsageReal      : Double = 0
+	open var powerUsageAppearent : Int32  = 0
+	open var powerUsage          : Int32  = 0
     open var accumulatedEnergy   : Int32  = 0
     open var random              : String = ""
     open var newDataAvailable    : Bool   = false
@@ -223,43 +226,101 @@ open class ScanResponcePacket {
     
     func parse() {
         if (data.count == 17) {
-            self.firmwareVersion   = data[0]
-            self.crownstoneId      = Conversion.uint8_array_to_uint16([data[1], data[2]])
-            self.switchState       = data[3]
-            self.eventBitmask      = data[4]
-            self.temperature       = Conversion.uint8_to_int8(data[5])
-            self.powerUsage        = Conversion.uint32_to_int32(
-                Conversion.uint8_array_to_uint32([
-                    data[6],
-                    data[7],
-                    data[8],
-                    data[9]
-                ])
-            )
-            self.accumulatedEnergy = Conversion.uint32_to_int32(
-                Conversion.uint8_array_to_uint32([
-                    data[10],
-                    data[11],
-                    data[12],
-                    data[13]
-                ])
-            )
-            self.random = Conversion.uint8_array_to_hex_string([data[14],data[15],data[16]])
-            
-            // bitmask states
-            let bitmaskArray = Conversion.uint8_to_bit_array(self.eventBitmask)
-            
-            newDataAvailable = bitmaskArray[0]
-            stateOfExternalCrownstone = bitmaskArray[1]
-            hasError = bitmaskArray[2]
-            setupFlag = bitmaskArray[7]
-   
+            self.protocolVersion = data[0]
+			switch (self.protocolVersion) {
+				case 1: 
+					self.parseProtocol_1(); break
+				case 2: 
+					self.parseProtocol_2(); break
+				default:
+					self.parseProtocol_1();
+			}
             validData = true
         }
         else {
             validData = false
         }
     }
+	
+	func parseProtocol_1() {
+		self.crownstoneId      = Conversion.uint8_array_to_uint16([data[1], data[2]])
+		self.switchState       = data[3]
+		self.eventBitmask      = data[4]
+		self.temperature       = Conversion.uint8_to_int8(data[5])
+		self.powerUsage        = Conversion.uint32_to_int32(
+			Conversion.uint8_array_to_uint32([
+				data[6],
+				data[7],
+				data[8],
+				data[9]
+			])
+		)*1000;
+		
+		self.powerUsageAppearent = self.powerUsage
+		
+		self.accumulatedEnergy = Conversion.uint32_to_int32(
+			Conversion.uint8_array_to_uint32([
+				data[10],
+				data[11],
+				data[12],
+				data[13]
+			])
+		)
+		
+		self.random = Conversion.uint8_array_to_hex_string([data[14],data[15],data[16]])
+		
+		// bitmask states
+		let bitmaskArray = Conversion.uint8_to_bit_array(self.eventBitmask)
+			
+		
+		newDataAvailable = bitmaskArray[0]
+		stateOfExternalCrownstone = bitmaskArray[1]
+		hasError = bitmaskArray[2]
+		setupFlag = bitmaskArray[7]
+	}
+	
+	func parseProtocol_2() {
+		self.crownstoneId      = Conversion.uint8_array_to_uint16([data[1], data[2]])
+		self.switchState       = data[3]
+		self.eventBitmask      = data[4]
+		self.temperature       = Conversion.uint8_to_int8(data[5])
+		
+		let powerFactor = Conversion.uint16_to_int16(
+			Conversion.uint8_array_to_uint16([
+				data[6],
+				data[7]
+			])
+		)
+		let appearentPower = Conversion.uint16_to_int16(
+			Conversion.uint8_array_to_uint16([
+				data[8],
+				data[9]
+			])
+		)
+    
+        self.powerFactor         = NSNumber(value: powerFactor as Int16).int32Value / 1024
+		self.powerUsageAppearent = NSNumber(value: appearentPower as Int16).int32Value / 16
+		self.powerUsageReal      = NSNumber(value: self.powerFactor).doubleValue * NSNumber(value: self.powerUsageAppearent).doubleValue
+		self.powerUsage          = self.powerUsageAppearent    
+
+		self.accumulatedEnergy = Conversion.uint32_to_int32(
+			Conversion.uint8_array_to_uint32([
+				data[10],
+				data[11],
+				data[12],
+				data[13]
+			])
+		)
+		self.random = Conversion.uint8_array_to_hex_string([data[14],data[15],data[16]])
+		
+		// bitmask states
+		let bitmaskArray = Conversion.uint8_to_bit_array(self.eventBitmask)
+		
+		newDataAvailable = bitmaskArray[0]
+		stateOfExternalCrownstone = bitmaskArray[1]
+		hasError = bitmaskArray[2]
+		setupFlag = bitmaskArray[7]		
+	}
     
     open func hasCrownstoneDataFormat() -> Bool {
         return validData
@@ -267,12 +328,15 @@ open class ScanResponcePacket {
     
     open func getJSON() -> JSON {
         var returnDict = [String: NSNumber]()
-        returnDict["firmwareVersion"] = NSNumber(value: self.firmwareVersion)
+        returnDict["protocolVersion"] = NSNumber(value: self.protocolVersion)
         returnDict["crownstoneId"] = NSNumber(value: self.crownstoneId)
         returnDict["switchState"] = NSNumber(value: self.switchState)
         returnDict["eventBitmask"] = NSNumber(value: self.eventBitmask)
         returnDict["temperature"] = NSNumber(value: self.temperature)
         returnDict["powerUsage"] = NSNumber(value: self.powerUsage)
+        returnDict["powerFactor"] = NSNumber(value: self.powerFactor)
+        returnDict["powerUsageReal"] = NSNumber(value: self.powerUsageReal)
+        returnDict["powerUsageAppearent"] = NSNumber(value: self.powerUsageAppearent)
         returnDict["accumulatedEnergy"] = NSNumber(value: self.accumulatedEnergy)
         
         // bitmask flags:
@@ -290,12 +354,15 @@ open class ScanResponcePacket {
     
     open func getDictionary() -> NSDictionary {
         let returnDict : [String: Any] = [
-            "firmwareVersion" : NSNumber(value: self.firmwareVersion),
+            "protocolVersion" : NSNumber(value: self.protocolVersion),
             "crownstoneId" : NSNumber(value: self.crownstoneId),
             "switchState" : NSNumber(value: self.switchState),
             "eventBitmask" : NSNumber(value: self.eventBitmask),
             "temperature" : NSNumber(value: self.temperature),
             "powerUsage" : NSNumber(value: self.powerUsage),
+            "powerFactor" : NSNumber(value: self.powerFactor),
+            "powerUsageReal" : NSNumber(value: self.powerUsageReal),
+            "powerUsageAppearent" : NSNumber(value: self.powerUsageAppearent),
             "accumulatedEnergy" : NSNumber(value: self.accumulatedEnergy),
             "newDataAvailable" : self.newDataAvailable,
             "stateOfExternalCrownstone" : self.stateOfExternalCrownstone,
