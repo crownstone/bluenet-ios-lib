@@ -410,7 +410,8 @@ open class BleManager: NSObject, CBPeripheralDelegate {
             }
             else {
                 // get a peripheral from the known list (TODO: check what happens if it requests an unknown one)
-                let peripherals = centralManager.retrievePeripherals(withIdentifiers: [nsUuid!]);
+                let uuidArray = [nsUuid!]
+                let peripherals = centralManager.retrievePeripherals(withIdentifiers: uuidArray);
                 if (peripherals.count == 0) {
                     reject(BleError.CAN_NOT_CONNECT_TO_UUID)
                 }
