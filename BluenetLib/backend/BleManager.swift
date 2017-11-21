@@ -14,6 +14,7 @@ import PromiseKit
 public enum BleError : Error {
     case DISCONNECTED
     case CONNECTION_CANCELLED
+    case CONNECTION_FAILED
     case NOT_CONNECTED
     case NO_SERVICES
     case NO_CHARACTERISTICS

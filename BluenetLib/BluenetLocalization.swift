@@ -216,13 +216,13 @@ open class BluenetLocalization {
                 LOG.verbose("received iBeacon DETAIL \(packet.idString) \(packet.rssi) \(packet.referenceId)")
             }
             
-            if (self.activeGroupId != nil) {
+            if let activeGroupIdVal = self.activeGroupId {
                 // if we have data in this payload.
                 if (data.count > 0 && self.classifier != nil && self.indoorLocalizationEnabled) {
-                    let currentLocation = self.classifier!.classify(data, referenceId: self.activeGroupId!)
-                    if (currentLocation != nil) {
-                        if (self.activeLocationId != currentLocation) {
-                            self._moveToNewLocation(currentLocation!)
+                    let currentLocation = self.classifier!.classify(data, referenceId: activeGroupIdVal)
+                    if let currentLocationVal = currentLocation {
+                        if (self.activeLocationId != currentLocationVal) {
+                            self._moveToNewLocation(currentLocationVal)
                         }
                     }
                     var locationDict = [String: String?]()
@@ -240,9 +240,9 @@ open class BluenetLocalization {
         var locationDict = [String: String?]()
         locationDict["region"] = self.activeGroupId
         
-        if (self.activeLocationId != nil) {
+        if let activeLocationIdVal = self.activeLocationId {
             // put the precious location in the dictionary
-            locationDict["location"] = self.activeLocationId
+            locationDict["location"] = activeLocationIdVal
             self.eventBus.emit("exitLocation", locationDict)
         }
         
@@ -272,15 +272,16 @@ open class BluenetLocalization {
     
     func _handleRegionEnter(_ regionId: Any) {
         if let regionString = regionId as? String {
-            if (self.activeGroupId != nil) {
-                if (self.activeGroupId! != regionString) {
-                    self.eventBus.emit("exitRegion", self.activeGroupId!)
+            if let activeGroupIdVal = self.activeGroupId {
+                if (activeGroupIdVal != regionString) {
+                    self.eventBus.emit("exitRegion", activeGroupIdVal)
                     self.eventBus.emit("enterRegion", regionString)
                 }
             }
             else {
                 self.eventBus.emit("enterRegion", regionString)
             }
+            
             self.initializedLocation = true
             self.activeGroupId = regionString
             
@@ -290,7 +291,5 @@ open class BluenetLocalization {
             LOG.info("REGION ENTER region not string")
         }
     }
-
-   
 }
 

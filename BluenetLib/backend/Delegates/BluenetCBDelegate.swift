@@ -134,13 +134,11 @@ open class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
     
     open func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
         LOG.info("BLUENET_LIB: in didFailToConnectPeripheral")
-        if (error != nil) {
-            BleManager.pendingPromise.reject(error!)
+        if let errorVal = error {
+            BleManager.pendingPromise.reject(errorVal)
         }
         else {
-            if (BleManager.pendingPromise.type == .CONNECT) {
-                BleManager.pendingPromise.reject(error!)
-            }
+            BleManager.pendingPromise.reject(BleError.CONNECTION_FAILED)
         }
     }
     
