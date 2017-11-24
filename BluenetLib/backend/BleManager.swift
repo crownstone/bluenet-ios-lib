@@ -376,7 +376,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
     func abortConnecting()  -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             LOG.info("BLUENET_LIB: starting to abort pending connection request")
-            if (connectingPeripheral != nil) {
+            if let connectingPeripheralVal = connectingPeripheral {
                 LOG.info("BLUENET_LIB: pending connection detected")
                 // if there was a connection in progress, cancel it with an error
                 if (pendingPromise.type == .CONNECT) {
@@ -388,7 +388,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
                 pendingPromise.load(fulfill, reject, type: .CANCEL_PENDING_CONNECTION)
                 pendingPromise.setDelayedReject(timeoutDurations.cancelPendingConnection, errorOnReject: .CANCEL_PENDING_CONNECTION_TIMEOUT)
                 
-                centralManager.cancelPeripheralConnection(connectingPeripheral!)
+                centralManager.cancelPeripheralConnection(connectingPeripheralVal)
                 
                 // we set it to nil here regardless if the connection abortion fails or not.
                 connectingPeripheral = nil
