@@ -204,7 +204,7 @@ open class ScanResponcePacket {
     open var temperature         : Int8   = 0
     open var powerFactor         : Double = 0
     open var powerUsageReal      : Double = 0
-	open var powerUsageAppearent : Double = 0
+	open var powerUsageApparent  : Double = 0
 	open var powerUsage          : Double = 0
     open var accumulatedEnergy   : Int32  = 0
     open var random              : String = ""
@@ -257,7 +257,7 @@ open class ScanResponcePacket {
 		)
         
         self.powerUsage = NSNumber(value: powerUsageMw).doubleValue * 0.001
-		self.powerUsageAppearent = self.powerUsage
+		self.powerUsageApparent = self.powerUsage
 		
 		self.accumulatedEnergy = Conversion.uint32_to_int32(
 			Conversion.uint8_array_to_uint32([
@@ -299,9 +299,9 @@ open class ScanResponcePacket {
 		)
     
         self.powerFactor         = NSNumber(value: powerFactor as Int16).doubleValue / 1024
-		self.powerUsageAppearent = NSNumber(value: appearentPower as Int16).doubleValue / 16
-		self.powerUsageReal      = self.powerFactor * self.powerUsageAppearent
-        self.powerUsage          = self.powerUsageAppearent
+		self.powerUsageApparent  = NSNumber(value: appearentPower as Int16).doubleValue / 16
+		self.powerUsageReal      = self.powerFactor * self.powerUsageApparent
+        self.powerUsage          = self.powerUsageApparent
 
 		self.accumulatedEnergy = Conversion.uint32_to_int32(
 			Conversion.uint8_array_to_uint32([
@@ -336,7 +336,7 @@ open class ScanResponcePacket {
         returnDict["powerUsage"] = NSNumber(value: self.powerUsage)
         returnDict["powerFactor"] = NSNumber(value: self.powerFactor)
         returnDict["powerUsageReal"] = NSNumber(value: self.powerUsageReal)
-        returnDict["powerUsageAppearent"] = NSNumber(value: self.powerUsageAppearent)
+        returnDict["powerUsageApparent"] = NSNumber(value: self.powerUsageApparent)
         returnDict["accumulatedEnergy"] = NSNumber(value: self.accumulatedEnergy)
         
         // bitmask flags:
@@ -362,7 +362,7 @@ open class ScanResponcePacket {
             "powerUsage" : NSNumber(value: self.powerUsage),
             "powerFactor" : NSNumber(value: self.powerFactor),
             "powerUsageReal" : NSNumber(value: self.powerUsageReal),
-            "powerUsageAppearent" : NSNumber(value: self.powerUsageAppearent),
+            "powerUsageApparent" : NSNumber(value: self.powerUsageApparent),
             "accumulatedEnergy" : NSNumber(value: self.accumulatedEnergy),
             "newDataAvailable" : self.newDataAvailable,
             "stateOfExternalCrownstone" : self.stateOfExternalCrownstone,

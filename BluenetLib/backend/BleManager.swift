@@ -336,23 +336,23 @@ open class BleManager: NSObject, CBPeripheralDelegate {
             }
             else {
                 // start the connection
-                if (connectedPeripheral != nil) {
-                    if (connectedPeripheral!.identifier.uuidString == uuid) {
+                if (self.connectedPeripheral != nil) {
+                    if (self.connectedPeripheral!.identifier.uuidString == uuid) {
                         LOG.info("BLUENET_LIB: Already connected to this peripheral")
                         fulfill(());
                     }
                     else {
                         LOG.info("BLUENET_LIB: Something is connected")
-                        disconnect()
+                        self.disconnect()
                             .then{ _ in self._connect(uuid)}
                             .then{ _ in fulfill(())}
                             .catch{ err in reject(err)}
                     }
                 }
                 // cancel any connection attempt in progress.
-                else if (connectingPeripheral != nil) {
+                else if (self.connectingPeripheral != nil) {
                     LOG.info("BLUENET_LIB: connection attempt in progress")
-                    abortConnecting()
+                    self.abortConnecting()
                         .then{ _ in return self._connect(uuid)}
                         .then{ _ in fulfill(())}
                         .catch{ err in reject(err)}
@@ -376,22 +376,22 @@ open class BleManager: NSObject, CBPeripheralDelegate {
     func abortConnecting()  -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             LOG.info("BLUENET_LIB: starting to abort pending connection request")
-            if let connectingPeripheralVal = connectingPeripheral {
+            if let connectingPeripheralVal = self.connectingPeripheral {
                 LOG.info("BLUENET_LIB: pending connection detected")
                 // if there was a connection in progress, cancel it with an error
-                if (pendingPromise.type == .CONNECT) {
+                if (self.pendingPromise.type == .CONNECT) {
                     LOG.info("BLUENET_LIB: rejecting the connection promise")
-                    pendingPromise.reject(BleError.CONNECTION_CANCELLED)
+                    self.pendingPromise.reject(BleError.CONNECTION_CANCELLED)
                 }
                 
                 LOG.info("BLUENET_LIB: Waiting to cancel connection....")
-                pendingPromise.load(fulfill, reject, type: .CANCEL_PENDING_CONNECTION)
-                pendingPromise.setDelayedReject(timeoutDurations.cancelPendingConnection, errorOnReject: .CANCEL_PENDING_CONNECTION_TIMEOUT)
+                self.pendingPromise.load(fulfill, reject, type: .CANCEL_PENDING_CONNECTION)
+                self.pendingPromise.setDelayedReject(timeoutDurations.cancelPendingConnection, errorOnReject: .CANCEL_PENDING_CONNECTION_TIMEOUT)
                 
-                centralManager.cancelPeripheralConnection(connectingPeripheralVal)
+                self.centralManager.cancelPeripheralConnection(connectingPeripheralVal)
                 
                 // we set it to nil here regardless if the connection abortion fails or not.
-                connectingPeripheral = nil
+                self.connectingPeripheral = nil
             }
             else {
                 fulfill(())
@@ -401,7 +401,6 @@ open class BleManager: NSObject, CBPeripheralDelegate {
     
     /**
      *  This does the actual connection. It stores the pending promise and waits for the delegate to return.
-     *
      */
     func _connect(_ uuid: String) -> Promise<Void> {
         let nsUuid = UUID(uuidString: uuid)
