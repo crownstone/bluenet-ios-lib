@@ -28,7 +28,7 @@ open class StateHandler {
         return Promise<CrownstoneErrors> { fulfill, reject in
             self.getErrorBitmask()
                 .then{ data -> Void in
-                    let relevantDataArray = [data[4],data[5],data[6],data[7]]
+                    let relevantDataArray = [data[0],data[1],data[2],data[3]]
                     let uint32 = Conversion.uint8_array_to_uint32(relevantDataArray)
                     let csError = CrownstoneErrors(bitMask: uint32)
                     fulfill(csError)
@@ -130,7 +130,6 @@ open class StateHandler {
             }
             self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.StateRead, writeCommand: writeCommand)
                 .then{ data -> Void in
-     
                     var validData = [UInt8]()
                     // remove the state preamble
                     if (data.count > 3) {
