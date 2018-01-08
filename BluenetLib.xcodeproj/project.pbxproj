@@ -56,8 +56,19 @@
 		FA5882E41E38C2E800913AE6 /* BluenetLibTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882B51E38C0F100913AE6 /* BluenetLibTests.swift */; };
 		FA5882E51E38C2EA00913AE6 /* EncryptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882B61E38C0F100913AE6 /* EncryptionTests.swift */; };
 		FA5882E61E38C2EC00913AE6 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FA5882B71E38C0F100913AE6 /* Info.plist */; };
-		FA5882E71E38C2EF00913AE6 /* PromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882B81E38C0F100913AE6 /* PromiseTests.swift */; };
 		FA5908AE1E363E4E0035E658 /* Zip.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA5908AD1E363E4E0035E658 /* Zip.framework */; };
+		FA7065D92003AE4600C833FE /* ScanResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065D82003AE4600C833FE /* ScanResponse.swift */; };
+		FA7065DC2003AE8F00C833FE /* opCode1.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065DB2003AE8F00C833FE /* opCode1.swift */; };
+		FA7065DE2003AE9D00C833FE /* opCode2.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065DD2003AE9D00C833FE /* opCode2.swift */; };
+		FA7065E02003AEA500C833FE /* opCode3.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065DF2003AEA500C833FE /* opCode3.swift */; };
+		FA7065E32003BD3D00C833FE /* opCode3_type1.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065E22003BD3D00C833FE /* opCode3_type1.swift */; };
+		FA7065E52003BD4700C833FE /* opCode3_type2.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065E42003BD4700C833FE /* opCode3_type2.swift */; };
+		FA7065E72003BD5300C833FE /* opCode3_type0.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065E62003BD5300C833FE /* opCode3_type0.swift */; };
+		FA7065E92003BD6500C833FE /* opCode3_type3.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065E82003BD6500C833FE /* opCode3_type3.swift */; };
+		FA7065EB2003BD7300C833FE /* opCode4.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065EA2003BD7300C833FE /* opCode4.swift */; };
+		FA7065EE2003C9DC00C833FE /* AdvertisementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065ED2003C9DC00C833FE /* AdvertisementTests.swift */; };
+		FA7065F02003D5EF00C833FE /* AdvertisementUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065EF2003D5EF00C833FE /* AdvertisementUtil.swift */; };
+		FA7065F32003DEC100C833FE /* opCode4_type0.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065F22003DEC100C833FE /* opCode4_type0.swift */; };
 		FA747B161E4B0FBA00255820 /* ControlPackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA747B151E4B0FBA00255820 /* ControlPackets.swift */; };
 		FA7BE69A1E4487B8009E633D /* MeshHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7BE6991E4487B8009E633D /* MeshHandler.swift */; };
 		FA7BE69C1E44902E009E633D /* MeshChannels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7BE69B1E44902E009E633D /* MeshChannels.swift */; };
@@ -126,9 +137,20 @@
 		FA5882B51E38C0F100913AE6 /* BluenetLibTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluenetLibTests.swift; sourceTree = "<group>"; };
 		FA5882B61E38C0F100913AE6 /* EncryptionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptionTests.swift; sourceTree = "<group>"; };
 		FA5882B71E38C0F100913AE6 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		FA5882B81E38C0F100913AE6 /* PromiseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseTests.swift; sourceTree = "<group>"; };
 		FA5882E11E38C10600913AE6 /* BluenetShared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BluenetShared.framework; path = Carthage/Build/iOS/BluenetShared.framework; sourceTree = "<group>"; };
 		FA5908AD1E363E4E0035E658 /* Zip.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Zip.framework; path = Carthage/Build/iOS/Zip.framework; sourceTree = "<group>"; };
+		FA7065D82003AE4600C833FE /* ScanResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanResponse.swift; sourceTree = "<group>"; };
+		FA7065DB2003AE8F00C833FE /* opCode1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode1.swift; sourceTree = "<group>"; };
+		FA7065DD2003AE9D00C833FE /* opCode2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode2.swift; sourceTree = "<group>"; };
+		FA7065DF2003AEA500C833FE /* opCode3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode3.swift; sourceTree = "<group>"; };
+		FA7065E22003BD3D00C833FE /* opCode3_type1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode3_type1.swift; sourceTree = "<group>"; };
+		FA7065E42003BD4700C833FE /* opCode3_type2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode3_type2.swift; sourceTree = "<group>"; };
+		FA7065E62003BD5300C833FE /* opCode3_type0.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode3_type0.swift; sourceTree = "<group>"; };
+		FA7065E82003BD6500C833FE /* opCode3_type3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode3_type3.swift; sourceTree = "<group>"; };
+		FA7065EA2003BD7300C833FE /* opCode4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode4.swift; sourceTree = "<group>"; };
+		FA7065ED2003C9DC00C833FE /* AdvertisementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvertisementTests.swift; sourceTree = "<group>"; };
+		FA7065EF2003D5EF00C833FE /* AdvertisementUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvertisementUtil.swift; sourceTree = "<group>"; };
+		FA7065F22003DEC100C833FE /* opCode4_type0.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode4_type0.swift; sourceTree = "<group>"; };
 		FA747B151E4B0FBA00255820 /* ControlPackets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ControlPackets.swift; sourceTree = "<group>"; };
 		FA79874E1DF6B3380005EB86 /* BluenetLib.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BluenetLib.md; sourceTree = "<group>"; };
 		FA79874F1DF6B3380005EB86 /* BluenetLocalizationLib.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BluenetLocalizationLib.md; sourceTree = "<group>"; };
@@ -250,7 +272,7 @@
 		FA5882971E38C0F000913AE6 /* containerClasses */ = {
 			isa = PBXGroup;
 			children = (
-				FA5882981E38C0F000913AE6 /* Advertisement.swift */,
+				FA7065DA2003AE6A00C833FE /* Advertisements */,
 				FA5882991E38C0F000913AE6 /* AvailableDevice.swift */,
 				FA58829A1E38C0F000913AE6 /* BluenetSettings.swift */,
 				FA3FC25E1ED4346200DD2F76 /* CrownstoneErrors.swift */,
@@ -306,10 +328,61 @@
 				FA5882B51E38C0F100913AE6 /* BluenetLibTests.swift */,
 				FA5882B61E38C0F100913AE6 /* EncryptionTests.swift */,
 				FA5882B71E38C0F100913AE6 /* Info.plist */,
-				FA5882B81E38C0F100913AE6 /* PromiseTests.swift */,
 				FA3FC25C1ED34DEF00DD2F76 /* ConversionTests.swift */,
+				FA7065ED2003C9DC00C833FE /* AdvertisementTests.swift */,
 			);
 			path = BluenetLibTests;
+			sourceTree = "<group>";
+		};
+		FA7065D72003AE1900C833FE /* AdvertisementPayloads */ = {
+			isa = PBXGroup;
+			children = (
+				FA7065E12003BD2300C833FE /* encryptedTypes */,
+				FA7065DB2003AE8F00C833FE /* opCode1.swift */,
+				FA7065DD2003AE9D00C833FE /* opCode2.swift */,
+				FA7065DF2003AEA500C833FE /* opCode3.swift */,
+				FA7065EA2003BD7300C833FE /* opCode4.swift */,
+			);
+			path = AdvertisementPayloads;
+			sourceTree = "<group>";
+		};
+		FA7065DA2003AE6A00C833FE /* Advertisements */ = {
+			isa = PBXGroup;
+			children = (
+				FA7065D72003AE1900C833FE /* AdvertisementPayloads */,
+				FA5882981E38C0F000913AE6 /* Advertisement.swift */,
+				FA7065D82003AE4600C833FE /* ScanResponse.swift */,
+				FA7065EF2003D5EF00C833FE /* AdvertisementUtil.swift */,
+			);
+			path = Advertisements;
+			sourceTree = "<group>";
+		};
+		FA7065E12003BD2300C833FE /* encryptedTypes */ = {
+			isa = PBXGroup;
+			children = (
+				FA7065F12003DEAF00C833FE /* opCode4 */,
+				FA7065EC2003C0C500C833FE /* opCode3 */,
+			);
+			path = encryptedTypes;
+			sourceTree = "<group>";
+		};
+		FA7065EC2003C0C500C833FE /* opCode3 */ = {
+			isa = PBXGroup;
+			children = (
+				FA7065E62003BD5300C833FE /* opCode3_type0.swift */,
+				FA7065E22003BD3D00C833FE /* opCode3_type1.swift */,
+				FA7065E42003BD4700C833FE /* opCode3_type2.swift */,
+				FA7065E82003BD6500C833FE /* opCode3_type3.swift */,
+			);
+			path = opCode3;
+			sourceTree = "<group>";
+		};
+		FA7065F12003DEAF00C833FE /* opCode4 */ = {
+			isa = PBXGroup;
+			children = (
+				FA7065F22003DEC100C833FE /* opCode4_type0.swift */,
+			);
+			path = opCode4;
 			sourceTree = "<group>";
 		};
 		FA747B141E4B0FBA00255820 /* packetGenerators */ = {
@@ -437,9 +510,11 @@
 				FA5882DB1E38C0F100913AE6 /* NotificationMerger.swift in Sources */,
 				FA7BE69C1E44902E009E633D /* MeshChannels.swift in Sources */,
 				FA5882CA1E38C0F100913AE6 /* NearestItem.swift in Sources */,
+				FA7065D92003AE4600C833FE /* ScanResponse.swift in Sources */,
 				FA5882C51E38C0F100913AE6 /* AvailableDevice.swift in Sources */,
 				FA5882D31E38C0F100913AE6 /* BlePackets.swift in Sources */,
 				FA5882C61E38C0F100913AE6 /* BluenetSettings.swift in Sources */,
+				FA7065EB2003BD7300C833FE /* opCode4.swift in Sources */,
 				FA5882C31E38C0F100913AE6 /* BluenetMotion.swift in Sources */,
 				FA5882D71E38C0F100913AE6 /* TrainingHelper.swift in Sources */,
 				FA5882CF1E38C0F100913AE6 /* EncryptionHandler.swift in Sources */,
@@ -448,33 +523,42 @@
 				FA7BE69E1E449287009E633D /* MeshPackets.swift in Sources */,
 				FA5882BF1E38C0F100913AE6 /* SetupHandler.swift in Sources */,
 				FA5882BB1E38C0F100913AE6 /* ConfigHandler.swift in Sources */,
+				FA7065E92003BD6500C833FE /* opCode3_type3.swift in Sources */,
 				FA5882BE1E38C0F100913AE6 /* PowerHandler.swift in Sources */,
 				FA5882C21E38C0F100913AE6 /* BluenetLocalization.swift in Sources */,
 				FA5882BC1E38C0F100913AE6 /* ControlHandler.swift in Sources */,
+				FA7065E02003AEA500C833FE /* opCode3.swift in Sources */,
 				FA5882C91E38C0F100913AE6 /* iBeaconContainers.swift in Sources */,
 				FA5882C81E38C0F100913AE6 /* Firmware.swift in Sources */,
 				FA5882D41E38C0F100913AE6 /* BluenetTypes.swift in Sources */,
 				FA5882CE1E38C0F100913AE6 /* TrainingData.swift in Sources */,
 				FA5882D61E38C0F100913AE6 /* Services.swift in Sources */,
+				FA7065E32003BD3D00C833FE /* opCode3_type1.swift in Sources */,
+				FA7065E52003BD4700C833FE /* opCode3_type2.swift in Sources */,
 				FA5882BD1E38C0F100913AE6 /* DfuHandler.swift in Sources */,
 				FA5882CC1E38C0F100913AE6 /* PromiseContainer.swift in Sources */,
 				FA7BE69A1E4487B8009E633D /* MeshHandler.swift in Sources */,
 				FA3FC25F1ED4346200DD2F76 /* CrownstoneErrors.swift in Sources */,
 				FA5882DA1E38C0F100913AE6 /* JSONUtils.swift in Sources */,
 				FA747B161E4B0FBA00255820 /* ControlPackets.swift in Sources */,
+				FA7065F32003DEC100C833FE /* opCode4_type0.swift in Sources */,
 				FA5882DC1E38C0F100913AE6 /* Util.swift in Sources */,
 				FA3FC25B1ED3499C00DD2F76 /* StateHandler.swift in Sources */,
 				FA5882D81E38C0F100913AE6 /* Conversion.swift in Sources */,
 				FA5882D91E38C0F100913AE6 /* Eventbus.swift in Sources */,
 				FA5882B91E38C0F100913AE6 /* BleManager.swift in Sources */,
 				FA5882D01E38C0F100913AE6 /* Globals.swift in Sources */,
+				FA7065E72003BD5300C833FE /* opCode3_type0.swift in Sources */,
 				FA0B813D1F94BC410090168B /* BluenetCBDelegateBackground.swift in Sources */,
+				FA7065F02003D5EF00C833FE /* AdvertisementUtil.swift in Sources */,
 				FA5882D51E38C0F100913AE6 /* Characteristics.swift in Sources */,
 				FA5882C41E38C0F100913AE6 /* Advertisement.swift in Sources */,
 				FA0B813B1F94BB510090168B /* BluenetCBDelegate.swift in Sources */,
 				FA5882C01E38C0F100913AE6 /* Bluenet.swift in Sources */,
+				FA7065DC2003AE8F00C833FE /* opCode1.swift in Sources */,
 				FA5882C71E38C0F100913AE6 /* EncryptedPackage.swift in Sources */,
 				FA5882CB1E38C0F100913AE6 /* PowerSamples.swift in Sources */,
+				FA7065DE2003AE9D00C833FE /* opCode2.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -482,8 +566,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FA5882E71E38C2EF00913AE6 /* PromiseTests.swift in Sources */,
 				FA3FC25D1ED34DEF00DD2F76 /* ConversionTests.swift in Sources */,
+				FA7065EE2003C9DC00C833FE /* AdvertisementTests.swift in Sources */,
 				FA5882E51E38C2EA00913AE6 /* EncryptionTests.swift in Sources */,
 				FA5882E41E38C2E800913AE6 /* BluenetLibTests.swift in Sources */,
 			);

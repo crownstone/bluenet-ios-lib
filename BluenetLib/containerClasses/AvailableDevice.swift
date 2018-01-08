@@ -14,11 +14,11 @@ open class AvailableDevice {
     var rssi : Int!
     var name : String?
     var handle : String
-    var crownstoneId : UInt16 = 0
+    var crownstoneId : UInt8 = 0
     var lastUpdate : Double = 0
     var cleanupCallback : voidCallback
     var avgRssi : Double!
-    var random : String = "test"
+    var timestamp : UInt32 = 0
     var verified = false
     var dfu = false
     
@@ -90,7 +90,7 @@ open class AvailableDevice {
                 self.consecutiveMatches = 0
             }
             else {
-                if (response.crownstoneId == self.crownstoneId && response.stateOfExternalCrownstone == false && self.random != response.random) {
+                if (response.crownstoneId == self.crownstoneId && response.stateOfExternalCrownstone == false && self.timestamp != response.timestamp) {
                     if (self.consecutiveMatches >= AMOUNT_OF_REQUIRED_MATCHES) {
                         self.verified = true
                     }
@@ -98,7 +98,7 @@ open class AvailableDevice {
                         self.consecutiveMatches += 1
                     }
                 }
-                else if (self.random == response.random) {
+                else if (self.timestamp == response.timestamp) {
                      // dont do anything, wait for next payload
                 }
                 else if (response.crownstoneId != self.crownstoneId && response.stateOfExternalCrownstone == true) {
@@ -110,7 +110,7 @@ open class AvailableDevice {
                     self.crownstoneId = response.crownstoneId
                 }
             }
-            self.random = response.random
+            self.timestamp = response.timestamp
         }
         else {
             self.consecutiveMatches = 0
