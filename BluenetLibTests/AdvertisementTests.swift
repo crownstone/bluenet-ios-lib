@@ -66,4 +66,17 @@ class AdvertisementTests: XCTestCase {
         let restored = BluenetLib.reconstructTimestamp(currentTimestamp: currentTimestamp, LsbTimestamp: LSB_timestamp)
         XCTAssertEqual(currentTimestamp, restored + 1)
     }
+    
+    func testScanReponseTest() {
+        // if this doesnt crash its fine.
+        let response = ScanResponsePacket([
+            4,
+            0,0,0,0,
+            0,0,0,0,
+            0,0,0,0,
+            0,0,0,0
+        ])
+        print("RESPONSE: \(response.getJSON())")
+        print("RESPONSE: \(response.stringify())")
+    }
 }

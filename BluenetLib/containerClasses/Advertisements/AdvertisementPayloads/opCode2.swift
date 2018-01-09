@@ -8,7 +8,7 @@
 
 import Foundation
 
-func parseOpcode2(serviceData : ScanResponcePacket, data : [UInt8]) {
+func parseOpcode2(serviceData : ScanResponsePacket, data : [UInt8]) {
     if (data.count == 17) {
         serviceData.crownstoneId = NSNumber(value: Conversion.uint8_array_to_uint16([data[1], data[2]])).uint8Value
         serviceData.switchState  = data[3]

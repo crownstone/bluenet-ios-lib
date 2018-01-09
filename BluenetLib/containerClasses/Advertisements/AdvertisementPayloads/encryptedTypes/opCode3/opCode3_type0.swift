@@ -8,7 +8,7 @@
 
 import Foundation
 
-func parseOpcode3_type0(serviceData : ScanResponcePacket, data : [UInt8]) {
+func parseOpcode3_type0(serviceData : ScanResponsePacket, data : [UInt8]) {
     if (data.count == 17) {
         // opCode   = data[0]
         // dataType = data[1]
@@ -27,6 +27,15 @@ func parseOpcode3_type0(serviceData : ScanResponcePacket, data : [UInt8]) {
         )
         
         serviceData.powerFactor        = NSNumber(value: powerFactor).doubleValue / 127
+        
+        // we cannot have a 0 for a powerfactor. To avoid division by 0, we set it to be either 0.01 or -0.01
+        if (serviceData.powerFactor >= 0 && serviceData.powerFactor < 0.01) {
+            serviceData.powerFactor = 0.01
+        }
+        else if (serviceData.powerFactor < 0 && serviceData.powerFactor > -0.01) {
+            serviceData.powerFactor = -0.01
+        }
+        
         serviceData.powerUsageReal     = NSNumber(value: realPower).doubleValue / 8
         serviceData.powerUsageApparent = serviceData.powerUsageReal / serviceData.powerFactor
         

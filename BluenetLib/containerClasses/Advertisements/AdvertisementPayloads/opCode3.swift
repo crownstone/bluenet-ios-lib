@@ -8,9 +8,9 @@
 
 import Foundation
 
-func parseOpcode3(serviceData : ScanResponcePacket, data : [UInt8]) {
+func parseOpcode3(serviceData : ScanResponsePacket, data : [UInt8]) {
     if (data.count == 17) {
-        serviceData.dataType = data[0]
+        serviceData.dataType = data[1]
         switch (serviceData.dataType) {
         case 0:
             parseOpcode3_type0(serviceData: serviceData, data: data)
@@ -21,7 +21,7 @@ func parseOpcode3(serviceData : ScanResponcePacket, data : [UInt8]) {
         case 3:
             parseOpcode3_type3(serviceData: serviceData, data: data)
         default:
-            LOG.warn("Advertisement opCode 3: Got an unknown typeCode \(data[0])")
+            LOG.warn("Advertisement opCode 3: Got an unknown typeCode \(data[1])")
             parseOpcode3_type0(serviceData: serviceData, data: data)
         }
     }

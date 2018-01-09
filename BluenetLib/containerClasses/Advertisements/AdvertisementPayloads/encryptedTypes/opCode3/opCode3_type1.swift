@@ -8,7 +8,7 @@
 
 import Foundation
 
-func parseOpcode3_type1(serviceData : ScanResponcePacket, data : [UInt8], includePowerMeasurement : Bool = true) {
+func parseOpcode3_type1(serviceData : ScanResponsePacket, data : [UInt8], includePowerMeasurement : Bool = true) {
     if (data.count == 17) {
         // opCode   = data[0]
         // dataType = data[1]

@@ -8,15 +8,15 @@
 
 import Foundation
 
-func parseOpcode4(serviceData : ScanResponcePacket, data : [UInt8]) {
+func parseOpcode4(serviceData : ScanResponsePacket, data : [UInt8]) {
     if (data.count == 17) {
-        serviceData.dataType = data[0]
+        serviceData.dataType = data[1]
         serviceData.setupMode = true
         switch (serviceData.dataType) {
         case 0:
             parseOpcode4_type0(serviceData: serviceData, data: data)
         default:
-            LOG.warn("Advertisement opCode 4: Got an unknown typeCode \(data[0])")
+            LOG.warn("Advertisement opCode 4: Got an unknown typeCode \(data[1])")
             parseOpcode4_type0(serviceData: serviceData, data: data)
         }
     }

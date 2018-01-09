@@ -83,7 +83,7 @@ open class AvailableDevice {
     
     
     // check if we consistently get the ID of this crownstone.
-    func verify(_ data: ScanResponcePacket?) {
+    func verify(_ data: ScanResponsePacket?) {
         if let response = data {
             if (response.isSetupPackage()) {
                 self.verified = true

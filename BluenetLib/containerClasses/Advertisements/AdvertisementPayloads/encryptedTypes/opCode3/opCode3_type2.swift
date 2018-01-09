@@ -8,7 +8,7 @@
 
 import Foundation
 
-func parseOpcode3_type2(serviceData : ScanResponcePacket, data : [UInt8]) {
+func parseOpcode3_type2(serviceData : ScanResponsePacket, data : [UInt8]) {
     if (data.count == 17) {
         serviceData.stateOfExternalCrownstone = true
         parseOpcode3_type0(serviceData: serviceData, data: data)

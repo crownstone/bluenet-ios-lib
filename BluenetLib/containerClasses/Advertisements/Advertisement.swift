@@ -29,7 +29,7 @@ open class Advertisement {
     open var serviceData = [String: [UInt8]]()
     open var serviceDataAvailable : Bool
     open var serviceUUID : String?
-    open var scanResponse : ScanResponcePacket?
+    open var scanResponse : ScanResponsePacket?
     
     init(handle: String, name: String?, rssi: NSNumber, serviceData: Any, serviceUUID: Any, referenceId: String) {
         self.referenceId = referenceId
@@ -63,11 +63,11 @@ open class Advertisement {
             if (id == CrownstonePlugAdvertisementServiceUUID ||
                 id == CrownstoneBuiltinAdvertisementServiceUUID ||
                 id == GuidestoneAdvertisementServiceUUID) {
-                self.scanResponse        = ScanResponcePacket(data)
-                self.isCrownstoneFamily  = self.scanResponse!.hasCrownstoneDataFormat()
-                self.isCrownstonePlug    = (id == CrownstonePlugAdvertisementServiceUUID)
-                self.isCrownstoneBuiltin = (id == CrownstoneBuiltinAdvertisementServiceUUID)
-                self.isGuidestone        = (id == GuidestoneAdvertisementServiceUUID)
+                self.scanResponse        =  ScanResponsePacket(data)
+                self.isCrownstoneFamily  =  self.scanResponse!.hasCrownstoneDataFormat()
+                self.isCrownstonePlug    =  (id == CrownstonePlugAdvertisementServiceUUID)
+                self.isCrownstoneBuiltin =  (id == CrownstoneBuiltinAdvertisementServiceUUID)
+                self.isGuidestone        =  (id == GuidestoneAdvertisementServiceUUID)
                 break
             }
         }
