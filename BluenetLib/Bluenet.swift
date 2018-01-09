@@ -76,14 +76,14 @@ open class Bluenet  {
         self.bleManager.setSettings(settings)
         
         // pass on the shared objects to the worker classes
-        self.dfu     = DfuHandler(     bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
-        self.config  = ConfigHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
-        self.setup   = SetupHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
-        self.control = ControlHandler( bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
-        self.power   = PowerHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
-        self.mesh    = MeshHandler(    bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
-        self.device  = DeviceHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
-        self.state   = StateHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList);
+        self.dfu     = DfuHandler(     bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList)
+        self.config  = ConfigHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList)
+        self.setup   = SetupHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList)
+        self.control = ControlHandler( bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList)
+        self.power   = PowerHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList)
+        self.mesh    = MeshHandler(    bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList)
+        self.device  = DeviceHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList)
+        self.state   = StateHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList)
         
         _ = eventBus.on("disconnectCommandWritten", self._storeDisconnectCommandList)
         

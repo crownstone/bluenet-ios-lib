@@ -41,6 +41,27 @@ open class StateHandler {
         return self._getState(StateType.error_BITMASK)
     }
     
+    open func getSwitchState() -> Promise<UInt8> {
+        return self._getState(StateType.switch_STATE)
+    }
+    
+    open func getSwitchStateFloat() -> Promise<Float> {
+        return Promise<Float> { fulfill, reject in
+            self.getSwitchState()
+                .then{ switchState -> Void in
+                    var returnState : Float = 0.0
+                    if (switchState == 128) {
+                        returnState = 1.0
+                    }
+                    else if (switchState <= 100) {
+                        returnState = 0.01 * NSNumber(value: switchState).floatValue * 0.99
+                    }
+                    fulfill(returnState)
+                }
+                .catch{ err in reject(err) }
+        }
+    }
+    
     open func getTime() -> Promise<NSNumber> {
         return Promise<NSNumber> { fulfill, reject in
             let timePromise : Promise<UInt32> = self._getState(StateType.time)

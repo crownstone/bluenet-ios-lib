@@ -157,29 +157,16 @@ open class ControlHandler {
      * This method will ask the current switch state and listen to the notification response. 
      * It will then switch the crownstone. If it was > 0 --> 0 if it was 0 --> 1.
      **/
-    open func toggleSwitchState() -> Promise<Float> {
-        return Promise<Float> { fulfill, reject in
-            var newSwitchStateSend : Float = 0
-            let writeCommand : voidPromiseCallback = { 
-                return self.bleManager.writeToCharacteristic(
-                    CSServices.CrownstoneService,
-                    characteristicId: CrownstoneCharacteristics.StateControl,
-                    data: ReadStatePacket(type: .switch_STATE).getNSData(),
-                    type: CBCharacteristicWriteType.withResponse);
-            }
-            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.StateRead, writeCommand: writeCommand)
-                .then{ data -> Promise<Void> in
-                    let currentSwitchState = data[4];
-                    var newSwitchState : Float = 0;
-                    if (currentSwitchState == 0) {
-                        newSwitchState = 1.0
-                    }
-                    newSwitchStateSend = newSwitchState
-                    return self.setSwitchState(newSwitchState)
+    open func toggleSwitchState(stateForOn : Float = 1.0) -> Promise<Void> {
+        let stateHandler = StateHandler(bleManager: self.bleManager, eventBus: self.eventBus, settings: self.settings, deviceList: self.deviceList)
+        return stateHandler.getSwitchState()
+            .then{ currentSwitchState -> Promise<Void> in
+                var newSwitchState : Float = 0;
+                if (currentSwitchState == 0) {
+                    newSwitchState = stateForOn
                 }
-                .then{ _ in fulfill(newSwitchStateSend) }
-                .catch{ err in reject(err) }
-        }
+                return self.setSwitchState(newSwitchState)
+            }
     }
     
     open func switchPWM(_ state: Float) -> Promise<Void> {
