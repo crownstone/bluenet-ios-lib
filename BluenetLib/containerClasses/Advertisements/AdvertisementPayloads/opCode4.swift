@@ -16,7 +16,7 @@ func parseOpcode4(serviceData : ScanResponsePacket, data : [UInt8]) {
         case 0:
             parseOpcode4_type0(serviceData: serviceData, data: data)
         default:
-            LOG.warn("Advertisement opCode 4: Got an unknown typeCode \(data[1])")
+            // LOG.warn("Advertisement opCode 4: Got an unknown typeCode \(data[1])")
             parseOpcode4_type0(serviceData: serviceData, data: data)
         }
     }

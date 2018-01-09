@@ -21,7 +21,7 @@ func parseOpcode3(serviceData : ScanResponsePacket, data : [UInt8]) {
         case 3:
             parseOpcode3_type3(serviceData: serviceData, data: data)
         default:
-            LOG.warn("Advertisement opCode 3: Got an unknown typeCode \(data[1])")
+            // LOG.warn("Advertisement opCode 3: Got an unknown typeCode \(data[1])")
             parseOpcode3_type0(serviceData: serviceData, data: data)
         }
     }

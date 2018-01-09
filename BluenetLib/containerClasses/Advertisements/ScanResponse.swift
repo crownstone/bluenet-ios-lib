@@ -54,19 +54,14 @@ open class ScanResponsePacket {
             self.opCode = data[0]
             switch (self.opCode) {
             case 1:
-                print("ParsingOpcode 1 \(self.opCode)")
                 parseOpcode1(serviceData: self, data: data)
             case 2:
-                print("ParsingOpcode 2 \(self.opCode)")
                 parseOpcode2(serviceData: self, data: data)
             case 3:
-                print("ParsingOpcode 3 \(self.opCode)")
                 parseOpcode3(serviceData: self, data: data)
             case 4:
-                print("ParsingOpcode 4 \(self.opCode)")
                 parseOpcode4(serviceData: self, data: data)
             default:
-                print("ParsingOpcode DEFAULT 3 \(self.opCode)")
                 parseOpcode3(serviceData: self, data: data)
             }
             validData = true
@@ -117,7 +112,6 @@ open class ScanResponsePacket {
             "uniqueElement"        : self.uniqueIdentifier
         ]
         
-        print("Got the document \(returnDict)")
         return returnDict as NSDictionary
     }
     
