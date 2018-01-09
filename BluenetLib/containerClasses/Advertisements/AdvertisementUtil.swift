@@ -27,10 +27,15 @@ func reconstructTimestamp(currentTimestamp: Double, LsbTimestamp : UInt16) -> Do
     let halfUInt16 : Double = 0x7FFF // roughly 9 hours in seconds
     
     // correct for overflows, check for drift from current time
-    if (currentTimestamp - restoredTimestamp < -halfUInt16) {
+    let delta = currentTimestamp - restoredTimestamp
+    
+    if (delta > -halfUInt16 && delta < 0) {
+        restoredTimestamp = _obtainTimestamp(fullTimeStamp: currentTimestamp - halfUInt16, lsb: LsbTimestamp)
+    }
+    else if (delta < -halfUInt16) {
         restoredTimestamp = _obtainTimestamp(fullTimeStamp: currentTimestamp - 0xFFFF, lsb: LsbTimestamp)
     }
-    else if (currentTimestamp - restoredTimestamp > halfUInt16) {
+    else if (delta > halfUInt16) {
         restoredTimestamp = _obtainTimestamp(fullTimeStamp: currentTimestamp + 0xFFFF, lsb: LsbTimestamp)
     }
     
