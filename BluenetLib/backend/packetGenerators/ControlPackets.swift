@@ -68,8 +68,8 @@ open class ControlPacketsGenerator {
         return keepAliveStatePacket(action: actionState, state: NSNumber(value: switchState as Float).uint8Value, timeout: timeout).getPacket()
     }
     
-    open static func getKeepAlivePacket() -> [UInt8] {
-        return ControlPacket(type: .keep_ALIVE).getPacket()
+    open static func getKeepAliveRepeatPacket() -> [UInt8] {
+        return ControlPacket(type: .keepAliveRepeat).getPacket()
     }
     
     open static func getResetErrorPacket(errorMask: UInt32) -> [UInt8] {

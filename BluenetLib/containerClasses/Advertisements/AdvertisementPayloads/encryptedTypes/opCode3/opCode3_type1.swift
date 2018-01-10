@@ -43,6 +43,7 @@ func parseOpcode3_type1(serviceData : ScanResponsePacket, data : [UInt8], includ
         serviceData.dimmingAllowed   = bitmaskArray[1]
         serviceData.hasError         = bitmaskArray[2]
         serviceData.switchLocked     = bitmaskArray[3]
+        serviceData.timeIsSet        = bitmaskArray[4]
         
         // opt out of this for the opcode3, type 4: external error state
         if (includePowerMeasurement) {
@@ -50,7 +51,7 @@ func parseOpcode3_type1(serviceData : ScanResponsePacket, data : [UInt8], includ
                 Conversion.uint8_array_to_uint16([
                     data[15],
                     data[16]
-                    ])
+                ])
             )
             serviceData.powerUsageReal     = NSNumber(value: realPower).doubleValue / 8
         }

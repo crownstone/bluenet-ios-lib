@@ -39,8 +39,8 @@ open class ScanResponsePacket {
     open var errorTimestamp      :   UInt32   = 0
     open var errorsBitmask       :   UInt32   = 0
     open var errorMode           :   Bool     = false
-    
-    open var uniqueIdentifier    : NSNumber = 0
+    open var timeIsSet           :   Bool     = false
+    open var uniqueIdentifier    :   NSNumber = 0
     
     var validData = false
     
@@ -109,7 +109,8 @@ open class ScanResponsePacket {
             "errorMode"            : self.errorMode,
             "errors"               : errorsDictionary,
             
-            "uniqueElement"        : self.uniqueIdentifier
+            "uniqueElement"        : self.uniqueIdentifier,
+            "timeIsSet"            : self.timeIsSet
         ]
         
         return returnDict as NSDictionary

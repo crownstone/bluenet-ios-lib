@@ -9,34 +9,35 @@
 import Foundation
 
 public enum ControlType : UInt8 {
-    case `switch` = 0
-    case pwm = 1
-    case set_TIME = 2
-    case goto_DFU = 3
-    case reset = 4
-    case factory_RESET = 5
-    case keep_ALIVE_STATE = 6
-    case keep_ALIVE = 7
-    case enable_MESH = 8
-    case enable_ENCRYPTION = 9
-    case enable_IBEACON = 10
+    case `switch`               = 0
+    case pwm                    = 1
+    case set_TIME               = 2
+    case goto_DFU               = 3
+    case reset                  = 4
+    case factory_RESET          = 5
+    case keep_ALIVE_STATE       = 6
+    case keepAliveRepeat        = 7
+    case enable_MESH            = 8
+    case enable_ENCRYPTION      = 9
+    case enable_IBEACON         = 10
     case enable_CONTINUOUS_POWER_MANAGEMENT = 11
-    case enable_SCANNER = 12
-    case scan_FOR_DEVICES = 13
-    case user_FEEDBACK = 14
-    case schedule_ENTRY = 15
-    case relay = 16
-    case validate_SETUP = 17
-    case request_SERVICE_DATA = 18
-    case disconnect = 19
-    case set_LED = 20
-    case no_OPERATION = 21
-    case increase_TX = 22
-    case reset_ERRORS = 23
-    case keepAlive_MESH = 24
-    case multiswitch_MESH = 25
-    case schedule_REMOVE = 26
-    
+    case enable_SCANNER         = 12
+    case scan_FOR_DEVICES       = 13
+    case user_FEEDBACK          = 14
+    case schedule_ENTRY         = 15
+    case relay                  = 16
+    case validate_SETUP         = 17
+    case request_SERVICE_DATA   = 18
+    case disconnect             = 19
+    case set_LED                = 20
+    case no_OPERATION           = 21
+    case increase_TX            = 22
+    case reset_ERRORS           = 23
+    case mesh_keepAliveRepeat   = 24
+    case mesh_multiSwitch       = 25
+    case schedule_REMOVE        = 26
+    case mesh_keepAliveState    = 27
+    case mesh_command           = 28
 }
 
 public enum ConfigurationType : UInt8 {
@@ -118,7 +119,7 @@ public enum OpCode : UInt8 {
 
 //*********** Mesh ***********//
 
-public enum MeshCommandType : UInt16 {
+public enum MeshCommandType : UInt8 {
     case control = 0
     case beacon
     case config
@@ -131,6 +132,14 @@ public enum IntentType : UInt8 {
     case enter
     case exit
     case manual
+}
+
+public enum MeshKeepAliveTypes : UInt8 {
+    case sharedTimeout = 0
+}
+
+public enum MeshMultiSwitchType : UInt8 {
+    case simpleList = 0
 }
 
 
