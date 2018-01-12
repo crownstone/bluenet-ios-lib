@@ -198,14 +198,14 @@ open class ControlHandler {
         return self._writeControlPacket(ControlPacketsGenerator.getKeepAliveRepeatPacket())
     }
     
-    open func allowDimming() -> Promise<Void> {
+    open func allowDimming(allow: Bool) -> Promise<Void> {
         LOG.info("BLUENET_LIB: allowDimming")
-        return self._writeControlPacket(ControlPacketsGenerator.getKeepAliveRepeatPacket())
+        return self._writeControlPacket(ControlPacketsGenerator.getAllowDimmingPacket(allow))
     }
     
-    open func lockSwitch() -> Promise<Void> {
+    open func lockSwitch(lock: Bool) -> Promise<Void> {
         LOG.info("BLUENET_LIB: lockSwitch")
-        return self._writeControlPacket(ControlPacketsGenerator.getKeepAliveRepeatPacket())
+        return self._writeControlPacket(ControlPacketsGenerator.getLockSwitchPacket(lock))
     }
     
     /**
