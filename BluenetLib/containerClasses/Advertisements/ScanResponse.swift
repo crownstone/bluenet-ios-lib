@@ -160,6 +160,7 @@ open class ScanResponsePacket {
                 for i in [Int](0...result.count-1) {
                     self.data[i+1] = result[i]
                 }
+                
                 // parse the data again based on the decrypted result
                 self.parse()
             }

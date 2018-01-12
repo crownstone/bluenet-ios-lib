@@ -64,7 +64,7 @@ open class MeshHandler {
     /**
      * This channel is used to send different switch commands with individual timeouts, switch states and intents to different crownstones in one message
      */
-    open func multiswitch(stones:[[String: NSNumber]]) -> Promise<Void> {
+    open func multiSwitch(stones:[[String: NSNumber]]) -> Promise<Void> {
         var packets = [StoneMultiSwitchPacket]()
         for stone in stones {
             let crownstoneId = stone["crownstoneId"]
