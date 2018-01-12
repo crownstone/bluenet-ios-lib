@@ -38,6 +38,8 @@ public enum ControlType : UInt8 {
     case schedule_REMOVE        = 26
     case mesh_keepAliveState    = 27
     case mesh_command           = 28
+    case allow_dimming          = 29
+    case lock_switch            = 30
 }
 
 public enum ConfigurationType : UInt8 {

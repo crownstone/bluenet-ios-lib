@@ -198,6 +198,15 @@ open class ControlHandler {
         return self._writeControlPacket(ControlPacketsGenerator.getKeepAliveRepeatPacket())
     }
     
+    open func allowDimming() -> Promise<Void> {
+        LOG.info("BLUENET_LIB: allowDimming")
+        return self._writeControlPacket(ControlPacketsGenerator.getKeepAliveRepeatPacket())
+    }
+    
+    open func lockSwitch() -> Promise<Void> {
+        LOG.info("BLUENET_LIB: lockSwitch")
+        return self._writeControlPacket(ControlPacketsGenerator.getKeepAliveRepeatPacket())
+    }
     
     /**
      * The session nonce is the only char that is ECB encrypted. We therefore read it without the libraries decryption (AES CTR) and decrypt it ourselves.

@@ -79,5 +79,23 @@ open class ControlPacketsGenerator {
     open static func getSetTimePacket(_ time: UInt32) -> [UInt8] {
         return ControlPacket(type: .set_TIME, payload32: time).getPacket()
     }
+    
+    open static func getAllowDimmingPacket(_ allow: Bool) -> [UInt8] {
+        var allowValue : UInt8 = 0
+        if (allow) {
+            allowValue = 1
+        }
+        
+        return ControlPacket(type: .allow_dimming, payload8: allowValue).getPacket()
+    }
+    
+    open static func getLockSwitchPacket(_ lock: Bool) -> [UInt8] {
+        var lockValue : UInt8 = 0
+        if (lock) {
+            lockValue = 1
+        }
+        
+        return ControlPacket(type: .lock_switch, payload8: lockValue).getPacket()
+    }
 
 }
