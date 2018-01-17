@@ -202,7 +202,7 @@ open class ControlHandler {
         LOG.info("BLUENET_LIB: allowDimming")
         return self._writeControlPacket(ControlPacketsGenerator.getAllowDimmingPacket(allow))
     }
-    
+     
     open func lockSwitch(lock: Bool) -> Promise<Void> {
         LOG.info("BLUENET_LIB: lockSwitch")
         return self._writeControlPacket(ControlPacketsGenerator.getLockSwitchPacket(lock))

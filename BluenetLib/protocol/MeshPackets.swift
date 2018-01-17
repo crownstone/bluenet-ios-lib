@@ -133,7 +133,6 @@ class StoneMultiSwitchPacket {
 class MeshMultiSwitchPacket {
     var type : UInt8
     var numberOfItems : UInt8
-    var reserved : UInt8 = 0
     var packets : [StoneMultiSwitchPacket]!
     
     init(type: MeshMultiSwitchType, packets: [StoneMultiSwitchPacket]) {
@@ -144,6 +143,7 @@ class MeshMultiSwitchPacket {
     
     func getPacket() -> [UInt8] {
         var arr = [UInt8]()
+        arr.append(self.type)
         arr.append(self.numberOfItems)
         for packet in self.packets {
             arr += packet.getPacket()
