@@ -12,6 +12,7 @@ func parseOpcode3_type0(serviceData : ScanResponsePacket, data : [UInt8]) {
     if (data.count == 17) {
         // opCode   = data[0]
         // dataType = data[1]
+        serviceData.stateOfExternalCrownstone = false
         
         serviceData.crownstoneId = data[2]
         serviceData.switchState  = data[3]

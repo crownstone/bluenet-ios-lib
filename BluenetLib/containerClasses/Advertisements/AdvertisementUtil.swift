@@ -21,23 +21,28 @@ func _obtainTimestamp(fullTimeStamp : Double, lsb : UInt16) -> Double {
 }
 
 func reconstructTimestamp(currentTimestamp: Double, LsbTimestamp : UInt16) -> Double {
+    // embed location data in timestamp
+    let secondsFromGMT: Double = NSNumber(value: TimeZone.current.secondsFromGMT()).doubleValue
+    let correctedTimestamp = currentTimestamp + secondsFromGMT
+    
     // attempt restoration
-    var restoredTimestamp = _obtainTimestamp(fullTimeStamp : currentTimestamp, lsb: LsbTimestamp)
+    var restoredTimestamp = _obtainTimestamp(fullTimeStamp : correctedTimestamp, lsb: LsbTimestamp)
     
     let halfUInt16 : Double = 0x7FFF // roughly 9 hours in seconds
     
     // correct for overflows, check for drift from current time
-    let delta = currentTimestamp - restoredTimestamp
+    let delta : Double = correctedTimestamp - restoredTimestamp
     
-    if (delta > -halfUInt16 && delta < 0) {
-        restoredTimestamp = _obtainTimestamp(fullTimeStamp: currentTimestamp - halfUInt16, lsb: LsbTimestamp)
+    if (delta > -halfUInt16 && delta < halfUInt16) {
+        return restoredTimestamp
     }
     else if (delta < -halfUInt16) {
-        restoredTimestamp = _obtainTimestamp(fullTimeStamp: currentTimestamp - 0xFFFF, lsb: LsbTimestamp)
+        restoredTimestamp = _obtainTimestamp(fullTimeStamp: correctedTimestamp - 0xFFFF, lsb: LsbTimestamp)
     }
     else if (delta > halfUInt16) {
-        restoredTimestamp = _obtainTimestamp(fullTimeStamp: currentTimestamp + 0xFFFF, lsb: LsbTimestamp)
+        restoredTimestamp = _obtainTimestamp(fullTimeStamp: correctedTimestamp + 0xFFFF, lsb: LsbTimestamp)
     }
+
     
     return restoredTimestamp
 }

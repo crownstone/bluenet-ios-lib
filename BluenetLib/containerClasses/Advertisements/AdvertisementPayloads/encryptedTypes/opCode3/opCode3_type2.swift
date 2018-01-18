@@ -10,7 +10,9 @@ import Foundation
 
 func parseOpcode3_type2(serviceData : ScanResponsePacket, data : [UInt8]) {
     if (data.count == 17) {
-        serviceData.stateOfExternalCrownstone = true
         parseOpcode3_type0(serviceData: serviceData, data: data)
+        
+        // apply differences between type 0 and type 2
+        serviceData.stateOfExternalCrownstone = true
     }
 }

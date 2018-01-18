@@ -33,10 +33,10 @@ class AdvertisementTests: XCTestCase {
     }
     
     func testTimestamp2Overflow1() {
-        let currentTimestamp : Double = 0x5A53FFFF + 1
+        let currentTimestamp : Double = 0x5A53FFFF + 1500
         let LSB_timestamp : UInt16 = 0xFFFF
         let restored = BluenetLib.reconstructTimestamp(currentTimestamp: currentTimestamp, LsbTimestamp: LSB_timestamp)
-        XCTAssertEqual(currentTimestamp, restored+1)
+        XCTAssertEqual(currentTimestamp, restored+1500)
     }
     
     func testTimestamp2Overflow2() {
@@ -61,10 +61,18 @@ class AdvertisementTests: XCTestCase {
     }
     
     func testTimestamp3Overflow5() {
-        let currentTimestamp : Double = 0x5A537FFF + 1
+        let secondsFromGMT: Double = NSNumber(value: TimeZone.current.secondsFromGMT()).doubleValue
+        let currentTimestamp : Double = 0x5A537FFF - 6 - secondsFromGMT
         let LSB_timestamp : UInt16 = 0x7FFF
         let restored = BluenetLib.reconstructTimestamp(currentTimestamp: currentTimestamp, LsbTimestamp: LSB_timestamp)
-        XCTAssertEqual(currentTimestamp, restored + 1)
+        XCTAssertEqual(currentTimestamp, restored - 6 - secondsFromGMT)
+    }
+    
+    func testTimestampConvert() {
+        let currentTimestamp : Double = 1516206007.7995
+        let LSB_timestamp : UInt16 = 34186
+        let restored = BluenetLib.reconstructTimestamp(currentTimestamp: currentTimestamp, LsbTimestamp: LSB_timestamp)
+        XCTAssertEqual(restored, 1516209546.0)
     }
     
     func testScanReponseTest() {
@@ -76,7 +84,16 @@ class AdvertisementTests: XCTestCase {
             0,0,0,0,
             0,0,0,0
         ])
-        print("RESPONSE: \(response.getJSON())")
-        print("RESPONSE: \(response.stringify())")
+        //print("RESPONSE: \(response.getJSON())")
+        //print("RESPONSE: \(response.stringify())")
+    }
+    
+    func testScanResponseParsing() {
+        let response = ScanResponsePacket([3,
+                                           0, 9, 128, 17,
+                                           23, 127, 0, 0,
+                                           0, 0, 0, 0,
+                                           122, 129, 206, 250])
+        //print("RESPONSE: \(response.getJSON())")
     }
 }

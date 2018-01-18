@@ -377,6 +377,7 @@ open class Bluenet  {
                     }
                 }
                 else if (castData.isCrownstoneFamily) {
+                    self.eventBus.emit("unverifiedAdvertisementData",castData)
                     // if the Crownstone is not verified yet, we can still emit a nearest Crownstone event if the RSSI is valid.
                     if (castData.rssi.intValue < 0) {
                         self._emitNearestCrownstone(topic: "nearestCrownstone", verifiedOnly: false);

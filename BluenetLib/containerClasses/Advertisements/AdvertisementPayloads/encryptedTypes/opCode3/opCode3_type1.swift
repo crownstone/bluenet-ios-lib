@@ -8,7 +8,7 @@
 
 import Foundation
 
-func parseOpcode3_type1(serviceData : ScanResponsePacket, data : [UInt8], includePowerMeasurement : Bool = true) {
+func parseOpcode3_type1(serviceData : ScanResponsePacket, data : [UInt8]) {
     if (data.count == 17) {
         // opCode   = data[0]
         // dataType = data[1]
@@ -45,15 +45,14 @@ func parseOpcode3_type1(serviceData : ScanResponsePacket, data : [UInt8], includ
         serviceData.switchLocked     = bitmaskArray[3]
         serviceData.timeIsSet        = bitmaskArray[4]
         
-        // opt out of this for the opcode3, type 4: external error state
-        if (includePowerMeasurement) {
-            let realPower = Conversion.uint16_to_int16(
-                Conversion.uint8_array_to_uint16([
-                    data[15],
-                    data[16]
-                ])
-            )
-            serviceData.powerUsageReal     = NSNumber(value: realPower).doubleValue / 8
-        }
+        let realPower = Conversion.uint16_to_int16(
+            Conversion.uint8_array_to_uint16([
+                data[15],
+                data[16]
+            ])
+        )
+        serviceData.powerUsageReal     = NSNumber(value: realPower).doubleValue / 8
+        // this packets has no validation
+        serviceData.validation = 0
     }
 }

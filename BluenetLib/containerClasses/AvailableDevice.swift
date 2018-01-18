@@ -18,13 +18,13 @@ open class AvailableDevice {
     var lastUpdate : Double = 0
     var cleanupCallback : voidCallback
     var avgRssi : Double!
-    var timestamp : UInt32 = 0
+    var uniqueIdentifier : NSNumber = 0
     var verified = false
     var dfu = false
     
     // config
-    let timeout : Double = 5 //seconds
-    let rssiTimeout : Double = 2 //seconds
+    let timeout : Double = 20 //seconds
+    let rssiTimeout : Double = 3 //seconds
     var consecutiveMatches : Int = 0
     
     init(_ data: Advertisement, _ cleanupCallback: @escaping voidCallback) {
@@ -90,33 +90,57 @@ open class AvailableDevice {
                 self.consecutiveMatches = 0
             }
             else {
-                if (response.crownstoneId == self.crownstoneId && response.stateOfExternalCrownstone == false && self.timestamp != response.timestamp) {
-                    if (self.consecutiveMatches >= AMOUNT_OF_REQUIRED_MATCHES) {
-                        self.verified = true
+                if (self.uniqueIdentifier != response.uniqueIdentifier) {
+                    if (response.validation != 0 && response.opCode == 3) {
+                        if (response.validation == 0xFACE && response.dataType != 1) {
+                            self.addValidMeasurement(response)
+                        }
+                        else if (response.validation != 0xFACE && response.dataType != 1) {
+                            self.invalidateDevice(data)
+                        }
                     }
                     else {
-                        self.consecutiveMatches += 1
+                        if (response.stateOfExternalCrownstone == false) {
+                            if (response.crownstoneId == self.crownstoneId) {
+                                self.addValidMeasurement(response)
+                            }
+                            else {
+                                self.invalidateDevice(data)
+                            }
+                        }
                     }
                 }
-                else if (self.timestamp == response.timestamp) {
-                     // dont do anything, wait for next payload
-                }
-                else if (response.crownstoneId != self.crownstoneId && response.stateOfExternalCrownstone == true) {
-                    // dont do anything
-                }
-                else {
-                    self.consecutiveMatches = 0
-                    self.verified = false
-                    self.crownstoneId = response.crownstoneId
-                }
             }
-            self.timestamp = response.timestamp
+            self.uniqueIdentifier = response.uniqueIdentifier
         }
         else {
-            self.consecutiveMatches = 0
-            self.verified = false;
+            self.invalidateDevice(data)
         }
         
+    }
+    
+    func addValidMeasurement(_ response: ScanResponsePacket) {
+        if (self.consecutiveMatches >= AMOUNT_OF_REQUIRED_MATCHES) {
+            self.verified = true
+            self.consecutiveMatches = 0
+        }
+        else {
+            self.consecutiveMatches += 1
+        }
+        
+        self.crownstoneId = response.crownstoneId
+    }
+    
+    func invalidateDevice(_ data: ScanResponsePacket?) {
+        if let response = data {
+            if (response.stateOfExternalCrownstone == false) {
+                self.crownstoneId = response.crownstoneId
+            }
+            
+        }
+        
+        self.consecutiveMatches = 0
+        self.verified = false;
     }
     
     func calculateRssiAverage() {
