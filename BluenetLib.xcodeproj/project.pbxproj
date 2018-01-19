@@ -71,7 +71,6 @@
 		FA7065F32003DEC100C833FE /* opCode4_type0.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065F22003DEC100C833FE /* opCode4_type0.swift */; };
 		FA747B161E4B0FBA00255820 /* ControlPackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA747B151E4B0FBA00255820 /* ControlPackets.swift */; };
 		FA7BE69A1E4487B8009E633D /* MeshHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7BE6991E4487B8009E633D /* MeshHandler.swift */; };
-		FA7BE69C1E44902E009E633D /* MeshChannels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7BE69B1E44902E009E633D /* MeshChannels.swift */; };
 		FA7BE69E1E449287009E633D /* MeshPackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7BE69D1E449287009E633D /* MeshPackets.swift */; };
 		FA8A9E061F15007E002028F6 /* SchedulerPackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA8A9E051F15007E002028F6 /* SchedulerPackets.swift */; };
 		FAE862621CF4B3830027539D /* Cartfile in Resources */ = {isa = PBXBuildFile; fileRef = FAE862611CF4B3830027539D /* Cartfile */; };
@@ -155,7 +154,6 @@
 		FA79874E1DF6B3380005EB86 /* BluenetLib.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BluenetLib.md; sourceTree = "<group>"; };
 		FA79874F1DF6B3380005EB86 /* BluenetLocalizationLib.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BluenetLocalizationLib.md; sourceTree = "<group>"; };
 		FA7BE6991E4487B8009E633D /* MeshHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeshHandler.swift; sourceTree = "<group>"; };
-		FA7BE69B1E44902E009E633D /* MeshChannels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeshChannels.swift; sourceTree = "<group>"; };
 		FA7BE69D1E449287009E633D /* MeshPackets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeshPackets.swift; sourceTree = "<group>"; };
 		FA8A9E051F15007E002028F6 /* SchedulerPackets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SchedulerPackets.swift; sourceTree = "<group>"; };
 		FAE862611CF4B3830027539D /* Cartfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Cartfile; sourceTree = "<group>"; };
@@ -301,7 +299,6 @@
 				FA5882931E38C0F000913AE6 /* BluenetLib.h */,
 				FA5882A91E38C0F100913AE6 /* BlePackets.swift */,
 				FA7BE69D1E449287009E633D /* MeshPackets.swift */,
-				FA7BE69B1E44902E009E633D /* MeshChannels.swift */,
 				FA5882AA1E38C0F100913AE6 /* BluenetTypes.swift */,
 				FA5882AB1E38C0F100913AE6 /* Characteristics.swift */,
 				FA5882AC1E38C0F100913AE6 /* Services.swift */,
@@ -508,7 +505,6 @@
 			files = (
 				FA5882BA1E38C0F100913AE6 /* LocationManager.swift in Sources */,
 				FA5882DB1E38C0F100913AE6 /* NotificationMerger.swift in Sources */,
-				FA7BE69C1E44902E009E633D /* MeshChannels.swift in Sources */,
 				FA5882CA1E38C0F100913AE6 /* NearestItem.swift in Sources */,
 				FA7065D92003AE4600C833FE /* ScanResponse.swift in Sources */,
 				FA5882C51E38C0F100913AE6 /* AvailableDevice.swift in Sources */,

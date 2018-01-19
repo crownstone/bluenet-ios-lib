@@ -8,28 +8,6 @@
 
 import Foundation
 
-class ScheduleEntryPacket {
-    var channel : MeshChannel!
-    var length  : UInt16
-    var payload : [UInt8]!
-    
-    init(channel: MeshChannel, payload: [UInt8]) {
-        self.channel = channel
-        self.length = NSNumber(value: payload.count).uint16Value
-        self.payload = payload
-    }
-    
-    func getPacket() -> [UInt8] {
-        var arr = [UInt8]()
-        arr.append(self.channel.rawValue)
-        arr.append(0) // reserved
-        arr += Conversion.uint16_to_uint8_array(self.length)
-        arr += self.payload
-        return arr
-    }
-}
-
-
 
 /**
  * scheduleEntryIndex: [ 0 .. 9 ] UInt8. Must be smaller than 10. This indicates which timer will be set.

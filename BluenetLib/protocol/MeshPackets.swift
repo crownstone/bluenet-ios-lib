@@ -57,6 +57,7 @@ class MeshKeepAlivePacket {
     
     func getPacket() -> [UInt8] {
         var arr = [UInt8]()
+        arr.append(self.type)
         arr += Conversion.uint16_to_uint8_array(self.timeout)
         arr.append(self.numberOfItems)
         for packet in self.packets {
@@ -67,14 +68,14 @@ class MeshKeepAlivePacket {
 }
 
 class MeshCommandPacket {
-    var type          : MeshCommandType!
+    var type          : UInt8 = 0
     var bitmask       : UInt8 = 0
     var idCounter     : UInt8 = 0
     var crownstoneIds : [UInt8]!
     var payload       : [UInt8]!
     
     init(type: MeshCommandType, crownstoneIds: [UInt8], payload: [UInt8]) {
-        self.type = type
+        self.type = type.rawValue
         self.crownstoneIds = crownstoneIds
         self.payload = payload
         self.idCounter = NSNumber(value: crownstoneIds.count).uint8Value
@@ -82,7 +83,7 @@ class MeshCommandPacket {
     
     func getPacket() -> [UInt8] {
         var arr = [UInt8]()
-        arr.append(self.type.rawValue)
+        arr.append(self.type)
         arr.append(self.bitmask)
         arr.append(self.idCounter)
         arr += (self.crownstoneIds)
