@@ -33,6 +33,53 @@
             endingLineNumber = "32"
             landmarkName = "CSServices"
             landmarkType = "14">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "globalinit_33_9388C8D4427471EBA8F25310983552CB_func11"
+                  moduleName = "BluenetLib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/alex/Dropbox/DoBots/Projects/XCode/bluenet-ios-lib/BluenetLib/protocol/Services.swift"
+                  timestampString = "538320238.901018"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "32"
+                  endingLineNumber = "32"
+                  offsetFromSymbolStart = "4">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "BluenetLib.CSServices.MeshService.unsafeMutableAddressor : Swift.String"
+                  moduleName = "BluenetLib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/alex/Dropbox/DoBots/Projects/XCode/bluenet-ios-lib/BluenetLib/protocol/Services.swift"
+                  timestampString = "538320238.904861"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "32"
+                  endingLineNumber = "32"
+                  offsetFromSymbolStart = "4">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "static BluenetLib.CSServices.MeshService.getter : Swift.String"
+                  moduleName = "BluenetLib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/alex/Dropbox/DoBots/Projects/XCode/bluenet-ios-lib/BluenetLib/protocol/Services.swift"
+                  timestampString = "538320238.9085701"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "32"
+                  endingLineNumber = "32"
+                  offsetFromSymbolStart = "44">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

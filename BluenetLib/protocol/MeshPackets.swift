@@ -99,12 +99,17 @@ class StoneMultiSwitchPacket {
     var state   : UInt8
     var intent  : UInt8
     
-    convenience init(crownstoneId: UInt8, state: UInt8, intent: UInt8) {
-        self.init(crownstoneId: crownstoneId, state: state, timeout:0, intent: intent)
+    convenience init(crownstoneId: UInt8, state: UInt8, intent: IntentType) {
+        self.init(crownstoneId: crownstoneId, state: state, timeout:0, intent: intent.rawValue)
     }
     
-    convenience init(crownstoneId: UInt8, state: Float, intent: UInt8) {
-        self.init(crownstoneId: crownstoneId, state: state, timeout:0, intent: intent)
+    convenience init(crownstoneId: UInt8, state: Float, intent: IntentType) {
+        self.init(crownstoneId: crownstoneId, state: state, timeout:0, intent: intent.rawValue)
+    }
+    
+    convenience init(crownstoneId: UInt8, state: Float, timeout: UInt16, intent: IntentType) {
+        let switchState = NSNumber(value: min(1,max(0,state))*100).uint8Value
+        self.init(crownstoneId: crownstoneId, state: switchState, timeout: timeout, intent: intent.rawValue)
     }
     
     convenience init(crownstoneId: UInt8, state: Float, timeout: UInt16, intent: UInt8) {

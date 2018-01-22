@@ -12,7 +12,7 @@ import CryptoSwift
 /*
  *
  *
- *  These are valid for SDK 0.6.0
+ *  These are valid for SDK 0.13.0
  *
  *
  */

@@ -57,6 +57,7 @@
 		FA5882E51E38C2EA00913AE6 /* EncryptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882B61E38C0F100913AE6 /* EncryptionTests.swift */; };
 		FA5882E61E38C2EC00913AE6 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FA5882B71E38C0F100913AE6 /* Info.plist */; };
 		FA5908AE1E363E4E0035E658 /* Zip.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA5908AD1E363E4E0035E658 /* Zip.framework */; };
+		FA6E8F8D2015FAE7004C3E8A /* PacketTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6E8F8C2015FAE7004C3E8A /* PacketTests.swift */; };
 		FA7065D92003AE4600C833FE /* ScanResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065D82003AE4600C833FE /* ScanResponse.swift */; };
 		FA7065DC2003AE8F00C833FE /* opCode1.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065DB2003AE8F00C833FE /* opCode1.swift */; };
 		FA7065DE2003AE9D00C833FE /* opCode2.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065DD2003AE9D00C833FE /* opCode2.swift */; };
@@ -138,6 +139,7 @@
 		FA5882B71E38C0F100913AE6 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FA5882E11E38C10600913AE6 /* BluenetShared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BluenetShared.framework; path = Carthage/Build/iOS/BluenetShared.framework; sourceTree = "<group>"; };
 		FA5908AD1E363E4E0035E658 /* Zip.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Zip.framework; path = Carthage/Build/iOS/Zip.framework; sourceTree = "<group>"; };
+		FA6E8F8C2015FAE7004C3E8A /* PacketTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PacketTests.swift; sourceTree = "<group>"; };
 		FA7065D82003AE4600C833FE /* ScanResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanResponse.swift; sourceTree = "<group>"; };
 		FA7065DB2003AE8F00C833FE /* opCode1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode1.swift; sourceTree = "<group>"; };
 		FA7065DD2003AE9D00C833FE /* opCode2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode2.swift; sourceTree = "<group>"; };
@@ -327,6 +329,7 @@
 				FA5882B71E38C0F100913AE6 /* Info.plist */,
 				FA3FC25C1ED34DEF00DD2F76 /* ConversionTests.swift */,
 				FA7065ED2003C9DC00C833FE /* AdvertisementTests.swift */,
+				FA6E8F8C2015FAE7004C3E8A /* PacketTests.swift */,
 			);
 			path = BluenetLibTests;
 			sourceTree = "<group>";
@@ -564,6 +567,7 @@
 			files = (
 				FA3FC25D1ED34DEF00DD2F76 /* ConversionTests.swift in Sources */,
 				FA7065EE2003C9DC00C833FE /* AdvertisementTests.swift in Sources */,
+				FA6E8F8D2015FAE7004C3E8A /* PacketTests.swift in Sources */,
 				FA5882E51E38C2EA00913AE6 /* EncryptionTests.swift in Sources */,
 				FA5882E41E38C2E800913AE6 /* BluenetLibTests.swift in Sources */,
 			);

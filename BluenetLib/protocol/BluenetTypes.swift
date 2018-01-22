@@ -137,7 +137,7 @@ public enum IntentType : UInt8 {
 }
 
 public enum MeshKeepAliveTypes : UInt8 {
-    case sharedTimeout = 0
+    case sharedTimeout = 1
 }
 
 public enum MeshMultiSwitchType : UInt8 {
