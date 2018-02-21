@@ -17,7 +17,7 @@ open class ScanResponsePacket {
     open var switchState         :   UInt8    = 0
     open var flagsBitmask        :   UInt8    = 0
     open var temperature         :   Int8     = 0
-    open var powerFactor         :   Double   = 0
+    open var powerFactor         :   Double   = 1
     open var powerUsageReal      :   Double   = 0
     open var powerUsageApparent  :   Double   = 0
     open var accumulatedEnergy   :   Int32    = 0
@@ -31,7 +31,7 @@ open class ScanResponsePacket {
     open var switchLocked        :   Bool     = false
     
     open var partialTimestamp    :   UInt16   = 0
-    open var timestamp           :   UInt32   = 0
+    open var timestamp           :   Double   = -1
     
     open var validation          :   UInt16   = 0x0000 // Will be 0xFACE if it is set.
     
@@ -44,27 +44,30 @@ open class ScanResponsePacket {
     
     var validData = false
     
-    init(_ data: [UInt8]) {
+    init(_ data: [UInt8], liteParse : Bool = false) {
         self.data = data
-        self.parse()
+        self.parse(liteParse: liteParse)
     }
     
-    func parse() {
+    func parse(liteParse : Bool) {
         if (data.count == 17) {
             self.opCode = data[0]
             switch (self.opCode) {
             case 1:
-                parseOpcode1(serviceData: self, data: data)
+                parseOpcode1(serviceData: self, data: data, liteParse: liteParse)
             case 2:
-                parseOpcode2(serviceData: self, data: data)
+                parseOpcode2(serviceData: self, data: data, liteParse: liteParse)
             case 3:
-                parseOpcode3(serviceData: self, data: data)
+                parseOpcode3(serviceData: self, data: data, liteParse: liteParse)
             case 4:
-                parseOpcode4(serviceData: self, data: data)
+                parseOpcode4(serviceData: self, data: data, liteParse: liteParse)
             default:
-                parseOpcode3(serviceData: self, data: data)
+                parseOpcode3(serviceData: self, data: data, liteParse: liteParse)
             }
-            validData = true
+            
+            if (liteParse == false) {
+                validData = true
+            }
         }
         else {
             validData = false
@@ -162,7 +165,7 @@ open class ScanResponsePacket {
                 }
                 
                 // parse the data again based on the decrypted result
-                self.parse()
+                self.parse(liteParse: false)
             }
             catch let err {
                 LOG.error("Could not decrypt advertisement \(err)")

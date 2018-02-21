@@ -31,7 +31,7 @@ open class Advertisement {
     open var serviceUUID : String?
     open var scanResponse : ScanResponsePacket?
     
-    init(handle: String, name: String?, rssi: NSNumber, serviceData: Any, serviceUUID: Any, referenceId: String) {
+    init(handle: String, name: String?, rssi: NSNumber, serviceData: Any, serviceUUID: Any, referenceId: String, liteParse: Bool = false) {
         self.referenceId = referenceId
         
         if (name != nil) {
@@ -63,7 +63,7 @@ open class Advertisement {
             if (id == CrownstonePlugAdvertisementServiceUUID ||
                 id == CrownstoneBuiltinAdvertisementServiceUUID ||
                 id == GuidestoneAdvertisementServiceUUID) {
-                self.scanResponse        =  ScanResponsePacket(data)
+                self.scanResponse        =  ScanResponsePacket(data, liteParse : liteParse)
                 self.isCrownstoneFamily  =  self.scanResponse!.hasCrownstoneDataFormat()
                 self.isCrownstonePlug    =  (id == CrownstonePlugAdvertisementServiceUUID)
                 self.isCrownstoneBuiltin =  (id == CrownstoneBuiltinAdvertisementServiceUUID)
@@ -188,6 +188,12 @@ open class Advertisement {
     open func decrypt( _ key: [UInt8] ) {
         if (serviceDataAvailable && self.scanResponse != nil) {
             self.scanResponse!.decrypt(key)
+        }
+    }
+    
+    open func fullParse() {
+        if (serviceDataAvailable && self.scanResponse != nil) {
+            self.scanResponse!.parse(liteParse: false)
         }
     }
 }

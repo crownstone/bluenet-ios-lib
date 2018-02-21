@@ -136,7 +136,6 @@ open class AvailableDevice {
             if (response.stateOfExternalCrownstone == false) {
                 self.crownstoneId = response.crownstoneId
             }
-            
         }
         
         self.consecutiveMatches = 0

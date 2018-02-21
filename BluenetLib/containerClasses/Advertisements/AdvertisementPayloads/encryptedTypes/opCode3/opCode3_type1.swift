@@ -8,11 +8,18 @@
 
 import Foundation
 
-func parseOpcode3_type1(serviceData : ScanResponsePacket, data : [UInt8]) {
+func parseOpcode3_type1(serviceData : ScanResponsePacket, data : [UInt8], liteParse: Bool) {
     if (data.count == 17) {
         // opCode   = data[0]
         // dataType = data[1]
         serviceData.errorMode = true
+        
+        serviceData.partialTimestamp = Conversion.uint8_array_to_uint16([data[13],data[14]])
+        serviceData.uniqueIdentifier = NSNumber(value: serviceData.partialTimestamp)
+        
+        if (liteParse) {
+            return
+        }
         
         serviceData.crownstoneId  = data[2]
         serviceData.errorsBitmask = Conversion.uint8_array_to_uint32([
@@ -30,12 +37,6 @@ func parseOpcode3_type1(serviceData : ScanResponsePacket, data : [UInt8]) {
         ])
         
         serviceData.flagsBitmask = data[11]
-        serviceData.temperature  = Conversion.uint8_to_int8(data[12])
-
-        serviceData.partialTimestamp = Conversion.uint8_array_to_uint16([data[13],data[14]])
-        serviceData.timestamp = NSNumber(value: reconstructTimestamp(currentTimestamp: NSDate().timeIntervalSince1970, LsbTimestamp: serviceData.partialTimestamp)).uint32Value
-        serviceData.uniqueIdentifier = NSNumber(value: serviceData.timestamp)
-        
         // bitmask states
         let bitmaskArray = Conversion.uint8_to_bit_array(serviceData.flagsBitmask)
         
@@ -44,6 +45,17 @@ func parseOpcode3_type1(serviceData : ScanResponsePacket, data : [UInt8]) {
         serviceData.hasError         = bitmaskArray[2]
         serviceData.switchLocked     = bitmaskArray[3]
         serviceData.timeIsSet        = bitmaskArray[4]
+        
+        serviceData.temperature  = Conversion.uint8_to_int8(data[12])
+
+        if (serviceData.timeIsSet) {
+            serviceData.timestamp = NSNumber(value: reconstructTimestamp(currentTimestamp: NSDate().timeIntervalSince1970, LsbTimestamp: serviceData.partialTimestamp)).doubleValue
+        }
+        else {
+            serviceData.timestamp = NSNumber(value: serviceData.partialTimestamp).doubleValue // this is now a counter
+        }
+        
+              
         
         let realPower = Conversion.uint16_to_int16(
             Conversion.uint8_array_to_uint16([

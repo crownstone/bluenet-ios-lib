@@ -8,10 +8,16 @@
 
 import Foundation
 
-func parseOpcode4_type0(serviceData : ScanResponsePacket, data : [UInt8]) {
+func parseOpcode4_type0(serviceData : ScanResponsePacket, data : [UInt8], liteParse: Bool) {
     if (data.count == 17) {
         // opCode   = data[0]
         // dataType = data[1]
+        
+        serviceData.uniqueIdentifier = NSNumber(value: data[12])
+        
+        if (liteParse) {
+            return
+        }
         
         serviceData.switchState  = data[2]
         serviceData.flagsBitmask = data[3]
@@ -45,7 +51,6 @@ func parseOpcode4_type0(serviceData : ScanResponsePacket, data : [UInt8]) {
             data[11]
         ])
         
-        serviceData.uniqueIdentifier = NSNumber(value: data[12])
         
         // bitmask states
         let bitmaskArray = Conversion.uint8_to_bit_array(serviceData.flagsBitmask)

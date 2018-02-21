@@ -8,8 +8,15 @@
 
 import Foundation
 
-func parseOpcode1(serviceData : ScanResponsePacket, data : [UInt8]) {
+func parseOpcode1(serviceData : ScanResponsePacket, data : [UInt8], liteParse: Bool = false) {
     if (data.count == 17) {
+        serviceData.timestamp = NSNumber(value: Conversion.uint8_array_to_uint32([0x00,data[14],data[15],data[16]])).doubleValue
+        serviceData.uniqueIdentifier = NSNumber(value: serviceData.timestamp)
+        
+        if (liteParse) {
+            return
+        }
+        
         serviceData.crownstoneId = NSNumber(value: Conversion.uint8_array_to_uint16([data[1], data[2]])).uint8Value
         serviceData.switchState  = data[3]
         serviceData.flagsBitmask = data[4]
@@ -36,8 +43,6 @@ func parseOpcode1(serviceData : ScanResponsePacket, data : [UInt8]) {
             ])
         )
         
-        serviceData.timestamp = Conversion.uint8_array_to_uint32([0x00,data[14],data[15],data[16]])
-        serviceData.uniqueIdentifier = NSNumber(value: serviceData.timestamp)
         // bitmask states
         let bitmaskArray = Conversion.uint8_to_bit_array(serviceData.flagsBitmask)
         
