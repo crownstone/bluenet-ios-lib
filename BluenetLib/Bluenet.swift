@@ -331,7 +331,6 @@ open class Bluenet  {
     func _parseAdvertisement(_ data: Any) {
         // first we check if the data is conforming to an advertisment
         if let castData = data as? Advertisement {
-            
             // check if we already know this Crownstone
             if deviceList[castData.handle] != nil {
                 deviceList[castData.handle]!.update(castData)

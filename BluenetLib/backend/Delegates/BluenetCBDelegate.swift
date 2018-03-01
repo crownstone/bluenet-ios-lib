@@ -99,7 +99,8 @@ open class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
             rssi: RSSI,
             serviceData: advertisementData["kCBAdvDataServiceData"] as Any,
             serviceUUID: advertisementData["kCBAdvDataServiceUUIDs"] as Any,
-            referenceId: BleManager.settings.referenceId
+            referenceId: BleManager.settings.referenceId,
+            liteParse: true
         );
 
         

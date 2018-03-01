@@ -56,6 +56,7 @@ open class Advertisement {
                 self.serviceData[serviceCUUID.uuidString] = uint8Arr
                 self.serviceUUID = serviceCUUID.uuidString
                 self.serviceDataAvailable = true
+                self.isInDFUMode = false
             }
         }
         
