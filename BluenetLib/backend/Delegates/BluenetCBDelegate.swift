@@ -102,7 +102,7 @@ open class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
             referenceId: BleManager.settings.referenceId,
             liteParse: true
         );
-
+        
         
         // Because crownstones alternate between connectable and nonconnectable to match iBeacon spec, the ios duplicate filtering does not work completely. This workaround implements uniqueness checking before decryption.
         if (BleManager.scanUniqueOnly == true) {

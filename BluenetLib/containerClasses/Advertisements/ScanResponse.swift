@@ -54,9 +54,9 @@ open class ScanResponsePacket {
             self.opCode = data[0]
             switch (self.opCode) {
             case 1:
-                parseOpcode1(serviceData: self, data: data, liteParse: liteParse)
+                parseOpcode1(serviceData: self, data: data)
             case 2:
-                parseOpcode2(serviceData: self, data: data, liteParse: liteParse)
+                parseOpcode2(serviceData: self, data: data)
             case 3:
                 parseOpcode3(serviceData: self, data: data, liteParse: liteParse)
             case 4:
@@ -65,7 +65,7 @@ open class ScanResponsePacket {
                 parseOpcode3(serviceData: self, data: data, liteParse: liteParse)
             }
             
-            if (liteParse == false) {
+            if (liteParse == true) {
                 validData = true
             }
         }

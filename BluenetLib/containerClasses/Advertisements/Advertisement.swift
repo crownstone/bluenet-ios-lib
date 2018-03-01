@@ -171,6 +171,7 @@ open class Advertisement {
         return JSONUtils.stringify(self.getJSON())
     }
     
+    
     open func isSetupPackage() -> Bool {
         if (serviceDataAvailable && self.scanResponse != nil) {
             return self.scanResponse!.isSetupPackage()
