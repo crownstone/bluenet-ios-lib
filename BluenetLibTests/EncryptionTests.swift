@@ -147,4 +147,25 @@ class EncryptionTests: XCTestCase {
         
         XCTAssertEqual(decryptedData[0...decryptedData.count-1], paddedData[0...paddedData.count-1], "decryption failed")
     }
+    
+    func testEncryptionWithoutKey() {
+        let payload  : [UInt8]  = [0, 0, 100, 0, 25]
+        let paddedData = zeroPadding.add(to: payload, blockSize: 16)
+        print("paddedData \(paddedData)")
+        
+        let key : [UInt8] = [0];
+        do {
+            guard key.count   == 16 else { throw BleError.DO_NOT_HAVE_ENCRYPTION_KEY }
+            guard paddedData.count == 16 else { throw BleError.INVALID_PACKAGE_FOR_ENCRYPTION_TOO_SHORT }
+            let aes = try AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: .noPadding)
+            print("GOT THE AES", aes)
+            let data = try aes.decrypt(paddedData)
+            print("DONE", data)
+        }
+        catch {
+            print("Could not decrypt advertisement \(error)")
+        }
+        
+        
+    }
 }
