@@ -230,7 +230,7 @@ class EncryptionHandler {
             throw BleError.DO_NOT_HAVE_ENCRYPTION_KEY
         }
         
-        if (key.count != 16) {
+        if (key!.count != 16) {
             throw BleError.DO_NOT_HAVE_ENCRYPTION_KEY
         }
         
