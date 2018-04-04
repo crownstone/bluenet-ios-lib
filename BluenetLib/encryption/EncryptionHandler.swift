@@ -22,7 +22,7 @@ let SESSION_DATA_LENGTH     = 5
 let SESSION_KEY_LENGTH      = 4
 let PACKET_USERLEVEL_LENGTH = 1
 let PACKET_NONCE_LENGTH     = 3
-let CHECKSUM                : UInt32 = 0xcafebabe
+let CHECKSUM       : UInt32 = 0xcafebabe
 
 var BLUENET_ENCRYPTION_TESTING = false
 
@@ -101,7 +101,6 @@ class EncryptionHandler {
         }
         
         let IV = try generateIV(nonce, sessionData: sessionData.sessionNonce)
-        
         // get key
         let key = try _getKey(settings)
         
@@ -113,7 +112,7 @@ class EncryptionHandler {
         
         // put the input data in the padded payload
         for (index, element) in payloadArray.enumerated() {
-            paddedPayload[index+4] = element
+            paddedPayload[index+SESSION_KEY_LENGTH] = element
         }
         
         // manually padd the payload since the CryptoSwift version is not working for CTR.

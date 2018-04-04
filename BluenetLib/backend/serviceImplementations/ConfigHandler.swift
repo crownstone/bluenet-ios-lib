@@ -28,6 +28,15 @@ open class ConfigHandler {
         return self._writeToConfig(packet: data.getPacket())
     }
     
+    open func getDimmerTempUp() -> Promise<Float> {
+        return self._getConfig(ConfigurationType.DIMMER_TEMP_UP_VOLTAGE)
+    }
+    
+    open func setDimmerTempUp(_ voltage: Float) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.DIMMER_TEMP_UP_VOLTAGE, payloadFloat: voltage)
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
     open func setIBeaconMajor(_ major: UInt16) -> Promise<Void> {
         let data = WriteConfigPacket(type: ConfigurationType.ibeacon_MAJOR, payload16: major)
         return self._writeToConfig(packet: data.getPacket())

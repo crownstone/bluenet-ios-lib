@@ -37,7 +37,6 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         
         LOG.info("BLUENET_LIB_NAV: location services enabled: \(CLLocationManager.locationServicesEnabled())");
         LOG.info("BLUENET_LIB_NAV: ranging services enabled: \(CLLocationManager.isRangingAvailable())");
-
     }
     
     /**

@@ -20,7 +20,7 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
     var wasScanning = false
     
     fileprivate var dfuController : DFUServiceController?
-    var pendingDFUPromiseFulfill : () -> Void = { }
+    var pendingDFUPromiseFulfill : (()) -> Void = {_ in }
     var pendingDFUPromiseReject : (BleError) -> Void  = {_ in }
     var promisePending = false
     
@@ -137,7 +137,7 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
                             .catch{ err in reject(err) }
                     }
                 }
-                .then {(_) -> Promise<voidPromiseCallback> in return self.setupNotifications()}
+                .then {(_) -> Promise<voidPromiseCallback> in return self.setupNotifications() /*the bootloader requires the user to subscribe to notifications in order to function*/}
                 .then {cleanupCallback -> Promise<Void> in
                     cleanup = cleanupCallback
                     success = true
@@ -223,7 +223,7 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
     func fulfillPromise() {
         if (self.promisePending) {
             self.promisePending = false
-            self.pendingDFUPromiseFulfill()
+            self.pendingDFUPromiseFulfill(())
         }
         self.bleManager.reassignDelegate()
     }

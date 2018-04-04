@@ -40,7 +40,26 @@ class EncryptionTests: XCTestCase {
         XCTAssertEqual(guestKey,  settings.guestKey!)
 
     }
+    
+    func testSwitchPacketEncryption() {
+        settings.setSessionNonce([49,50,51,52,53])
+        let payload : [UInt8] = [0,0,1,0,100]
+        let payloadData = Data(payload)
+        let data = try! EncryptionHandler.encrypt(payloadData, settings: settings)
+        
+        print("ENC DATA \(data.bytes)")
+    }
 
+    
+    func testNotificationPacketEncryption() {
+        settings.loadKeys(encryptionEnabled: true, adminKey: "f40a7ab9eb1c9909a35e4b5bb1c07bcd", memberKey: "dcad9f07f4a13339db066b4acf437646", guestKey: "9332b7abf19b86f548156d88c687def6", referenceId: "test")
+        settings.setSessionNonce([245, 128, 31, 110, 0])
+        let payload : [UInt8] =  [184, 200, 141, 1, 103, 184, 15, 98, 70, 17, 30, 224, 126, 226, 113, 105, 144, 144, 35, 180]
+        let payloadData = Data(payload)
+        let data = try! EncryptionHandler.decrypt(payloadData, settings: settings)
+        
+        print("dec data \(data.bytes)")
+    }
     
     func testEncryption() {
         // we are going to try if the CTR method from Cryptswift is doing what we think its doing when adding the counter to the IV

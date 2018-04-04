@@ -36,7 +36,7 @@ public typealias eventCallback = (Any) -> Void
    |  "nearestCrownstone"           |     NearestItem      |     When a verified advertisement packet in setup mode is received, we check the list
    |                                |                      |     of available stones in setup mode and return the closest.
  */
-open class Bluenet  {
+open class Bluenet {
     // todo: set back to private, currently public for DEBUG
     var counter : UInt64 = 0
     open let bleManager : BleManager!

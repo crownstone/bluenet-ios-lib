@@ -102,7 +102,7 @@ open class Conversion {
         var string = ""
         for i in [Int](0...input.count-1) {
             // due to little endian, we read it out in the reverse order.
-            string +=  Conversion.uint8_to_hex_string(input[input.count-1-i])
+            string += Conversion.uint8_to_hex_string(input[input.count-1-i])
             
             // add colons to the string
             if (i < input.count-1) {
@@ -226,6 +226,19 @@ open class Conversion {
     open static func uint16_to_int16(_ val: UInt16) -> Int16 {
         let ns = NSNumber(value: val as UInt16)
         return ns.int16Value
+    }
+    
+    open static func uint8_array_to_float(_ arr: [UInt8]) -> Float {
+        let data = Data(arr)
+        let floatVal = data.withUnsafeBytes { $0.pointee } as Float
+        return floatVal
+    }
+    
+    
+    open static func float_to_uint8_array(_ val: Float) -> [UInt8] {
+        var float1 : Float = val
+        let data = Data(buffer: UnsafeBufferPointer(start: &float1, count: 1))
+        return data.bytes
     }
 }
 

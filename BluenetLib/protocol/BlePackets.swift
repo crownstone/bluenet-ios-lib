@@ -64,6 +64,13 @@ class BLEPacket {
         self.length = Conversion.uint16_to_uint8_array(__uint16_t(self.payload.count))
     }
     
+    init(type: UInt8, payloadFloat: Float) {
+        self.type = type
+        self.payload = Conversion.float_to_uint8_array(payloadFloat)
+        self.length = Conversion.uint16_to_uint8_array(__uint16_t(self.payload.count))
+    }
+    
+    
     func getPacket() -> [UInt8] {
         var arr = [UInt8]()
         arr.append(self.type)
@@ -136,6 +143,7 @@ class ReadConfigPacket : BLEPacket {
     init(type: ConfigurationType, payload16: UInt16) { super.init(type: type.rawValue, payload: payload16) }
     init(type: ConfigurationType, payload32: UInt32) { super.init(type: type.rawValue, payload: payload32) }
     init(type: ConfigurationType, payloadArray: [UInt8]) { super.init(type: type.rawValue, payload: payloadArray) }
+    init(type: ConfigurationType, payloadFloat: Float  ) { super.init(type: type.rawValue, payloadFloat: payloadFloat)  }
     
     func getOpCode() -> OpCode { return .read }
     
@@ -162,6 +170,7 @@ class ReadStatePacket : BLEPacket {
     init(type: StateType, payload16:     UInt16)  { super.init(type: type.rawValue, payload: payload16) }
     init(type: StateType, payload32:     UInt32)  { super.init(type: type.rawValue, payload: payload32) }
     init(type: StateType, payloadArray:  [UInt8]) { super.init(type: type.rawValue, payload: payloadArray) }
+    init(type: StateType, payloadFloat:  Float  ) { super.init(type: type.rawValue, payloadFloat: payloadFloat)  }
     
     func getOpCode() -> OpCode {
         return .read

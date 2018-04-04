@@ -88,4 +88,10 @@ class ConversionTests: XCTestCase {
         print(Conversion.uint8_to_int8(133))
         print(Conversion.uint8_to_int8(0))
     }
+    
+    func testFloatConversion() {
+        print(Conversion.float_to_uint8_array(3.3))
+        XCTAssertEqual(Conversion.float_to_uint8_array(3.3),[51,51,83,64])
+        XCTAssertEqual(Conversion.uint8_array_to_float([51,51,83,64]),3.3)
+    }
 }

@@ -93,6 +93,12 @@ public enum ConfigurationType : UInt8 {
     case power_ZERO = 47
     case power_AVERAGE_WINDOW = 48
     case mesh_ACCESS_ADDRESS = 49
+    case CURRENT_CONSUMPTION_THRESHOLD = 50
+    case CURRENT_CONSUMPTION_THRESHOLD_DIMMER = 51
+    case DIMMER_TEMP_UP_VOLTAGE = 52
+    case DIMEMR_TEMP_DOWN_VOLTAGE = 53
+    case PWM_ALLOWED = 54
+    case SWITCH_LOCKED = 55
 }
 
 public enum MeshHandle : UInt8 {
