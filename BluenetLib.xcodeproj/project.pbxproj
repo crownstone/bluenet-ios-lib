@@ -18,6 +18,8 @@
 		FA3FC25B1ED3499C00DD2F76 /* StateHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3FC25A1ED3499C00DD2F76 /* StateHandler.swift */; };
 		FA3FC25D1ED34DEF00DD2F76 /* ConversionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3FC25C1ED34DEF00DD2F76 /* ConversionTests.swift */; };
 		FA3FC25F1ED4346200DD2F76 /* CrownstoneErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3FC25E1ED4346200DD2F76 /* CrownstoneErrors.swift */; };
+		FA535A752076855000B6B793 /* opCode5.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA535A742076855000B6B793 /* opCode5.swift */; };
+		FA535A772076856400B6B793 /* opCode6.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA535A762076856400B6B793 /* opCode6.swift */; };
 		FA5882B91E38C0F100913AE6 /* BleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58828A1E38C0F000913AE6 /* BleManager.swift */; };
 		FA5882BA1E38C0F100913AE6 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58828B1E38C0F000913AE6 /* LocationManager.swift */; };
 		FA5882BB1E38C0F100913AE6 /* ConfigHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58828D1E38C0F000913AE6 /* ConfigHandler.swift */; };
@@ -100,6 +102,8 @@
 		FA3FC25A1ED3499C00DD2F76 /* StateHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateHandler.swift; sourceTree = "<group>"; };
 		FA3FC25C1ED34DEF00DD2F76 /* ConversionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConversionTests.swift; sourceTree = "<group>"; };
 		FA3FC25E1ED4346200DD2F76 /* CrownstoneErrors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CrownstoneErrors.swift; sourceTree = "<group>"; };
+		FA535A742076855000B6B793 /* opCode5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode5.swift; sourceTree = "<group>"; };
+		FA535A762076856400B6B793 /* opCode6.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode6.swift; sourceTree = "<group>"; };
 		FA58828A1E38C0F000913AE6 /* BleManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BleManager.swift; sourceTree = "<group>"; };
 		FA58828B1E38C0F000913AE6 /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		FA58828D1E38C0F000913AE6 /* ConfigHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigHandler.swift; sourceTree = "<group>"; };
@@ -342,6 +346,8 @@
 				FA7065DD2003AE9D00C833FE /* opCode2.swift */,
 				FA7065DF2003AEA500C833FE /* opCode3.swift */,
 				FA7065EA2003BD7300C833FE /* opCode4.swift */,
+				FA535A742076855000B6B793 /* opCode5.swift */,
+				FA535A762076856400B6B793 /* opCode6.swift */,
 			);
 			path = AdvertisementPayloads;
 			sourceTree = "<group>";
@@ -532,11 +538,13 @@
 				FA5882D41E38C0F100913AE6 /* BluenetTypes.swift in Sources */,
 				FA5882CE1E38C0F100913AE6 /* TrainingData.swift in Sources */,
 				FA5882D61E38C0F100913AE6 /* Services.swift in Sources */,
+				FA535A752076855000B6B793 /* opCode5.swift in Sources */,
 				FA7065E32003BD3D00C833FE /* opCode3_type1.swift in Sources */,
 				FA7065E52003BD4700C833FE /* opCode3_type2.swift in Sources */,
 				FA5882BD1E38C0F100913AE6 /* DfuHandler.swift in Sources */,
 				FA5882CC1E38C0F100913AE6 /* PromiseContainer.swift in Sources */,
 				FA7BE69A1E4487B8009E633D /* MeshHandler.swift in Sources */,
+				FA535A772076856400B6B793 /* opCode6.swift in Sources */,
 				FA3FC25F1ED4346200DD2F76 /* CrownstoneErrors.swift in Sources */,
 				FA5882DA1E38C0F100913AE6 /* JSONUtils.swift in Sources */,
 				FA747B161E4B0FBA00255820 /* ControlPackets.swift in Sources */,

@@ -91,11 +91,19 @@ open class AvailableDevice {
             }
             else {
                 if (self.uniqueIdentifier != response.uniqueIdentifier) {
-                    if (response.validation != 0 && response.opCode == 3) {
-                        if (response.validation == 0xFACE && response.dataType != 1) {
+                    if (response.validation != 0 && response.opCode == 5) {
+                        if (response.validation == 0xFA && response.dataType != 1) { // datatype 1 is the error packet
                             self.addValidMeasurement(response)
                         }
-                        else if (response.validation != 0xFACE && response.dataType != 1) {
+                        else if (response.validation != 0xFA && response.dataType != 1) {// datatype 1 is the error packet
+                            self.invalidateDevice(data)
+                        }
+                    }
+                    else if (response.validation != 0 && response.opCode == 3) {
+                        if (response.validation == 0xFA && response.dataType != 1) { // datatype 1 is the error packet
+                            self.addValidMeasurement(response)
+                        }
+                        else if (response.validation != 0xFA && response.dataType != 1) { // datatype 1 is the error packet
                             self.invalidateDevice(data)
                         }
                     }

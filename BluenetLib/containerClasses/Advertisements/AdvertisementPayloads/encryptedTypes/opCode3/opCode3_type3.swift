@@ -15,6 +15,6 @@ func parseOpcode3_type3(serviceData : ScanResponsePacket, data : [UInt8], litePa
         // apply differences between type 1 and type 4
         serviceData.stateOfExternalCrownstone = true
         serviceData.powerUsageReal = 0
-        serviceData.validation = Conversion.uint8_array_to_uint16([data[15],data[16]])
+        serviceData.validation = data[16]
     }
 }

@@ -73,9 +73,7 @@ func parseOpcode3_type0(serviceData : ScanResponsePacket, data : [UInt8], litePa
             serviceData.timestamp = NSNumber(value: serviceData.partialTimestamp).doubleValue // this is now a counter
         }
         
-        
-        
-        serviceData.validation = Conversion.uint8_array_to_uint16([data[15],data[16]])
+        serviceData.validation = data[16]
     }
 }
 

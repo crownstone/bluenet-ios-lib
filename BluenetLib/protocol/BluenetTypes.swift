@@ -149,3 +149,13 @@ public enum MeshKeepAliveTypes : UInt8 {
 public enum MeshMultiSwitchType : UInt8 {
     case simpleList = 0
 }
+
+//****************** DEVICE TYPES IN ADVERTISEMENTS *************//
+
+public enum DeviceType : UInt8 {
+    case undefined = 0
+    case plug = 1
+    case guidestone = 2
+    case builtin = 3
+    case crownstoneUSB = 4
+}

@@ -56,9 +56,9 @@ class EncryptionTests: XCTestCase {
         settings.setSessionNonce([245, 128, 31, 110, 0])
         let payload : [UInt8] =  [184, 200, 141, 1, 103, 184, 15, 98, 70, 17, 30, 224, 126, 226, 113, 105, 144, 144, 35, 180]
         let payloadData = Data(payload)
-        let data = try! EncryptionHandler.decrypt(payloadData, settings: settings)
+        let data = try? EncryptionHandler.decrypt(payloadData, settings: settings)
         
-        print("dec data \(data.bytes)")
+        print("dec data \(data)")
     }
     
     func testEncryption() {

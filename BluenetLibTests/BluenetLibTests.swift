@@ -65,7 +65,18 @@ class BluenetLibTests: XCTestCase {
         print(Conversion.uint8_array_to_hex_string(aInv))
     }
     
+    func testDataAPI() {
+        var data = [123,232,321,12]
+        
+        print(data[1...])
+    }
     
+    func testEnums() {
+        if let x = DeviceType(rawValue: 1) {
+            print("X",x,String(describing: x))
+        }
+        print("XZ")
+    }
     
     func testScheduleConfig() {
         let config = ScheduleConfigurator(

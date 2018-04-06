@@ -33,7 +33,7 @@ open class ScanResponsePacket {
     open var partialTimestamp    :   UInt16   = 0
     open var timestamp           :   Double   = -1
     
-    open var validation          :   UInt16   = 0x0000 // Will be 0xFACE if it is set.
+    open var validation          :   UInt8  = 0x00 // Will be 0xFA if it is set.
     
     // TYPE ERROR (opCode 3, type 1)
     open var errorTimestamp      :   UInt32   = 0
@@ -41,6 +41,9 @@ open class ScanResponsePacket {
     open var errorMode           :   Bool     = false
     open var timeIsSet           :   Bool     = false
     open var uniqueIdentifier    :   NSNumber = 0
+    
+    open var deviceType          :   DeviceType = .undefined
+    open var rssiOfExternalCrownstone : Int8  = 0
     
     var validData = false
     
@@ -50,7 +53,23 @@ open class ScanResponsePacket {
     }
     
     func parse(liteParse : Bool) {
-        if (data.count == 17) {
+        if (data.count == 18) {
+            self.opCode = data[0]
+            switch (self.opCode) {
+            case 5:
+                parseOpcode5(serviceData: self, data: data)
+            case 6:
+                parseOpcode6(serviceData: self, data: data)
+            
+            default:
+                parseOpcode5(serviceData: self, data: data, liteParse: liteParse)
+            }
+            
+            if (liteParse == true) {
+                validData = true
+            }
+        }
+        else if (data.count == 17) {
             self.opCode = data[0]
             switch (self.opCode) {
             case 1:
@@ -113,7 +132,9 @@ open class ScanResponsePacket {
             "errors"               : errorsDictionary,
             
             "uniqueElement"        : self.uniqueIdentifier,
-            "timeIsSet"            : self.timeIsSet
+            "timeIsSet"            : self.timeIsSet,
+            "deviceType"           : String(describing: self.deviceType),
+            "rssiOfExternalCrownstone" : self.rssiOfExternalCrownstone
         ]
         
         return returnDict as NSDictionary
@@ -140,9 +161,9 @@ open class ScanResponsePacket {
             else {
                 return false
             }
-        case 3:
+        case 3, 5:
             return false
-        case 4:
+        case 4, 6:
             return true
         default:
             return false
