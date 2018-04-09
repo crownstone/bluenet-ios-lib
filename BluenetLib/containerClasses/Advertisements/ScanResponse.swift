@@ -24,6 +24,7 @@ open class ScanResponsePacket {
     open var setupMode           :   Bool     = false
     open var stateOfExternalCrownstone : Bool = false
     open var data                :   [UInt8]!
+    open var encryptedData       :   [UInt8]!
     
     open var dimmingAvailable    :   Bool     = false
     open var dimmingAllowed      :   Bool     = false
@@ -55,12 +56,12 @@ open class ScanResponsePacket {
     func parse(liteParse : Bool) {
         if (data.count == 18) {
             self.opCode = data[0]
+            self.encryptedData = Array(data[2...])
             switch (self.opCode) {
             case 5:
                 parseOpcode5(serviceData: self, data: data)
             case 6:
                 parseOpcode6(serviceData: self, data: data)
-            
             default:
                 parseOpcode5(serviceData: self, data: data, liteParse: liteParse)
             }
@@ -71,6 +72,7 @@ open class ScanResponsePacket {
         }
         else if (data.count == 17) {
             self.opCode = data[0]
+            self.encryptedData = Array(data[1...])
             switch (self.opCode) {
             case 1:
                 parseOpcode1(serviceData: self, data: data)
@@ -171,15 +173,9 @@ open class ScanResponsePacket {
     }
     
     open func decrypt(_ key: [UInt8]) {
-        if (validData == true) {
-            var encryptedData = [UInt8](repeating: 0, count: 16)
-            // copy the data we want to encrypt into a buffer
-            for i in [Int](1...data.count-1) {
-                encryptedData[i-1] = data[i]
-            }
-            
+        if (validData == true && self.encryptedData.count == 16) {
             do {
-                let result = try EncryptionHandler.decryptAdvertisement(encryptedData, key: key)
+                let result = try EncryptionHandler.decryptAdvertisement(self.encryptedData, key: key)
                 
                 for i in [Int](0...result.count-1) {
                     self.data[i+1] = result[i]
