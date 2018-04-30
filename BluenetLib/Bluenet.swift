@@ -40,6 +40,7 @@ open class Bluenet {
     // todo: set back to private, currently public for DEBUG
     var counter : UInt64 = 0
     open let bleManager : BleManager!
+    //open let blePeripheralManager : BlePeripheralManager!
     open var settings : BluenetSettings!
     let eventBus : EventBus!
     var deviceList = [String: AvailableDevice]()
@@ -71,6 +72,7 @@ open class Bluenet {
         self.settings   = BluenetSettings()
         self.eventBus   = EventBus()
         self.bleManager = BleManager(eventBus: self.eventBus, backgroundEnabled: backgroundEnabled)
+        //self.blePeripheralManager = BlePeripheralManager(eventBus: self.eventBus, backgroundEnabled: backgroundEnabled);
         
         // give the BLE manager a reference to the settings.
         self.bleManager.setSettings(settings)
@@ -101,6 +103,10 @@ open class Bluenet {
     
     open func setBackgroundScanning(newBackgroundState: Bool) {
         self.bleManager.setBackgroundScanning(newBackgroundState: newBackgroundState)
+    }
+    
+    open func initPeripheral() {
+        //self.blePeripheralManager.startAdvertising()
     }
     
     /**
@@ -216,6 +222,15 @@ open class Bluenet {
         return self.bleManager.isReady()
     }
     
+    
+    /**
+     * Returns if the BLE manager is initialized.
+     * Should be used to make sure commands are not send before it's finished and get stuck.
+ 
+    open func isPeripheralReady() -> Promise<Void> {
+        return self.blePeripheralManager.isReady()
+    }
+    */
     
     /**
      * Connect to a BLE device with the provided UUID.

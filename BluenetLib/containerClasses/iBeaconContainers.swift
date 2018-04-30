@@ -56,7 +56,7 @@ open class iBeaconPacket: iBeaconPacketProtocol {
         self.referenceId = referenceId
         
         // we claim that the uuid, major and minor combination is unique.
-        self.idString = uuid + ".Maj:" + String(describing: major) + ".Min:" + String(describing: minor)
+        self.idString = uuid + "_Maj:" + String(describing: major) + "_Min:" + String(describing: minor)
     }
     
     open func getJSON() -> JSON {
