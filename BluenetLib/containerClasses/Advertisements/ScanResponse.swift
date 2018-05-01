@@ -25,6 +25,7 @@ open class ScanResponsePacket {
     open var stateOfExternalCrownstone : Bool = false
     open var data                :   [UInt8]!
     open var encryptedData       :   [UInt8]!
+    open var encryptedDataStartIndex : Int = 1
     
     open var dimmingAvailable    :   Bool     = false
     open var dimmingAllowed      :   Bool     = false
@@ -57,6 +58,7 @@ open class ScanResponsePacket {
         if (data.count == 18) {
             self.opCode = data[0]
             self.encryptedData = Array(data[2...])
+            self.encryptedDataStartIndex = 2
             switch (self.opCode) {
             case 5:
                 parseOpcode5(serviceData: self, data: data)
@@ -73,6 +75,7 @@ open class ScanResponsePacket {
         else if (data.count == 17) {
             self.opCode = data[0]
             self.encryptedData = Array(data[1...])
+            self.encryptedDataStartIndex = 1
             switch (self.opCode) {
             case 1:
                 parseOpcode1(serviceData: self, data: data)
@@ -178,7 +181,7 @@ open class ScanResponsePacket {
                 let result = try EncryptionHandler.decryptAdvertisement(self.encryptedData, key: key)
                 
                 for i in [Int](0...result.count-1) {
-                    self.data[i+1] = result[i]
+                    self.data[i+self.encryptedDataStartIndex] = result[i]
                 }
                 
                 // parse the data again based on the decrypted result

@@ -80,7 +80,7 @@ open class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
     
     
     public func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
-        print("START ADV", error)
+        print("START ADV", error as Any)
     }
     
     public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {

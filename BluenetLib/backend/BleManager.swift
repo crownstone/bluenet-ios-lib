@@ -26,6 +26,7 @@ public enum BleError : Error {
     case CANNOT_SET_TIMEOUT_WITH_THIS_TYPE_OF_PROMISE
     case TIMEOUT
     case DISCONNECT_TIMEOUT
+    case AWAIT_DISCONNECT_TIMEOUT
     case CANCEL_PENDING_CONNECTION_TIMEOUT
     case CONNECT_TIMEOUT
     case GET_SERVICES_TIMEOUT
@@ -80,11 +81,16 @@ public enum BleError : Error {
     // promise errors
     case REPLACED_WITH_OTHER_PROMISE
     
+    
     // timer errors
     case INCORRECT_SCHEDULE_ENTRY_INDEX
     case INCORRECT_DATA_COUNT_FOR_ALL_TIMERS
     case NO_SCHEDULE_ENTRIES_AVAILABLE
     case NO_TIMER_FOUND
+    
+    // process errors
+    case PROCESS_ABORTED_WITH_ERROR
+    case UNKNOWN_PROCESS_TYPE
 }
 
 struct timeoutDurations {
@@ -426,6 +432,36 @@ open class BleManager: NSObject, CBPeripheralDelegate {
                     centralManager.connect(connectingPeripheral!, options: nil)
 
                 }
+            }
+        }
+    }
+    
+    
+    open func waitForPeripheralToDisconnect(timeout : Double) -> Promise<Void> {
+        return Promise<Void> { fulfill, reject in
+            // only disconnect if we are actually connected!
+            if (self.connectedPeripheral != nil) {
+                LOG.info("BLUENET_LIB: waiting for the connected peripheral to disconnect from us")
+                let disconnectPromise = Promise<Void> { success, failure in
+                    // in case the connected peripheral has been disconnected beween the start and invocation of this method.
+                    if (self.connectedPeripheral != nil) {
+                        self.pendingPromise.load(success, failure, type: .AWAIT_DISCONNECT)
+                        self.pendingPromise.setDelayedReject(timeout, errorOnReject: .AWAIT_DISCONNECT_TIMEOUT)
+                    }
+                    else {
+                        success(())
+                    }
+                }
+                // we clean up (self.connectedPeripheral = nil) inside the disconnect() method, thereby needing this inner promise
+                disconnectPromise.then { _ -> Void in
+                    // make sure the connected peripheral is set to nil so we know nothing is connected
+                    self.connectedPeripheral = nil
+                    fulfill(())
+                }
+                .catch { err in reject(err) }
+            }
+            else {
+                fulfill(())
             }
         }
     }
@@ -791,6 +827,73 @@ open class BleManager: NSObject, CBPeripheralDelegate {
                 unsubscribe!()
                     .then{ _  in fulfill(collectedData) }
                     .catch{ err in reject(err) }
+            })
+            
+            
+            let notificationCallback = {(data: Any) -> Void in
+                if let castData = data as? Data {
+                    merger.merge(castData.bytes)
+                }
+            }
+            
+            self.enableNotifications(serviceId, characteristicId: characteristicId, callback: notificationCallback)
+                .then{ unsub -> Promise<Void> in
+                    unsubscribe = unsub
+                    return writeCommand()
+                }
+                .catch{ err in reject(err) }
+        }
+    }
+    
+    /**
+     * This will just subscribe for a single notification and clean up after itself.
+     * The merged, finalized reply to the write command will be in the fulfill of this promise.
+     */
+    open func setupNotificationStream(_ serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback, resultHandler: @escaping processCallback) -> Promise<Void> {
+        return Promise<Void> { fulfill, reject in
+            var unsubscribe : voidPromiseCallback? = nil
+            
+            // use the notification merger to handle the full packet once we have received it.
+            let merger = NotificationMerger(callback: { data -> Void in
+                var collectedData : [UInt8]? = nil
+                
+                if (self.settings.isEncryptionEnabled()) {
+                    do {
+                        // attempt to decrypt it
+                        let decryptedData = try EncryptionHandler.decrypt(Data(data), settings: self.settings)
+                        collectedData = decryptedData.bytes;
+                    }
+                    catch _ {
+                        LOG.error("Error decrypting notifcation in stream!")
+                        reject(BleError.COULD_NOT_DECRYPT)
+                        return
+                    }
+                }
+                else {
+                    collectedData = data
+                }
+                
+                if let data = collectedData {
+                    let result = resultHandler(data)
+                    if (result == .FINISHED) {
+                        unsubscribe!()
+                            .then{ _  in fulfill(()) }
+                            .catch{ err in reject(err) }
+                    }
+                    else if (result == .CONTINUE) {
+                        // do nothing.
+                    }
+                    else if (result == .ABORT_ERROR) {
+                        unsubscribe!()
+                            .then{ _  in reject(BleError.PROCESS_ABORTED_WITH_ERROR) }
+                            .catch{ err in reject(err) }
+                    }
+                    else {
+                        unsubscribe!()
+                            .then{ _  in reject(BleError.UNKNOWN_PROCESS_TYPE) }
+                            .catch{ err in reject(err) }
+                    }
+                }
             })
             
             

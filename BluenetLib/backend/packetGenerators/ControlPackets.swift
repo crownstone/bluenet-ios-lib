@@ -97,5 +97,23 @@ open class ControlPacketsGenerator {
         
         return ControlPacket(type: .lock_switch, payload8: lockValue).getPacket()
     }
+    
+    open static func getSetupPacket(type: UInt8, crownstoneId: UInt8, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> [UInt8] {
+        var data : [UInt8] = []
+        data.append(type)
+        data.append(crownstoneId)
+        
+        data += Conversion.ascii_or_hex_string_to_16_byte_array(adminKey)
+        data += Conversion.ascii_or_hex_string_to_16_byte_array(memberKey)
+        data += Conversion.ascii_or_hex_string_to_16_byte_array(guestKey)
+        
+        data += Conversion.hex_string_to_uint8_array(meshAccessAddress)
+        
+        data += Conversion.ibeaconUUIDString_to_reversed_uint8_array(ibeaconUUID)
+        data += Conversion.uint16_to_uint8_array(ibeaconMajor)
+        data += Conversion.uint16_to_uint8_array(ibeaconMinor)
+        
+        return ControlPacket(type: .setup, payloadArray: data).getPacket()
+    }
 
 }

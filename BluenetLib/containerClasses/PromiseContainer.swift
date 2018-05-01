@@ -13,6 +13,7 @@ import CoreBluetooth
 enum RequestType {
     case NONE
     case DISCONNECT
+    case AWAIT_DISCONNECT
     case CANCEL_PENDING_CONNECTION
     case CONNECT
     case GET_SERVICES

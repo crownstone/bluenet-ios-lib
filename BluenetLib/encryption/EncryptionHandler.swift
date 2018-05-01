@@ -180,7 +180,6 @@ class EncryptionHandler {
     
     static func _verifyDecryption(_ decrypted: [UInt8], _ sessionData: SessionData) throws -> [UInt8] {
         // the conversion to uint32 only takes the first 4 bytes
-        print(decrypted,sessionData.validationKey!)
         if (Conversion.uint8_array_to_uint32(decrypted) == Conversion.uint8_array_to_uint32(sessionData.validationKey!)) {
             // remove checksum from decyption and return payload
             var result = [UInt8](repeating: 0, count: decrypted.count - SESSION_KEY_LENGTH)

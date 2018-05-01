@@ -74,6 +74,7 @@
 		FA7065F02003D5EF00C833FE /* AdvertisementUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065EF2003D5EF00C833FE /* AdvertisementUtil.swift */; };
 		FA7065F32003DEC100C833FE /* opCode4_type0.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065F22003DEC100C833FE /* opCode4_type0.swift */; };
 		FA747B161E4B0FBA00255820 /* ControlPackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA747B151E4B0FBA00255820 /* ControlPackets.swift */; };
+		FA76EF2120976EDB0046DCDE /* ResultPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA76EF2020976EDB0046DCDE /* ResultPacket.swift */; };
 		FA7BE69A1E4487B8009E633D /* MeshHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7BE6991E4487B8009E633D /* MeshHandler.swift */; };
 		FA7BE69E1E449287009E633D /* MeshPackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7BE69D1E449287009E633D /* MeshPackets.swift */; };
 		FA8A9E061F15007E002028F6 /* SchedulerPackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA8A9E051F15007E002028F6 /* SchedulerPackets.swift */; };
@@ -159,6 +160,7 @@
 		FA7065EF2003D5EF00C833FE /* AdvertisementUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvertisementUtil.swift; sourceTree = "<group>"; };
 		FA7065F22003DEC100C833FE /* opCode4_type0.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode4_type0.swift; sourceTree = "<group>"; };
 		FA747B151E4B0FBA00255820 /* ControlPackets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ControlPackets.swift; sourceTree = "<group>"; };
+		FA76EF2020976EDB0046DCDE /* ResultPacket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultPacket.swift; sourceTree = "<group>"; };
 		FA79874E1DF6B3380005EB86 /* BluenetLib.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BluenetLib.md; sourceTree = "<group>"; };
 		FA79874F1DF6B3380005EB86 /* BluenetLocalizationLib.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BluenetLocalizationLib.md; sourceTree = "<group>"; };
 		FA7BE6991E4487B8009E633D /* MeshHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeshHandler.swift; sourceTree = "<group>"; };
@@ -289,6 +291,7 @@
 				FA58829E1E38C0F100913AE6 /* NearestItem.swift */,
 				FA58829F1E38C0F100913AE6 /* PowerSamples.swift */,
 				FA5882A01E38C0F100913AE6 /* PromiseContainer.swift */,
+				FA76EF2020976EDB0046DCDE /* ResultPacket.swift */,
 				FA5882A21E38C0F100913AE6 /* TrainingData.swift */,
 			);
 			path = containerClasses;
@@ -535,6 +538,7 @@
 				FA5882BE1E38C0F100913AE6 /* PowerHandler.swift in Sources */,
 				FA5882C21E38C0F100913AE6 /* BluenetLocalization.swift in Sources */,
 				FA5882BC1E38C0F100913AE6 /* ControlHandler.swift in Sources */,
+				FA76EF2120976EDB0046DCDE /* ResultPacket.swift in Sources */,
 				FA7065E02003AEA500C833FE /* opCode3.swift in Sources */,
 				FA5882C91E38C0F100913AE6 /* iBeaconContainers.swift in Sources */,
 				FA5882C81E38C0F100913AE6 /* Firmware.swift in Sources */,

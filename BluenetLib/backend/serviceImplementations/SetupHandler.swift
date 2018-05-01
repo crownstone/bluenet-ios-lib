@@ -58,6 +58,39 @@ open class SetupHandler {
      * This will handle the complete setup. We expect bonding has already been done by now.
      */
     open func setup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
+        // if the crownstone has the new setupControl characteristic, we can do the quick setup.
+        return Promise<Void> { fulfill, reject -> Void in
+            self.bleManager.getChacteristic(CSServices.SetupService, SetupCharacteristics.SetupControl)
+                .then{(characteristic) -> Promise<Void> in
+                    // here we can do fastSetup
+                    LOG.info("BLUENET_LIB: Fast Setup is supported. Performing..")
+                    return self.fastSetup(crownstoneId: crownstoneId, adminKey: adminKey, memberKey: memberKey, guestKey: guestKey, meshAccessAddress: meshAccessAddress, ibeaconUUID: ibeaconUUID, ibeaconMajor: ibeaconMajor, ibeaconMinor: ibeaconMinor)
+                }
+                .then{(_) -> Void in fulfill(()) }
+                .catch{(err: Error) in
+                    if let bleErr = err as? BleError {
+                        if (bleErr == BleError.CHARACTERISTIC_DOES_NOT_EXIST) {
+                            // do normal setup.
+                            LOG.info("BLUENET_LIB: Fast Setup is NOT supported. Performing classic setup..")
+                            self.classicSetup(crownstoneId: crownstoneId, adminKey: adminKey, memberKey: memberKey, guestKey: guestKey, meshAccessAddress: meshAccessAddress, ibeaconUUID: ibeaconUUID, ibeaconMajor: ibeaconMajor, ibeaconMinor: ibeaconMinor)
+                                .then{(_) -> Void in fulfill(()) }
+                                .catch{(setupError: Error) -> Void in reject(setupError) }
+                        }
+                        else {
+                            reject(err)
+                        }
+                    }
+                    else {
+                        reject(err)
+                    }
+                }
+        }
+    }
+    
+    /**
+     * This will handle the complete setup. We expect bonding has already been done by now.
+     */
+    open func classicSetup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
         self.step = 0
         self.verificationFailed = false
         return Promise<Void> { fulfill, reject in
@@ -86,11 +119,96 @@ open class SetupHandler {
                     self.bleManager.settings.restoreEncryption()
                     _ = self.bleManager.disconnect()
                     reject(err)
-                }
+            }
         }
     }
     
+    /**
+     * This will handle the complete setup. We expect bonding has already been done by now.
+     */
+    open func fastSetup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
+        self.step = 0
+        self.verificationFailed = false
+        return Promise<Void> { fulfill, reject in
+            self.handleSetupPhaseEncryption()
+                .then{(_) -> Promise<Void> in
+                    self.eventBus.emit("setupProgress", 6);
+                    return self.bleManager.setupNotificationStream(
+                        CSServices.SetupService,
+                        characteristicId: SetupCharacteristics.SetupControl,
+                        writeCommand: { () -> Promise<Void> in
+                            self.eventBus.emit("setupProgress", 9)
+                            return self.commandSetup(crownstoneId: crownstoneId, adminKey: adminKey, memberKey: memberKey, guestKey: guestKey, meshAccessAddress: meshAccessAddress, ibeaconUUID: ibeaconUUID, ibeaconMajor: ibeaconMajor, ibeaconMinor: ibeaconMinor)
+                        },
+                        resultHandler: {(returnData) -> ProcessType in
+                            if let data = returnData as? [UInt8] {
+                                let packet = ResultPacket(data)
+                                if (packet.valid) {
+                                    let payload = packet.getUInt16Payload()
+                                    if (payload == ResultValue.WAIT_FOR_SUCCESS.rawValue) {
+                                        // thats ok
+                                        self.eventBus.emit("setupProgress", 10)
+                                        return .CONTINUE
+                                    }
+                                    else if (payload == ResultValue.SUCCESS.rawValue) {
+                                        return .FINISHED
+                                    }
+                                    else {
+                                        return .ABORT_ERROR
+                                    }
+                                }
+                                else {
+                                    // stop, something went wrong
+                                    return .ABORT_ERROR
+                                }
+                            }
+                            else {
+                                // stop, something went wrong
+                                return .ABORT_ERROR
+                            }
+                        }
+                    )
+                }
+                .then{(_) -> Promise<Void> in
+                    LOG.info("BLUENET_LIB: SetupCommand Finished, disconnecting")
+                    self.eventBus.emit("setupProgress", 12)
+                    return self.bleManager.waitForPeripheralToDisconnect(timeout: 15)
+                }
+                .then{(_) -> Void in
+                    LOG.info("BLUENET_LIB: Setup Finished")
+                    self.eventBus.emit("setupProgress", 13)
+                    self.bleManager.settings.exitSetup()
+                    fulfill(())
+                }
+                .catch{(err: Error) -> Void in
+                    self.eventBus.emit("setupProgress", 0)
+                    self.bleManager.settings.exitSetup()
+                    self.bleManager.settings.restoreEncryption()
+                    _ = self.bleManager.disconnect()
+                    reject(err)
+            }
+        }
+    }
     
+    func commandSetup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
+        let packet = ControlPacketsGenerator.getSetupPacket(
+            type: 0,
+            crownstoneId: NSNumber(value: crownstoneId).uint8Value,
+            adminKey: adminKey,
+            memberKey: memberKey,
+            guestKey: guestKey,
+            meshAccessAddress: meshAccessAddress,
+            ibeaconUUID: ibeaconUUID,
+            ibeaconMajor: ibeaconMajor,
+            ibeaconMinor: ibeaconMinor
+        )
+        return self.bleManager.writeToCharacteristic(
+            CSServices.SetupService,
+            characteristicId: SetupCharacteristics.SetupControl,
+            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+            type: CBCharacteristicWriteType.withResponse
+        )
+    }
     
     func wrapUp() -> Promise<Void> {
         return self.clearNotifications()

@@ -12,6 +12,7 @@ import CoreBluetooth
 
 
 public typealias voidCallback = () -> Void
+public typealias processCallback = (Any) -> ProcessType
 public typealias voidPromiseCallback = () -> Promise<Void>
 public typealias eventCallback = (Any) -> Void
 

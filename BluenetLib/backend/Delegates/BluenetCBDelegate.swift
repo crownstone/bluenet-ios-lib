@@ -152,8 +152,12 @@ open class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         BleManager.settings.invalidateSessionNonce()
         BleManager.notificationEventBus.reset()
         
-        LOG.info("BLUENET_LIB: in didDisconnectPeripheral")
+        LOG.info("BLUENET_LIB: in didDisconnectPeripheral.")
         if (BleManager.pendingPromise.type == .CANCEL_PENDING_CONNECTION) {
+            BleManager.pendingPromise.fulfill(())
+        }
+        else if (BleManager.pendingPromise.type == .AWAIT_DISCONNECT) {
+            LOG.info("BLUENET_LIB: Peripheral disconnected from us succesfully.")
             BleManager.pendingPromise.fulfill(())
         }
         else {

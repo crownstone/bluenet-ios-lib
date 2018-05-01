@@ -40,6 +40,8 @@ public enum ControlType : UInt8 {
     case mesh_command           = 28
     case allow_dimming          = 29
     case lock_switch            = 30
+    case setup                  = 31
+    case enable_switchcraft     = 32
 }
 
 public enum ConfigurationType : UInt8 {
@@ -159,3 +161,36 @@ public enum DeviceType : UInt8 {
     case builtin = 3
     case crownstoneUSB = 4
 }
+
+
+//****************** RESULT VALUES *************//
+
+public enum ResultValue: UInt16 {
+    case SUCCESS                = 0      // Completed successfully.
+    case WAIT_FOR_SUCCESS       = 1      // Command is successful so far, but you need to wait for SUCCESS.
+    case BUFFER_UNASSIGNED      = 16     // No buffer was assigned for the command.
+    case BUFFER_LOCKED          = 17     // Buffer is locked, failed queue command.
+    case WRONG_PAYLOAD_LENGTH   = 32     // Wrong payload lenght provided.
+    case WRONG_PARAMETER        = 33     // Wrong parameter provided.
+    case INVALID_MESSAGE        = 34     // invalid message provided.
+    case UNKNOWN_OP_CODE        = 35     // Unknown operation code provided.
+    case UNKNOWN_TYPE           = 36     // Unknown type provided.
+    case NOT_FOUND              = 37     // The thing you were looking for was not found.
+    case NO_ACCESS              = 48     // Invalid access for this command.
+    case NOT_AVAILABLE          = 64     // Command currently not available.
+    case NOT_IMPLEMENTED        = 65     // Command not implemented (not yet or not anymore).
+    case WRITE_DISABLED         = 80     // Write is disabled for given type.
+    case ERR_WRITE_NOT_ALLOWED  = 81     // Direct write is not allowed for this type, use command instead.
+    case ADC_INVALID_CHANNEL    = 96     // Invalid adc input channel selected.
+}
+
+//****************** PROCESS TYPES *************//
+
+public enum ProcessType: UInt16 {
+    case CONTINUE = 0
+    case FINISHED = 1
+    case ABORT_ERROR = 2
+}
+
+
+

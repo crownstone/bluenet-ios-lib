@@ -84,7 +84,18 @@ open class ControlHandler {
             .then{(_) -> Promise<[UInt8]> in return self._readControlPacket()}
             .then{(response: [UInt8]) -> Promise<Void> in
                 return Promise<Void> {fulfill, reject in
-                    if (response[0] == 0) {
+                    // new response types
+                    if (response[0] == ControlType.factory_RESET.rawValue) {
+                        let packet = ResultPacket(response)
+                        let payload = packet.getUInt16Payload()
+                        if (payload == ResultValue.SUCCESS.rawValue) {
+                            fulfill(())
+                        }
+                        else {
+                            reject(BleError.COULD_NOT_FACTORY_RESET)
+                        }
+                    }
+                    else if (response[0] == 0) { // legacy
                         fulfill(())
                     }
                     else {

@@ -19,7 +19,6 @@ func parseOpcode5(serviceData : ScanResponsePacket, data : [UInt8], liteParse: B
       
         serviceData.dataType = data[2]
 
-        
         let slice : [UInt8] = Array(data[1...])
         switch (serviceData.dataType) {
         case 0:
