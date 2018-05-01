@@ -79,7 +79,7 @@ open class ControlHandler {
         )
     }
     
-    func sendNoOp() -> Promise<Void> {
+    open func sendNoOp() -> Promise<Void> {
         let packet = ControlPacketsGenerator.getNoOpPacket()
         return self._writeControlPacket(packet)
     }
