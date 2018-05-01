@@ -117,7 +117,7 @@ open class SetupHandler {
                     _ = self.clearNotifications()
                     self.bleManager.settings.exitSetup()
                     self.bleManager.settings.restoreEncryption()
-                    _ = self.bleManager.disconnect()
+                    _ = self.bleManager.errorDisconnect()
                     reject(err)
             }
         }
@@ -132,12 +132,12 @@ open class SetupHandler {
         return Promise<Void> { fulfill, reject in
             self.handleSetupPhaseEncryption()
                 .then{(_) -> Promise<Void> in
-                    self.eventBus.emit("setupProgress", 6);
+                    self.eventBus.emit("setupProgress", 4);
                     return self.bleManager.setupNotificationStream(
                         CSServices.SetupService,
                         characteristicId: SetupCharacteristics.SetupControl,
                         writeCommand: { () -> Promise<Void> in
-                            self.eventBus.emit("setupProgress", 9)
+                            self.eventBus.emit("setupProgress", 6)
                             return self.commandSetup(crownstoneId: crownstoneId, adminKey: adminKey, memberKey: memberKey, guestKey: guestKey, meshAccessAddress: meshAccessAddress, ibeaconUUID: ibeaconUUID, ibeaconMajor: ibeaconMajor, ibeaconMinor: ibeaconMinor)
                         },
                         resultHandler: {(returnData) -> ProcessType in
@@ -147,7 +147,7 @@ open class SetupHandler {
                                     let payload = packet.getUInt16Payload()
                                     if (payload == ResultValue.WAIT_FOR_SUCCESS.rawValue) {
                                         // thats ok
-                                        self.eventBus.emit("setupProgress", 10)
+                                        self.eventBus.emit("setupProgress", 7)
                                         return .CONTINUE
                                     }
                                     else if (payload == ResultValue.SUCCESS.rawValue) {
@@ -167,12 +167,12 @@ open class SetupHandler {
                                 return .ABORT_ERROR
                             }
                         }
-                    )
+                        ,timeout: 3)
                 }
                 .then{(_) -> Promise<Void> in
                     LOG.info("BLUENET_LIB: SetupCommand Finished, disconnecting")
-                    self.eventBus.emit("setupProgress", 12)
-                    return self.bleManager.waitForPeripheralToDisconnect(timeout: 15)
+                    self.eventBus.emit("setupProgress", 11)
+                    return self.bleManager.waitForPeripheralToDisconnect(timeout: 10)
                 }
                 .then{(_) -> Void in
                     LOG.info("BLUENET_LIB: Setup Finished")
@@ -184,7 +184,7 @@ open class SetupHandler {
                     self.eventBus.emit("setupProgress", 0)
                     self.bleManager.settings.exitSetup()
                     self.bleManager.settings.restoreEncryption()
-                    _ = self.bleManager.disconnect()
+                    _ = self.bleManager.errorDisconnect()
                     reject(err)
             }
         }

@@ -80,6 +80,10 @@ open class ControlPacketsGenerator {
         return ControlPacket(type: .set_TIME, payload32: time).getPacket()
     }
     
+    open static func getNoOpPacket() -> [UInt8] {
+        return ControlPacket(type: .no_OPERATION).getPacket()
+    }
+    
     open static func getAllowDimmingPacket(_ allow: Bool) -> [UInt8] {
         var allowValue : UInt8 = 0
         if (allow) {

@@ -26,6 +26,7 @@ public enum BleError : Error {
     case CANNOT_SET_TIMEOUT_WITH_THIS_TYPE_OF_PROMISE
     case TIMEOUT
     case DISCONNECT_TIMEOUT
+    case ERROR_DISCONNECT_TIMEOUT
     case AWAIT_DISCONNECT_TIMEOUT
     case CANCEL_PENDING_CONNECTION_TIMEOUT
     case CONNECT_TIMEOUT
@@ -34,6 +35,7 @@ public enum BleError : Error {
     case READ_CHARACTERISTIC_TIMEOUT
     case WRITE_CHARACTERISTIC_TIMEOUT
     case ENABLE_NOTIFICATIONS_TIMEOUT
+    case NOTIFICATION_STREAM_TIMEOUT
     case DISABLE_NOTIFICATIONS_TIMEOUT
     case CANNOT_WRITE_AND_VERIFY
     case CAN_NOT_CONNECT_TO_UUID
@@ -95,6 +97,7 @@ public enum BleError : Error {
 
 struct timeoutDurations {
     static let disconnect              : Double = 3
+    static let errorDisconnect          : Double = 5
     static let cancelPendingConnection : Double = 3
     static let connect                 : Double = 10
     static let reconnect               : Double = 0.5
@@ -469,6 +472,25 @@ open class BleManager: NSObject, CBPeripheralDelegate {
     /**
      *  Disconnect from the connected BLE device
      */
+    open func errorDisconnect() -> Promise<Void> {
+        return Promise<Void> { fulfill, reject in
+            // cancel any pending connections
+            if (self.connectingPeripheral != nil) {
+                LOG.info("BLUENET_LIB: disconnecting from connecting peripheral due to error")
+                abortConnecting()
+                    .then{ _ in return self._disconnect(errorMode: true) }
+                    .then{_ -> Void in fulfill(())}
+                    .catch{err in reject(err)}
+            }
+            else {
+                self._disconnect(errorMode: true).then{_ -> Void in fulfill(())}.catch{err in reject(err)}
+            }
+        }
+    }
+    
+    /**
+     *  Disconnect from the connected BLE device
+     */
     open func disconnect() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             // cancel any pending connections
@@ -485,7 +507,8 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         }
     }
     
-    func _disconnect() -> Promise<Void> {
+    
+    func _disconnect(errorMode: Bool = false) -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             // only disconnect if we are actually connected!
             if (self.connectedPeripheral != nil) {
@@ -493,8 +516,14 @@ open class BleManager: NSObject, CBPeripheralDelegate {
                 let disconnectPromise = Promise<Void> { success, failure in
                     // in case the connected peripheral has been disconnected beween the start and invocation of this method.
                     if (self.connectedPeripheral != nil) {
-                        self.pendingPromise.load(success, failure, type: .DISCONNECT)
-                        self.pendingPromise.setDelayedReject(timeoutDurations.disconnect, errorOnReject: .DISCONNECT_TIMEOUT)
+                        if (errorMode == true) {
+                            self.pendingPromise.load(success, failure, type: .ERROR_DISCONNECT)
+                            self.pendingPromise.setDelayedReject(timeoutDurations.errorDisconnect, errorOnReject: .ERROR_DISCONNECT_TIMEOUT)
+                        }
+                        else {
+                            self.pendingPromise.load(success, failure, type: .DISCONNECT)
+                            self.pendingPromise.setDelayedReject(timeoutDurations.disconnect, errorOnReject: .DISCONNECT_TIMEOUT)
+                        }
                         self.centralManager.cancelPeripheralConnection(self.connectedPeripheral!)
                     }
                     else {
@@ -849,13 +878,15 @@ open class BleManager: NSObject, CBPeripheralDelegate {
      * This will just subscribe for a single notification and clean up after itself.
      * The merged, finalized reply to the write command will be in the fulfill of this promise.
      */
-    open func setupNotificationStream(_ serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback, resultHandler: @escaping processCallback) -> Promise<Void> {
+    open func setupNotificationStream(_ serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback, resultHandler: @escaping processCallback, timeout: Double = 5) -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             var unsubscribe : voidPromiseCallback? = nil
+            var streamFinished = false
             
             // use the notification merger to handle the full packet once we have received it.
             let merger = NotificationMerger(callback: { data -> Void in
                 var collectedData : [UInt8]? = nil
+                if (streamFinished == true) { return }
                 
                 if (self.settings.isEncryptionEnabled()) {
                     do {
@@ -876,6 +907,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
                 if let data = collectedData {
                     let result = resultHandler(data)
                     if (result == .FINISHED) {
+                        streamFinished = true
                         unsubscribe!()
                             .then{ _  in fulfill(()) }
                             .catch{ err in reject(err) }
@@ -884,11 +916,13 @@ open class BleManager: NSObject, CBPeripheralDelegate {
                         // do nothing.
                     }
                     else if (result == .ABORT_ERROR) {
+                        streamFinished = true
                         unsubscribe!()
                             .then{ _  in reject(BleError.PROCESS_ABORTED_WITH_ERROR) }
                             .catch{ err in reject(err) }
                     }
                     else {
+                        streamFinished = true
                         unsubscribe!()
                             .then{ _  in reject(BleError.UNKNOWN_PROCESS_TYPE) }
                             .catch{ err in reject(err) }
@@ -902,6 +936,17 @@ open class BleManager: NSObject, CBPeripheralDelegate {
                     merger.merge(castData.bytes)
                 }
             }
+            
+            delay(timeout, { () in
+                if (streamFinished == false) {
+                    streamFinished = true
+                    if (unsubscribe != nil) {
+                        unsubscribe!()
+                            .then{ _  in reject(BleError.NOTIFICATION_STREAM_TIMEOUT) }
+                            .catch{ err in reject(BleError.NOTIFICATION_STREAM_TIMEOUT) }
+                    }
+                }
+            })
             
             self.enableNotifications(serviceId, characteristicId: characteristicId, callback: notificationCallback)
                 .then{ unsub -> Promise<Void> in

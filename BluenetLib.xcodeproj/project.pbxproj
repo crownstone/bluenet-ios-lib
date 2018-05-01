@@ -267,12 +267,12 @@
 			isa = PBXGroup;
 			children = (
 				FA58828D1E38C0F000913AE6 /* ConfigHandler.swift */,
-				FA2261C01E55A7B9001D0262 /* DeviceHandler.swift */,
 				FA58828E1E38C0F000913AE6 /* ControlHandler.swift */,
+				FA2261C01E55A7B9001D0262 /* DeviceHandler.swift */,
 				FA58828F1E38C0F000913AE6 /* DfuHandler.swift */,
+				FA7BE6991E4487B8009E633D /* MeshHandler.swift */,
 				FA5882901E38C0F000913AE6 /* PowerHandler.swift */,
 				FA5882911E38C0F000913AE6 /* SetupHandler.swift */,
-				FA7BE6991E4487B8009E633D /* MeshHandler.swift */,
 				FA3FC25A1ED3499C00DD2F76 /* StateHandler.swift */,
 			);
 			path = serviceImplementations;

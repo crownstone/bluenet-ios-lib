@@ -160,6 +160,15 @@ open class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
             LOG.info("BLUENET_LIB: Peripheral disconnected from us succesfully.")
             BleManager.pendingPromise.fulfill(())
         }
+        else if (BleManager.pendingPromise.type == .ERROR_DISCONNECT) {
+            if (error != nil) {
+                LOG.info("BLUENET_LIB: Operation Error_Disconnect: Peripheral disconnected from us.")
+            }
+            else {
+                LOG.info("BLUENET_LIB: Operation Error_Disconnect: We disconnected from Peripheral.")
+            }
+            BleManager.pendingPromise.fulfill(())
+        }
         else {
             if (error != nil) {
                 LOG.info("BLUENET_LIB: Disconnected with error \(error!)")

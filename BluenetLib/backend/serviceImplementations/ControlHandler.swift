@@ -79,6 +79,11 @@ open class ControlHandler {
         )
     }
     
+    func sendNoOp() -> Promise<Void> {
+        let packet = ControlPacketsGenerator.getNoOpPacket()
+        return self._writeControlPacket(packet)
+    }
+    
     open func commandFactoryReset() -> Promise<Void> {
         return self._writeControlPacket(ControlPacketsGenerator.getCommandFactoryResetPacket())
             .then{(_) -> Promise<[UInt8]> in return self._readControlPacket()}

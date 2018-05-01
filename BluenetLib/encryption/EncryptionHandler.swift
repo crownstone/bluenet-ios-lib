@@ -66,7 +66,6 @@ open class zeroPadding {
 class EncryptionHandler {
     init() {}
     
-    
     static func getRandomNumbers() -> UInt8 {
         if (BLUENET_ENCRYPTION_TESTING) {
             return 128
