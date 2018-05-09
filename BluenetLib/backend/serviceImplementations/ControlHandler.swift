@@ -232,9 +232,14 @@ open class ControlHandler {
             .then{(sessionNonce : [UInt8]) -> Promise<Void> in
                 return Promise <Void> { fulfill, reject in
                     do {
-                        let sessionNonce = try EncryptionHandler.decryptSessionNonce(sessionNonce, key: self.bleManager.settings.guestKey!)
-                        self.bleManager.settings.setSessionNonce(sessionNonce)
-                        fulfill(())
+                        if let guestKey = self.bleManager.settings.guestKey {
+                            let sessionNonce = try EncryptionHandler.decryptSessionNonce(sessionNonce, key: guestKey)
+                            self.bleManager.settings.setSessionNonce(sessionNonce)
+                            fulfill(())
+                        }
+                        else {
+                            throw BleError.DO_NOT_HAVE_ENCRYPTION_KEY
+                        }
                     }
                     catch let err {
                         reject(err)
@@ -245,7 +250,7 @@ open class ControlHandler {
                 return Promise <Void> { fulfill, reject in
                     // we only want to pass this to the main promise of connect if we successfully received the nonce, but cant decrypt it.
                     if let bleErr = err as? BleError {
-                        if bleErr == BleError.COULD_NOT_VALIDATE_SESSION_NONCE {
+                        if bleErr == BleError.COULD_NOT_VALIDATE_SESSION_NONCE || bleErr == BleError.DO_NOT_HAVE_ENCRYPTION_KEY {
                             reject(err)
                             return
                         }

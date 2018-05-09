@@ -90,30 +90,35 @@ open class AvailableDevice {
                 self.consecutiveMatches = 0
             }
             else {
-                if (self.uniqueIdentifier != response.uniqueIdentifier) {
-                    if (response.validation != 0 && response.opCode == 5) {
-                        if (response.validation == 0xFA && response.dataType != 1) { // datatype 1 is the error packet
-                            self.addValidMeasurement(response)
-                        }
-                        else if (response.validation != 0xFA && response.dataType != 1) {// datatype 1 is the error packet
-                            self.invalidateDevice(data)
-                        }
-                    }
-                    else if (response.validation != 0 && response.opCode == 3) {
-                        if (response.validation == 0xFA && response.dataType != 1) { // datatype 1 is the error packet
-                            self.addValidMeasurement(response)
-                        }
-                        else if (response.validation != 0xFA && response.dataType != 1) { // datatype 1 is the error packet
-                            self.invalidateDevice(data)
-                        }
-                    }
-                    else {
-                        if (response.stateOfExternalCrownstone == false) {
-                            if (response.crownstoneId == self.crownstoneId) {
+                if (response.dataReadyForUse == false) {
+                    self.invalidateDevice(data)
+                }
+                else {
+                    if (self.uniqueIdentifier != response.uniqueIdentifier) {
+                        if (response.validation != 0 && response.opCode == 5) {
+                            if (response.validation == 0xFA && response.dataType != 1) { // datatype 1 is the error packet
                                 self.addValidMeasurement(response)
                             }
-                            else {
+                            else if (response.validation != 0xFA && response.dataType != 1) {// datatype 1 is the error packet
                                 self.invalidateDevice(data)
+                            }
+                        }
+                        else if (response.validation != 0 && response.opCode == 3) {
+                            if (response.validation == 0xFA && response.dataType != 1) { // datatype 1 is the error packet
+                                self.addValidMeasurement(response)
+                            }
+                            else if (response.validation != 0xFA && response.dataType != 1) { // datatype 1 is the error packet
+                                self.invalidateDevice(data)
+                            }
+                        }
+                        else {
+                            if (response.stateOfExternalCrownstone == false) {
+                                if (response.crownstoneId == self.crownstoneId) {
+                                    self.addValidMeasurement(response)
+                                }
+                                else {
+                                    self.invalidateDevice(data)
+                                }
                             }
                         }
                     }
@@ -124,7 +129,6 @@ open class AvailableDevice {
         else {
             self.invalidateDevice(data)
         }
-        
     }
     
     func addValidMeasurement(_ response: ScanResponsePacket) {

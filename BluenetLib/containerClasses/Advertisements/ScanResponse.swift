@@ -48,6 +48,7 @@ open class ScanResponsePacket {
     open var rssiOfExternalCrownstone : Int8  = 0
     
     var validData = false
+    open var dataReadyForUse = false // decryption is successful
     
     init(_ data: [UInt8], liteParse : Bool = false) {
         self.data = data
@@ -186,8 +187,10 @@ open class ScanResponsePacket {
                 
                 // parse the data again based on the decrypted result
                 self.parse(liteParse: false)
+                self.dataReadyForUse = true
             }
             catch let err {
+                self.dataReadyForUse = false
                 LOG.error("Could not decrypt advertisement \(err)")
             }
         }

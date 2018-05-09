@@ -162,6 +162,7 @@ open class Advertisement {
     open func fullParse() {
         if (serviceDataAvailable && self.scanResponse != nil) {
             self.scanResponse!.parse(liteParse: false)
+            self.scanResponse!.dataReadyForUse = true
         }
     }
 }

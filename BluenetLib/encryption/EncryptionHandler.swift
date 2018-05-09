@@ -146,7 +146,7 @@ class EncryptionHandler {
     
     static func decryptSessionNonce(_ input: [UInt8], key: [UInt8]) throws -> [UInt8] {
         if (input.count == 16) {
-            guard key.count   == 16 else { throw BleError.DO_NOT_HAVE_ENCRYPTION_KEY }
+            guard key.count == 16 else { throw BleError.DO_NOT_HAVE_ENCRYPTION_KEY }
             let result = try AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: .noPadding).decrypt(input)
             let checksum = Conversion.uint8_array_to_uint32(result)
             if (checksum == CHECKSUM) {
