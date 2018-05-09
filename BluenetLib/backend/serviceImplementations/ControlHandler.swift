@@ -224,6 +224,11 @@ open class ControlHandler {
         return self._writeControlPacket(ControlPacketsGenerator.getLockSwitchPacket(lock))
     }
     
+    open func setSwitchCraft(enabled: Bool) -> Promise<Void> {
+        LOG.info("BLUENET_LIB: setSwitchCraft")
+        return self._writeControlPacket(ControlPacketsGenerator.getSwitchCraftPacket(enabled))
+    }
+    
     /**
      * The session nonce is the only char that is ECB encrypted. We therefore read it without the libraries decryption (AES CTR) and decrypt it ourselves.
      **/

@@ -102,6 +102,15 @@ open class ControlPacketsGenerator {
         return ControlPacket(type: .lock_switch, payload8: lockValue).getPacket()
     }
     
+    open static func getSwitchCraftPacket(_ enabled: Bool) -> [UInt8] {
+        var enabledValue : UInt8 = 0
+        if (enabled) {
+            enabledValue = 1
+        }
+        
+        return ControlPacket(type: .enable_switchcraft, payload8: enabledValue).getPacket()
+    }
+    
     open static func getSetupPacket(type: UInt8, crownstoneId: UInt8, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> [UInt8] {
         var data : [UInt8] = []
         data.append(type)
