@@ -8,6 +8,7 @@
 
 import XCTest
 import SwiftyJSON
+import PromiseKit
 @testable import BluenetLib
 
 func XCTAssertEqualDictionaries<S: Equatable, T: Equatable>(first: [S:T], _ second: [S:T]) {
@@ -52,6 +53,56 @@ class BluenetLibTests: XCTestCase {
     func testHexString() {
         XCTAssertEqual("FF",String(format:"%2X", 255))
     }
+    
+    func testErrorPropagation() {
+        let exp = expectation(description: "Example")
+        let promise = Promise<Void> { fulfill, reject in delay(0.3, { reject(BleError.INVALID_SESSION_DATA) }) }
+        firstly{ when(fulfilled: promise) }
+            .then{ _ in print("HERE")}
+            .catch{(error: Error) -> Void in
+                print(1,error)
+                print(3,error)
+            }
+            .catch{(error: Error) -> Void in
+                print(2,error)
+                exp.fulfill()
+            }
+        
+        waitForExpectations(timeout: 0.5, handler: nil)
+    }
+    
+    func testPromiseIntermediateCatch() {
+        let exp = expectation(description: "Example")
+        let promise = Promise<Void> { fulfill, reject in delay(0.3, { reject(BleError.INVALID_SESSION_DATA) }) }
+        firstly{ when(fulfilled: promise) }
+            .catch{(error: Error) -> Void in
+                print(1,error)
+            }
+            .then{ _ in print("HERE")}
+            .catch{(error: Error) -> Void in
+                print(2,error)
+            }
+            .catch{(error: Error) -> Void in
+                print(3,error)
+                exp.fulfill()
+        }
+        let promise2 = Promise<Void> { fulfill, reject in delay(0.3, { fulfill(()) }) }
+        firstly{ when(fulfilled: promise2) }
+            .catch{(error: Error) -> Void in
+                print(5,error)
+            }
+            .then{ _ in print("HERE")}
+            .catch{(error: Error) -> Void in
+                print(6,error)
+            }
+            .catch{(error: Error) -> Void in
+                print(7,error)
+                exp.fulfill()
+        }
+        
+        waitForExpectations(timeout: 0.5, handler: nil)
+    }
+    
     
     func testJSON() {
         let a = JSON("{\"a\":null}")

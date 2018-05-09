@@ -154,6 +154,7 @@ open class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         
         LOG.info("BLUENET_LIB: in didDisconnectPeripheral.")
         if (BleManager.pendingPromise.type == .CANCEL_PENDING_CONNECTION) {
+            LOG.info("BLUENET_LIB: Connection cancelled.")
             BleManager.pendingPromise.fulfill(())
         }
         else if (BleManager.pendingPromise.type == .AWAIT_DISCONNECT) {

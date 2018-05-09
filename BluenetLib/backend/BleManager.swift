@@ -420,22 +420,24 @@ open class BleManager: NSObject, CBPeripheralDelegate {
             else {
                 // get a peripheral from the known list (TODO: check what happens if it requests an unknown one)
                 let uuidArray = [nsUuid!]
-                let peripherals = centralManager.retrievePeripherals(withIdentifiers: uuidArray);
+                let peripherals = self.centralManager.retrievePeripherals(withIdentifiers: uuidArray);
                 if (peripherals.count == 0) {
                     reject(BleError.CAN_NOT_CONNECT_TO_UUID)
                 }
                 else {
                     let peripheral = peripherals[0]
-                    connectingPeripheral = peripheral
-                    connectingPeripheral!.delegate = self
+                    self.connectingPeripheral = peripheral
+                    self.connectingPeripheral!.delegate = self
                     
                     // setup the pending promise for connection
-                    pendingPromise.load(fulfill, reject, type: .CONNECT)
-                    pendingPromise.setDelayedReject(timeoutDurations.connect, errorOnReject: .CONNECT_TIMEOUT)
-                    centralManager.connect(connectingPeripheral!, options: nil)
-
+                    self.pendingPromise.load(fulfill, reject, type: .CONNECT)
+                    self.pendingPromise.setDelayedReject(timeoutDurations.connect, errorOnReject: .CONNECT_TIMEOUT)
+                    self.centralManager.connect(connectingPeripheral!, options: nil)
                 }
             }
+        }
+        .catch{(error: Error) -> Void in
+            self.connectingPeripheral = nil
         }
     }
     
