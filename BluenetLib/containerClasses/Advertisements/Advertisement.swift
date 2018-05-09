@@ -30,7 +30,7 @@ open class Advertisement {
     
     init(handle: String, name: String?, rssi: NSNumber, serviceData: Any, serviceUUID: Any, referenceId: String, liteParse: Bool = false) {
         self.referenceId = referenceId
-        
+
         if (name != nil) {
             self.name = name!
         }

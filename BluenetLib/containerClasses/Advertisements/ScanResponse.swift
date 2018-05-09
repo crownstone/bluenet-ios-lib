@@ -188,11 +188,6 @@ open class ScanResponsePacket {
                 self.parse(liteParse: false)
             }
             catch let err {
-                if let bleErr = err as? BleError {
-                    if (bleErr == BleError.DO_NOT_HAVE_ENCRYPTION_KEY) {
-                        return
-                    }
-                }
                 LOG.error("Could not decrypt advertisement \(err)")
             }
         }
