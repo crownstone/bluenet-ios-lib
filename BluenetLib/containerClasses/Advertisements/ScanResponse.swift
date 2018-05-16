@@ -42,6 +42,8 @@ open class ScanResponsePacket {
     open var errorsBitmask       :   UInt32   = 0
     open var errorMode           :   Bool     = false
     open var timeIsSet           :   Bool     = false
+    open var switchCraftEnabled  :   Bool     = false
+    
     open var uniqueIdentifier    :   NSNumber = 0
     
     open var deviceType          :   DeviceType = .undefined
@@ -133,6 +135,7 @@ open class ScanResponsePacket {
             "dimmingAvailable"     : self.dimmingAvailable,
             "dimmingAllowed"       : self.dimmingAllowed,
             "switchLocked"         : self.switchLocked,
+            "switchCraftEnabled"   : self.switchCraftEnabled,
             
             "errorMode"            : self.errorMode,
             "errors"               : errorsDictionary,

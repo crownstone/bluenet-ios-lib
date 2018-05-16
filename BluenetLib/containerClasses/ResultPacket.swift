@@ -18,7 +18,7 @@ open class ResultPacket {
     open var type : UInt8 = 0
     open var opCode : UInt8 = 0
     open var length : UInt16 = 0
-    open var payload : [UInt8] = [] // id of the entity that provides the keys
+    open var payload : [UInt8] = []
     
     open var valid = false
     

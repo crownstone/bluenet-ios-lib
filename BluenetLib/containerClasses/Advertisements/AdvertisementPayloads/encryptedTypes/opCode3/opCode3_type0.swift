@@ -33,6 +33,7 @@ func parseOpcode3_type0(serviceData : ScanResponsePacket, data : [UInt8], litePa
         serviceData.hasError         = bitmaskArray[2]
         serviceData.switchLocked     = bitmaskArray[3]
         serviceData.timeIsSet        = bitmaskArray[4]
+        serviceData.switchCraftEnabled = bitmaskArray[5]
         
         serviceData.temperature  = Conversion.uint8_to_int8(data[5])
         
