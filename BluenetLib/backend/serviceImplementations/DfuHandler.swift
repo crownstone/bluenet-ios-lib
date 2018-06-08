@@ -157,7 +157,12 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
                 }
                 .then {(_) -> Promise<Void> in
                     self.bleManager.settings.restoreEncryption()
-                    return cleanup!()
+                    if (cleanup != nil) {
+                        return cleanup!()
+                    }
+                    else {
+                        return Promise <Void> { fulfill2, reject2 in fulfill2(()) }
+                    }
                 }
                 .then {(_) -> Promise<Void> in
                     cleanup = nil
