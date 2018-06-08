@@ -41,7 +41,7 @@ open class Bluenet {
     // todo: set back to private, currently public for DEBUG
     var counter : UInt64 = 0
     open let bleManager : BleManager!
-    //open let blePeripheralManager : BlePeripheralManager!
+    open let blePeripheralManager : BlePeripheralManager!
     open var settings : BluenetSettings!
     let eventBus : EventBus!
     var deviceList = [String: AvailableDevice]()
@@ -73,7 +73,7 @@ open class Bluenet {
         self.settings   = BluenetSettings()
         self.eventBus   = EventBus()
         self.bleManager = BleManager(eventBus: self.eventBus, backgroundEnabled: backgroundEnabled)
-        //self.blePeripheralManager = BlePeripheralManager(eventBus: self.eventBus, backgroundEnabled: backgroundEnabled);
+        self.blePeripheralManager = BlePeripheralManager(eventBus: self.eventBus, backgroundEnabled: backgroundEnabled);
         
         // give the BLE manager a reference to the settings.
         self.bleManager.setSettings(settings)
@@ -106,8 +106,8 @@ open class Bluenet {
         self.bleManager.setBackgroundScanning(newBackgroundState: newBackgroundState)
     }
     
-    open func initPeripheral() {
-        //self.blePeripheralManager.startAdvertising()
+    open func initPeripheral(uuidString: String = "c005") {
+        self.blePeripheralManager.startAdvertising(uuidString: uuidString)
     }
     
     /**

@@ -35,8 +35,8 @@ open class SessionData {
             throw BleError.INVALID_SESSION_DATA
         }
         
-        sessionNonce = [UInt8](repeating: 0, count: SESSION_DATA_LENGTH)
-        validationKey   = [UInt8](repeating: 0,  count: SESSION_KEY_LENGTH)
+        sessionNonce  = [UInt8](repeating: 0, count: SESSION_DATA_LENGTH)
+        validationKey = [UInt8](repeating: 0, count: SESSION_KEY_LENGTH)
 
         for i in [Int](0...SESSION_KEY_LENGTH-1) {
             sessionNonce[i] = sessionData[i]

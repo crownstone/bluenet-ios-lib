@@ -92,7 +92,7 @@ open class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         if (BleManager.batterySaving == true) {
             return
         }
-        
+
         let emitData = Advertisement(
             handle: peripheral.identifier.uuidString,
             name: peripheral.name,

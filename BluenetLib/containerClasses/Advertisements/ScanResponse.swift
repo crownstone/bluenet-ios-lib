@@ -58,21 +58,18 @@ open class ScanResponsePacket {
     }
     
     func parse(liteParse : Bool) {
+        validData = true
         if (data.count == 18) {
             self.opCode = data[0]
             self.encryptedData = Array(data[2...])
             self.encryptedDataStartIndex = 2
             switch (self.opCode) {
-            case 5:
-                parseOpcode5(serviceData: self, data: data)
-            case 6:
-                parseOpcode6(serviceData: self, data: data)
-            default:
-                parseOpcode5(serviceData: self, data: data, liteParse: liteParse)
-            }
-            
-            if (liteParse == true) {
-                validData = true
+                case 5:
+                    parseOpcode5(serviceData: self, data: data, liteParse: liteParse)
+                case 6:
+                    parseOpcode6(serviceData: self, data: data, liteParse: liteParse)
+                default:
+                    parseOpcode5(serviceData: self, data: data, liteParse: liteParse)
             }
         }
         else if (data.count == 17) {
@@ -90,10 +87,6 @@ open class ScanResponsePacket {
                 parseOpcode4(serviceData: self, data: data, liteParse: liteParse)
             default:
                 parseOpcode3(serviceData: self, data: data, liteParse: liteParse)
-            }
-            
-            if (liteParse == true) {
-                validData = true
             }
         }
         else {

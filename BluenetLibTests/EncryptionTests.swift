@@ -139,7 +139,8 @@ class EncryptionTests: XCTestCase {
         let paddedData = zeroPadding.add(to: payload, blockSize: 16)
         print("paddedData \(paddedData)")
 
-        let key : [UInt8] = [103, 117, 101, 115, 116, 75, 101, 121, 70, 111, 114, 71, 105, 114, 108, 115];
+        let key : [UInt8] = Conversion.ascii_or_hex_string_to_16_byte_array("9e34c5a7da5c2b8d36e9fc5cf7497a6b")
+        print(key)
         let encryptedData = try! AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: .noPadding).encrypt(paddedData)
         print("encryptedData \(encryptedData)")
         let decryptedData = try! AES(key: key, blockMode: CryptoSwift.BlockMode.ECB, padding: .noPadding).decrypt(encryptedData)

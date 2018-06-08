@@ -116,7 +116,7 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
             self.bleManager.isReady() // first check if the bluenet lib is ready before using it for BLE things.
                 .then {(_) -> Promise<Void> in return self.bleManager.connect(uuid)}
                 .then {(_) -> Promise<Void> in
-                    return Promise<Void> {fulfill, reject in
+                    return Promise<Void> { fulfill2, reject2 in
                         self.bleManager.getServicesFromDevice()
                             .then{ services -> Void in
                                 var isInDfuMode = false
@@ -128,13 +128,13 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
                                 }
                                 
                                 if (isInDfuMode == false) {
-                                    reject(BleError.NOT_IN_DFU_MODE)
+                                    reject2(BleError.NOT_IN_DFU_MODE)
                                 }
                                 else {
-                                    fulfill(())
+                                    fulfill2(())
                                 }
                             }
-                            .catch{ err in reject(err) }
+                            .catch{ err in reject2(err) }
                     }
                 }
                 .then {(_) -> Promise<voidPromiseCallback> in return self.setupNotifications() /*the bootloader requires the user to subscribe to notifications in order to function*/}
@@ -142,6 +142,18 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
                     cleanup = cleanupCallback
                     success = true
                     return self._writeResetCommand()
+                }
+                .recover{(err: Error) -> Promise<Void> in
+                    return Promise <Void> { fulfill2, reject2 in
+                        // we only want to pass this to the main promise of connect if we successfully received the nonce, but cant decrypt it.
+                        if let bleErr = err as? BleError {
+                            if bleErr != BleError.NOT_IN_DFU_MODE {
+                                reject2(err)
+                                return
+                            }
+                        }
+                        fulfill2(())
+                    }
                 }
                 .then {(_) -> Promise<Void> in
                     self.bleManager.settings.restoreEncryption()

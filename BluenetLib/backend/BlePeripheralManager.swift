@@ -27,7 +27,8 @@ open class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
     var BleState : Int = 0
     var backgroundEnabled = true
 
-  
+    var advertising = false
+    
     public init(eventBus: EventBus, backgroundEnabled: Bool = true) {
         super.init();
     
@@ -43,7 +44,15 @@ open class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
         self.pendingPromise = promiseContainer()
     }
     
-    public func startAdvertising() {
+    public func startAdvertising(uuidString: String) {
+        if (self.advertising) {
+            self.stopAdvertising()
+        }
+        self.advertising = true
+        let serviceUuid = CBUUID(string: uuidString)
+        let serialService = CBMutableService(type: serviceUuid, primary: true)
+        
+        peripheralManager.add(serialService)
         /*
         let proximityUUID = UUID(uuidString:
             "39ED98FF-2900-441A-802F-9C398FC199D2")
@@ -62,8 +71,14 @@ open class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
         print("APPENDED", ibeaconDict)
         print("MANUALLY", manually)
         //self.peripheralManager.add(CBMutableService(type: CBUUID(data: data), primary: true))
-        self.peripheralManager.startAdvertising(manually)
+        
         */
+        self.peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey:[serviceUuid], CBAdvertisementDataLocalNameKey: "Fred"])
+    }
+    
+    public func stopAdvertising() {
+        self.advertising = false
+        self.peripheralManager.stopAdvertising()
     }
     
     open func isReady() -> Promise<Void> {
