@@ -274,23 +274,13 @@ open class SetupHandler {
     open func _factoryReset() -> Promise<Void> {
         LOG.info("factoryReset in setup")
         let packet = ControlPacket(type: .factory_RESET).getPacket()
-        return self.bleManager.writeToCharacteristic(
-            CSServices.SetupService,
-            characteristicId: SetupCharacteristics.Control,
-            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-            type: CBCharacteristicWriteType.withResponse
-        )
+        return self._writeSetupControlPacket(packet)
     }
     
     open func setHighTX() -> Promise<Void> {
         LOG.info("setHighTX")
         let packet = ControlPacket(type: .increase_TX).getPacket()
-        return self.bleManager.writeToCharacteristic(
-            CSServices.SetupService,
-            characteristicId: SetupCharacteristics.Control,
-            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-            type: CBCharacteristicWriteType.withResponse
-        )
+        return self._writeSetupControlPacket(packet)
     }
     open func writeCrownstoneId(_ id: UInt16) -> Promise<Void> {
         LOG.info("writeCrownstoneId")
@@ -327,12 +317,7 @@ open class SetupHandler {
     open func finalizeSetup() -> Promise<Void> {
         LOG.info("finalizeSetup")
         let packet = ControlPacket(type: .validate_SETUP).getPacket()
-        return self.bleManager.writeToCharacteristic(
-            CSServices.SetupService,
-            characteristicId: SetupCharacteristics.Control,
-            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-            type: CBCharacteristicWriteType.withResponse
-        )
+        return self._writeSetupControlPacket(packet)
     }
     
     func setupNotifications() -> Promise<Void> {
@@ -466,5 +451,37 @@ open class SetupHandler {
         }
         return match
     }
+    
+    func _writeSetupControlPacket(_ packet: [UInt8]) -> Promise<Void> {
+        return self.bleManager.getChacteristic(CSServices.SetupService, SetupCharacteristics.SetupControl)
+            .then{(characteristic) -> Promise<Void> in
+                return self.bleManager.writeToCharacteristic(
+                    CSServices.SetupService,
+                    characteristicId: SetupCharacteristics.SetupControl,
+                    data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                    type: CBCharacteristicWriteType.withResponse
+                )
+            }
+            .recover{(err: Error) -> Promise<Void> in
+                return Promise <Void> { fulfill, reject in
+                    // we only want to pass this to the main promise of connect if we successfully received the nonce, but cant decrypt it.
+                    if let bleErr = err as? BleError {
+                        if (bleErr == BleError.CHARACTERISTIC_DOES_NOT_EXIST) {
+                            self.bleManager.writeToCharacteristic(
+                                CSServices.SetupService,
+                                characteristicId: SetupCharacteristics.Control,
+                                data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                                type: CBCharacteristicWriteType.withResponse
+                                )
+                                .then{ _ -> Void in fulfill(())}
+                                .catch{(err2: Error) -> Void in reject(err2) }
+                            return
+                        }
+                    }
+                    reject(err)
+                }
+            }
+    }
+    
     
 }
