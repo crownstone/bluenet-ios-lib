@@ -44,14 +44,12 @@ class MeshKeepAlivePacket {
     var type : UInt8
     var timeout : UInt16 = 0
     var numberOfItems : UInt8  = 0
-    var reserved : [UInt8]!
     var packets : [StoneKeepAlivePacket]!
     
     init(type: MeshKeepAliveTypes, timeout: UInt16, packets: [StoneKeepAlivePacket]) {
         self.type = type.rawValue;
         self.timeout = timeout
         self.numberOfItems = NSNumber(value: packets.count).uint8Value
-        self.reserved = [0,0]
         self.packets = packets
     }
     

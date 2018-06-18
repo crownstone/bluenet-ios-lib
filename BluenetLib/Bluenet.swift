@@ -106,8 +106,12 @@ open class Bluenet {
         self.bleManager.setBackgroundScanning(newBackgroundState: newBackgroundState)
     }
     
-    open func initPeripheral(uuidString: String = "c005") {
+    open func startAdvertising(uuidString: String = "c005") {
         self.blePeripheralManager.startAdvertising(uuidString: uuidString)
+    }
+    
+    open func startAdvertisingArray(uuidStrings: [String]) {
+        self.blePeripheralManager.startAdvertisingArray(uuidStrings: uuidStrings)
     }
     
     /**
@@ -227,11 +231,11 @@ open class Bluenet {
     /**
      * Returns if the BLE manager is initialized.
      * Should be used to make sure commands are not send before it's finished and get stuck.
- 
+     */
     open func isPeripheralReady() -> Promise<Void> {
         return self.blePeripheralManager.isReady()
     }
-    */
+
     
     /**
      * Connect to a BLE device with the provided UUID.

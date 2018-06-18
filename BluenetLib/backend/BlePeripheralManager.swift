@@ -53,31 +53,27 @@ open class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
         let serialService = CBMutableService(type: serviceUuid, primary: true)
         
         peripheralManager.add(serialService)
-        /*
-        let proximityUUID = UUID(uuidString:
-            "39ED98FF-2900-441A-802F-9C398FC199D2")
-        let major : CLBeaconMajorValue = 1
-        let minor : CLBeaconMinorValue = 1
-        let beaconID = "com.example.myDeviceRegion"
+        self.peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey:[serviceUuid], CBAdvertisementDataLocalNameKey: APPNAME])
+    }
+    
+    public func startAdvertisingArray(uuidStrings: [String]) {
+        if (self.advertising) {
+            self.stopAdvertising()
+        }
         
-        var beacon = CLBeaconRegion(proximityUUID: proximityUUID!, major: major, minor: minor, identifier: beaconID)
-        let data : Data = Data(bytes:[2,12,13,14,15,6,7,8,9,10,11,12,13,14,15,16])
-        let ibeaconData = beacon.peripheralData(withMeasuredPower: -50)
-        var ibeaconDict = ((ibeaconData as NSDictionary) as! [String : Any])
-        var manually = [
-            "kCBAdvDataAppleBeaconKey": Data(bytes:[0x39, 0xed, 0x98, 0xff, 0x29, 0x00, 0x44, 0x1a, 0x80, 0x2f, 0x9c, 0x39, 0x8f, 0xc1, 0x99, 0xd, 0x00, 0x64, 0x00, 0x01, 0xc5])
-        ]
-        //ibeaconDict[CBAdvertisementDataServiceUUIDsKey] = [data, Data(bytes:[8,9])]
-        print("APPENDED", ibeaconDict)
-        print("MANUALLY", manually)
-        //self.peripheralManager.add(CBMutableService(type: CBUUID(data: data), primary: true))
+        for uuidString in uuidStrings {
+            let serviceUuid = CBUUID(string: uuidString)
+            let serialService = CBMutableService(type: serviceUuid, primary: true)
+            
+            peripheralManager.add(serialService)
+        }
         
-        */
-        self.peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey:[serviceUuid], CBAdvertisementDataLocalNameKey: "Fred"])
+        self.peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey:uuidStrings, CBAdvertisementDataLocalNameKey: APPNAME])
     }
     
     public func stopAdvertising() {
         self.advertising = false
+        self.peripheralManager.removeAllServices()
         self.peripheralManager.stopAdvertising()
     }
     
@@ -93,9 +89,8 @@ open class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
     }
     
     
-    
     public func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
-        print("START ADV", error as Any)
+        
     }
     
     public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
