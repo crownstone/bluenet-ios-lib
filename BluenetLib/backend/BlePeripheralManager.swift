@@ -60,15 +60,15 @@ open class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
         if (self.advertising) {
             self.stopAdvertising()
         }
-        
+         self.advertising = true
+        var serviceUUIDStrings : [CBUUID] = []
         for uuidString in uuidStrings {
             let serviceUuid = CBUUID(string: uuidString)
             let serialService = CBMutableService(type: serviceUuid, primary: true)
-            
+            serviceUUIDStrings.append(serviceUuid)
             peripheralManager.add(serialService)
         }
-        
-        self.peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey:uuidStrings, CBAdvertisementDataLocalNameKey: APPNAME])
+        self.peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey:serviceUUIDStrings, CBAdvertisementDataLocalNameKey: APPNAME])
     }
     
     public func stopAdvertising() {
