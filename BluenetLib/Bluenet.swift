@@ -114,6 +114,10 @@ open class Bluenet {
         self.blePeripheralManager.startAdvertisingArray(uuidStrings: uuidStrings)
     }
     
+    open func stopAdvertising() {
+        self.blePeripheralManager.stopAdvertising()
+    }
+    
     /**
      * Load a settings object into Bluenet
      */
