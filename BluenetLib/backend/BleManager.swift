@@ -880,10 +880,11 @@ open class BleManager: NSObject, CBPeripheralDelegate {
      * This will just subscribe for a single notification and clean up after itself.
      * The merged, finalized reply to the write command will be in the fulfill of this promise.
      */
-    open func setupNotificationStream(_ serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback, resultHandler: @escaping processCallback, timeout: Double = 5) -> Promise<Void> {
+    open func setupNotificationStream(_ serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback, resultHandler: @escaping processCallback, timeout: Double = 5, successIfWriteSuccessful: Bool = false) -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             var unsubscribe : voidPromiseCallback? = nil
             var streamFinished = false
+            var writeSuccessful = false
             
             // use the notification merger to handle the full packet once we have received it.
             let merger = NotificationMerger(callback: { data -> Void in
@@ -944,8 +945,22 @@ open class BleManager: NSObject, CBPeripheralDelegate {
                     streamFinished = true
                     if (unsubscribe != nil) {
                         unsubscribe!()
-                            .then{ _  in reject(BleError.NOTIFICATION_STREAM_TIMEOUT) }
-                            .catch{ err in reject(BleError.NOTIFICATION_STREAM_TIMEOUT) }
+                            .then{ _ -> Void in
+                                if (successIfWriteSuccessful && writeSuccessful) {
+                                    fulfill(())
+                                }
+                                else {
+                                    reject(BleError.NOTIFICATION_STREAM_TIMEOUT)
+                                }
+                            }
+                            .catch{ err in
+                                if (successIfWriteSuccessful && writeSuccessful) {
+                                    fulfill(())
+                                }
+                                else {
+                                    reject(BleError.NOTIFICATION_STREAM_TIMEOUT)
+                                }
+                        }
                     }
                 }
             })
@@ -954,6 +969,9 @@ open class BleManager: NSObject, CBPeripheralDelegate {
                 .then{ unsub -> Promise<Void> in
                     unsubscribe = unsub
                     return writeCommand()
+                }
+                .then{ _ -> Void in
+                    writeSuccessful = true
                 }
                 .catch{ err in reject(err) }
         }

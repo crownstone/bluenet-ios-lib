@@ -167,7 +167,7 @@ open class SetupHandler {
                                 return .ABORT_ERROR
                             }
                         }
-                        ,timeout: 3)
+                        ,timeout: 3, successIfWriteSuccessful: true)
                 }
                 .then{(_) -> Promise<Void> in
                     LOG.info("BLUENET_LIB: SetupCommand Finished, disconnecting")
