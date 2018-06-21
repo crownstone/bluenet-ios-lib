@@ -173,16 +173,22 @@ open class ControlHandler {
      * This method will ask the current switch state and listen to the notification response. 
      * It will then switch the crownstone. If it was > 0 --> 0 if it was 0 --> 1.
      **/
-    open func toggleSwitchState(stateForOn : Float = 1.0) -> Promise<Void> {
+    open func toggleSwitchState(stateForOn : Float = 1.0) -> Promise<Float> {
         let stateHandler = StateHandler(bleManager: self.bleManager, eventBus: self.eventBus, settings: self.settings, deviceList: self.deviceList)
-        return stateHandler.getSwitchState()
-            .then{ currentSwitchState -> Promise<Void> in
-                var newSwitchState : Float = 0;
-                if (currentSwitchState == 0) {
-                    newSwitchState = stateForOn
+        return Promise<Float> { fulfill, reject -> Void in
+            var newSwitchState : Float = 0;
+            stateHandler.getSwitchState()
+                .then{ currentSwitchState -> Promise<Void> in
+                    if (currentSwitchState == 0) {
+                        newSwitchState = stateForOn
+                    }
+                    return self.setSwitchState(newSwitchState)
                 }
-                return self.setSwitchState(newSwitchState)
-            }
+                .then{ _ in fulfill(newSwitchState) }
+                .catch{(err) -> Void in
+                    reject(err)
+                }
+        }
     }
     
     open func switchPWM(_ state: Float) -> Promise<Void> {
