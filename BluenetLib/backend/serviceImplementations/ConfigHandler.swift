@@ -85,6 +85,43 @@ open class ConfigHandler {
         return self._writeToConfig(packet: data.getPacket())
     }
     
+    open func setUartState(_ state: NSNumber) -> Promise<Void> {
+        return Promise<Void> { fulfill, reject in
+            if (state == 3 || state == 1 || state == 0) {
+                let data = WriteConfigPacket(type: ConfigurationType.UART_ENABLED, payload8: state.uint8Value)
+                self._writeToConfig(packet: data.getPacket())
+                    .then{ _ in fulfill(()) }
+                    .catch{err in reject(err)}
+            }
+            else {
+                LOG.warn("BluenetLib: setUartState: Only 0, 1, or 3 are allowed inputs. You gave: \(state).")
+                reject(BleError.INVALID_INPUT)
+            }
+        }
+    }
+    
+    open func setMeshChannel(_ channel: NSNumber) -> Promise<Void> {
+        return Promise<Void> { fulfill, reject in
+            if (channel == 37 || channel == 38 || channel == 39) {
+                let data = WriteConfigPacket(type: ConfigurationType.MESH_CHANNEL, payload8: channel.uint8Value)
+                self._writeToConfig(packet: data.getPacket())
+                    .then{ _ in fulfill(()) }
+                    .catch{err in reject(err)}
+            }
+            else {
+                LOG.warn("BluenetLib: setMeshChannel: Only 37, 38 or 39 are allowed inputs. You gave: \(channel).")
+                reject(BleError.INVALID_INPUT)
+            }
+        }
+    }
+    
+    open func getMeshChannel() -> Promise<NSNumber> {
+        return Promise<NSNumber> { fulfill, reject in
+            let configPromise : Promise<UInt8> = self._getConfig(ConfigurationType.MESH_CHANNEL)
+            configPromise.then{ channel -> Void in fulfill(NSNumber(value: channel)) }.catch{err in reject(err)}
+        }
+    }
+    
     open func setTxPower (_ txPower: NSNumber) -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             if (txPower == -40 || txPower == -30 || txPower == -20 || txPower == -16 || txPower == -12 || txPower == -8 || txPower == -4 || txPower == 0 || txPower == 4) {
@@ -107,6 +144,7 @@ open class ConfigHandler {
             type: CBCharacteristicWriteType.withResponse
         )
     }
+    
     
     public func _getConfig<T>(_ config : ConfigurationType) -> Promise<T> {
         return Promise<T> { fulfill, reject in

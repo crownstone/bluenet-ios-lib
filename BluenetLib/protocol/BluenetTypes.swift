@@ -101,6 +101,10 @@ public enum ConfigurationType : UInt8 {
     case DIMEMR_TEMP_DOWN_VOLTAGE = 53
     case PWM_ALLOWED = 54
     case SWITCH_LOCKED = 55
+    case SWITCHCRAFT_ENABLED = 56
+    case SWITCHCRAFT_THRESHOLD = 57
+    case MESH_CHANNEL = 58
+    case UART_ENABLED = 59
 }
 
 public enum MeshHandle : UInt8 {

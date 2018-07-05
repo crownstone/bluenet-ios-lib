@@ -28,7 +28,8 @@ open class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
     var backgroundEnabled = true
 
     var advertising = false
-    
+    var restartRequired = false
+ 
     public init(eventBus: EventBus, backgroundEnabled: Bool = true) {
         super.init();
     
@@ -93,7 +94,19 @@ open class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
         
     }
     
+    public func peripheralManager(_ peripheral: CBPeripheralManager, willRestoreState dict: [String : Any]) {
+        LOG.info("BLUENET_LIB: Peripheral manager WILL RESTORE STATE \(dict)");
+    }
+    
+    
     public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         self.BleState = peripheral.state.rawValue
+    
+        if (peripheral.state.rawValue == 4) {
+            self.restartRequired = true
+        }
+       // else if (peripheral.state.rawValue == 5 && self.restartRequired == true) {
+       //     self.startAdvertising()
+       // }
     }
 }

@@ -93,6 +93,9 @@ public enum BleError : Error {
     // process errors
     case PROCESS_ABORTED_WITH_ERROR
     case UNKNOWN_PROCESS_TYPE
+    
+    // general errors
+    case INVALID_INPUT
 }
 
 struct timeoutDurations {

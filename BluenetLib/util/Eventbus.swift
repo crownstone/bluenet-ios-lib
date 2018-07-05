@@ -65,5 +65,4 @@ open class EventBus {
             }
         }
     }
-    
 }
