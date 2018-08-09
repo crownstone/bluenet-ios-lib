@@ -137,6 +137,13 @@ open class BluenetLocalization {
         self.locationManager.clearTrackedBeacons()
     }
     
+    /**
+     * Is currently scanning for iBeacons
+     */
+    open func getTrackingState() -> [String: Bool] {
+        return self.locationManager.getTrackingState();
+    }
+    
     
     /**
      * This will stop listening to a single iBeacon uuid and remove it from the list. This is called when you remove the region from

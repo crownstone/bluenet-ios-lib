@@ -108,6 +108,13 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         }
     }
     
+    open func getTrackingState() -> [String:Bool] {
+        return [
+            "isMonitoring": self.monitoringState,
+            "isRanging":    self.rangingState
+        ];
+    }
+    
     /**
      * Start monitoring the region for this beacon. 
      * A manager will be initialized if required. Will only start monitoring if the manager is already started. 

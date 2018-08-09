@@ -12,9 +12,9 @@ import Foundation
 open class BluenetSettings {
     open var encryptionEnabled = false
     open var temporaryDisable = false
-    open var adminKey : [UInt8]? = nil
-    open var memberKey  : [UInt8]? = nil
-    open var guestKey : [UInt8]? = nil
+    open var adminKey  : [UInt8]? = nil
+    open var memberKey : [UInt8]? = nil
+    open var guestKey  : [UInt8]? = nil
     open var setupKey  : [UInt8]? = nil
     open var initializedKeys = false
     open var sessionNonce : [UInt8]? = nil
@@ -27,7 +27,7 @@ open class BluenetSettings {
     public func loadKeys(encryptionEnabled: Bool, adminKey: String?, memberKey: String?, guestKey: String?, referenceId: String) {
         self.encryptionEnabled = encryptionEnabled
         self.referenceId = referenceId
-        
+       
         if (adminKey != nil) {
             self.adminKey = Conversion.ascii_or_hex_string_to_16_byte_array(adminKey!)
         }
