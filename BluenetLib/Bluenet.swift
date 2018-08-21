@@ -90,7 +90,7 @@ open class Bluenet {
         
         _ = eventBus.on("disconnectCommandWritten", self._storeDisconnectCommandList)
         
-        // subscribe to BLE advertisements (TODO: add encryption)
+        // subscribe to BLE advertisements
         _ = self.eventBus.on("advertisementData", self._parseAdvertisement)
     }
     

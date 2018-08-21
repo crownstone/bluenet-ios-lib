@@ -32,7 +32,7 @@ func parseOpcode3_type0(serviceData : ScanResponsePacket, data : [UInt8], litePa
         serviceData.dimmingAllowed   = bitmaskArray[1]
         serviceData.hasError         = bitmaskArray[2]
         serviceData.switchLocked     = bitmaskArray[3]
-        serviceData.timeIsSet        = bitmaskArray[4]
+        serviceData.timeSet          = bitmaskArray[4]
         serviceData.switchCraftEnabled = bitmaskArray[5]
         
         serviceData.temperature  = Conversion.uint8_to_int8(data[5])
@@ -67,7 +67,7 @@ func parseOpcode3_type0(serviceData : ScanResponsePacket, data : [UInt8], litePa
             ])
         )
         
-        if (serviceData.timeIsSet) {
+        if (serviceData.timeSet) {
             serviceData.timestamp = NSNumber(value: reconstructTimestamp(currentTimestamp: NSDate().timeIntervalSince1970, LsbTimestamp: serviceData.partialTimestamp)).doubleValue
         }
         else {

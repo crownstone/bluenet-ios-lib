@@ -143,11 +143,7 @@ open class StateHandler {
     public func _getState<T>(_ state : StateType) -> Promise<T> {
         return Promise<T> { fulfill, reject in
             let writeCommand : voidPromiseCallback = { 
-                return self.bleManager.writeToCharacteristic(
-                    CSServices.CrownstoneService,
-                    characteristicId: CrownstoneCharacteristics.StateControl,
-                    data: ReadStatePacket(type: state).getNSData(),
-                    type: CBCharacteristicWriteType.withResponse);
+                return self._writeToState(packet: ReadStatePacket(type: state).getPacket())
             }
             self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.StateRead, writeCommand: writeCommand)
                 .then{ data -> Void in

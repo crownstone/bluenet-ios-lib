@@ -41,7 +41,7 @@ open class ScanResponsePacket {
     open var errorTimestamp      :   UInt32   = 0
     open var errorsBitmask       :   UInt32   = 0
     open var errorMode           :   Bool     = false
-    open var timeIsSet           :   Bool     = false
+    open var timeSet             :   Bool     = false
     open var switchCraftEnabled  :   Bool     = false
     
     open var uniqueIdentifier    :   NSNumber = 0
@@ -134,7 +134,7 @@ open class ScanResponsePacket {
             "errors"               : errorsDictionary,
             
             "uniqueElement"        : self.uniqueIdentifier,
-            "timeIsSet"            : self.timeIsSet,
+            "timeSet"              : self.timeSet,
             "deviceType"           : String(describing: self.deviceType),
             "rssiOfExternalCrownstone" : self.rssiOfExternalCrownstone
         ]

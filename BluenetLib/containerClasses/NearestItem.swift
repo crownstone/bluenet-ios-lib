@@ -10,12 +10,12 @@ import Foundation
 import SwiftyJSON
 
 open class NearestItem {
-    var name : String = ""
-    var handle : String = ""
-    var rssi : Int = 0
-    var setupMode : Bool = false
-    var dfuMode : Bool = false
-    var verified : Bool = false
+    var name      : String = ""
+    var handle    : String = ""
+    var rssi      : Int    = 0
+    var setupMode : Bool   = false
+    var dfuMode   : Bool   = false
+    var verified  : Bool   = false
     
     init(name: String, handle:String, rssi: Int, setupMode: Bool, dfuMode: Bool, verified: Bool) {
         self.name = name
