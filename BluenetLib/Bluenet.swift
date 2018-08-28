@@ -45,8 +45,8 @@ open class Bluenet {
     open var settings : BluenetSettings!
     let eventBus : EventBus!
     var deviceList = [String: AvailableDevice]()
-    var setupList = [String: NearestItem]()
-    var dfuList = [String: NearestItem]()
+    var setupList : NearestItemContainer!
+    var dfuList : NearestItemContainer!
     var disconnectCommandTimeList = [String: Double]()
 
     // declare the classes handling the library protocol
@@ -74,6 +74,9 @@ open class Bluenet {
         self.eventBus   = EventBus()
         self.bleManager = BleManager(eventBus: self.eventBus, backgroundEnabled: backgroundEnabled)
         self.blePeripheralManager = BlePeripheralManager(eventBus: self.eventBus, backgroundEnabled: backgroundEnabled);
+        
+        self.setupList = NearestItemContainer()
+        self.dfuList   = NearestItemContainer()
         
         // give the BLE manager a reference to the settings.
         self.bleManager.setSettings(settings)
@@ -372,30 +375,43 @@ open class Bluenet {
                             // log debug for nearest setup
                             LOG.debug("BLUENET_LIB: received SetupAdvertisement nr: \(self.counter)")
                             
+                            // remove the item from the dfuList if this is in there. In the event a state changes, we don't want to keep it in the old lists
+                            self.dfuList.removeItem(handle: castData.handle)
                             
-                            self.setupList[castData.handle] = NearestItem(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue, setupMode: true, verified: true)
-                            // log debug for nearest setup
+                            // add entry to the dfu list
+                            self.setupList.load(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue)
+                            let nearestSetup = self.setupList.getNearestItem(setupMode: true, dfuMode: false)
+                            if nearestSetup != nil {
+                                self.eventBus.emit("nearestSetupCrownstone", nearestSetup!)
+                            }
+                            
+                             // log debug for nearest setup
                             LOG.debug("BLUENET_LIB: received nearestSetupCrownstone nr: \(self.counter)")
-                            
-                            self._emitNearestSetupCrownstone()
+   
                         }
                         else if (castData.isDFUPackage()) {
                             // log debug for nearest setup
                             LOG.debug("BLUENET_LIB: received DFUadvertisement nr: \(self.counter)")
                             
+                            // remove the item from the setuplist if this is in there. In the event a state changes, we don't want to keep it in the old lists
+                            self.setupList.removeItem(handle: castData.handle)
                             
-                            self.dfuList[castData.handle] = NearestItem(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue, dfuMode: true, verified: true)
+                            // add entry to the dfu list
+                            self.dfuList.load(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue)
+                            let nearestDFU = self.dfuList.getNearestItem(setupMode: false, dfuMode: true)
+                            if nearestDFU != nil {
+                                self.eventBus.emit("nearestDFUCrownstone", nearestDFU!)
+                            }
+                            
                             // log debug for nearest setup
                             LOG.debug("BLUENET_LIB: received nearestSetupCrownstone nr: \(self.counter)")
-                            
-                            self._emitNearestDFUCrownstone()
-
                         }
                         else {
                             // handling normal packages, we emit nearest Crownstone (since verifieds are also Crownstones) and verified nearest.
                             self._emitNearestCrownstone(topic: "nearestCrownstone", verifiedOnly: false);
                             self._emitNearestCrownstone(topic: "nearestVerifiedCrownstone", verifiedOnly: true);
-                            self.setupList.removeValue(forKey: castData.handle)
+                            self.dfuList.removeItem(handle: castData.handle)
+                            self.setupList.removeItem(handle: castData.handle)
                         }
                     }
                 }
@@ -414,44 +430,6 @@ open class Bluenet {
         }
     }
     
-    
-    // TODO: can be optimized so it does not use a loop.
-    // TODO: move this logic into a specific container class instead of the setupList dictionary
-    func _emitNearestSetupCrownstone() {
-        var nearestRSSI = -1000
-        var nearestHandle = ""
-        var nearestName = ""
-        for (_ , nearestItem) in self.setupList {
-            if (nearestItem.rssi > nearestRSSI) {
-                nearestRSSI = nearestItem.rssi
-                nearestHandle = nearestItem.handle
-                nearestName = nearestItem.name
-            }
-        }
-        if (nearestHandle != "" && nearestRSSI < 0) {
-            let data = NearestItem(name: nearestName, handle: nearestHandle, rssi: nearestRSSI, setupMode: true, verified: true)
-            self.eventBus.emit("nearestSetupCrownstone", data)
-        }
-    }
-    
-    // TODO: can be optimized so it does not use a loop.
-    // TODO: move this logic into a specific container class instead of the setupList dictionary
-    func _emitNearestDFUCrownstone() {
-        var nearestRSSI = -1000
-        var nearestHandle = ""
-        var nearestName = ""
-        for (_ , nearestItem) in self.dfuList {
-            if (nearestItem.rssi > nearestRSSI) {
-                nearestRSSI = nearestItem.rssi
-                nearestHandle = nearestItem.handle
-                nearestName = nearestItem.name
-            }
-        }
-        if (nearestHandle != "" && nearestRSSI < 0) {
-            let data = NearestItem(name: nearestName, handle: nearestHandle, rssi: nearestRSSI, dfuMode: true, verified: true)
-            self.eventBus.emit("nearestDFUCrownstone", data)
-        }
-    }
     
     // TODO: can be optimized so it does not use a loop.
     // TODO: move this logic into a specific container class instead of the devicelist dictionary

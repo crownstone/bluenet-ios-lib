@@ -34,6 +34,10 @@ open class NearestItem {
         self.init(name: name, handle: handle, rssi: rssi, setupMode: false, dfuMode: dfuMode, verified: verified)
     }
     
+    convenience init(nearInfo: NearInformation, setupMode: Bool, dfuMode: Bool, verified: Bool) {
+        self.init(name: nearInfo.name, handle: nearInfo.handle, rssi: nearInfo.rssi, setupMode: setupMode, dfuMode: dfuMode, verified: verified)
+    }
+    
     open func getJSON() -> JSON {
         var dataDict = [String : Any]()
         dataDict["name"]      = self.name

@@ -100,7 +100,7 @@ public enum BleError : Error {
 
 struct timeoutDurations {
     static let disconnect              : Double = 3
-    static let errorDisconnect          : Double = 5
+    static let errorDisconnect         : Double = 5
     static let cancelPendingConnection : Double = 3
     static let connect                 : Double = 10
     static let reconnect               : Double = 0.5

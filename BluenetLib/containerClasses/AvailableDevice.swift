@@ -10,28 +10,24 @@ import Foundation
 let AMOUNT_OF_REQUIRED_MATCHES = 3
 
 open class AvailableDevice {
-    var rssiHistory = [Double: Int]()
     var rssi : Int!
     var name : String?
     var handle : String
     var crownstoneId : UInt8 = 0
     var lastUpdate : Double = 0
     var cleanupCallback : voidCallback
-    var avgRssi : Double!
     var uniqueIdentifier : NSNumber = 0
     var verified = false
     var dfu = false
     
     // config
     let timeout : Double = 20 //seconds
-    let rssiTimeout : Double = 3 //seconds
     var consecutiveMatches : Int = 0
     
     init(_ data: Advertisement, _ cleanupCallback: @escaping voidCallback) {
         self.name = data.name
         self.handle = data.handle
         self.cleanupCallback = cleanupCallback
-        self.avgRssi = data.rssi.doubleValue
         if (data.isCrownstoneFamily) {
             if (data.isSetupPackage()) {
                 self.verified = true;
@@ -52,11 +48,7 @@ open class AvailableDevice {
             self.cleanupCallback()
         }
     }
-    
-    func clearRSSI(_ referenceTime : Double) {
-        self.rssiHistory.removeValue(forKey: referenceTime)
-        self.calculateRssiAverage()
-    }
+
     
     func update(_ data: Advertisement) {
         self.rssi = data.rssi.intValue
@@ -64,8 +56,6 @@ open class AvailableDevice {
         // make a local copy for the closures.
         let updatetime = Date().timeIntervalSince1970
         self.lastUpdate = updatetime
-        
-        self.rssiHistory[self.lastUpdate] = self.rssi;
         
         if (data.isInDFUMode == true) {
             self.verified = true;
@@ -75,10 +65,7 @@ open class AvailableDevice {
             self.verify(data.scanResponse)
         }
         
-        self.calculateRssiAverage()
-        
-        delay(self.timeout, { self.checkTimeout(updatetime) });
-        delay(self.rssiTimeout, { self.clearRSSI(updatetime) });
+        delay(self.timeout, { self.checkTimeout(updatetime) })
     }
     
     
@@ -154,13 +141,4 @@ open class AvailableDevice {
         self.verified = false;
     }
     
-    func calculateRssiAverage() {
-        var count = 0
-        var total : Double = 0
-        for (_, rssi) in self.rssiHistory {
-            total = total + Double(rssi)
-            count += 1
-        }
-        self.avgRssi = total/Double(count);
-    }
 }

@@ -160,4 +160,27 @@ class BluenetLibTests: XCTestCase {
         
     }
     
+    
+    func testClearIteratingDict() {
+        var dict = [String: Int]()
+        dict["test1"] = 1
+        dict["test2"] = 2
+        dict["test3"] = 3
+        dict["test4"] = 4
+        dict["test5"] = 5
+        dict["test6"] = 3
+        dict["test7"] = 7
+        dict["test8"] = 2
+        dict["test9"] = 1
+        dict["test10"] = 10
+        
+        for (keyStr, value) in dict {
+            if value < 5 {
+                dict.removeValue(forKey: keyStr)
+            }
+        }
+        
+        print(dict)
+    }
+    
 }
