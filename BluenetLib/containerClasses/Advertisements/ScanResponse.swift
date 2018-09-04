@@ -10,6 +10,15 @@ import Foundation
 import CoreBluetooth
 import SwiftyJSON
 
+
+
+public enum CrownstoneMode {
+    case operation
+    case setup
+    case dfu
+    case unknown
+}
+
 open class ScanResponsePacket {
     open var opCode              :   UInt8    = 0
     open var dataType            :   UInt8    = 0
@@ -52,48 +61,71 @@ open class ScanResponsePacket {
     var validData = false
     open var dataReadyForUse = false // decryption is successful
     
-    init(_ data: [UInt8], liteParse : Bool = false) {
+    init(_ data: [UInt8]) {
         self.data = data
-        self.parse(liteParse: liteParse)
-    }
-    
-    func parse(liteParse : Bool) {
+        
         validData = true
-        if (data.count == 18) {
+        if (self.data.count == 18) {
             self.opCode = data[0]
             self.encryptedData = Array(data[2...])
             self.encryptedDataStartIndex = 2
-            switch (self.opCode) {
-                case 5:
-                    parseOpcode5(serviceData: self, data: data, liteParse: liteParse)
-                case 6:
-                    parseOpcode6(serviceData: self, data: data, liteParse: liteParse)
-                default:
-                    parseOpcode5(serviceData: self, data: data, liteParse: liteParse)
-            }
         }
-        else if (data.count == 17) {
+        else if (self.data.count == 17) {
             self.opCode = data[0]
             self.encryptedData = Array(data[1...])
             self.encryptedDataStartIndex = 1
-            switch (self.opCode) {
-            case 1:
-                parseOpcode1(serviceData: self, data: data)
-            case 2:
-                parseOpcode2(serviceData: self, data: data)
-            case 3:
-                parseOpcode3(serviceData: self, data: data, liteParse: liteParse)
-            case 4:
-                parseOpcode4(serviceData: self, data: data, liteParse: liteParse)
-            default:
-                parseOpcode3(serviceData: self, data: data, liteParse: liteParse)
-            }
         }
         else {
             validData = false
         }
     }
     
+    func getOperationMode() -> CrownstoneMode {
+        if (self.validData == false) {
+            return CrownstoneMode.unknown
+        }
+        
+        switch (self.opCode) {
+            case 1:
+                // this is a deprecated protocol. We checked if everything was 0 and that the setup flag was high.
+                let bitmaskArray = Conversion.uint8_to_bit_array(data[4])
+                if (bitmaskArray[7] && Conversion.uint8_array_to_uint16([data[1], data[2]]) == 0) {
+                    return CrownstoneMode.setup
+                }
+                return CrownstoneMode.operation
+            case 2, 3:
+                return CrownstoneMode.operation
+            case 4:
+                return CrownstoneMode.setup
+            case 5:
+                return CrownstoneMode.operation
+            case 6:
+                return CrownstoneMode.setup
+            default:
+                return CrownstoneMode.unknown
+        }
+    }
+    
+    func parse() {
+        if (self.validData) {
+            switch (self.opCode) {
+            case 1:
+                parseOpcode1(serviceData: self, data: data)
+            case 2:
+                parseOpcode2(serviceData: self, data: data)
+            case 3:
+                parseOpcode3(serviceData: self, data: data)
+            case 4:
+                parseOpcode4(serviceData: self, data: data)
+            case 5:
+                parseOpcode5(serviceData: self, data: data)
+            case 6:
+                parseOpcode6(serviceData: self, data: data)
+            default:
+                parseOpcode5(serviceData: self, data: data)
+            }
+        }
+    }
     
     
     open func hasCrownstoneDataFormat() -> Bool {
@@ -113,7 +145,7 @@ open class ScanResponsePacket {
             "dataType"             : NSNumber(value: self.dataType),
             "stateOfExternalCrownstone" : self.stateOfExternalCrownstone,
             "hasError"             : self.hasError,
-            "setupMode"            : self.isSetupPackage(),
+            "setupMode"            : self.setupMode,
             
             "crownstoneId"         : NSNumber(value: self.crownstoneId),
             "switchState"          : NSNumber(value: self.switchState),
@@ -150,27 +182,6 @@ open class ScanResponsePacket {
         return JSONUtils.stringify(self.getJSON())
     }
     
-    open func isSetupPackage() -> Bool {
-        if (validData == false) {
-            return false
-        }
-        
-        switch (self.opCode) {
-        case 1,2:
-            if (crownstoneId == 0 && switchState == 0 && powerUsageReal == 0 && accumulatedEnergy == 0 && setupMode == true) {
-                return true
-            }
-            else {
-                return false
-            }
-        case 3, 5:
-            return false
-        case 4, 6:
-            return true
-        default:
-            return false
-        }
-    }
     
     open func decrypt(_ key: [UInt8]) {
         if (validData == true && self.encryptedData.count == 16) {
@@ -182,7 +193,7 @@ open class ScanResponsePacket {
                 }
                 
                 // parse the data again based on the decrypted result
-                self.parse(liteParse: false)
+                self.parse()
                 self.dataReadyForUse = true
             }
             catch let err {

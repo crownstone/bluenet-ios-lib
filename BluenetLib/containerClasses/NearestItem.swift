@@ -17,25 +17,24 @@ open class NearestItem {
     var dfuMode   : Bool   = false
     var verified  : Bool   = false
     
-    init(name: String, handle:String, rssi: Int, setupMode: Bool, dfuMode: Bool, verified: Bool) {
-        self.name = name
-        self.handle = handle;
-        self.rssi = rssi
+    init(name: String, handle: String, rssi: Int, setupMode: Bool, dfuMode: Bool, verified: Bool) {
+        self.name      = name
+        self.handle    = handle
+        self.rssi      = rssi
         self.setupMode = setupMode
-        self.dfuMode = dfuMode
-        self.verified = verified
+        self.dfuMode   = dfuMode
+        self.verified  = verified
     }
-    
-    convenience init(name: String, handle:String, rssi: Int, setupMode: Bool, verified: Bool) {
-        self.init(name: name, handle: handle, rssi: rssi, setupMode: setupMode, dfuMode: false, verified: verified)
-    }
-    
-    convenience init(name: String, handle:String, rssi: Int, dfuMode: Bool, verified: Bool) {
-        self.init(name: name, handle: handle, rssi: rssi, setupMode: false, dfuMode: dfuMode, verified: verified)
-    }
-    
-    convenience init(nearInfo: NearInformation, setupMode: Bool, dfuMode: Bool, verified: Bool) {
-        self.init(name: nearInfo.name, handle: nearInfo.handle, rssi: nearInfo.rssi, setupMode: setupMode, dfuMode: dfuMode, verified: verified)
+
+    convenience init(nearStone: CrownstoneSummary, setupMode: Bool, dfuMode: Bool) {
+        self.init(
+            name:      nearStone.name,
+            handle:    nearStone.handle,
+            rssi:      nearStone.rssi,
+            setupMode: setupMode,
+            dfuMode:   dfuMode,
+            verified:  nearStone.validated
+        )
     }
     
     open func getJSON() -> JSON {

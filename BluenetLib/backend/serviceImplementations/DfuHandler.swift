@@ -16,7 +16,6 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
     let bleManager : BleManager!
     var settings : BluenetSettings!
     let eventBus : EventBus!
-    var deviceList : [String: AvailableDevice]!
     var wasScanning = false
     
     fileprivate var dfuController : DFUServiceController?
@@ -26,11 +25,10 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
     
     let secureDFU = false
     
-    init (bleManager: BleManager, eventBus: EventBus, settings: BluenetSettings, deviceList: [String: AvailableDevice]) {
+    init (bleManager: BleManager, eventBus: EventBus, settings: BluenetSettings) {
         self.bleManager = bleManager
         self.settings   = settings
         self.eventBus   = eventBus
-        self.deviceList = deviceList
     }
     
     

@@ -18,19 +18,17 @@ open class Advertisement {
     open var handle : String
     open var name : String
     open var rssi : NSNumber
-    open var referenceId : String // id of the entity that provides the keys
+    open var referenceId : String? // id of the entity that provides the keys
     
     open var isCrownstoneFamily  : Bool = false
-    open var isInDFUMode         : Bool = false
+    open var operationMode : CrownstoneMode = .unknown
     
     open var serviceData = [String: [UInt8]]()
     open var serviceDataAvailable : Bool
     open var serviceUUID : String?
     open var scanResponse : ScanResponsePacket?
     
-    init(handle: String, name: String?, rssi: NSNumber, serviceData: Any, serviceUUID: Any, referenceId: String, liteParse: Bool = false) {
-        self.referenceId = referenceId
-
+    init(handle: String, name: String?, rssi: NSNumber, serviceData: Any, serviceUUID: Any) {
         if (name != nil) {
             self.name = name!
         }
@@ -43,7 +41,9 @@ open class Advertisement {
 
         if let castData = serviceUUID as? [CBUUID] {
             self.serviceUUID = castData[0].uuidString // assuming only one service data uuid
-            self.isInDFUMode = self.serviceUUID == DFUServiceUUID
+            if (self.serviceUUID == DFUServiceUUID) {
+                self.operationMode = .dfu
+            }
         }
         
         if let castData = serviceData as? [CBUUID: Data] {
@@ -53,7 +53,7 @@ open class Advertisement {
                 self.serviceData[serviceCUUID.uuidString] = uint8Arr
                 self.serviceUUID = serviceCUUID.uuidString
                 self.serviceDataAvailable = true
-                self.isInDFUMode = false
+                self.operationMode = .unknown
             }
         }
         
@@ -61,11 +61,13 @@ open class Advertisement {
             if (id == CrownstonePlugAdvertisementServiceUUID ||
                 id == CrownstoneBuiltinAdvertisementServiceUUID ||
                 id == GuidestoneAdvertisementServiceUUID) {
-                self.scanResponse        =  ScanResponsePacket(data, liteParse : liteParse)
+                self.scanResponse        =  ScanResponsePacket(data)
                 self.isCrownstoneFamily  =  self.scanResponse!.hasCrownstoneDataFormat()
                 break
             }
         }
+        
+        self.operationMode = self.getOperationMode()
     }
     
     func getNumberArray(_ data: [UInt8]) -> [NSNumber] {
@@ -99,7 +101,7 @@ open class Advertisement {
         if ((scanResponse) != nil) {
             return scanResponse!.getUniqueElement()
         }
-        return ""
+        return "NO_UNIQUE_ELEMENT"
     }
     
     open func getJSON() -> JSON {
@@ -112,9 +114,12 @@ open class Advertisement {
             "name"   : self.name,
             "rssi"   : self.rssi,
             "isCrownstoneFamily"   : self.isCrownstoneFamily,
-            "isInDFUMode"          : self.isInDFUMode,
-            "referenceId"          : self.referenceId
+            "isInDFUMode"          : self.operationMode == .dfu,
         ]
+        
+        if (self.referenceId != nil) {
+            returnDict["referenceId"] = self.referenceId!
+        }
         
         if (self.serviceUUID != nil) {
             returnDict["serviceUUID"] = self.serviceUUID!
@@ -138,15 +143,17 @@ open class Advertisement {
     }
     
     
-    open func isSetupPackage() -> Bool {
-        if (serviceDataAvailable && self.scanResponse != nil) {
-            return self.scanResponse!.isSetupPackage()
+    open func getOperationMode() -> CrownstoneMode {
+        if (self.operationMode == .unknown) {
+            if (self.scanResponse != nil) {
+                return self.scanResponse!.getOperationMode()
+            }
+            else {
+                return CrownstoneMode.unknown
+            }
         }
-        return false
-    }
-    
-    open func isDFUPackage() -> Bool {
-        return self.isInDFUMode
+        
+        return self.operationMode
     }
     
     open func hasScanResponse() -> Bool {
@@ -159,12 +166,6 @@ open class Advertisement {
         }
     }
     
-    open func fullParse() {
-        if (serviceDataAvailable && self.scanResponse != nil) {
-            self.scanResponse!.parse(liteParse: false)
-            self.scanResponse!.dataReadyForUse = true
-        }
-    }
 }
 
 
