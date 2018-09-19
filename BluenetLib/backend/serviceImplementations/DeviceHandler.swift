@@ -11,7 +11,7 @@ import PromiseKit
 import CoreBluetooth
 
 
-open class DeviceHandler {
+public class DeviceHandler {
     let bleManager : BleManager!
     var settings : BluenetSettings!
     let eventBus : EventBus!
@@ -26,7 +26,7 @@ open class DeviceHandler {
         
     }
     
-    open func getFirmwareRevision() -> Promise<String> {
+    public func getFirmwareRevision() -> Promise<String> {
         return getSoftwareRevision()
     }
     
@@ -34,7 +34,7 @@ open class DeviceHandler {
     /**
      * Returns a symvar version number like  "1.1.0"
      */
-    open func getSoftwareRevision() -> Promise<String> {
+    public func getSoftwareRevision() -> Promise<String> {
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.DeviceInformation, characteristic: DeviceCharacteristics.FirmwareRevision)
             .then{ data -> Promise<String> in
                 return Promise<String>{fulfill, reject in fulfill(Conversion.uint8_array_to_string(data))
@@ -65,7 +65,7 @@ open class DeviceHandler {
      * reserved = "00000000"          (8)
      * nordicChipVersion = "xxxxxx"   (6)
      */
-    open func getHardwareRevision() -> Promise<String> {
+    public func getHardwareRevision() -> Promise<String> {
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.DeviceInformation, characteristic: DeviceCharacteristics.HardwareRevision)
             .then{ data -> Promise<String> in
                 return Promise<String>{fulfill, reject in fulfill(Conversion.uint8_array_to_string(data))
@@ -74,7 +74,7 @@ open class DeviceHandler {
     
     
     
-    open func getBootloaderRevision() -> Promise<String> {
+    public func getBootloaderRevision() -> Promise<String> {
         return self.bleManager.getServicesFromDevice()
             .then{ services in
                 var isInDfuMode = false

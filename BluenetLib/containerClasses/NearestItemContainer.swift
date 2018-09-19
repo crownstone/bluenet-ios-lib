@@ -15,7 +15,7 @@ struct NearInformation {
     var updatedAt: Double
 }
 
-open class NearestItemContainer {
+public class NearestItemContainer {
     var items = [String: NearInformation]()
     
     // config
@@ -23,7 +23,7 @@ open class NearestItemContainer {
 
     init() {}
     
-    open func load(name: String, handle:String, rssi: Int) {
+    public func load(name: String, handle:String, rssi: Int) {
         let currentTime = Date().timeIntervalSince1970
         // sometimes rssi can be 0 or 127, this is an invalid data point.
         if rssi < 0 {
@@ -40,13 +40,13 @@ open class NearestItemContainer {
         self.removeExpired(currentTime: currentTime)
     }
     
-    open func removeItem(handle: String) {
+    public func removeItem(handle: String) {
         if self.items[handle] != nil {
             self.items.removeValue(forKey: handle)
         }
     }
     
-    open func getNearestItem(setupMode: Bool, dfuMode: Bool) -> NearestItem? {
+    public func getNearestItem(setupMode: Bool, dfuMode: Bool) -> NearestItem? {
         let nearestRSSI = -1000
         var nearestInfo : NearInformation? = nil
         for (_ , nearInfo) in self.items {

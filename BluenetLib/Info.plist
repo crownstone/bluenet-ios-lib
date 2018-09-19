@@ -25,7 +25,7 @@
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Insert always use string here</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Insert when open in use string here</string>
+	<string>Insert when public in use string here</string>
 	<key>NSPrincipalClass</key>
 	<string></string>
 </dict>

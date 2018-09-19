@@ -43,7 +43,6 @@
 		FA5882CE1E38C0F100913AE6 /* TrainingData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882A21E38C0F100913AE6 /* TrainingData.swift */; };
 		FA5882CF1E38C0F100913AE6 /* EncryptionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882A41E38C0F100913AE6 /* EncryptionHandler.swift */; };
 		FA5882D01E38C0F100913AE6 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882A51E38C0F100913AE6 /* Globals.swift */; };
-		FA5882D11E38C0F100913AE6 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FA5882A61E38C0F100913AE6 /* Info.plist */; };
 		FA5882D31E38C0F100913AE6 /* BlePackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882A91E38C0F100913AE6 /* BlePackets.swift */; };
 		FA5882D41E38C0F100913AE6 /* BluenetTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882AA1E38C0F100913AE6 /* BluenetTypes.swift */; };
 		FA5882D51E38C0F100913AE6 /* Characteristics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882AB1E38C0F100913AE6 /* Characteristics.swift */; };
@@ -58,7 +57,6 @@
 		FA5882E31E38C27100913AE6 /* BluenetLib.h in Headers */ = {isa = PBXBuildFile; fileRef = FA5882931E38C0F000913AE6 /* BluenetLib.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FA5882E41E38C2E800913AE6 /* BluenetLibTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882B51E38C0F100913AE6 /* BluenetLibTests.swift */; };
 		FA5882E51E38C2EA00913AE6 /* EncryptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882B61E38C0F100913AE6 /* EncryptionTests.swift */; };
-		FA5882E61E38C2EC00913AE6 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FA5882B71E38C0F100913AE6 /* Info.plist */; };
 		FA5908AE1E363E4E0035E658 /* Zip.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA5908AD1E363E4E0035E658 /* Zip.framework */; };
 		FA6106B5207D079B007969BB /* BlePeripheralManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6106B4207D079B007969BB /* BlePeripheralManager.swift */; };
 		FA6E8F8D2015FAE7004C3E8A /* PacketTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6E8F8C2015FAE7004C3E8A /* PacketTests.swift */; };
@@ -465,7 +463,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 0800;
+				LastUpgradeCheck = 1000;
 				ORGANIZATIONNAME = "Alex de Mulder";
 				TargetAttributes = {
 					FA3C18781CBBDA6B00A11CF7 = {
@@ -501,7 +499,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FA5882D11E38C0F100913AE6 /* Info.plist in Resources */,
 				FAE862621CF4B3830027539D /* Cartfile in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -510,7 +507,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FA5882E61E38C2EC00913AE6 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -613,14 +609,22 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -647,6 +651,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = BluenetLib;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -664,14 +669,22 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -691,6 +704,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = BluenetLib;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				TARGETED_DEVICE_FAMILY = "1,2";

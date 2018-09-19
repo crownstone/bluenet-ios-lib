@@ -9,7 +9,7 @@
 import Foundation
 import SwiftyJSON
 
-open class NearestItem {
+public class NearestItem {
     var name      : String = ""
     var handle    : String = ""
     var rssi      : Int    = 0
@@ -38,7 +38,7 @@ open class NearestItem {
         self.init(name: nearInfo.name, handle: nearInfo.handle, rssi: nearInfo.rssi, setupMode: setupMode, dfuMode: dfuMode, verified: verified)
     }
     
-    open func getJSON() -> JSON {
+    public func getJSON() -> JSON {
         var dataDict = [String : Any]()
         dataDict["name"]      = self.name
         dataDict["handle"]    = self.handle
@@ -51,11 +51,11 @@ open class NearestItem {
         return dataJSON
     }
     
-    open func stringify() -> String {
+    public func stringify() -> String {
         return JSONUtils.stringify(self.getJSON())
     }
     
-    open func getDictionary() -> NSDictionary {
+    public func getDictionary() -> NSDictionary {
         let returnDict : [String: Any] = [
             "name"      : self.name,
             "handle"    : self.handle,

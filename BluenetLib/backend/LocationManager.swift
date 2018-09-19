@@ -11,7 +11,7 @@ import CoreLocation
 import SwiftyJSON
 import UIKit
 
-open class LocationManager : NSObject, CLLocationManagerDelegate {
+public class LocationManager : NSObject, CLLocationManagerDelegate {
     var manager : CLLocationManager?
     
     var eventBus : EventBus!
@@ -42,7 +42,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     /**
      * Enable/disable background ranging
      */
-    open func setBackgroundScanning(newBackgroundState: Bool) {
+    public func setBackgroundScanning(newBackgroundState: Bool) {
         if (self.backgroundRangingEnabled == newBackgroundState) {
             return
         }
@@ -54,7 +54,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     /**
      * Make sure you hook this up to your AppDelegate method for applicationWillEnterForeground. It will re-enable ranging if the backgroundRangingEnabled is not allowed.
      */
-    open func applicationWillEnterForeground() {
+    public func applicationWillEnterForeground() {
         self.appIsInBackground = false
         if (self.backgroundRangingEnabled == false) {
             LOG.info("BLUENET_LIB_NAV: applicationDidEnterBackground. Will continue pauseRangingRegions.")
@@ -65,7 +65,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     /**
      * Make sure you hook this up to your AppDelegate method for applicationDidEnterBackground. It will disable ranging if the backgroundRangingEnabled is not allowed.
      */
-    open func applicationDidEnterBackground() {
+    public func applicationDidEnterBackground() {
         appIsInBackground = true
         if (self.backgroundRangingEnabled == false) {
             LOG.info("BLUENET_LIB_NAV: applicationDidEnterBackground. Will now pauseRangingRegions.")
@@ -76,7 +76,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     /**
      * Request the GPS coordinates within 3KM radius (least accurate)
      */
-    open func requestLocation() -> CLLocationCoordinate2D {
+    public func requestLocation() -> CLLocationCoordinate2D {
         // ask for permission if the manager does not exist and create the manager
         if (self.coordinatesSet) {
             return coordinates
@@ -90,7 +90,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     /**
      * Request Permissions to use the background location. A manager will be instantiated if required and the didChangeAuthorization delegate method will be called.
      */
-    open func requestLocationPermission() {
+    public func requestLocationPermission() {
         if (self.manager == nil) {
             // initializing a new manager will already invoke the didChangeAuthorization delegate method.
             self._setLocationManager()
@@ -108,7 +108,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         }
     }
     
-    open func getTrackingState() -> [String:Bool] {
+    public func getTrackingState() -> [String:Bool] {
         return [
             "isMonitoring": self.monitoringState,
             "isRanging":    self.rangingState
@@ -120,7 +120,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
      * A manager will be initialized if required. Will only start monitoring if the manager is already started. 
      * If it is not, we will add this beacon to the list of regions to monitor. Once the manager is started, the list will be monitored.
      */
-    open func trackBeacon(_ beacon: iBeaconContainer) {
+    public func trackBeacon(_ beacon: iBeaconContainer) {
         LOG.info("BLUENET_LIB_NAV: Requesting tracking for \(beacon.UUID)")
         // ask for permission if the manager does not exist and create the manager
         if (self.manager == nil) { self.requestLocationPermission() }
@@ -140,7 +140,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     /**
      * Request to invoke the didDetermineState delegate method and fire the events again.
      */
-    open func refreshRegionState() {
+    public func refreshRegionState() {
         if (self.manager != nil) {
             for region in self.manager!.monitoredRegions {
                 self.manager!.requestState(for: region)
@@ -154,7 +154,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     /**
      * Stop monitoring and ranging all regions that are currently being tracked by the manager. Not neccesarily the ones we know if in our class.
      */
-    open func stopTrackingAllRegions() {
+    public func stopTrackingAllRegions() {
         if (self.manager != nil) {
             // stop monitoring all previous regions
             for region in self.manager!.monitoredRegions {
@@ -175,7 +175,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     /**
      * Stop monitoring and ranging all regions we know of in our class (ie. the ones we added)
      */
-    open func clearTrackedBeacons() {
+    public func clearTrackedBeacons() {
         self.pauseTrackingRegions()
         self.trackingBeacons.removeAll()
     }
@@ -183,7 +183,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     /**
      * Stop monitoring and ranging a specific ibeacon region.
      */
-    open func stopTrackingIBeacon(_ uuid: String) {
+    public func stopTrackingIBeacon(_ uuid: String) {
         if (self.manager != nil) {
             // stop monitoring this beacon
             var targetIndex : Int? = nil;
@@ -219,7 +219,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     /**
      * Will stop ranging beacons
      */
-    open func pauseRangingRegions() {
+    public func pauseRangingRegions() {
         // only do something if beacons are being ranged
         if (self.manager != nil && self.rangingState == true) {
             // stop ranging all becons
@@ -230,7 +230,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         }
     }
     
-    open func isMonitoringRegions() -> Bool {
+    public func isMonitoringRegions() -> Bool {
         return self.monitoringState
     }
     
@@ -238,7 +238,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     /**
      * Start monitoring all regions we have in our trackingBeacons list.
      */
-    open func startMonitoringRegions() {
+    public func startMonitoringRegions() {
         LOG.info("BLUENET_LIB_NAV: startMonitoringRegions")
         // we need a CL location manager for this.
         if (self.manager != nil) {
@@ -259,7 +259,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     /**
      * Pause monitoring and ranging (= tracking) all regions. This is different from clear since we keep them in the trackingBeacons list. With this list, we can resume tracking later on.
      */
-    open func pauseTrackingRegions() {
+    public func pauseTrackingRegions() {
         // we need a CL location manager for this.
         if (self.manager != nil) {
             // stop monitoring all becons
@@ -355,7 +355,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     
     // MARK: delegate methods
     
-    open func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+    public func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         LOG.info("BLUENET_LIB_NAV: Changed Authorization \(status)")
         switch (CLLocationManager.authorizationStatus()) {
             case .notDetermined:
@@ -388,12 +388,12 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     
-    open func locationManager(_ manager : CLLocationManager, didStartMonitoringFor region : CLRegion) {
+    public func locationManager(_ manager : CLLocationManager, didStartMonitoringFor region : CLRegion) {
         LOG.info("BLUENET_LIB_NAV: did start MONITORING \(region) \n");
     }
         
     
-    open func locationManager(_ manager : CLLocationManager, didRangeBeacons beacons : [CLBeacon], in region: CLBeaconRegion) {
+    public func locationManager(_ manager : CLLocationManager, didRangeBeacons beacons : [CLBeacon], in region: CLBeaconRegion) {
         var iBeacons = [iBeaconPacket]()
         
         for beacon in beacons {
@@ -414,19 +414,19 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
         }
     }
     
-    open func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
+    public func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
         LOG.info("BLUENET_LIB_NAV: did enter region \(region) \n");
         self._startRanging(region);
     }
     
     
-    open func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
+    public func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
         LOG.info("BLUENET_LIB_NAV: did exit region \(region) \n");
         self._stopRanging(region);
     }
     
     // this is a fallback mechanism because the enter and exit do not always fire.
-    open func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
+    public func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
         LOG.info("BLUENET_LIB_NAV: State change \(state.rawValue) , \(region)")
         if (state.rawValue == 1) {       // 1 == inside
             LOG.info("BLUENET_LIB_NAV: State change to inside")
@@ -450,7 +450,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
      *  Discussion:
      *    Invoked when an error has occurred ranging beacons in a region. Error types are defined in "CLError.h".
      */
-    open func locationManager(_ manager: CLLocationManager, rangingBeaconsDidFailFor region: CLBeaconRegion, withError error: Error) {
+    public func locationManager(_ manager: CLLocationManager, rangingBeaconsDidFailFor region: CLBeaconRegion, withError error: Error) {
          LOG.error("BLUENET_LIB_NAV: did rangingBeaconsDidFailForRegion \(region)  withError: \(error) \n");
     }
     
@@ -463,7 +463,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
      *    Invoked when an error has occurred. Error types are defined in "CLError.h".
      */
   
-    open func locationManager(_ manager: CLLocationManager, didFailWithError error: Error){
+    public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error){
         LOG.error("BLUENET_LIB_NAV: did didFailWithError withError: \(error) \n");
     }
     
@@ -473,7 +473,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
      *  Discussion:
      *    Invoked when a region monitoring error has occurred. Error types are defined in "CLError.h".
      */
-    open func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error){
+    public func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error){
         LOG.error("BLUENET_LIB_NAV: did monitoringDidFailForRegion \(String(describing: region))  withError: \(error)\n");
     }
     
@@ -574,7 +574,7 @@ open class LocationManager : NSObject, CLLocationManagerDelegate {
                 }
             }
             
-            // abort. We're already ranging this region.
+            // abort. We're not ranging this region anymore
             if (abort) {
                 return
             }

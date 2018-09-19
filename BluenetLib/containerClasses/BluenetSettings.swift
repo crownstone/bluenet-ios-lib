@@ -9,18 +9,18 @@
 import Foundation
 
 
-open class BluenetSettings {
-    open var encryptionEnabled = false
-    open var temporaryDisable = false
-    open var adminKey  : [UInt8]? = nil
-    open var memberKey : [UInt8]? = nil
-    open var guestKey  : [UInt8]? = nil
-    open var setupKey  : [UInt8]? = nil
-    open var initializedKeys = false
-    open var sessionNonce : [UInt8]? = nil
-    open var referenceId : String = "unknown"
+public class BluenetSettings {
+    public var encryptionEnabled = false
+    public var temporaryDisable = false
+    public var adminKey  : [UInt8]? = nil
+    public var memberKey : [UInt8]? = nil
+    public var guestKey  : [UInt8]? = nil
+    public var setupKey  : [UInt8]? = nil
+    public var initializedKeys = false
+    public var sessionNonce : [UInt8]? = nil
+    public var referenceId : String = "unknown"
     
-    open var userLevel : UserLevel = .unknown
+    public var userLevel : UserLevel = .unknown
     
     init() {}
     
@@ -68,37 +68,37 @@ open class BluenetSettings {
         }
     }
     
-    open func invalidateSessionNonce() {
+    public func invalidateSessionNonce() {
         self.sessionNonce = nil
     }
     
-    open func setSessionNonce(_ sessionNonce: [UInt8]) {
+    public func setSessionNonce(_ sessionNonce: [UInt8]) {
         self.sessionNonce = sessionNonce
     }
     
-    open func loadSetupKey(_ setupKey: [UInt8]) {
+    public func loadSetupKey(_ setupKey: [UInt8]) {
         self.setupKey = setupKey
         userLevel = .setup
     }
     
-    open func exitSetup() {
+    public func exitSetup() {
         self.setupKey = nil
         detemineUserLevel()
     }
     
-    open func disableEncryptionTemporarily() {
+    public func disableEncryptionTemporarily() {
         self.temporaryDisable = true
     }
     
-    open func restoreEncryption() {
+    public func restoreEncryption() {
         self.temporaryDisable = false
     }
     
-    open func isTemporarilyDisabled() -> Bool {
+    public func isTemporarilyDisabled() -> Bool {
         return temporaryDisable
     }
     
-    open func isEncryptionEnabled() -> Bool {
+    public func isEncryptionEnabled() -> Bool {
         if (temporaryDisable == true) {
             return false
         }

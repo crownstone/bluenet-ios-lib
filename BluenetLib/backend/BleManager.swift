@@ -120,8 +120,8 @@ struct timeoutDurations {
 
 
 
-open class BleManager: NSObject, CBPeripheralDelegate {
-    open var centralManager : CBCentralManager!
+public class BleManager: NSObject, CBPeripheralDelegate {
+    public var centralManager : CBCentralManager!
     var connectedPeripheral: CBPeripheral?
     var connectingPeripheral: CBPeripheral?
     
@@ -129,7 +129,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
     var pendingPromise : promiseContainer!
     var eventBus : EventBus!
     var notificationEventBus : EventBus!
-    open var settings : BluenetSettings!
+    public var settings : BluenetSettings!
     
     var decoupledDelegate = false
     
@@ -165,15 +165,15 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         self.pendingPromise = promiseContainer()
     }
     
-    open func applicationWillEnterForeground() {
+    public func applicationWillEnterForeground() {
         
     }
     
-    open func applicationDidEnterBackground() {
+    public func applicationDidEnterBackground() {
         
     }
     
-    open func setBackgroundScanning(newBackgroundState: Bool) {
+    public func setBackgroundScanning(newBackgroundState: Bool) {
         if (self.backgroundEnabled == newBackgroundState) {
             return
         }
@@ -224,7 +224,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
      * This can be disabled by passing the optional doNotChangeScanning parameter.
      *
     **/
-    open func enableBatterySaving(doNotChangeScanning: Bool = false) {
+    public func enableBatterySaving(doNotChangeScanning: Bool = false) {
         LOG.info("BLUENET_LIB: Enabled Battery Saving. doNotChangeScanning: \(doNotChangeScanning)")
         self.batterySaving = true
         
@@ -242,7 +242,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
     /**
      * Similar to enable, this will revert the changes done by enable.
      **/
-    open func disableBatterySaving(doNotChangeScanning : Bool = false) {
+    public func disableBatterySaving(doNotChangeScanning : Bool = false) {
         LOG.info("BLUENET_LIB: Disabled Battery Saving. doNotChangeScanning: \(doNotChangeScanning)")
         self.batterySaving = false
         if (doNotChangeScanning == false) {
@@ -256,16 +256,16 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         }
     }
     
-    open func setSettings(_ settings: BluenetSettings) {
+    public func setSettings(_ settings: BluenetSettings) {
         self.settings = settings
     }
     
-    open func decoupleFromDelegate() {
+    public func decoupleFromDelegate() {
         LOG.info("Decoupling from Delegate")
         self.decoupledDelegate = true
     }
     
-    open func reassignDelegate() {
+    public func reassignDelegate() {
         LOG.info("Reassigning Delegate")
         self.decoupledDelegate = false
         if (self.backgroundEnabled) {
@@ -277,7 +277,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         self.restoreScanning()
     }
    
-    open func emitBleState() {
+    public func emitBleState() {
         if (self.backgroundEnabled) {
             self.CBDelegateBackground.centralManagerDidUpdateState(self.centralManager)
         }
@@ -291,7 +291,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
     /**
      * This method will fulfill when the bleManager is ready. It polls itself every 0.25 seconds. Never rejects.
      */
-    open func isReady() -> Promise<Void> {
+    public func isReady() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             if (self.BleState != .poweredOn) {
                 delay(0.50, { _ = self.isReady().then{_ -> Void in fulfill(())} })
@@ -302,16 +302,16 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         }
     }
     
-    open func waitToReconnect() -> Promise<Void> {
+    public func waitToReconnect() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in delay(timeoutDurations.waitForReconnect, fulfill) }
     }
     
-    open func waitForRestart() -> Promise<Void> {
+    public func waitForRestart() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in delay(timeoutDurations.waitForRestart, fulfill) }
     }
     
     // this delay is set up for calls that need to write to storage.
-    open func waitToWrite(_ iteration: UInt8 = 0) -> Promise<Void> {
+    public func waitToWrite(_ iteration: UInt8 = 0) -> Promise<Void> {
         if (iteration > 0) {
             LOG.info("BLUENET_LIB: Could not verify immediatly, waiting longer between steps...")
             return Promise<Void> { fulfill, reject in delay(2 * timeoutDurations.waitForWrite, fulfill) }
@@ -321,7 +321,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
     }
 
     
-    open func getPeripheral(_ uuid: String) -> CBPeripheral? {
+    public func getPeripheral(_ uuid: String) -> CBPeripheral? {
         let nsUuid = UUID(uuidString: uuid)
         if (nsUuid == nil) {
             return nil
@@ -340,7 +340,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
      * Connect to a ble device. The uuid is the Apple UUID which differs between phones for a single device
      *
      */
-    open func connect(_ uuid: String) -> Promise<Void> {
+    public func connect(_ uuid: String) -> Promise<Void> {
         LOG.info("BLUENET_LIB: starting to connect")
         return Promise<Void> { fulfill, reject in
             if (self.BleState != .poweredOn) {
@@ -445,7 +445,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
     }
     
     
-    open func waitForPeripheralToDisconnect(timeout : Double) -> Promise<Void> {
+    public func waitForPeripheralToDisconnect(timeout : Double) -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             // only disconnect if we are actually connected!
             if (self.connectedPeripheral != nil) {
@@ -477,7 +477,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
     /**
      *  Disconnect from the connected BLE device
      */
-    open func errorDisconnect() -> Promise<Void> {
+    public func errorDisconnect() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             // cancel any pending connections
             if (self.connectingPeripheral != nil) {
@@ -496,7 +496,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
     /**
      *  Disconnect from the connected BLE device
      */
-    open func disconnect() -> Promise<Void> {
+    public func disconnect() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             // cancel any pending connections
             if (self.connectingPeripheral != nil) {
@@ -554,7 +554,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
      *  Get the services from a connected device
      *
      */
-    open func getServicesFromDevice() -> Promise<[CBService]> {
+    public func getServicesFromDevice() -> Promise<[CBService]> {
         return Promise<[CBService]> { fulfill, reject in
             if (connectedPeripheral != nil) {
                 if let services = connectedPeripheral!.services {
@@ -583,7 +583,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         return nil;
     }
     
-    open func getCharacteristicsFromDevice(_ serviceId: String) -> Promise<[CBCharacteristic]> {
+    public func getCharacteristicsFromDevice(_ serviceId: String) -> Promise<[CBCharacteristic]> {
         return Promise<[CBCharacteristic]> { fulfill, reject in
             // if we are not connected, exit
             if (connectedPeripheral != nil) {
@@ -674,7 +674,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         }
     }
     
-    open func readCharacteristicWithoutEncryption(_ service: String, characteristic: String) -> Promise<[UInt8]> {
+    public func readCharacteristicWithoutEncryption(_ service: String, characteristic: String) -> Promise<[UInt8]> {
         return Promise<[UInt8]> { fulfill, reject in
             self.settings.disableEncryptionTemporarily()
             self.readCharacteristic(service, characteristicId: characteristic)
@@ -689,7 +689,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         }
     }
     
-    open func readCharacteristic(_ serviceId: String, characteristicId: String) -> Promise<[UInt8]> {
+    public func readCharacteristic(_ serviceId: String, characteristicId: String) -> Promise<[UInt8]> {
         return Promise<[UInt8]> { fulfill, reject in
             self.getChacteristic(serviceId, characteristicId)
                 .then{characteristic -> Void in
@@ -708,7 +708,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         }
     }
     
-    open func writeToCharacteristic(_ serviceId: String, characteristicId: String, data: Data, type: CBCharacteristicWriteType) -> Promise<Void> {
+    public func writeToCharacteristic(_ serviceId: String, characteristicId: String, data: Data, type: CBCharacteristicWriteType) -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             self.getChacteristic(serviceId, characteristicId)
                 .then{characteristic -> Void in
@@ -750,7 +750,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         }
     }
     
-    open func enableNotifications(_ serviceId: String, characteristicId: String, callback: @escaping eventCallback) -> Promise<voidPromiseCallback> {
+    public func enableNotifications(_ serviceId: String, characteristicId: String, callback: @escaping eventCallback) -> Promise<voidPromiseCallback> {
         var unsubscribeCallback : voidCallback? = nil
         return Promise<voidPromiseCallback> { fulfill, reject in
             // if there is already a listener on this topic, we assume notifications are already enabled. We just add another listener
@@ -838,7 +838,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
      * This will just subscribe for a single notification and clean up after itself. 
      * The merged, finalized reply to the write command will be in the fulfill of this promise.
      */
-    open func setupSingleNotification(_ serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback) -> Promise<[UInt8]> {
+    public func setupSingleNotification(_ serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback) -> Promise<[UInt8]> {
         return Promise<[UInt8]> { fulfill, reject in
             var unsubscribe : voidPromiseCallback? = nil
             var collectedData = [UInt8]();
@@ -883,7 +883,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
      * This will just subscribe for a single notification and clean up after itself.
      * The merged, finalized reply to the write command will be in the fulfill of this promise.
      */
-    open func setupNotificationStream(_ serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback, resultHandler: @escaping processCallback, timeout: Double = 5, successIfWriteSuccessful: Bool = false) -> Promise<Void> {
+    public func setupNotificationStream(_ serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback, resultHandler: @escaping processCallback, timeout: Double = 5, successIfWriteSuccessful: Bool = false) -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             var unsubscribe : voidPromiseCallback? = nil
             var streamFinished = false
@@ -982,7 +982,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
     
     // MARK: scanning
     
-    open func startScanning() {
+    public func startScanning() {
         self.disableBatterySaving(doNotChangeScanning: true)
         self.scanning = true
         self.scanUniqueOnly = false
@@ -998,7 +998,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         centralManager.scanForPeripherals(withServices: nil, options:[CBCentralManagerScanOptionAllowDuplicatesKey: true])
     }
     
-    open func startScanningForService(_ serviceUUID: String, uniqueOnly: Bool = false) {
+    public func startScanningForService(_ serviceUUID: String, uniqueOnly: Bool = false) {
          self.disableBatterySaving(doNotChangeScanning: true)
         self.scanning = true
         self.scanUniqueOnly = uniqueOnly
@@ -1015,7 +1015,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         centralManager.scanForPeripherals(withServices: [service], options:[CBCentralManagerScanOptionAllowDuplicatesKey: !uniqueOnly])
     }
     
-    open func startScanningForServices(_ serviceUUIDs: [String], uniqueOnly: Bool = false) {
+    public func startScanningForServices(_ serviceUUIDs: [String], uniqueOnly: Bool = false) {
         self.disableBatterySaving(doNotChangeScanning: true)
         self.scanning = true
         self.scanUniqueOnly = uniqueOnly
@@ -1036,13 +1036,13 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         centralManager.scanForPeripherals(withServices: services, options:[CBCentralManagerScanOptionAllowDuplicatesKey: !uniqueOnly])
     }
     
-    open func pauseScanning() {
+    public func pauseScanning() {
         LOG.info("BLUENET_LIB: pausing scan")
         centralManager.stopScan()
     }
     
 
-    open func stopScanning() {
+    public func stopScanning() {
         self.scanning = false
         self.scanUniqueOnly = false
         self.scanningForServices = nil
@@ -1057,7 +1057,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         centralManager.stopScan()
     }
     
-    open func restoreScanning() {
+    public func restoreScanning() {
         // only restore scanning if we have a valid restoration state.
         if (self.scanningStateStored == false) {
             LOG.info("BLUENET_LIB: Can't restore scanning: no state saved")
@@ -1077,7 +1077,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
     
     // MARK: peripheral delegate
     
-    open func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+    public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         if (pendingPromise.type == .GET_SERVICES) {
             // we will allow silent errors here if we do not explicitly ask for services
             if (error != nil) {
@@ -1094,7 +1094,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         }
     }
     
-    open func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+    public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         if (pendingPromise.type == .GET_CHARACTERISTICS) {
             // we will allow silent errors here if we do not explicitly ask for characteristics
             if (error != nil) {
@@ -1114,7 +1114,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
     /**
     * This is the reaction to read characteristic AND notifications!
     */
-    open func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+    public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         // handle the case for failed bonding
         if (error != nil) {
             if (pendingPromise.type == .READ_CHARACTERISTIC) {
@@ -1164,7 +1164,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
     
     
     
-    open func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
+    public func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
         LOG.info("BLUENET_LIB: written")
         if (pendingPromise.type == .WRITE_CHARACTERISTIC) {
             if (error != nil) {
@@ -1176,7 +1176,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         }
     }
     
-    open func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
+    public func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
         if (pendingPromise.type == .ENABLE_NOTIFICATIONS || pendingPromise.type == .DISABLE_NOTIFICATIONS) {
             if (error != nil) {
                 pendingPromise.reject(error!)
@@ -1187,7 +1187,7 @@ open class BleManager: NSObject, CBPeripheralDelegate {
         }
     }
     
-    open func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
+    public func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
         peripheral.discoverServices(nil)
     }
     

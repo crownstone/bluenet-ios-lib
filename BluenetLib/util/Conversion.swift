@@ -8,17 +8,17 @@
 
 import Foundation
 
-open class Conversion {
+public class Conversion {
     
     // Convert a number into an array of 2 bytes.
-    open static func uint16_to_uint8_array(_ value: UInt16) -> [UInt8] {
+    public static func uint16_to_uint8_array(_ value: UInt16) -> [UInt8] {
         return [
             UInt8((value >> 0 & 0xFF)),
             UInt8((value >> 8 & 0xFF))
         ]
     }
     
-    open static func uint16_array_to_uint8_array(_ valueArray: [UInt16]) -> [UInt8] {
+    public static func uint16_array_to_uint8_array(_ valueArray: [UInt16]) -> [UInt8] {
         var returnArray = [UInt8]();
         for uint16 in valueArray {
             returnArray += Conversion.uint16_to_uint8_array(uint16)
@@ -28,7 +28,7 @@ open class Conversion {
     
     
     // Convert a number into an array of 4 bytes.
-    open static func uint32_to_uint8_array(_ value: UInt32) -> [UInt8] {
+    public static func uint32_to_uint8_array(_ value: UInt32) -> [UInt8] {
         return [
             UInt8((value >> 0 & 0xFF)),
             UInt8((value >> 8 & 0xFF)),
@@ -37,7 +37,7 @@ open class Conversion {
         ]
     }
     
-    open static func string_to_uint8_array(_ string: String) -> [UInt8] {
+    public static func string_to_uint8_array(_ string: String) -> [UInt8] {
         var arr = [UInt8]();
         for c in string {
             let scalars = String(c).unicodeScalars
@@ -47,7 +47,7 @@ open class Conversion {
     }
 
     
-    open static func uint8_array_to_string(_ data: [UInt8]) -> String {
+    public static func uint8_array_to_string(_ data: [UInt8]) -> String {
         var dataCopy = [UInt8]()
         for byte in data {
             dataCopy.append(byte)
@@ -56,7 +56,7 @@ open class Conversion {
         return String(cString: dataCopy)
     }
     
-    open static func uint8_array_to_hex_string(_ data: [UInt8]) -> String {
+    public static func uint8_array_to_hex_string(_ data: [UInt8]) -> String {
         var stringResult = ""
         for byte in data {
             stringResult += Conversion.uint8_to_hex_string(byte)
@@ -66,7 +66,7 @@ open class Conversion {
     
     
     
-    open static func uint8_to_hex_string(_ byte: UInt8) -> String {
+    public static func uint8_to_hex_string(_ byte: UInt8) -> String {
         if (byte < 0xf) {
             return "0" + String(format:"%1X", byte)
         }
@@ -76,7 +76,7 @@ open class Conversion {
     }
 
     
-    open static func hex_string_to_uint8_array(_ input: String) -> [UInt8] {
+    public static func hex_string_to_uint8_array(_ input: String) -> [UInt8] {
         var hexNumber = ""
         var result = [UInt8]()
         for letter in input {
@@ -89,7 +89,7 @@ open class Conversion {
         return result
     }
     
-    open static func ascii_or_hex_string_to_16_byte_array(_ input: String) -> [UInt8] {
+    public static func ascii_or_hex_string_to_16_byte_array(_ input: String) -> [UInt8] {
         if (input.count == 16) {
             return Conversion.string_to_uint8_array(input);
         }
@@ -98,7 +98,7 @@ open class Conversion {
         }
     }
     
-    open static func uint8_array_to_macAddress(_ input:[UInt8]) -> String {
+    public static func uint8_array_to_macAddress(_ input:[UInt8]) -> String {
         var string = ""
         for i in [Int](0...input.count-1) {
             // due to little endian, we read it out in the reverse order.
@@ -112,11 +112,11 @@ open class Conversion {
         return string
     }
     
-    open static func reverse(_ input: [UInt8]) -> [UInt8] {
+    public static func reverse(_ input: [UInt8]) -> [UInt8] {
         return input.reversed() as [UInt8]
     }
     
-    open static func ibeaconUUIDString_to_uint8_array(_ input:String) -> [UInt8] {
+    public static func ibeaconUUIDString_to_uint8_array(_ input:String) -> [UInt8] {
         let check = UUID(uuidString: input)
         if (check != nil) {
             var stripped = input.replacingOccurrences(of: "-", with: "")
@@ -126,16 +126,16 @@ open class Conversion {
         return []
     }
     
-    open static func ibeaconUUIDString_to_reversed_uint8_array(_ input:String) -> [UInt8] {
+    public static func ibeaconUUIDString_to_reversed_uint8_array(_ input:String) -> [UInt8] {
         let byteArray = Conversion.ibeaconUUIDString_to_uint8_array(input)
         return Conversion.reverse(byteArray)
     }
     
-    open static func uint8_array_to_uint16(_ arr8: [UInt8]) -> UInt16 {
+    public static func uint8_array_to_uint16(_ arr8: [UInt8]) -> UInt16 {
         return (UInt16(arr8[1]) << 8) + UInt16(arr8[0])
     }
     
-    open static func uint8_array_to_uint32(_ arr8: [UInt8]) -> UInt32 {
+    public static func uint8_array_to_uint32(_ arr8: [UInt8]) -> UInt32 {
         let p1 = UInt32(arr8[3]) << 24
         let p2 = UInt32(arr8[2]) << 16
         let p3 = UInt32(arr8[1]) << 8
@@ -143,12 +143,12 @@ open class Conversion {
         return p1 + p2 + p3 + p4
     }
     
-    open static func uint32_to_int32(_ val: UInt32) -> Int32 {
+    public static func uint32_to_int32(_ val: UInt32) -> Int32 {
         let ns = NSNumber(value: val as UInt32)
         return ns.int32Value
     }
     
-    open static func uint8_to_bit_array(_ val: UInt8) -> [Bool] {
+    public static func uint8_to_bit_array(_ val: UInt8) -> [Bool] {
         var result = [Bool](repeating: false, count: 8)
         let one : UInt8 = 1
         result[0] = (val & one) != 0
@@ -162,7 +162,7 @@ open class Conversion {
         return result
     }
     
-    open static func bit_array_to_uint8(_ bitArray: [Bool]) -> UInt8 {
+    public static func bit_array_to_uint8(_ bitArray: [Bool]) -> UInt8 {
         var result : UInt8 = 0
         let one : UInt8 = 1
         
@@ -178,7 +178,7 @@ open class Conversion {
         return result
     }
     
-    open static func uint32_to_bit_array(_ val: UInt32) -> [Bool] {
+    public static func uint32_to_bit_array(_ val: UInt32) -> [Bool] {
         var result = [Bool](repeating: false, count: 32)
         let one : UInt32 = 1
         
@@ -189,7 +189,7 @@ open class Conversion {
         return result
     }
     
-    open static func bit_array_to_uint32(_ bitArray: [Bool]) -> UInt32 {
+    public static func bit_array_to_uint32(_ bitArray: [Bool]) -> UInt32 {
         var result : UInt32 = 0
         let one : UInt32 = 1
         
@@ -202,7 +202,7 @@ open class Conversion {
     
     
     
-    open static func flip_bit_array(_ bitArray: [Bool]) -> [Bool] {
+    public static func flip_bit_array(_ bitArray: [Bool]) -> [Bool] {
         var result = [Bool](repeating: false, count: bitArray.count)
         
         for i in 0...(bitArray.count - 1) {
@@ -212,30 +212,30 @@ open class Conversion {
         return result
     }
     
-    open static func uint8_to_int8(_ val: UInt8) -> Int8 {
+    public static func uint8_to_int8(_ val: UInt8) -> Int8 {
         
         let ns = NSNumber(value: val as UInt8)
         return ns.int8Value
     }
     
-    open static func int8_to_uint8(_ val: Int8) -> UInt8 {
+    public static func int8_to_uint8(_ val: Int8) -> UInt8 {
         let ns = NSNumber(value: val as Int8)
         return ns.uint8Value
     }
     
-    open static func uint16_to_int16(_ val: UInt16) -> Int16 {
+    public static func uint16_to_int16(_ val: UInt16) -> Int16 {
         let ns = NSNumber(value: val as UInt16)
         return ns.int16Value
     }
     
-    open static func uint8_array_to_float(_ arr: [UInt8]) -> Float {
+    public static func uint8_array_to_float(_ arr: [UInt8]) -> Float {
         let data = Data(arr)
         let floatVal = data.withUnsafeBytes { $0.pointee } as Float
         return floatVal
     }
     
     
-    open static func float_to_uint8_array(_ val: Float) -> [UInt8] {
+    public static func float_to_uint8_array(_ val: Float) -> [UInt8] {
         var float1 : Float = val
         let data = Data(buffer: UnsafeBufferPointer(start: &float1, count: 1))
         return data.bytes

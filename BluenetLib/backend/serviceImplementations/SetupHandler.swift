@@ -10,7 +10,7 @@ import Foundation
 import PromiseKit
 import CoreBluetooth
 
-open class SetupHandler {
+public class SetupHandler {
     let bleManager : BleManager!
     var settings : BluenetSettings!
     let eventBus : EventBus!
@@ -57,7 +57,7 @@ open class SetupHandler {
     /**
      * This will handle the complete setup. We expect bonding has already been done by now.
      */
-    open func setup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
+    public func setup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
         // if the crownstone has the new setupControl characteristic, we can do the quick setup.
         return Promise<Void> { fulfill, reject -> Void in
             self.bleManager.getChacteristic(CSServices.SetupService, SetupCharacteristics.SetupControl)
@@ -90,7 +90,7 @@ open class SetupHandler {
     /**
      * This will handle the complete setup. We expect bonding has already been done by now.
      */
-    open func classicSetup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
+    public func classicSetup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
         self.step = 0
         self.verificationFailed = false
         return Promise<Void> { fulfill, reject in
@@ -126,7 +126,7 @@ open class SetupHandler {
     /**
      * This will handle the complete setup. We expect bonding has already been done by now.
      */
-    open func fastSetup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
+    public func fastSetup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
         self.step = 0
         self.verificationFailed = false
         return Promise<Void> { fulfill, reject in
@@ -216,18 +216,18 @@ open class SetupHandler {
             .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 12); return self.bleManager.disconnect()}
     }
     
-    open func getSessionKey() -> Promise<[UInt8]> {
+    public func getSessionKey() -> Promise<[UInt8]> {
         LOG.info("getSessionKey")
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.SetupService, characteristic: SetupCharacteristics.SessionKey)
     }
         
-    open func getSessionNonce() -> Promise<[UInt8]> {
+    public func getSessionNonce() -> Promise<[UInt8]> {
         LOG.info("getSessionNonce")
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.SetupService, characteristic: SetupCharacteristics.SessionNonce)
     }
     
     
-    open func putInDFU() -> Promise<Void> {
+    public func putInDFU() -> Promise<Void> {
         LOG.info("put in DFU during setup.")
         let packet : [UInt8] = [66]
         self.bleManager.settings.disableEncryptionTemporarily()
@@ -252,7 +252,7 @@ open class SetupHandler {
     /**
      * Get the MAC address as a F3:D4:A1:CC:FF:32 String
      */
-    open func getMACAddress() -> Promise<String> {
+    public func getMACAddress() -> Promise<String> {
         return Promise<String> { fulfill, reject in
             self.bleManager.readCharacteristicWithoutEncryption(CSServices.SetupService, characteristic: SetupCharacteristics.MacAddress)
                 .then{data -> Void in LOG.info("\(data)"); fulfill(Conversion.uint8_array_to_macAddress(data))}
@@ -264,57 +264,57 @@ open class SetupHandler {
     /**
      * This will handle the factory reset during setup mode.
      */
-    open func factoryReset() -> Promise<Void> {
+    public func factoryReset() -> Promise<Void> {
         return self.handleSetupPhaseEncryption()
             .then{(_) -> Promise<Void> in return self._factoryReset() }
             .then{(_) -> Void in _ = self.bleManager.disconnect() }
     }
 
     
-    open func _factoryReset() -> Promise<Void> {
+    public func _factoryReset() -> Promise<Void> {
         LOG.info("factoryReset in setup")
         let packet = ControlPacket(type: .factory_RESET).getPacket()
         return self._writeSetupControlPacket(packet)
     }
     
-    open func setHighTX() -> Promise<Void> {
+    public func setHighTX() -> Promise<Void> {
         LOG.info("setHighTX")
         let packet = ControlPacket(type: .increase_TX).getPacket()
         return self._writeSetupControlPacket(packet)
     }
-    open func writeCrownstoneId(_ id: UInt16) -> Promise<Void> {
+    public func writeCrownstoneId(_ id: UInt16) -> Promise<Void> {
         LOG.info("writeCrownstoneId")
         return self._writeAndVerify(.crownstone_IDENTIFIER, payload: Conversion.uint16_to_uint8_array(id))
     }
-    open func writeAdminKey(_ key: String) -> Promise<Void> {
+    public func writeAdminKey(_ key: String) -> Promise<Void> {
         LOG.info("writeAdminKey")
         return self._writeAndVerify(.admin_ENCRYPTION_KEY, payload: Conversion.ascii_or_hex_string_to_16_byte_array(key))
     }
-    open func writeMemberKey(_ key: String) -> Promise<Void> {
+    public func writeMemberKey(_ key: String) -> Promise<Void> {
         LOG.info("writeMemberKey")
         return self._writeAndVerify(.member_ENCRYPTION_KEY, payload: Conversion.ascii_or_hex_string_to_16_byte_array(key))
     }
-    open func writeGuestKey(_ key: String) -> Promise<Void> {
+    public func writeGuestKey(_ key: String) -> Promise<Void> {
         LOG.info("writeGuestKey")
         return self._writeAndVerify(.guest_ENCRYPTION_KEY, payload: Conversion.ascii_or_hex_string_to_16_byte_array(key))
     }
-    open func writeMeshAccessAddress(_ address: String) -> Promise<Void> {
+    public func writeMeshAccessAddress(_ address: String) -> Promise<Void> {
         LOG.info("writeMeshAccessAddress")
         return self._writeAndVerify(.mesh_ACCESS_ADDRESS, payload: Conversion.hex_string_to_uint8_array(address))
     }
-    open func writeIBeaconUUID(_ uuid: String) -> Promise<Void> {
+    public func writeIBeaconUUID(_ uuid: String) -> Promise<Void> {
         LOG.info("writeIBeaconUUID")
         return self._writeAndVerify(.ibeacon_UUID, payload: Conversion.ibeaconUUIDString_to_reversed_uint8_array(uuid))
     }
-    open func writeIBeaconMajor(_ major: UInt16) -> Promise<Void> {
+    public func writeIBeaconMajor(_ major: UInt16) -> Promise<Void> {
         LOG.info("writeIBeaconMajor")
         return self._writeAndVerify(.ibeacon_MAJOR, payload: Conversion.uint16_to_uint8_array(major))
     }
-    open func writeIBeaconMinor(_ minor: UInt16) -> Promise<Void> {
+    public func writeIBeaconMinor(_ minor: UInt16) -> Promise<Void> {
         LOG.info("writeIBeaconMinor")
         return self._writeAndVerify(.ibeacon_MINOR, payload: Conversion.uint16_to_uint8_array(minor))
     }
-    open func finalizeSetup() -> Promise<Void> {
+    public func finalizeSetup() -> Promise<Void> {
         LOG.info("finalizeSetup")
         let packet = ControlPacket(type: .validate_SETUP).getPacket()
         return self._writeSetupControlPacket(packet)

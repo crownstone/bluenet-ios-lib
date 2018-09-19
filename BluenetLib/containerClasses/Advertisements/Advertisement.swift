@@ -14,19 +14,19 @@ import SwiftyJSON
  * Wrapper for all relevant data of the object
  *
  */
-open class Advertisement {
-    open var handle : String
-    open var name : String
-    open var rssi : NSNumber
-    open var referenceId : String // id of the entity that provides the keys
+public class Advertisement {
+    public var handle : String
+    public var name : String
+    public var rssi : NSNumber
+    public var referenceId : String // id of the entity that provides the keys
     
-    open var isCrownstoneFamily  : Bool = false
-    open var isInDFUMode         : Bool = false
+    public var isCrownstoneFamily  : Bool = false
+    public var isInDFUMode         : Bool = false
     
-    open var serviceData = [String: [UInt8]]()
-    open var serviceDataAvailable : Bool
-    open var serviceUUID : String?
-    open var scanResponse : ScanResponsePacket?
+    public var serviceData = [String: [UInt8]]()
+    public var serviceDataAvailable : Bool
+    public var serviceUUID : String?
+    public var scanResponse : ScanResponsePacket?
     
     init(handle: String, name: String?, rssi: NSNumber, serviceData: Any, serviceUUID: Any, referenceId: String, liteParse: Bool = false) {
         self.referenceId = referenceId
@@ -95,18 +95,18 @@ open class Advertisement {
         return JSON([])
     }
 
-    open func getUniqueElement() -> String {
+    public func getUniqueElement() -> String {
         if ((scanResponse) != nil) {
             return scanResponse!.getUniqueElement()
         }
         return ""
     }
     
-    open func getJSON() -> JSON {
+    public func getJSON() -> JSON {
         return JSON(self.getDictionary())
     }
     
-    open func getDictionary() -> NSDictionary {
+    public func getDictionary() -> NSDictionary {
         var returnDict : [String: Any] = [
             "handle" : self.handle,
             "name"   : self.name,
@@ -133,33 +133,33 @@ open class Advertisement {
     }
 
     
-    open func stringify() -> String {
+    public func stringify() -> String {
         return JSONUtils.stringify(self.getJSON())
     }
     
     
-    open func isSetupPackage() -> Bool {
+    public func isSetupPackage() -> Bool {
         if (serviceDataAvailable && self.scanResponse != nil) {
             return self.scanResponse!.isSetupPackage()
         }
         return false
     }
     
-    open func isDFUPackage() -> Bool {
+    public func isDFUPackage() -> Bool {
         return self.isInDFUMode
     }
     
-    open func hasScanResponse() -> Bool {
+    public func hasScanResponse() -> Bool {
         return (serviceDataAvailable && self.scanResponse != nil)
     }
     
-    open func decrypt( _ key: [UInt8] ) {
+    public func decrypt( _ key: [UInt8] ) {
         if (serviceDataAvailable && self.scanResponse != nil) {
             self.scanResponse!.decrypt(key)
         }
     }
     
-    open func fullParse() {
+    public func fullParse() {
         if (serviceDataAvailable && self.scanResponse != nil) {
             self.scanResponse!.parse(liteParse: false)
             self.scanResponse!.dataReadyForUse = true

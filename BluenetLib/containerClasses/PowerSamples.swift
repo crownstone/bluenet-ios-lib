@@ -24,12 +24,12 @@ import SwiftyJSON
  * Wrapper for all relevant data of the object
  *
  */
-open class PowerSamples {
-    open var current = [UInt16]()
-    open var voltage = [UInt16]()
-    open var currentTimes = [UInt32]()
-    open var voltageTimes = [UInt32]()
-    open var valid = false
+public class PowerSamples {
+    public var current = [UInt16]()
+    public var voltage = [UInt16]()
+    public var currentTimes = [UInt32]()
+    public var voltageTimes = [UInt32]()
+    public var valid = false
     
     init(data: [UInt8]) {
         if (self.parse(data)) {

@@ -11,7 +11,7 @@ import CoreLocation
 import SwiftyJSON
 import BluenetShared
 
-open class iBeaconContainer {
+public class iBeaconContainer {
     var UUID : Foundation.UUID;
     var referenceId = ""
     var region : CLBeaconRegion
@@ -38,14 +38,14 @@ open class iBeaconContainer {
     }
 }
 
-open class iBeaconPacket: iBeaconPacketProtocol {
-    open var uuid : String
-    open var major: NSNumber
-    open var minor: NSNumber
-    open var rssi : NSNumber
-    open var distance : NSNumber
-    open var idString: String
-    open var referenceId: String
+public class iBeaconPacket: iBeaconPacketProtocol {
+    public var uuid : String
+    public var major: NSNumber
+    public var minor: NSNumber
+    public var rssi : NSNumber
+    public var distance : NSNumber
+    public var idString: String
+    public var referenceId: String
     
     init(uuid: String, major: NSNumber, minor: NSNumber, distance: NSNumber, rssi: NSNumber, referenceId: String) {
         self.uuid = uuid
@@ -59,7 +59,7 @@ open class iBeaconPacket: iBeaconPacketProtocol {
         self.idString = uuid + "_Maj:" + String(describing: major) + "_Min:" + String(describing: minor)
     }
     
-    open func getJSON() -> JSON {
+    public func getJSON() -> JSON {
         var dataDict = [String : Any]()
         dataDict["id"]    = self.idString
         dataDict["uuid"]  = self.uuid
@@ -72,11 +72,11 @@ open class iBeaconPacket: iBeaconPacketProtocol {
         return JSON(dataDict)
     }
     
-    open func stringify() -> String {
+    public func stringify() -> String {
         return JSONUtils.stringify(self.getJSON())
     }
     
-    open func getDictionary() -> NSDictionary {
+    public func getDictionary() -> NSDictionary {
         let returnDict : [String: Any] = [
             "id" : self.idString,
             "uuid" : self.uuid,

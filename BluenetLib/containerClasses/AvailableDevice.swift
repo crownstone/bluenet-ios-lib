@@ -9,7 +9,7 @@ import Foundation
 
 let AMOUNT_OF_REQUIRED_MATCHES = 3
 
-open class AvailableDevice {
+public class AvailableDevice {
     var rssi : Int!
     var name : String?
     var handle : String

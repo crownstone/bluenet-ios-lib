@@ -36,16 +36,16 @@ import BluenetShared
                                                         we emit the exit location event if we were in a different location before.
     "currentLocation"           Dictionary              ["region": String, "location": String], returns the result of the classifier each second as long as it is a valid measurement.
  */
-open class BluenetLocalization {
+public class BluenetLocalization {
     // Modules
-    open var locationManager : LocationManager!
+    public var locationManager : LocationManager!
     var eventBus : EventBus!
     var classifier : LocalizationClassifier?
     
     // class vars
     var activeGroupId : String?
     var activeLocationId : String?
-    open var indoorLocalizationEnabled : Bool = false
+    public var indoorLocalizationEnabled : Bool = false
     var initializedLocation : Bool = false
     
     
@@ -70,21 +70,21 @@ open class BluenetLocalization {
         _ = self.eventBus.on("iBeaconAdvertisement", self._updateState)
     }
     
-    open func setBackgroundScanning(newBackgroundState: Bool) {
+    public func setBackgroundScanning(newBackgroundState: Bool) {
         self.locationManager.setBackgroundScanning(newBackgroundState: newBackgroundState)
     }
     
     /**
      * This method allows you to load a custom classifier into the module. A classifier is optional but required for the enter/exit/current location events.
      */
-    open func insertClassifier( classifier : LocalizationClassifier ) {
+    public func insertClassifier( classifier : LocalizationClassifier ) {
         self.classifier = classifier
     }
     
     /**
      * The user needs to manually request permission
      */
-    open func requestLocationPermission() {
+    public func requestLocationPermission() {
         self.locationManager.requestLocationPermission()
     }
     
@@ -92,7 +92,7 @@ open class BluenetLocalization {
     /**
      * This provides a very rough estimate of the users location. The location is cached for battery saving. This is accurate up to 3km radius (kCLLocationAccuracyThreeKilometers).
      */
-    open func requestLocation() -> CLLocationCoordinate2D {
+    public func requestLocation() -> CLLocationCoordinate2D {
         return self.locationManager.requestLocation()
     }
     
@@ -100,7 +100,7 @@ open class BluenetLocalization {
      * This method configures an ibeacon with the ibeaconUUID you provide. The dataId is used to notify
      * you when this region is entered as well as to keep track of which classifiers belong to which datapoint in your reference.
      */
-    open func trackIBeacon(uuid: String, referenceId: String) {
+    public func trackIBeacon(uuid: String, referenceId: String) {
         if (uuid.count < 30) {
             LOG.warn("BLUENET LOCALIZATION ---- Cannot track \(referenceId) with UUID \(uuid)")
         }
@@ -113,7 +113,7 @@ open class BluenetLocalization {
     /**
      * This method will call requestState on every registered region.
      */
-    open func refreshLocation() {
+    public func refreshLocation() {
         self.locationManager.refreshRegionState()
     }
     
@@ -122,7 +122,7 @@ open class BluenetLocalization {
      * The app can correct for this and implement it's own exitRegion logic. By calling this afterwards the lib will fire a new enter region event when it sees
      * new beacons.
      */	
-    open func forceClearActiveRegion() {
+    public func forceClearActiveRegion() {
         activeGroupId = nil
         activeLocationId = nil
     }
@@ -131,7 +131,7 @@ open class BluenetLocalization {
      *  This will stop listening to any and all updates from the iBeacon tracking. Your app may fall asleep.
      *  It will also remove the list of all tracked iBeacons.
      */
-    open func clearTrackedBeacons() {
+    public func clearTrackedBeacons() {
         activeGroupId = nil
         activeLocationId = nil
         self.locationManager.clearTrackedBeacons()
@@ -140,7 +140,7 @@ open class BluenetLocalization {
     /**
      * Is currently scanning for iBeacons
      */
-    open func getTrackingState() -> [String: Bool] {
+    public func getTrackingState() -> [String: Bool] {
         return self.locationManager.getTrackingState();
     }
     
@@ -149,7 +149,7 @@ open class BluenetLocalization {
      * This will stop listening to a single iBeacon uuid and remove it from the list. This is called when you remove the region from
      * the list of stuff you want to listen to. It will not be resumed by resumeTracking.
      */
-    open func stopTrackingIBeacon(_ uuid: String) {
+    public func stopTrackingIBeacon(_ uuid: String) {
         self.locationManager.stopTrackingIBeacon(uuid);
     }
     
@@ -157,7 +157,7 @@ open class BluenetLocalization {
      *  This will pause listening to any and all updates from the iBeacon tracking. Your app may fall asleep. It can be resumed by 
      *  the resumeTracking method.
      */
-    open func pauseTracking() {
+    public func pauseTracking() {
         self.locationManager.pauseTrackingRegions()
     }
     
@@ -165,7 +165,7 @@ open class BluenetLocalization {
      *  Continue tracking iBeacons. Will trigger enterRegion and enterLocation again.
      *  Can be called multiple times without duplicate events.
      */
-    open func resumeTracking() {
+    public func resumeTracking() {
         if (self.locationManager.isMonitoringRegions() == false) {
             activeGroupId = nil
             activeLocationId = nil
@@ -179,14 +179,14 @@ open class BluenetLocalization {
      * This will enable the classifier. It requires the TrainingData to be setup and will trigger the current/enter/exitRoom events
      * This should be used if the user is sure the TrainingData process has been finished.
      */
-    open func startIndoorLocalization() {
+    public func startIndoorLocalization() {
         activeLocationId = nil
         self.indoorLocalizationEnabled = true;
     }
     /**
      * This will disable the classifier. The current/enter/exitRoom events will no longer be fired.
      */
-    open func stopIndoorLocalization() {
+    public func stopIndoorLocalization() {
         self.indoorLocalizationEnabled = false;
     }
     
@@ -194,21 +194,21 @@ open class BluenetLocalization {
      * Subscribe to a topic with a callback. This method returns an Int which is used as identifier of the subscription.
      * This identifier is supplied to the off method to unsubscribe.
      */
-    open func on(_ topic: String, _ callback: @escaping eventCallback) -> voidCallback {
+    public func on(_ topic: String, _ callback: @escaping eventCallback) -> voidCallback {
         return self.eventBus.on(topic, callback)
     }
     
     /**
      * Make sure you hook this up to your AppDelegate method for applicationWillEnterForeground. Required for disabling background ranging.
      */
-    open func applicationWillEnterForeground() {
+    public func applicationWillEnterForeground() {
         self.locationManager.applicationWillEnterForeground()
     }
     
     /**
      * Make sure you hook this up to your AppDelegate method for applicationWillEnterForeground. Required for disabling background ranging.
      */
-    open func applicationDidEnterBackground() {
+    public func applicationDidEnterBackground() {
         self.locationManager.applicationDidEnterBackground()
     }
     

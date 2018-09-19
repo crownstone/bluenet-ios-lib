@@ -9,9 +9,9 @@
 import Foundation
 import SwiftyJSON
 
-open class JSONUtils {
+public class JSONUtils {
     
-    open static func stringify(_ value: AnyObject?)-> String {
+    public static func stringify(_ value: AnyObject?)-> String {
         if value == nil {
             return ""
         }else{
@@ -19,11 +19,11 @@ open class JSONUtils {
         }
     }
     
-    open static func stringify(_ json:JSON) -> String{
+    public static func stringify(_ json:JSON) -> String{
         return json.rawString(options: JSONSerialization.WritingOptions(rawValue: 0))!;
     }
     
-    open static func jsonToData(_ json:JSON) throws -> Data{
+    public static func jsonToData(_ json:JSON) throws -> Data{
         return try json.rawData();
     }
     
