@@ -374,7 +374,7 @@ open class Bluenet {
             self.eventBus.emit("advertisementData", castData)
             
             // check if this is a Crownstone, if not we don't need to do anything more. Raw scans can subscribe to the rawAdvertismentData topic.
-            if (!castData.isCrownstoneFamily) { return }
+            if (!castData.isCrownstoneFamily && castData.operationMode != .dfu) { return }
             
             let handle = castData.handle
             
@@ -413,6 +413,8 @@ open class Bluenet {
                 }
             }
             else {
+                if (!castData.isCrownstoneFamily) { return }
+                
                 // emit unverifiedAdvertisementData
                 self.eventBus.emit("unverifiedAdvertisementData", castData)
                 
