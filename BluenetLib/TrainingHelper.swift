@@ -13,7 +13,7 @@ import SwiftyJSON
 /**
 
  */
-open class TrainingHelper {
+public class TrainingHelper {
     // Modules
     var bluenetLocalization : BluenetLocalization!
     
@@ -34,7 +34,7 @@ open class TrainingHelper {
     /**
      * Start collecting a TrainingData set.
      */
-    open func startCollectingTrainingData() {
+    public func startCollectingTrainingData() {
         self.collectingTrainingData = TrainingData()
         self._registerTrainingDataCollectionCallback();
     }
@@ -43,7 +43,7 @@ open class TrainingHelper {
     /**
      * Pause collecting a TrainingData. Usually when something in the app would interrupt the user.
      */
-    open func pauseCollectingTrainingData() {
+    public func pauseCollectingTrainingData() {
         self._removeTrainingDataListener()
     }
     
@@ -51,7 +51,7 @@ open class TrainingHelper {
     /**
      * Resume collecting a TrainingData.
      */
-    open func resumeCollectingTrainingData() {
+    public func resumeCollectingTrainingData() {
         self._registerTrainingDataCollectionCallback()
     }
     
@@ -59,7 +59,7 @@ open class TrainingHelper {
     /**
      * Stop collecting a TrainingData without loading it into the classifier.
      */
-    open func abortCollectingTrainingData() {
+    public func abortCollectingTrainingData() {
         self._cleanupCollectingTrainingData()
     }
    
@@ -67,7 +67,7 @@ open class TrainingHelper {
     /**
      * Finalize collecting a TrainingData and store it in the appropriate classifier based on the referenceId and the locationId.
      */
-    open func finishCollectingTrainingData() -> String? {
+    public func finishCollectingTrainingData() -> String? {
         var returnData : String? = nil
         if (self.collectingTrainingData != nil) {
             returnData = self.collectingTrainingData!.stringify()

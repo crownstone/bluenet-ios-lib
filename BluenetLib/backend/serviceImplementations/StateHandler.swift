@@ -10,7 +10,7 @@ import Foundation
 import PromiseKit
 import CoreBluetooth
 
-open class StateHandler {
+public class StateHandler {
     let bleManager : BleManager!
     var settings : BluenetSettings!
     let eventBus : EventBus!
@@ -22,7 +22,7 @@ open class StateHandler {
     }
     
     
-    open func getErrors() -> Promise<CrownstoneErrors> {
+    public func getErrors() -> Promise<CrownstoneErrors> {
         return Promise<CrownstoneErrors> { fulfill, reject in
             self.getErrorBitmask()
                 .then{ data -> Void in
@@ -35,15 +35,15 @@ open class StateHandler {
         }
     }
     
-    open func getErrorBitmask() -> Promise<[UInt8]> {
+    public func getErrorBitmask() -> Promise<[UInt8]> {
         return self._getState(StateType.error_BITMASK)
     }
     
-    open func getSwitchState() -> Promise<UInt8> {
+    public func getSwitchState() -> Promise<UInt8> {
         return self._getState(StateType.switch_STATE)
     }
     
-    open func getSwitchStateFloat() -> Promise<Float> {
+    public func getSwitchStateFloat() -> Promise<Float> {
         return Promise<Float> { fulfill, reject in
             self.getSwitchState()
                 .then{ switchState -> Void in
@@ -60,14 +60,14 @@ open class StateHandler {
         }
     }
     
-    open func getTime() -> Promise<NSNumber> {
+    public func getTime() -> Promise<NSNumber> {
         return Promise<NSNumber> { fulfill, reject in
             let timePromise : Promise<UInt32> = self._getState(StateType.time)
             timePromise.then{ time -> Void in fulfill(NSNumber(value: time))}.catch{ err in reject(err) }
         }
     }
     
-    open func getAllSchedules() -> Promise<[ScheduleConfigurator]> {
+    public func getAllSchedules() -> Promise<[ScheduleConfigurator]> {
         return Promise<[ScheduleConfigurator]> { fulfill, reject in
             let dataPromise : Promise<[UInt8]> = self._getState(StateType.schedule)
             dataPromise
@@ -113,7 +113,7 @@ open class StateHandler {
         }
     }
     
-    open func getAvailableScheduleEntryIndex() -> Promise<UInt8> {
+    public func getAvailableScheduleEntryIndex() -> Promise<UInt8> {
         return Promise<UInt8> { fulfill, reject in
             self.getAllSchedules()
                 .then{ schedules -> Void in

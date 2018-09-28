@@ -10,7 +10,7 @@ import Foundation
 import PromiseKit
 import CoreBluetooth
 
-open class ControlHandler {
+public class ControlHandler {
     let bleManager : BleManager!
     var settings : BluenetSettings!
     let eventBus : EventBus!
@@ -22,7 +22,7 @@ open class ControlHandler {
         self.eventBus   = eventBus
     }
     
-    open func recoverByFactoryReset(_ uuid: String) -> Promise<Void> {
+    public func recoverByFactoryReset(_ uuid: String) -> Promise<Void> {
         self.bleManager.settings.disableEncryptionTemporarily()
         return Promise<Void> { fulfill, reject in
             self.bleManager.isReady() // first check if the bluenet lib is ready before using it for BLE things.
@@ -77,12 +77,12 @@ open class ControlHandler {
         )
     }
     
-    open func sendNoOp() -> Promise<Void> {
+    public func sendNoOp() -> Promise<Void> {
         let packet = ControlPacketsGenerator.getNoOpPacket()
         return self._writeControlPacket(packet)
     }
     
-    open func commandFactoryReset() -> Promise<Void> {
+    public func commandFactoryReset() -> Promise<Void> {
         return self._writeControlPacket(ControlPacketsGenerator.getCommandFactoryResetPacket())
             .then{(_) -> Promise<[UInt8]> in return self._readControlPacket()}
             .then{(response: [UInt8]) -> Promise<Void> in
@@ -113,17 +113,17 @@ open class ControlHandler {
      * Switches power intelligently.
      * State has to be between 0 and 1
      */
-    open func setSwitchState(_ state: Float) -> Promise<Void> {
+    public func setSwitchState(_ state: Float) -> Promise<Void> {
         let packet = ControlPacketsGenerator.getSwitchStatePacket(state)
         return self._writeControlPacket(packet)
     }
     
-    open func reset() -> Promise<Void> {
+    public func reset() -> Promise<Void> {
         LOG.info("BLUENET_LIB: requesting reset")
         return self._writeControlPacket(ControlPacketsGenerator.getResetPacket())
     }
     
-    open func putInDFU() -> Promise<Void> {
+    public func putInDFU() -> Promise<Void> {
         return self.bleManager.getServicesFromDevice()
             .then{ services in
                 var isInDfuMode = false
@@ -144,7 +144,7 @@ open class ControlHandler {
         }
     }
     
-    open func disconnect() -> Promise<Void> {
+    public func disconnect() -> Promise<Void> {
         var connectedHandle : String? = nil
         if (self.bleManager.connectedPeripheral != nil) {
             connectedHandle = self.bleManager.connectedPeripheral!.identifier.uuidString
@@ -161,7 +161,7 @@ open class ControlHandler {
             }
     }
     
-    open func switchRelay(_ state: UInt8) -> Promise<Void> {
+    public func switchRelay(_ state: UInt8) -> Promise<Void> {
         LOG.info("BLUENET_LIB: switching relay to \(state)")
         return self._writeControlPacket(ControlPacketsGenerator.getRelaySwitchPacket(state))
     }
@@ -171,7 +171,7 @@ open class ControlHandler {
      * This method will ask the current switch state and listen to the notification response. 
      * It will then switch the crownstone. If it was > 0 --> 0 if it was 0 --> 1.
      **/
-    open func toggleSwitchState(stateForOn : Float = 1.0) -> Promise<Float> {
+    public func toggleSwitchState(stateForOn : Float = 1.0) -> Promise<Float> {
         let stateHandler = StateHandler(bleManager: self.bleManager, eventBus: self.eventBus, settings: self.settings)
         return Promise<Float> { fulfill, reject -> Void in
             var newSwitchState : Float = 0;
@@ -189,17 +189,17 @@ open class ControlHandler {
         }
     }
     
-    open func switchPWM(_ state: Float) -> Promise<Void> {
+    public func switchPWM(_ state: Float) -> Promise<Void> {
         LOG.info("BLUENET_LIB: switching PWM to \(state)")
         return self._writeControlPacket(ControlPacketsGenerator.getPwmSwitchPacket(state))
     }
     
-    open func setTime(_ newTime: NSNumber) -> Promise<Void> {
+    public func setTime(_ newTime: NSNumber) -> Promise<Void> {
         LOG.info("BLUENET_LIB: setting the TIME to \(newTime.uint32Value)")
         return self._writeControlPacket(ControlPacketsGenerator.getSetTimePacket(newTime.uint32Value))
     }
     
-    open func clearError(errorDict: NSDictionary) -> Promise<Void> {
+    public func clearError(errorDict: NSDictionary) -> Promise<Void> {
         let resetErrorMask = CrownstoneErrors(dictionary: errorDict).getResetMask()
         return _writeControlPacket(ControlPacketsGenerator.getResetErrorPacket(errorMask: resetErrorMask))
     }
@@ -208,27 +208,27 @@ open class ControlHandler {
     /**
      * If the changeState is true, then the state and timeout will be used. If it is false, the keepaliveState on the Crownstone will be cleared and nothing will happen when the timer runs out.
      */
-    open func keepAliveState(changeState: Bool, state: Float, timeout: UInt16) -> Promise<Void> {
+    public func keepAliveState(changeState: Bool, state: Float, timeout: UInt16) -> Promise<Void> {
         LOG.info("BLUENET_LIB: Keep alive State")
         return self._writeControlPacket(ControlPacketsGenerator.getKeepAliveStatePacket(changeState: changeState, state: state, timeout: timeout))
     }
     
-    open func keepAliveRepeat() -> Promise<Void> {
+    public func keepAliveRepeat() -> Promise<Void> {
         LOG.info("BLUENET_LIB: Keep alive")
         return self._writeControlPacket(ControlPacketsGenerator.getKeepAliveRepeatPacket())
     }
     
-    open func allowDimming(allow: Bool) -> Promise<Void> {
+    public func allowDimming(allow: Bool) -> Promise<Void> {
         LOG.info("BLUENET_LIB: allowDimming")
         return self._writeControlPacket(ControlPacketsGenerator.getAllowDimmingPacket(allow))
     }
      
-    open func lockSwitch(lock: Bool) -> Promise<Void> {
+    public func lockSwitch(lock: Bool) -> Promise<Void> {
         LOG.info("BLUENET_LIB: lockSwitch")
         return self._writeControlPacket(ControlPacketsGenerator.getLockSwitchPacket(lock))
     }
     
-    open func setSwitchCraft(enabled: Bool) -> Promise<Void> {
+    public func setSwitchCraft(enabled: Bool) -> Promise<Void> {
         LOG.info("BLUENET_LIB: setSwitchCraft")
         return self._writeControlPacket(ControlPacketsGenerator.getSwitchCraftPacket(enabled))
     }
@@ -236,7 +236,7 @@ open class ControlHandler {
     /**
      * The session nonce is the only char that is ECB encrypted. We therefore read it without the libraries decryption (AES CTR) and decrypt it ourselves.
      **/
-    open func getAndSetSessionNonce() -> Promise<Void> {
+    public func getAndSetSessionNonce() -> Promise<Void> {
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.CrownstoneService, characteristic: CrownstoneCharacteristics.SessionNonce)
             .then{(sessionNonce : [UInt8]) -> Promise<Void> in
                 return Promise <Void> { fulfill, reject in
@@ -272,7 +272,7 @@ open class ControlHandler {
     /**
      * This is used to configure the scheduler. The ScheduleConfigurator can be used to configure the data without knowing the protocol.
      **/
-    open func setSchedule(scheduleConfig: ScheduleConfigurator) -> Promise<Void> {
+    public func setSchedule(scheduleConfig: ScheduleConfigurator) -> Promise<Void> {
         if (scheduleConfig.scheduleEntryIndex > 9) {
             return Promise<Void> { fulfill, reject in reject(BleError.INCORRECT_SCHEDULE_ENTRY_INDEX) }
         }
@@ -285,7 +285,7 @@ open class ControlHandler {
     /**
      * There are 10 schedulers. You pick which one you want to clear with the timerIndex which can be 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
      **/
-    open func clearSchedule(scheduleEntryIndex: UInt8) -> Promise<Void> {
+    public func clearSchedule(scheduleEntryIndex: UInt8) -> Promise<Void> {
         if (scheduleEntryIndex > 9) {
             return Promise<Void> { fulfill, reject in reject(BleError.INCORRECT_SCHEDULE_ENTRY_INDEX) }
         }

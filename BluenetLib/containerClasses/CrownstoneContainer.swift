@@ -16,7 +16,7 @@ struct CrownstoneSummary {
     var validated: Bool
 }
 
-open class CrownstoneContainer {
+public class CrownstoneContainer {
     var items = [String: CrownstoneSummary]()
     
     // config
@@ -30,7 +30,7 @@ open class CrownstoneContainer {
         self.dfuMode   = dfuMode
     }
     
-    open func load(name: String, handle:String, rssi: Int, validated: Bool) {
+    public func load(name: String, handle:String, rssi: Int, validated: Bool) {
         let currentTime = Date().timeIntervalSince1970
         // sometimes rssi can be 0 or 127, this is an invalid data point.
         if rssi < 0 {
@@ -46,13 +46,13 @@ open class CrownstoneContainer {
         }
     }
     
-    open func removeItem(handle: String) {
+    public func removeItem(handle: String) {
         if self.items[handle] != nil {
             self.items.removeValue(forKey: handle)
         }
     }
     
-    open func getNearestItem() -> NearestItem? {
+    public func getNearestItem() -> NearestItem? {
         let currentTime = Date().timeIntervalSince1970
         self.removeExpired(currentTime: currentTime)
         

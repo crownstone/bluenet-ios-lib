@@ -10,7 +10,7 @@ import Foundation
 import CoreMotion
 
 
-open class BluenetMotion  {
+public class BluenetMotion  {
 
     var motionManager: CMMotionManager!
     

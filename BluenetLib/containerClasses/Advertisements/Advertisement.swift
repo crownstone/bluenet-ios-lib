@@ -14,19 +14,19 @@ import SwiftyJSON
  * Wrapper for all relevant data of the object
  *
  */
-open class Advertisement {
-    open var handle : String
-    open var name : String
-    open var rssi : NSNumber
-    open var referenceId : String? // id of the entity that provides the keys
+public class Advertisement {
+    public var handle : String
+    public var name : String
+    public var rssi : NSNumber
+    public var referenceId : String? // id of the entity that provides the keys
     
-    open var isCrownstoneFamily  : Bool = false
-    open var operationMode : CrownstoneMode = .unknown
+    public var isCrownstoneFamily  : Bool = false
+    public var operationMode : CrownstoneMode = .unknown
     
-    open var serviceData = [String: [UInt8]]()
-    open var serviceDataAvailable : Bool
-    open var serviceUUID : String?
-    open var scanResponse : ScanResponsePacket?
+    public var serviceData = [String: [UInt8]]()
+    public var serviceDataAvailable : Bool
+    public var serviceUUID : String?
+    public var scanResponse : ScanResponsePacket?
     
     init(handle: String, name: String?, rssi: NSNumber, serviceData: Any, serviceUUID: Any) {
         if (name != nil) {
@@ -97,18 +97,18 @@ open class Advertisement {
         return JSON([])
     }
 
-    open func getUniqueElement() -> String {
+    public func getUniqueElement() -> String {
         if ((scanResponse) != nil) {
             return scanResponse!.getUniqueElement()
         }
         return "NO_UNIQUE_ELEMENT"
     }
     
-    open func getJSON() -> JSON {
+    public func getJSON() -> JSON {
         return JSON(self.getDictionary())
     }
     
-    open func getDictionary() -> NSDictionary {
+    public func getDictionary() -> NSDictionary {
         var returnDict : [String: Any] = [
             "handle" : self.handle,
             "name"   : self.name,
@@ -138,12 +138,12 @@ open class Advertisement {
     }
 
     
-    open func stringify() -> String {
+    public func stringify() -> String {
         return JSONUtils.stringify(self.getJSON())
     }
     
     
-    open func getOperationMode() -> CrownstoneMode {
+    public func getOperationMode() -> CrownstoneMode {
         if (self.operationMode == .unknown) {
             if (self.scanResponse != nil) {
                 return self.scanResponse!.getOperationMode()
@@ -156,11 +156,11 @@ open class Advertisement {
         return self.operationMode
     }
     
-    open func hasScanResponse() -> Bool {
+    public func hasScanResponse() -> Bool {
         return (serviceDataAvailable && self.scanResponse != nil)
     }
     
-    open func decrypt( _ key: [UInt8] ) {
+    public func decrypt( _ key: [UInt8] ) {
         if (serviceDataAvailable && self.scanResponse != nil) {
             self.scanResponse!.decrypt(key)
         }

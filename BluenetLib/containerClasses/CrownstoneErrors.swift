@@ -15,15 +15,15 @@ import Foundation
  4 | Dimmer on failure  | If this is 1, the dimmer is broken, in an always (partial) on  state.
  5 | Dimmer off failure | If this is 1, the dimmer is broken, in an always (partial) off state.
  */
-open class CrownstoneErrors {
-    open var overCurrent        = false
-    open var overCurrentDimmer  = false
-    open var temperatureChip    = false
-    open var temperatureDimmer  = false
-    open var dimmerOnFailure    = false
-    open var dimmerOffFailure   = false
+public class CrownstoneErrors {
+    public var overCurrent        = false
+    public var overCurrentDimmer  = false
+    public var temperatureChip    = false
+    public var temperatureDimmer  = false
+    public var dimmerOnFailure    = false
+    public var dimmerOffFailure   = false
     
-    open var bitMask : UInt32   = 0
+    public var bitMask : UInt32   = 0
     
     init(bitMask: UInt32) {
         self.bitMask = bitMask
@@ -57,15 +57,15 @@ open class CrownstoneErrors {
         self.bitMask = Conversion.bit_array_to_uint32(bitArray)
     }
     
-    open func getResetMask() -> UInt32 {
+    public func getResetMask() -> UInt32 {
         return self.bitMask
     }
     
-    open func hasErrors() -> Bool {
+    public func hasErrors() -> Bool {
         return self.bitMask == 0
     }
     
-    open func getDictionary() -> NSDictionary {
+    public func getDictionary() -> NSDictionary {
         let returnDict : [String: Any] = [
             "overCurrent"       : NSNumber(value: self.overCurrent),
             "overCurrentDimmer" : NSNumber(value: self.overCurrentDimmer),

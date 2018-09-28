@@ -156,15 +156,15 @@ public class ScheduleConfigurator {
         }
     }
     
-    open func isAvailable() -> Bool {
+    public func isAvailable() -> Bool {
         return nextTime == 0
     }
     
-    open func isActive() -> Bool {
+    public func isActive() -> Bool {
         return !self.isAvailable()
     }
     
-    open func getPacket() -> [UInt8] {
+    public func getPacket() -> [UInt8] {
         self._setActionType()
         self._setRepeatType()
         
@@ -180,7 +180,7 @@ public class ScheduleConfigurator {
         return arr
     }
     
-    open func getScheduleDataFormat() -> NSDictionary {
+    public func getScheduleDataFormat() -> NSDictionary {
         var data = [String: Any]()
         
         self._setRepeatType()
@@ -216,7 +216,7 @@ public class ScheduleOverrideMask {
         self.location = (data >> 1) & 0x01 == 1
     }
     
-    open func getMask() -> UInt8 {
+    public func getMask() -> UInt8 {
         var mask : UInt8 = 0
         
         // bits:
@@ -261,7 +261,7 @@ public class ScheduleRepeatDayMask {
         }
     }
     
-    open func getMask() -> UInt8 {
+    public func getMask() -> UInt8 {
         var mask : UInt8 = 0
         
         // bits:

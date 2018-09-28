@@ -9,8 +9,8 @@
 import Foundation
 import SwiftyJSON
 
-open class TrainingData {
-    open var data = [[String: Any]]()
+public class TrainingData {
+    public var data = [[String: Any]]()
     
     public init() {}
     public init(stringifiedData: String) {
@@ -37,11 +37,11 @@ open class TrainingData {
         data.append(dataDict);
     }
     
-    open func getJSON() -> JSON {
+    public func getJSON() -> JSON {
         return JSON(self.data)
     }
     
-    open func stringify() -> String {
+    public func stringify() -> String {
         return JSONUtils.stringify(JSON(self.data))
     }
 }

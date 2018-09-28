@@ -11,13 +11,13 @@ import CoreBluetooth
 import SwiftyJSON
 import PromiseKit
 
-open class BluenetCBDelegateBackground: BluenetCBDelegate {
+public class BluenetCBDelegateBackground: BluenetCBDelegate {
     
     override init(bleManager: BleManager) {
         super.init(bleManager: bleManager);
     }
     
-    open func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]) {
+    public func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]) {
         LOG.info("BLUENET_LIB: WILL RESTORE STATE \(dict)");
     }
 }

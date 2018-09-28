@@ -8,7 +8,7 @@
 
 import Foundation
 
-open class EventBus {
+public class EventBus {
     init() {}
     
     var subscribers = [String: String]()

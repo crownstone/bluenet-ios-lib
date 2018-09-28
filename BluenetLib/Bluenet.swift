@@ -37,12 +37,12 @@ public typealias eventCallback = (Any) -> Void
    |  "nearestCrownstone"           |     NearestItem      |     When a verified advertisement packet in setup mode is received, we check the list
    |                                |                      |     of available stones in setup mode and return the closest.
  */
-open class Bluenet {
+public class Bluenet {
     // todo: set back to private, currently public for DEBUG
     var counter : UInt64 = 0
-    open let bleManager : BleManager!
-    open let blePeripheralManager : BlePeripheralManager!
-    open var settings : BluenetSettings!
+    public let bleManager : BleManager!
+    public let blePeripheralManager : BlePeripheralManager!
+    public var settings : BluenetSettings!
     let eventBus : EventBus!
     
     var reachableCrownstones = [String: AdvertismentValidator]()
@@ -56,14 +56,14 @@ open class Bluenet {
     var encryptionMap = [String: String]()
 
     // declare the classes handling the library protocol
-    open let dfu      : DfuHandler!
-    open let config   : ConfigHandler!
-    open let setup    : SetupHandler!
-    open let control  : ControlHandler!
-    open let power    : PowerHandler!
-    open let mesh     : MeshHandler!
-    open let device   : DeviceHandler!
-    open let state    : StateHandler!
+    public let dfu      : DfuHandler!
+    public let config   : ConfigHandler!
+    public let setup    : SetupHandler!
+    public let control  : ControlHandler!
+    public let power    : PowerHandler!
+    public let mesh     : MeshHandler!
+    public let device   : DeviceHandler!
+    public let state    : StateHandler!
 
     
     // MARK: API
@@ -103,32 +103,32 @@ open class Bluenet {
         _ = self.eventBus.on("rawAdvertisementData", self._checkAdvertisement)
     }
     
-    open func enableBatterySaving() {
+    public func enableBatterySaving() {
         self.bleManager.enableBatterySaving()
     }
     
-    open func disableBatterySaving() {
+    public func disableBatterySaving() {
         self.bleManager.disableBatterySaving()
     }
     
-    open func setBackgroundScanning(newBackgroundState: Bool) {
+    public func setBackgroundScanning(newBackgroundState: Bool) {
         self.bleManager.setBackgroundScanning(newBackgroundState: newBackgroundState)
     }
     
-    open func startAdvertising(uuidString: String = "c005") {
+    public func startAdvertising(uuidString: String = "c005") {
         self.blePeripheralManager.startAdvertising(uuidString: uuidString)
     }
     
-    open func startAdvertisingArray(uuidStrings: [String]) {
+    public func startAdvertisingArray(uuidStrings: [String]) {
         self.blePeripheralManager.startAdvertisingArray(uuidStrings: uuidStrings)
     }
     
-    open func stopAdvertising() {
+    public func stopAdvertising() {
         self.blePeripheralManager.stopAdvertising()
     }
     
     
-    open func loadKeysets(encryptionEnabled: Bool, keySets: [KeySet]) {
+    public func loadKeysets(encryptionEnabled: Bool, keySets: [KeySet]) {
         self.settings.loadKeySets(
             encryptionEnabled: encryptionEnabled,
             keySets: keySets
@@ -140,7 +140,7 @@ open class Bluenet {
      * Start actively scanning for BLE devices.
      * Scan results will be broadcasted on the "advertisementData" topic.
      */
-    open func startScanning() {
+    public func startScanning() {
         self.bleManager.stopScanning()
         self.bleManager.startScanning()
     }
@@ -150,7 +150,7 @@ open class Bluenet {
      * Start actively scanning for Crownstones (and guidestones) based on the scan response service uuid.
      * Scan results will be broadcasted on the "advertisementData" topic.
      */
-    open func startScanningForCrownstones() {
+    public func startScanningForCrownstones() {
         self.startScanningForServices([
             CrownstoneBuiltinAdvertisementServiceUUID,
             CrownstonePlugAdvertisementServiceUUID,
@@ -166,7 +166,7 @@ open class Bluenet {
      *
      * This is the battery saving variant, only unique messages are shown.
      */
-    open func startScanningForCrownstonesUniqueOnly() {
+    public func startScanningForCrownstonesUniqueOnly() {
         self.startScanningForServicesUniqueOnly([
             CrownstoneBuiltinAdvertisementServiceUUID,
             CrownstonePlugAdvertisementServiceUUID,
@@ -180,7 +180,7 @@ open class Bluenet {
      * Start actively scanning for BLE devices containing a specific serviceUUID.
      * Scan results will be broadcasted on the "advertisementData" topic.
      */
-    open func startScanningForService(_ serviceUUID: String) {
+    public func startScanningForService(_ serviceUUID: String) {
         self.bleManager.stopScanning()
         self.bleManager.startScanningForService(serviceUUID, uniqueOnly: false)
     }
@@ -189,7 +189,7 @@ open class Bluenet {
      * Start actively scanning for BLE devices containing a specific serviceUUID.
      * Scan results will be broadcasted on the "advertisementData" topic.
      */
-    open func startScanningForServices(_ serviceUUIDs: [String]) {
+    public func startScanningForServices(_ serviceUUIDs: [String]) {
         self.bleManager.stopScanning()
         self.bleManager.startScanningForServices(serviceUUIDs, uniqueOnly: false)
     }
@@ -201,7 +201,7 @@ open class Bluenet {
      *
      * This is the battery saving variant, only unique messages are shown.
      */
-    open func startScanningForServiceUniqueOnly(_ serviceUUID: String) {
+    public func startScanningForServiceUniqueOnly(_ serviceUUID: String) {
         self.bleManager.stopScanning()
         self.bleManager.startScanningForService(serviceUUID, uniqueOnly: true)
     }
@@ -213,7 +213,7 @@ open class Bluenet {
      *
      * This is the battery saving variant, only unique messages are shown.
      */
-    open func startScanningForServicesUniqueOnly(_ serviceUUIDs: [String]) {
+    public func startScanningForServicesUniqueOnly(_ serviceUUIDs: [String]) {
         self.bleManager.stopScanning()
         self.bleManager.startScanningForServices(serviceUUIDs, uniqueOnly: true)
     }
@@ -222,7 +222,7 @@ open class Bluenet {
     /**
      * Stop actively scanning for BLE devices.
      */
-    open func stopScanning() {
+    public func stopScanning() {
         self.bleManager.stopScanning()
     }
     
@@ -231,7 +231,7 @@ open class Bluenet {
      * Returns if the BLE manager is initialized.
      * Should be used to make sure commands are not send before it's finished and get stuck.
      */
-    open func isReady() -> Promise<Void> {
+    public func isReady() -> Promise<Void> {
         return self.bleManager.isReady()
     }
     
@@ -240,7 +240,7 @@ open class Bluenet {
      * Returns if the BLE manager is initialized.
      * Should be used to make sure commands are not send before it's finished and get stuck.
      */
-    open func isPeripheralReady() -> Promise<Void> {
+    public func isPeripheralReady() -> Promise<Void> {
         return self.blePeripheralManager.isReady()
     }
 
@@ -252,7 +252,7 @@ open class Bluenet {
      *   - It will abort other pending connection requests
      *   - It will disconnect from a connected device if that is the case
      */
-    open func connect(_ handle: String, referenceId: String? = nil) -> Promise<Void> {
+    public func connect(_ handle: String, referenceId: String? = nil) -> Promise<Void> {
         var delayTime : Double = 0
         if let timeOfLastDisconnectCommand = self.disconnectCommandTimeList[handle] {
             let minimumTimeBetweenReconnects = timeoutDurations.reconnect // seconds
@@ -309,7 +309,7 @@ open class Bluenet {
      * Disconnect from the connected device. Will also fulfil if there is nothing connected.
      * Timeout is set to 2 seconds.
      */
-    open func disconnect() -> Promise<Void> {
+    public func disconnect() -> Promise<Void> {
         return self.bleManager.disconnect()
     }
     
@@ -317,14 +317,14 @@ open class Bluenet {
     /**
      * Get the state of the BLE controller.
      */
-    open func getBleState() -> CBCentralManagerState {
+    public func getBleState() -> CBCentralManagerState {
         return self.bleManager.BleState
     }
     
     /**
      * Re-emit the state of the BLE controller.
      */
-    open func emitBleState() {
+    public func emitBleState() {
         self.bleManager.emitBleState()
     }
     
@@ -333,28 +333,28 @@ open class Bluenet {
      * Subscribe to a topic with a callback. This method returns an Int which is used as identifier of the subscription.
      * This identifier is supplied to the off method to unsubscribe.
      */
-    open func on(_ topic: String, _ callback: @escaping eventCallback) -> voidCallback {
+    public func on(_ topic: String, _ callback: @escaping eventCallback) -> voidCallback {
         return self.eventBus.on(topic, callback)
     }
     
     
-    open func waitToReconnect() -> Promise<Void> {
+    public func waitToReconnect() -> Promise<Void> {
         return self.bleManager.waitToReconnect()
     }
     
-    open func waitToWrite() -> Promise<Void> {
+    public func waitToWrite() -> Promise<Void> {
         return self.bleManager.waitToWrite(0)
     }
     
-    open func waitToWrite(_ iteration: UInt8 = 0) -> Promise<Void> {
+    public func waitToWrite(_ iteration: UInt8 = 0) -> Promise<Void> {
         return self.bleManager.waitToWrite(iteration)
     }
     
-    open func applicationWillEnterForeground() {
+    public func applicationWillEnterForeground() {
         
     }
     
-    open func applicationDidEnterBackground() {
+    public func applicationDidEnterBackground() {
         
     }
     

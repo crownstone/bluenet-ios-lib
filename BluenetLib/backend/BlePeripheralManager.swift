@@ -12,15 +12,15 @@ import CoreLocation
 import SwiftyJSON
 import PromiseKit
 
-open class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
+public class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
     
     
-    open var peripheralManager : CBPeripheralManager!
+    public var peripheralManager : CBPeripheralManager!
     
     var pendingPromise : promiseContainer!
     var eventBus : EventBus!
     var notificationEventBus : EventBus!
-    open var settings : BluenetSettings!
+    public var settings : BluenetSettings!
     
     var decoupledDelegate = false
     
@@ -78,7 +78,7 @@ open class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
         self.peripheralManager.stopAdvertising()
     }
     
-    open func isReady() -> Promise<Void> {
+    public func isReady() -> Promise<Void> {
         return Promise<Void> { fulfill, reject in
             if (self.BleState != 5) {
                 delay(0.50, { _ = self.isReady().then{_ -> Void in fulfill(())} })

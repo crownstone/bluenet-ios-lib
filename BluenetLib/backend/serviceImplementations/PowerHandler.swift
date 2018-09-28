@@ -10,7 +10,7 @@ import Foundation
 import PromiseKit
 import CoreBluetooth
 
-open class PowerHandler {
+public class PowerHandler {
     let bleManager : BleManager!
     var settings : BluenetSettings!
     let eventBus : EventBus!
@@ -25,7 +25,7 @@ open class PowerHandler {
      * Set the switch state. If 0 or 1, switch on or off. If 0 < x < 1 then dim.
      * TODO: currently only relay is supported.
      */
-    open func switchRelay(_ state: UInt8) -> Promise<Void> {
+    public func switchRelay(_ state: UInt8) -> Promise<Void> {
         LOG.info("BLUENET_LIB: switching relay to \(state)")
         let packet : [UInt8] = [state]
         return self.bleManager.writeToCharacteristic(
@@ -41,7 +41,7 @@ open class PowerHandler {
      * Set the switch state. If 0 or 1, switch on or off. If 0 < x < 1 then dim.
      * TODO: currently only relay is supported.
      */
-    open func switchPWM(_ state: UInt8) -> Promise<Void> {
+    public func switchPWM(_ state: UInt8) -> Promise<Void> {
         LOG.info("BLUENET_LIB: switching relay to \(state)")
         let packet : [UInt8] = [state]
         return self.bleManager.writeToCharacteristic(
@@ -55,7 +55,7 @@ open class PowerHandler {
     
     
     
-    open func notifyPowersamples() -> Promise<voidPromiseCallback> {
+    public func notifyPowersamples() -> Promise<voidPromiseCallback> {
         let successCallback = {(data: [UInt8]) -> Void in
             let samples = PowerSamples(data: data)
             if (samples.valid) {

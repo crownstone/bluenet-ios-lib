@@ -9,13 +9,13 @@
 import Foundation
 
 
-open class KeySet {
-    open var adminKey  : [UInt8]? = nil
-    open var memberKey : [UInt8]? = nil
-    open var guestKey  : [UInt8]? = nil
-    open var initializedKeys = false
-    open var referenceId : String = "unknown"
-    open var userLevel : UserLevel = .unknown
+public class KeySet {
+    public var adminKey  : [UInt8]? = nil
+    public var memberKey : [UInt8]? = nil
+    public var guestKey  : [UInt8]? = nil
+    public var initializedKeys = false
+    public var referenceId : String = "unknown"
+    public var userLevel : UserLevel = .unknown
     
     init(adminKey: String?, memberKey: String?, guestKey: String?, referenceId: String) {
         self.referenceId = referenceId

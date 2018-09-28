@@ -19,47 +19,47 @@ public enum CrownstoneMode {
     case unknown
 }
 
-open class ScanResponsePacket {
-    open var opCode              :   UInt8    = 0
-    open var dataType            :   UInt8    = 0
-    open var crownstoneId        :   UInt8    = 0
-    open var switchState         :   UInt8    = 0
-    open var flagsBitmask        :   UInt8    = 0
-    open var temperature         :   Int8     = 0
-    open var powerFactor         :   Double   = 1
-    open var powerUsageReal      :   Double   = 0
-    open var powerUsageApparent  :   Double   = 0
-    open var accumulatedEnergy   :   Int64    = 0
-    open var setupMode           :   Bool     = false
-    open var stateOfExternalCrownstone : Bool = false
-    open var data                :   [UInt8]!
-    open var encryptedData       :   [UInt8]!
-    open var encryptedDataStartIndex : Int = 1
+public class ScanResponsePacket {
+    public var opCode              :   UInt8    = 0
+    public var dataType            :   UInt8    = 0
+    public var crownstoneId        :   UInt8    = 0
+    public var switchState         :   UInt8    = 0
+    public var flagsBitmask        :   UInt8    = 0
+    public var temperature         :   Int8     = 0
+    public var powerFactor         :   Double   = 1
+    public var powerUsageReal      :   Double   = 0
+    public var powerUsageApparent  :   Double   = 0
+    public var accumulatedEnergy   :   Int64    = 0
+    public var setupMode           :   Bool     = false
+    public var stateOfExternalCrownstone : Bool = false
+    public var data                :   [UInt8]!
+    public var encryptedData       :   [UInt8]!
+    public var encryptedDataStartIndex : Int = 1
     
-    open var dimmingAvailable    :   Bool     = false
-    open var dimmingAllowed      :   Bool     = false
-    open var hasError            :   Bool     = false
-    open var switchLocked        :   Bool     = false
+    public var dimmingAvailable    :   Bool     = false
+    public var dimmingAllowed      :   Bool     = false
+    public var hasError            :   Bool     = false
+    public var switchLocked        :   Bool     = false
     
-    open var partialTimestamp    :   UInt16   = 0
-    open var timestamp           :   Double   = -1
+    public var partialTimestamp    :   UInt16   = 0
+    public var timestamp           :   Double   = -1
     
-    open var validation          :   UInt8  = 0x00 // Will be 0xFA if it is set.
+    public var validation          :   UInt8  = 0x00 // Will be 0xFA if it is set.
     
     // TYPE ERROR (opCode 3, type 1)
-    open var errorTimestamp      :   UInt32   = 0
-    open var errorsBitmask       :   UInt32   = 0
-    open var errorMode           :   Bool     = false
-    open var timeSet             :   Bool     = false
-    open var switchCraftEnabled  :   Bool     = false
+    public var errorTimestamp      :   UInt32   = 0
+    public var errorsBitmask       :   UInt32   = 0
+    public var errorMode           :   Bool     = false
+    public var timeSet             :   Bool     = false
+    public var switchCraftEnabled  :   Bool     = false
     
-    open var uniqueIdentifier    :   NSNumber = 0
+    public var uniqueIdentifier    :   NSNumber = 0
     
-    open var deviceType          :   DeviceType = .undefined
-    open var rssiOfExternalCrownstone : Int8  = 0
+    public var deviceType          :   DeviceType = .undefined
+    public var rssiOfExternalCrownstone : Int8  = 0
     
     var validData = false
-    open var dataReadyForUse = false // decryption is successful
+    public var dataReadyForUse = false // decryption is successful
     
     init(_ data: [UInt8]) {
         self.data = data
@@ -128,17 +128,17 @@ open class ScanResponsePacket {
     }
     
     
-    open func hasCrownstoneDataFormat() -> Bool {
+    public func hasCrownstoneDataFormat() -> Bool {
         return validData
     }
     
-    open func getUniqueElement() -> String {
+    public func getUniqueElement() -> String {
         return Conversion.uint8_array_to_hex_string(
                 Conversion.uint32_to_uint8_array(self.uniqueIdentifier.uint32Value)
         )
     }
     
-    open func getDictionary() -> NSDictionary {
+    public func getDictionary() -> NSDictionary {
         let errorsDictionary = CrownstoneErrors(bitMask: self.errorsBitmask).getDictionary()
         let returnDict : [String: Any] = [
             "opCode"               : NSNumber(value: self.opCode),
@@ -174,16 +174,16 @@ open class ScanResponsePacket {
         return returnDict as NSDictionary
     }
     
-    open func getJSON() -> JSON {
+    public func getJSON() -> JSON {
         return JSON(self.getDictionary())
     }
     
-    open func stringify() -> String {
+    public func stringify() -> String {
         return JSONUtils.stringify(self.getJSON())
     }
     
     
-    open func decrypt(_ key: [UInt8]) {
+    public func decrypt(_ key: [UInt8]) {
         if (validData == true && self.encryptedData.count == 16) {
             do {
                 let result = try EncryptionHandler.decryptAdvertisement(self.encryptedData, key: key)

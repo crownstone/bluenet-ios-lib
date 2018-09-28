@@ -14,13 +14,13 @@ import SwiftyJSON
  * Wrapper for all relevant data of the object
  *
  */
-open class ResultPacket {
-    open var type : UInt8 = 0
-    open var opCode : UInt8 = 0
-    open var length : UInt16 = 0
-    open var payload : [UInt8] = []
+public class ResultPacket {
+    public var type : UInt8 = 0
+    public var opCode : UInt8 = 0
+    public var length : UInt16 = 0
+    public var payload : [UInt8] = []
     
-    open var valid = false
+    public var valid = false
     
     init(_ data : [UInt8]) {
         if (data.count >= 4) {

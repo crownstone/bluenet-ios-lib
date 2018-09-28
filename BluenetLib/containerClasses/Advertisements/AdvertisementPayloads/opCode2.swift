@@ -32,7 +32,7 @@ func parseOpcode2(serviceData : ScanResponsePacket, data : [UInt8]) {
         serviceData.powerUsageApparent = NSNumber(value: appearentPower as Int16).doubleValue / 16
         serviceData.powerUsageReal     = serviceData.powerFactor * serviceData.powerUsageApparent
         
-        serviceData.accumulatedEnergy = Conversion.uint32_to_int32(
+        let accumulatedEnergy = Conversion.uint32_to_int32(
             Conversion.uint8_array_to_uint32([
                 data[10],
                 data[11],
@@ -40,7 +40,7 @@ func parseOpcode2(serviceData : ScanResponsePacket, data : [UInt8]) {
                 data[13]
             ])
         )
-        
+        serviceData.accumulatedEnergy = NSNumber(value: accumulatedEnergy).int64Value * 64
         
         // bitmask states
         let bitmaskArray = Conversion.uint8_to_bit_array(serviceData.flagsBitmask)

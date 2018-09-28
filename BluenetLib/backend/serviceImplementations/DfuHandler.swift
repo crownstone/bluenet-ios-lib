@@ -12,7 +12,7 @@ import CoreBluetooth
 import iOSDFULibrary
 
 
-open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
+public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
     let bleManager : BleManager!
     var settings : BluenetSettings!
     let eventBus : EventBus!
@@ -39,7 +39,7 @@ open class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
      * After the DFU finishes (fail or success) we have to reassign the delegate to our bleManager using the self.bleManager.reassignDelegate method.
      *
      **/
-    open func startDFU(handle: String, firmwareURL: URL) -> Promise<Void> {
+    public func startDFU(handle: String, firmwareURL: URL) -> Promise<Void> {
         if (self.promisePending == true) {
             self.rejectPromise(BleError.DFU_OVERRULED)
             _ = dfuController?.abort()

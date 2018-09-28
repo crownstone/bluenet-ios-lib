@@ -26,7 +26,7 @@ let CHECKSUM       : UInt32 = 0xcafebabe
 
 var BLUENET_ENCRYPTION_TESTING = false
 
-open class SessionData {
+public class SessionData {
     var sessionNonce : [UInt8]!
     var validationKey : [UInt8]!
     
@@ -46,8 +46,8 @@ open class SessionData {
     }
 }
 
-open class zeroPadding {
-    static open func add(to data: [UInt8], blockSize: Int) -> [UInt8] {
+public class zeroPadding {
+    static public func add(to data: [UInt8], blockSize: Int) -> [UInt8] {
         if (data.count % blockSize != 0) {
             let offset = blockSize - (data.count % blockSize)
             let padding = [UInt8](repeating: 0, count: offset)
@@ -58,7 +58,7 @@ open class zeroPadding {
         return data
     }
     
-     static open func remove(from data: [UInt8], blockSize: Int?) -> [UInt8] {
+     static public func remove(from data: [UInt8], blockSize: Int?) -> [UInt8] {
         return data
     }
 }

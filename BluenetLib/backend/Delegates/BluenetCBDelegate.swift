@@ -14,7 +14,7 @@ import SwiftyJSON
 import PromiseKit
 
 
-open class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
+public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
     var BleManager : BleManager!
     
     public init(bleManager: BleManager) {
@@ -25,7 +25,7 @@ open class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
     
     // MARK: CENTRAL MANAGER DELEGATE
     
-    open func centralManagerDidUpdateState(_ central: CBCentralManager) {
+    public func centralManagerDidUpdateState(_ central: CBCentralManager) {
         BleManager.cBmanagerUpdatedState = true
         
         if #available(iOS 10.0, *) {
@@ -81,7 +81,7 @@ open class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         }
     }
     
-    open func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+    public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         // in some processes, the encryption can be disabled temporarily. Advertisements CAN come in in this period and be misfigured by the lack of decryption.
         // to avoid this, we do not listen to advertisements while the encryption is TEMPORARILY disabled.
         if (BleManager.settings.isTemporarilyDisabled()) {
@@ -117,7 +117,7 @@ open class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         BleManager.eventBus.emit("rawAdvertisementData",emitData)
     }
     
-    open func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+    public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         LOG.info("BLUENET_LIB: in didConnectPeripheral")
         if (BleManager.pendingPromise.type == .CONNECT) {
             LOG.info("BLUENET_LIB: connected")
@@ -127,7 +127,7 @@ open class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         }
     }
     
-    open func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+    public func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
         LOG.info("BLUENET_LIB: in didFailToConnectPeripheral")
         if let errorVal = error {
             BleManager.pendingPromise.reject(errorVal)
@@ -137,7 +137,7 @@ open class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         }
     }
     
-    open func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+    public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         // since we disconnected, we must set the connected peripherals to nil.
         BleManager.connectingPeripheral = nil;
         BleManager.connectedPeripheral = nil;

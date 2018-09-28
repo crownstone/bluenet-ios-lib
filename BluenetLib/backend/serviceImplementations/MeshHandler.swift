@@ -10,7 +10,7 @@ import Foundation
 import PromiseKit
 import CoreBluetooth
 
-open class MeshHandler {
+public class MeshHandler {
     let bleManager : BleManager!
     var settings : BluenetSettings!
     let eventBus : EventBus!
@@ -26,7 +26,7 @@ open class MeshHandler {
      * This allows you to send a keepAliveState message to multiple Crownstones via the Mesh network.
      * It will make the Crownstone repeat it's last known mesh message.
      */
-    open func keepAliveRepeat() -> Promise<Void> {
+    public func keepAliveRepeat() -> Promise<Void> {
         let packet = ControlPacket(type: .mesh_keepAliveRepeat).getPacket()
         return self._writeControlPacket(packet)
     }
@@ -36,7 +36,7 @@ open class MeshHandler {
      * The timeout is usually per region, stones are in the format:
      * [ [crownstoneId: Number(UInt16), action: Number(Bool), state: Number(Float: [0 .. 1])] ]
      */
-    open func keepAliveState(timeout: UInt16, stones: [[String: NSNumber]]) -> Promise<Void> {
+    public func keepAliveState(timeout: UInt16, stones: [[String: NSNumber]]) -> Promise<Void> {
         var packets = [StoneKeepAlivePacket]()
         for stone in stones {
             let crownstoneId = stone["crownstoneId"]
@@ -62,7 +62,7 @@ open class MeshHandler {
     /**
      * This channel is used to send different switch commands with individual timeouts, switch states and intents to different crownstones in one message
      */
-    open func multiSwitch(stones:[[String: NSNumber]]) -> Promise<Void> {
+    public func multiSwitch(stones:[[String: NSNumber]]) -> Promise<Void> {
         var packets = [StoneMultiSwitchPacket]()
         for stone in stones {
             let crownstoneId = stone["crownstoneId"]
@@ -85,25 +85,25 @@ open class MeshHandler {
         }
     }
     
-    open func batchCommand(crownstoneIds: [UInt8], commandPacket: [UInt8]) -> Promise<Void> {
+    public func batchCommand(crownstoneIds: [UInt8], commandPacket: [UInt8]) -> Promise<Void> {
         let meshPayload = MeshCommandPacket(type: .control, crownstoneIds: crownstoneIds, payload: commandPacket).getPacket()
         let commandPayload = ControlPacket(type: .mesh_command, payloadArray: meshPayload).getPacket()
         return self._writeControlPacket(commandPayload)
     }
     
-    open func batchBeaconConfig(crownstoneIds: [UInt8], beaconPacket: [UInt8]) -> Promise<Void> {
+    public func batchBeaconConfig(crownstoneIds: [UInt8], beaconPacket: [UInt8]) -> Promise<Void> {
         let meshPayload = MeshCommandPacket(type: .beacon, crownstoneIds: crownstoneIds, payload: beaconPacket).getPacket()
         let commandPayload = ControlPacket(type: .mesh_command, payloadArray: meshPayload).getPacket()
         return self._writeControlPacket(commandPayload)
     }
     
-    open func batchConfig(crownstoneIds: [UInt8], configPacket: [UInt8]) -> Promise<Void> {
+    public func batchConfig(crownstoneIds: [UInt8], configPacket: [UInt8]) -> Promise<Void> {
         let meshPayload = MeshCommandPacket(type: .config, crownstoneIds: crownstoneIds, payload: configPacket).getPacket()
         let commandPayload = ControlPacket(type: .mesh_command, payloadArray: meshPayload).getPacket()
         return self._writeControlPacket(commandPayload)
     }
     
-    open func batchState(crownstoneIds: [UInt8], statePacket: [UInt8]) -> Promise<Void> {
+    public func batchState(crownstoneIds: [UInt8], statePacket: [UInt8]) -> Promise<Void> {
         let meshPayload = MeshCommandPacket(type: .state, crownstoneIds: crownstoneIds, payload: statePacket).getPacket()
         let commandPayload = ControlPacket(type: .mesh_command, payloadArray: meshPayload).getPacket()
         return self._writeControlPacket(commandPayload)
