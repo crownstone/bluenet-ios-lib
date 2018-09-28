@@ -29,7 +29,7 @@ open class ScanResponsePacket {
     open var powerFactor         :   Double   = 1
     open var powerUsageReal      :   Double   = 0
     open var powerUsageApparent  :   Double   = 0
-    open var accumulatedEnergy   :   Int32    = 0
+    open var accumulatedEnergy   :   Int64    = 0
     open var setupMode           :   Bool     = false
     open var stateOfExternalCrownstone : Bool = false
     open var data                :   [UInt8]!
