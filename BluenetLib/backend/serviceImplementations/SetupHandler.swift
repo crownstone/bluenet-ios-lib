@@ -14,7 +14,6 @@ public class SetupHandler {
     let bleManager : BleManager!
     var settings : BluenetSettings!
     let eventBus : EventBus!
-    var deviceList : [String: AvailableDevice]!
     
     var unsubscribeNotificationCallback : voidPromiseCallback?
     
@@ -24,11 +23,10 @@ public class SetupHandler {
     var verificationFailed = false
     var step = 0
     
-    init (bleManager:BleManager, eventBus: EventBus, settings: BluenetSettings, deviceList: [String: AvailableDevice]) {
+    init (bleManager:BleManager, eventBus: EventBus, settings: BluenetSettings) {
         self.bleManager = bleManager
         self.settings   = settings
         self.eventBus   = eventBus
-        self.deviceList = deviceList
     }
     
     

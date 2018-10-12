@@ -14,14 +14,12 @@ public class ControlHandler {
     let bleManager : BleManager!
     var settings : BluenetSettings!
     let eventBus : EventBus!
-    var deviceList : [String: AvailableDevice]!
     var disconnectCommandTimeList : [String: Double]!
     
-    init (bleManager:BleManager, eventBus: EventBus, settings: BluenetSettings, deviceList: [String: AvailableDevice]) {
+    init (bleManager:BleManager, eventBus: EventBus, settings: BluenetSettings) {
         self.bleManager = bleManager
         self.settings   = settings
         self.eventBus   = eventBus
-        self.deviceList = deviceList
     }
     
     public func recoverByFactoryReset(_ uuid: String) -> Promise<Void> {
@@ -174,7 +172,7 @@ public class ControlHandler {
      * It will then switch the crownstone. If it was > 0 --> 0 if it was 0 --> 1.
      **/
     public func toggleSwitchState(stateForOn : Float = 1.0) -> Promise<Float> {
-        let stateHandler = StateHandler(bleManager: self.bleManager, eventBus: self.eventBus, settings: self.settings, deviceList: self.deviceList)
+        let stateHandler = StateHandler(bleManager: self.bleManager, eventBus: self.eventBus, settings: self.settings)
         return Promise<Float> { fulfill, reject -> Void in
             var newSwitchState : Float = 0;
             stateHandler.getSwitchState()
@@ -243,7 +241,7 @@ public class ControlHandler {
             .then{(sessionNonce : [UInt8]) -> Promise<Void> in
                 return Promise <Void> { fulfill, reject in
                     do {
-                        if let guestKey = self.bleManager.settings.guestKey {
+                        if let guestKey = self.bleManager.settings.getGuestKey() {
                             let sessionNonce = try EncryptionHandler.decryptSessionNonce(sessionNonce, key: guestKey)
                             self.bleManager.settings.setSessionNonce(sessionNonce)
                             fulfill(())

@@ -207,18 +207,18 @@ class EncryptionHandler {
     }
     
     static func _getKey(_ userLevel: UserLevel, _ settings: BluenetSettings) throws -> [UInt8] {
-        if (settings.initializedKeys == false && userLevel != .setup) {
+        if (userLevel == .unknown) {
             throw BleError.COULD_NOT_ENCRYPT_KEYS_NOT_SET
         }
         
         var key : [UInt8]?
         switch (userLevel) {
         case .admin:
-            key = settings.adminKey
+            key = settings.getAdminKey()
         case .member:
-            key = settings.memberKey
+            key = settings.getMemberKey()
         case .guest:
-            key = settings.guestKey
+            key = settings.getGuestKey()
         case .setup:
             key = settings.setupKey
         default:

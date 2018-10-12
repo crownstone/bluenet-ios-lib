@@ -98,31 +98,23 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
             name: peripheral.name,
             rssi: RSSI,
             serviceData: advertisementData["kCBAdvDataServiceData"] as Any,
-            serviceUUID: advertisementData["kCBAdvDataServiceUUIDs"] as Any,
-            referenceId: BleManager.settings.referenceId,
-            liteParse: true
-        );
+            serviceUUID: advertisementData["kCBAdvDataServiceUUIDs"] as Any
+        )
         
-        
-        // Because crownstones alternate between connectable and nonconnectable to match iBeacon spec, the ios duplicate filtering does not work completely. This workaround implements uniqueness checking before decryption.
-        if (BleManager.scanUniqueOnly == true) {
-            let uniqueElement = emitData.getUniqueElement()
-            if (BleManager.uniquenessReference[emitData.handle] != nil) {
-                if (BleManager.uniquenessReference[emitData.handle] == uniqueElement) {
-                    return
-                }
-            }
-            BleManager.uniquenessReference[emitData.handle] = uniqueElement
-        }
-        
-        if (BleManager.settings.isEncryptionEnabled() && emitData.isSetupPackage() == false && BleManager.settings.guestKey != nil) {
-            emitData.decrypt(BleManager.settings.guestKey!)
-            BleManager.eventBus.emit("advertisementData",emitData)
-        }
-        else {
-            emitData.fullParse()
-            BleManager.eventBus.emit("advertisementData",emitData)
-        }
+//
+//        // Because crownstones alternate between connectable and nonconnectable to match iBeacon spec, the ios duplicate filtering does not work completely. This workaround implements uniqueness checking before decryption.
+//        if (BleManager.scanUniqueOnly == true) {
+//            let uniqueElement = emitData.getUniqueElement()
+//            if (BleManager.uniquenessReference[emitData.handle] != nil) {
+//                if (BleManager.uniquenessReference[emitData.handle] == uniqueElement) {
+//                    return
+//                }
+//            }
+//            BleManager.uniquenessReference[emitData.handle] = uniqueElement
+//        }
+//
+     
+        BleManager.eventBus.emit("rawAdvertisementData",emitData)
     }
     
     public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {

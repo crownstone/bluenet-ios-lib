@@ -44,6 +44,7 @@ public enum BleError : Error {
     case UNKNOWN_TYPE
     
     // encryption errors
+    case INVALID_SESSION_REFERENCE_ID
     case INVALID_SESSION_DATA
     case NO_SESSION_NONCE_SET
     case COULD_NOT_VALIDATE_SESSION_NONCE
@@ -147,11 +148,11 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     var CBDelegate : BluenetCBDelegate!
     var CBDelegateBackground : BluenetCBDelegateBackground!
 
-    public init(eventBus: EventBus, backgroundEnabled: Bool = true) {
+    public init(eventBus: EventBus, settings: BluenetSettings, backgroundEnabled: Bool = true) {
         super.init();
         
         self.notificationEventBus = EventBus()
-        self.settings = BluenetSettings()
+        self.settings = settings
         self.eventBus = eventBus
         
         self.backgroundEnabled = backgroundEnabled
@@ -165,13 +166,6 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         self.pendingPromise = promiseContainer()
     }
     
-    public func applicationWillEnterForeground() {
-        
-    }
-    
-    public func applicationDidEnterBackground() {
-        
-    }
     
     public func setBackgroundScanning(newBackgroundState: Bool) {
         if (self.backgroundEnabled == newBackgroundState) {
@@ -254,10 +248,6 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 self.restoreScanning()
             }
         }
-    }
-    
-    public func setSettings(_ settings: BluenetSettings) {
-        self.settings = settings
     }
     
     public func decoupleFromDelegate() {

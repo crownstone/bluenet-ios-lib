@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		FA0B813B1F94BB510090168B /* BluenetCBDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0B813A1F94BB510090168B /* BluenetCBDelegate.swift */; };
 		FA0B813D1F94BC410090168B /* BluenetCBDelegateBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0B813C1F94BC410090168B /* BluenetCBDelegateBackground.swift */; };
-		FA225EF321359C7900549058 /* NearestItemContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA225EF221359C7900549058 /* NearestItemContainer.swift */; };
+		FA225EF321359C7900549058 /* CrownstoneContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA225EF221359C7900549058 /* CrownstoneContainer.swift */; };
 		FA2261C11E55A7B9001D0262 /* DeviceHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA2261C01E55A7B9001D0262 /* DeviceHandler.swift */; };
 		FA2D0F6E1E1BFD88006A8260 /* iOSDFULibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA2D0F6D1E1BFD88006A8260 /* iOSDFULibrary.framework */; };
 		FA2DCB681DD0C99300D5A893 /* BluenetLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA3C18791CBBDA6B00A11CF7 /* BluenetLib.framework */; };
@@ -19,6 +19,8 @@
 		FA3FC25B1ED3499C00DD2F76 /* StateHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3FC25A1ED3499C00DD2F76 /* StateHandler.swift */; };
 		FA3FC25D1ED34DEF00DD2F76 /* ConversionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3FC25C1ED34DEF00DD2F76 /* ConversionTests.swift */; };
 		FA3FC25F1ED4346200DD2F76 /* CrownstoneErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3FC25E1ED4346200DD2F76 /* CrownstoneErrors.swift */; };
+		FA4B678F213839B60050CE9D /* KeySet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4B678E213839B60050CE9D /* KeySet.swift */; };
+		FA4B67912138414D0050CE9D /* AdvertisementValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4B67902138414D0050CE9D /* AdvertisementValidator.swift */; };
 		FA535A752076855000B6B793 /* opCode5.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA535A742076855000B6B793 /* opCode5.swift */; };
 		FA535A772076856400B6B793 /* opCode6.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA535A762076856400B6B793 /* opCode6.swift */; };
 		FA5882B91E38C0F100913AE6 /* BleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58828A1E38C0F000913AE6 /* BleManager.swift */; };
@@ -32,7 +34,6 @@
 		FA5882C21E38C0F100913AE6 /* BluenetLocalization.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882941E38C0F000913AE6 /* BluenetLocalization.swift */; };
 		FA5882C31E38C0F100913AE6 /* BluenetMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882951E38C0F000913AE6 /* BluenetMotion.swift */; };
 		FA5882C41E38C0F100913AE6 /* Advertisement.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882981E38C0F000913AE6 /* Advertisement.swift */; };
-		FA5882C51E38C0F100913AE6 /* AvailableDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882991E38C0F000913AE6 /* AvailableDevice.swift */; };
 		FA5882C61E38C0F100913AE6 /* BluenetSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58829A1E38C0F000913AE6 /* BluenetSettings.swift */; };
 		FA5882C71E38C0F100913AE6 /* EncryptedPackage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58829B1E38C0F000913AE6 /* EncryptedPackage.swift */; };
 		FA5882C81E38C0F100913AE6 /* Firmware.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58829C1E38C0F000913AE6 /* Firmware.swift */; };
@@ -93,7 +94,7 @@
 /* Begin PBXFileReference section */
 		FA0B813A1F94BB510090168B /* BluenetCBDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluenetCBDelegate.swift; sourceTree = "<group>"; };
 		FA0B813C1F94BC410090168B /* BluenetCBDelegateBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluenetCBDelegateBackground.swift; sourceTree = "<group>"; };
-		FA225EF221359C7900549058 /* NearestItemContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearestItemContainer.swift; sourceTree = "<group>"; };
+		FA225EF221359C7900549058 /* CrownstoneContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrownstoneContainer.swift; sourceTree = "<group>"; };
 		FA2261C01E55A7B9001D0262 /* DeviceHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceHandler.swift; sourceTree = "<group>"; };
 		FA2D0F6D1E1BFD88006A8260 /* iOSDFULibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iOSDFULibrary.framework; path = Carthage/Build/iOS/iOSDFULibrary.framework; sourceTree = "<group>"; };
 		FA2EEF771DA3FF9A0096B67F /* CryptoSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoSwift.framework; path = Carthage/Build/iOS/CryptoSwift.framework; sourceTree = "<group>"; };
@@ -104,6 +105,8 @@
 		FA3FC25A1ED3499C00DD2F76 /* StateHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateHandler.swift; sourceTree = "<group>"; };
 		FA3FC25C1ED34DEF00DD2F76 /* ConversionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConversionTests.swift; sourceTree = "<group>"; };
 		FA3FC25E1ED4346200DD2F76 /* CrownstoneErrors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CrownstoneErrors.swift; sourceTree = "<group>"; };
+		FA4B678E213839B60050CE9D /* KeySet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySet.swift; sourceTree = "<group>"; };
+		FA4B67902138414D0050CE9D /* AdvertisementValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvertisementValidator.swift; sourceTree = "<group>"; };
 		FA535A742076855000B6B793 /* opCode5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode5.swift; sourceTree = "<group>"; };
 		FA535A762076856400B6B793 /* opCode6.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode6.swift; sourceTree = "<group>"; };
 		FA58828A1E38C0F000913AE6 /* BleManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BleManager.swift; sourceTree = "<group>"; };
@@ -118,7 +121,6 @@
 		FA5882941E38C0F000913AE6 /* BluenetLocalization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluenetLocalization.swift; sourceTree = "<group>"; };
 		FA5882951E38C0F000913AE6 /* BluenetMotion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluenetMotion.swift; sourceTree = "<group>"; };
 		FA5882981E38C0F000913AE6 /* Advertisement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Advertisement.swift; sourceTree = "<group>"; };
-		FA5882991E38C0F000913AE6 /* AvailableDevice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AvailableDevice.swift; sourceTree = "<group>"; };
 		FA58829A1E38C0F000913AE6 /* BluenetSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluenetSettings.swift; sourceTree = "<group>"; };
 		FA58829B1E38C0F000913AE6 /* EncryptedPackage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptedPackage.swift; sourceTree = "<group>"; };
 		FA58829C1E38C0F000913AE6 /* Firmware.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Firmware.swift; sourceTree = "<group>"; };
@@ -282,18 +284,19 @@
 			isa = PBXGroup;
 			children = (
 				FA7065DA2003AE6A00C833FE /* Advertisements */,
-				FA5882991E38C0F000913AE6 /* AvailableDevice.swift */,
+				FA4B67902138414D0050CE9D /* AdvertisementValidator.swift */,
+				FA225EF221359C7900549058 /* CrownstoneContainer.swift */,
 				FA58829A1E38C0F000913AE6 /* BluenetSettings.swift */,
 				FA3FC25E1ED4346200DD2F76 /* CrownstoneErrors.swift */,
 				FA58829B1E38C0F000913AE6 /* EncryptedPackage.swift */,
 				FA58829C1E38C0F000913AE6 /* Firmware.swift */,
 				FA58829D1E38C0F000913AE6 /* iBeaconContainers.swift */,
 				FA58829E1E38C0F100913AE6 /* NearestItem.swift */,
-				FA225EF221359C7900549058 /* NearestItemContainer.swift */,
 				FA58829F1E38C0F100913AE6 /* PowerSamples.swift */,
 				FA5882A01E38C0F100913AE6 /* PromiseContainer.swift */,
 				FA76EF2020976EDB0046DCDE /* ResultPacket.swift */,
 				FA5882A21E38C0F100913AE6 /* TrainingData.swift */,
+				FA4B678E213839B60050CE9D /* KeySet.swift */,
 			);
 			path = containerClasses;
 			sourceTree = "<group>";
@@ -521,7 +524,6 @@
 				FA5882DB1E38C0F100913AE6 /* NotificationMerger.swift in Sources */,
 				FA5882CA1E38C0F100913AE6 /* NearestItem.swift in Sources */,
 				FA7065D92003AE4600C833FE /* ScanResponse.swift in Sources */,
-				FA5882C51E38C0F100913AE6 /* AvailableDevice.swift in Sources */,
 				FA5882D31E38C0F100913AE6 /* BlePackets.swift in Sources */,
 				FA5882C61E38C0F100913AE6 /* BluenetSettings.swift in Sources */,
 				FA7065EB2003BD7300C833FE /* opCode4.swift in Sources */,
@@ -537,7 +539,9 @@
 				FA5882BE1E38C0F100913AE6 /* PowerHandler.swift in Sources */,
 				FA5882C21E38C0F100913AE6 /* BluenetLocalization.swift in Sources */,
 				FA5882BC1E38C0F100913AE6 /* ControlHandler.swift in Sources */,
+				FA4B678F213839B60050CE9D /* KeySet.swift in Sources */,
 				FA76EF2120976EDB0046DCDE /* ResultPacket.swift in Sources */,
+				FA4B67912138414D0050CE9D /* AdvertisementValidator.swift in Sources */,
 				FA7065E02003AEA500C833FE /* opCode3.swift in Sources */,
 				FA5882C91E38C0F100913AE6 /* iBeaconContainers.swift in Sources */,
 				FA5882C81E38C0F100913AE6 /* Firmware.swift in Sources */,
@@ -563,7 +567,7 @@
 				FA5882D01E38C0F100913AE6 /* Globals.swift in Sources */,
 				FA7065E72003BD5300C833FE /* opCode3_type0.swift in Sources */,
 				FA0B813D1F94BC410090168B /* BluenetCBDelegateBackground.swift in Sources */,
-				FA225EF321359C7900549058 /* NearestItemContainer.swift in Sources */,
+				FA225EF321359C7900549058 /* CrownstoneContainer.swift in Sources */,
 				FA6106B5207D079B007969BB /* BlePeripheralManager.swift in Sources */,
 				FA7065F02003D5EF00C833FE /* AdvertisementUtil.swift in Sources */,
 				FA5882D51E38C0F100913AE6 /* Characteristics.swift in Sources */,
@@ -654,6 +658,7 @@
 				PRODUCT_NAME = BluenetLib;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -707,6 +712,7 @@
 				PRODUCT_NAME = BluenetLib;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";

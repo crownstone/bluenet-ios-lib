@@ -14,16 +14,12 @@ import CoreBluetooth
 public class DeviceHandler {
     let bleManager : BleManager!
     var settings : BluenetSettings!
-    let eventBus : EventBus!
-    var deviceList : [String: AvailableDevice]!
+    let eventBus : EventBus!    
     
-    
-    init (bleManager:BleManager, eventBus: EventBus, settings: BluenetSettings, deviceList: [String: AvailableDevice]) {
+    init (bleManager:BleManager, eventBus: EventBus, settings: BluenetSettings) {
         self.bleManager = bleManager
         self.settings   = settings
         self.eventBus   = eventBus
-        self.deviceList = deviceList
-        
     }
     
     public func getFirmwareRevision() -> Promise<String> {

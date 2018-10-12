@@ -29,7 +29,7 @@ public typealias eventCallback = (Any) -> Void
    |  --------------------------------------------------------------------------------------------------------
    |  "bleStatus"                   |     String           |     Is emitted when the state of the BLE changes. Possible values: "unauthorized", "poweredOff", "poweredOn", "unknown"
    |  "setupProgress"               |     NSNumber         |     Phases in the setup process, numbers from 1 - 13, 0 for error.
-   |  "advertisementData"           |     Advertisement    |     When an advertisement packet is received
+   |  "rawAdvertismentData"         |     Advertisement    |     When an advertisement packet is received
    |  "verifiedAdvertisementData"   |     Advertisement    |     When an advertisement has been decrypted successfully 3 consecutive times it is verified.
    |                                |                      |     Setup and DFU are also included since they dont need to be decrypted. This sorts out only your Crownstones.
    |  "nearestSetupCrownstone"      |     NearestItem      |     When a verified advertisement packet in setup mode is received, we check the list
@@ -44,10 +44,16 @@ public class Bluenet {
     public let blePeripheralManager : BlePeripheralManager!
     public var settings : BluenetSettings!
     let eventBus : EventBus!
-    var deviceList = [String: AvailableDevice]()
-    var setupList : NearestItemContainer!
-    var dfuList : NearestItemContainer!
+    
+    var reachableCrownstones = [String: AdvertismentValidator]()
+    var setupList : CrownstoneContainer!
+    var dfuList : CrownstoneContainer!
+    var crownstoneList: CrownstoneContainer!
+    var validatedCrownstoneList: CrownstoneContainer!
+    
     var disconnectCommandTimeList = [String: Double]()
+    
+    var encryptionMap = [String: String]()
 
     // declare the classes handling the library protocol
     public let dfu      : DfuHandler!
@@ -72,29 +78,29 @@ public class Bluenet {
     public init(backgroundEnabled: Bool = true) {
         self.settings   = BluenetSettings()
         self.eventBus   = EventBus()
-        self.bleManager = BleManager(eventBus: self.eventBus, backgroundEnabled: backgroundEnabled)
+        self.bleManager = BleManager(eventBus: self.eventBus, settings: settings, backgroundEnabled: backgroundEnabled)
         self.blePeripheralManager = BlePeripheralManager(eventBus: self.eventBus, backgroundEnabled: backgroundEnabled);
         
-        self.setupList = NearestItemContainer()
-        self.dfuList   = NearestItemContainer()
-        
-        // give the BLE manager a reference to the settings.
-        self.bleManager.setSettings(settings)
-        
+        self.setupList               = CrownstoneContainer(setupMode: true,  dfuMode: false)
+        self.dfuList                 = CrownstoneContainer(setupMode: false, dfuMode: true )
+        self.crownstoneList          = CrownstoneContainer(setupMode: false, dfuMode: false)
+        self.validatedCrownstoneList = CrownstoneContainer(setupMode: true,  dfuMode: true )
+       
         // pass on the shared objects to the worker classes
-        self.dfu     = DfuHandler(     bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList)
-        self.config  = ConfigHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList)
-        self.setup   = SetupHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList)
-        self.control = ControlHandler( bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList)
-        self.power   = PowerHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList)
-        self.mesh    = MeshHandler(    bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList)
-        self.device  = DeviceHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList)
-        self.state   = StateHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings, deviceList: deviceList)
+        self.dfu     = DfuHandler(     bleManager:bleManager, eventBus: eventBus, settings: settings)
+        self.config  = ConfigHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings)
+        self.setup   = SetupHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings)
+        self.control = ControlHandler( bleManager:bleManager, eventBus: eventBus, settings: settings)
+        self.power   = PowerHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings)
+        self.mesh    = MeshHandler(    bleManager:bleManager, eventBus: eventBus, settings: settings)
+        self.device  = DeviceHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings)
+        self.state   = StateHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings)
         
         _ = eventBus.on("disconnectCommandWritten", self._storeDisconnectCommandList)
         
         // subscribe to BLE advertisements
-        _ = self.eventBus.on("advertisementData", self._parseAdvertisement)
+//        _ = self.eventBus.on("advertisementData", self._parseAdvertisement)
+        _ = self.eventBus.on("rawAdvertisementData", self._checkAdvertisement)
     }
     
     public func enableBatterySaving() {
@@ -121,16 +127,11 @@ public class Bluenet {
         self.blePeripheralManager.stopAdvertising()
     }
     
-    /**
-     * Load a settings object into Bluenet
-     */
-    public func setSettings(encryptionEnabled: Bool, adminKey: String?, memberKey: String?, guestKey: String?, referenceId: String) {
-        self.settings.loadKeys(
+    
+    public func loadKeysets(encryptionEnabled: Bool, keySets: [KeySet]) {
+        self.settings.loadKeySets(
             encryptionEnabled: encryptionEnabled,
-            adminKey: adminKey,
-            memberKey: memberKey,
-            guestKey: guestKey,
-            referenceId: referenceId
+            keySets: keySets
         )
     }
     
@@ -245,15 +246,15 @@ public class Bluenet {
 
     
     /**
-     * Connect to a BLE device with the provided UUID.
-     * This UUID is unique per BLE device per iOS device and is NOT the MAC address.
+     * Connect to a BLE device with the provided handle.
+     * This handle is unique per BLE device per iOS device and is NOT the MAC address.
      * Timeout is set to 3 seconds starting from the actual start of the connection.
      *   - It will abort other pending connection requests
      *   - It will disconnect from a connected device if that is the case
      */
-    public func connect(_ uuid: String) -> Promise<Void> {
+    public func connect(_ handle: String, referenceId: String? = nil) -> Promise<Void> {
         var delayTime : Double = 0
-        if let timeOfLastDisconnectCommand = self.disconnectCommandTimeList[uuid] {
+        if let timeOfLastDisconnectCommand = self.disconnectCommandTimeList[handle] {
             let minimumTimeBetweenReconnects = timeoutDurations.reconnect // seconds
             let diff = Date().timeIntervalSince1970 - timeOfLastDisconnectCommand
             if (diff < minimumTimeBetweenReconnects) {
@@ -262,12 +263,21 @@ public class Bluenet {
         }
         
         let connectionCommand : voidPromiseCallback = {
-            LOG.info("BLUENET_LIB: Connecting to \(uuid) now.")
-            return self.bleManager.connect(uuid)
+            LOG.info("BLUENET_LIB: Connecting to \(handle) now.")
+            return self.bleManager.connect(handle)
                 .then{_ -> Promise<Void> in
                     LOG.info("BLUENET_LIB: connected!")
                     return Promise<Void> {fulfill, reject in
                         if (self.settings.isEncryptionEnabled()) {
+                            // we have to validate if the referenceId is valid here, otherwise we cannot do encryption
+                            if (referenceId == nil) {
+                                return reject(BleError.INVALID_SESSION_REFERENCE_ID)
+                            }
+                            
+                            if (self.settings.setSessionId(referenceId: referenceId!) == false) {
+                                return reject(BleError.INVALID_SESSION_REFERENCE_ID)
+                            }
+                            
                             self.control.getAndSetSessionNonce()
                                 .then{_ -> Void in
                                     fulfill(())
@@ -282,7 +292,7 @@ public class Bluenet {
         }
         
         if (delayTime != 0) {
-            LOG.info("BLUENET_LIB: Delaying connection to \(uuid) with \(delayTime) seconds since it recently got a disconnectCommand.")
+            LOG.info("BLUENET_LIB: Delaying connection to \(handle) with \(delayTime) seconds since it recently got a disconnectCommand.")
             return Promise<Void> {fulfill, reject in
                 delay(delayTime, {
                     connectionCommand().then{ _ in fulfill(()) }.catch{err in reject(err) }
@@ -341,11 +351,11 @@ public class Bluenet {
     }
     
     public func applicationWillEnterForeground() {
-        self.bleManager.applicationWillEnterForeground()
+        
     }
     
     public func applicationDidEnterBackground() {
-        self.bleManager.applicationDidEnterBackground()
+        
     }
     
     // MARK: util
@@ -355,110 +365,72 @@ public class Bluenet {
         }
     }
     
-    func _parseAdvertisement(_ data: Any) {
+
+
+    func _checkAdvertisement(_ data: Any) {
         // first we check if the data is conforming to an advertisment
         if let castData = data as? Advertisement {
-            // check if we already know this Crownstone
-            if deviceList[castData.handle] != nil {
-                deviceList[castData.handle]!.update(castData)
-                if (deviceList[castData.handle]!.verified) {
-                    // log debug for verified advertisement
-                    self.counter += 1
-                    LOG.debug("BLUENET_LIB: received verifiedAdvertisementData nr: \(self.counter)")
-                    self.eventBus.emit("verifiedAdvertisementData",castData)
-                    
-                    // if we have a valid RSSI measurement:
-                    if (castData.rssi.intValue < 0) {
-                        
-                        // handling setup packages
-                        if (castData.isSetupPackage()) {
-                            // log debug for nearest setup
-                            LOG.debug("BLUENET_LIB: received SetupAdvertisement nr: \(self.counter)")
-                            
-                            // remove the item from the dfuList if this is in there. In the event a state changes, we don't want to keep it in the old lists
-                            self.dfuList.removeItem(handle: castData.handle)
-                            
-                            // add entry to the dfu list
-                            self.setupList.load(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue)
-                            let nearestSetup = self.setupList.getNearestItem(setupMode: true, dfuMode: false)
-                            if nearestSetup != nil {
-                                self.eventBus.emit("nearestSetupCrownstone", nearestSetup!)
-                            }
-                            
-                             // log debug for nearest setup
-                            LOG.debug("BLUENET_LIB: received nearestSetupCrownstone nr: \(self.counter)")
-   
-                        }
-                        else if (castData.isDFUPackage()) {
-                            // log debug for nearest setup
-                            LOG.debug("BLUENET_LIB: received DFUadvertisement nr: \(self.counter)")
-                            
-                            // remove the item from the setuplist if this is in there. In the event a state changes, we don't want to keep it in the old lists
-                            self.setupList.removeItem(handle: castData.handle)
-                            
-                            // add entry to the dfu list
-                            self.dfuList.load(name: castData.name, handle: castData.handle, rssi: castData.rssi.intValue)
-                            let nearestDFU = self.dfuList.getNearestItem(setupMode: false, dfuMode: true)
-                            if nearestDFU != nil {
-                                self.eventBus.emit("nearestDFUCrownstone", nearestDFU!)
-                            }
-                            
-                            // log debug for nearest setup
-                            LOG.debug("BLUENET_LIB: received nearestSetupCrownstone nr: \(self.counter)")
-                        }
-                        else {
-                            // handling normal packages, we emit nearest Crownstone (since verifieds are also Crownstones) and verified nearest.
-                            self._emitNearestCrownstone(topic: "nearestCrownstone", verifiedOnly: false);
-                            self._emitNearestCrownstone(topic: "nearestVerifiedCrownstone", verifiedOnly: true);
-                            self.dfuList.removeItem(handle: castData.handle)
-                            self.setupList.removeItem(handle: castData.handle)
-                        }
-                    }
-                }
-                else if (castData.isCrownstoneFamily) {
-                    self.eventBus.emit("unverifiedAdvertisementData",castData)
-                    // if the Crownstone is not verified yet, we can still emit a nearest Crownstone event if the RSSI is valid.
-                    if (castData.rssi.intValue < 0) {
-                        self._emitNearestCrownstone(topic: "nearestCrownstone", verifiedOnly: false);
-                    }
+            // emit advertisementData
+            self.eventBus.emit("advertisementData", castData)
+            
+            // check if this is a Crownstone, if not we don't need to do anything more. Raw scans can subscribe to the rawAdvertismentData topic.
+            if (!castData.isCrownstoneFamily && castData.operationMode != .dfu) { return }
+            
+            let handle = castData.handle
+            
+            // we will leave it up to the validator to determine what to do now.
+            if self.reachableCrownstones[handle] == nil {
+                self.reachableCrownstones[handle] = AdvertismentValidator(settings: self.settings)
+            }
+            
+            let validator = self.reachableCrownstones[handle]!
+            validator.update(advertisement: castData)
+    
+            
+            if (validator.validated) {
+                // emit verified advertisement
+                self.eventBus.emit("verifiedAdvertisementData", castData)
+                
+                // emit nearestCrownstone
+                self.addToList(adv: castData, crownstoneList: self.crownstoneList, topic: "nearestCrownstone", validated: true)
+                
+                switch validator.operationMode {
+                    case CrownstoneMode.setup:
+                        self.addToList(adv: castData, crownstoneList: self.setupList, topic: "nearestSetupCrownstone", validated: true)
+                        self.dfuList.removeItem(handle: handle)
+                        self.validatedCrownstoneList.removeItem(handle: handle)
+                    case CrownstoneMode.dfu:
+                        self.addToList(adv: castData, crownstoneList: self.dfuList, topic: "nearestDFUCrownstone", validated: true)
+                        self.setupList.removeItem(handle: handle)
+                        self.validatedCrownstoneList.removeItem(handle: handle)
+                    case CrownstoneMode.operation:
+                        self.addToList(adv: castData, crownstoneList: self.validatedCrownstoneList, topic: "nearestVerifiedCrownstone", validated: true)
+                        self.dfuList.removeItem(handle: handle)
+                        self.setupList.removeItem(handle: handle)
+                    case CrownstoneMode.unknown:
+                        // emit nearestCrownstone
+                        break
                 }
             }
             else {
-                // add this Crownstone to the list that we keep track of.
-                deviceList[castData.handle] = AvailableDevice(castData, { self.deviceList.removeValue(forKey: castData.handle)})
+                if (!castData.isCrownstoneFamily) { return }
+                
+                // emit unverifiedAdvertisementData
+                self.eventBus.emit("unverifiedAdvertisementData", castData)
+                
+                // emit nearestCrownstone
+                self.addToList(adv: castData, crownstoneList: self.crownstoneList, topic: "nearestCrownstone", validated: false)
             }
         }
     }
     
-    
-    // TODO: can be optimized so it does not use a loop.
-    // TODO: move this logic into a specific container class instead of the devicelist dictionary
-    func _emitNearestCrownstone(topic: String, verifiedOnly: Bool = true) {
-        var nearestRSSI = -1000
-        var nearestHandle = ""
-        var nearestName : String?
-        var nearestVerified = false
-        for (handle, device) in self.deviceList {
-            if (device.rssi > nearestRSSI) {
-                if ((verifiedOnly == true && device.verified == true) || verifiedOnly == false) {
-                    nearestRSSI = device.rssi
-                    nearestHandle = handle
-                    nearestName = device.name
-                    nearestVerified = device.verified
-                }
-            }
-        }
-        
-        if (nearestName == nil) {
-            nearestName = "nil"
-        }
-        
-        if (nearestHandle != "" && nearestRSSI < 0) {
-            let data = NearestItem(name: nearestName!, handle: nearestHandle, rssi: nearestRSSI, setupMode: false, verified: nearestVerified)
-            self.eventBus.emit(topic, data)
+    func addToList(adv: Advertisement, crownstoneList: CrownstoneContainer, topic: String, validated: Bool) {
+        crownstoneList.load(name: adv.name, handle: adv.handle, rssi: adv.rssi.intValue, validated: validated)
+        let nearestItem = crownstoneList.getNearestItem()
+        if (nearestItem != nil) {
+            self.eventBus.emit(topic, nearestItem!)
         }
     }
-    
     
 }
 

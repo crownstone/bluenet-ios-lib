@@ -58,14 +58,15 @@ func parseOpcode3_type0(serviceData : ScanResponsePacket, data : [UInt8], litePa
         serviceData.powerUsageReal     = NSNumber(value: realPower).doubleValue / 8
         serviceData.powerUsageApparent = serviceData.powerUsageReal / serviceData.powerFactor
         
-        serviceData.accumulatedEnergy = Conversion.uint32_to_int32(
+        let accumulatedEnergy = Conversion.uint32_to_int32(
             Conversion.uint8_array_to_uint32([
                 data[9],
                 data[10],
                 data[11],
                 data[12]
             ])
-        )
+        );
+        serviceData.accumulatedEnergy = NSNumber(value: accumulatedEnergy).int64Value * 64
         
         if (serviceData.timeSet) {
             serviceData.timestamp = NSNumber(value: reconstructTimestamp(currentTimestamp: NSDate().timeIntervalSince1970, LsbTimestamp: serviceData.partialTimestamp)).doubleValue

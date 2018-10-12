@@ -14,13 +14,11 @@ public class ConfigHandler {
     let bleManager : BleManager!
     var settings : BluenetSettings!
     let eventBus : EventBus!
-    var deviceList : [String: AvailableDevice]!
     
-    init (bleManager:BleManager, eventBus: EventBus, settings: BluenetSettings, deviceList: [String: AvailableDevice]) {
+    init (bleManager:BleManager, eventBus: EventBus, settings: BluenetSettings) {
         self.bleManager = bleManager
         self.settings   = settings
         self.eventBus   = eventBus
-        self.deviceList = deviceList
     }
     
     public func setIBeaconUUID(_ uuid: String) -> Promise<Void> {
