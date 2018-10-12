@@ -17,7 +17,7 @@ public class KeySet {
     public var referenceId : String = "unknown"
     public var userLevel : UserLevel = .unknown
     
-    init(adminKey: String?, memberKey: String?, guestKey: String?, referenceId: String) {
+    public init(adminKey: String?, memberKey: String?, guestKey: String?, referenceId: String) {
         self.referenceId = referenceId
         
         if (adminKey != nil) {
