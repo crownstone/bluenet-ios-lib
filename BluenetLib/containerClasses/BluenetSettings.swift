@@ -135,18 +135,22 @@ public class BluenetSettings {
     
     public func loadSetupKey(_ setupKey: [UInt8]) {
         self.setupKey = setupKey
+        self.detemineUserLevel()
     }
     
     public func exitSetup() {
         self.setupKey = nil
+        self.detemineUserLevel()
     }
     
     public func disableEncryptionTemporarily() {
         self.temporaryDisable = true
+        self.detemineUserLevel()
     }
     
     public func restoreEncryption() {
         self.temporaryDisable = false
+        self.detemineUserLevel()
     }
     
     public func isTemporarilyDisabled() -> Bool {

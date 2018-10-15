@@ -60,6 +60,7 @@ public enum BleError : Error {
     case CAN_NOT_GET_PAYLOAD
     case USERLEVEL_IN_READ_PACKET_INVALID
     case READ_SESSION_NONCE_ZERO_MAYBE_ENCRYPTION_DISABLED
+    case SETUP_FAILED
     
     // recovery error
     case NOT_IN_RECOVERY_MODE

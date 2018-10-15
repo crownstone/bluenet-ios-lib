@@ -56,11 +56,12 @@ public class CrownstoneContainer {
         let currentTime = Date().timeIntervalSince1970
         self.removeExpired(currentTime: currentTime)
         
-        let nearestRSSI = -1000
+        var nearestRSSI = -1000
         var nearStone : CrownstoneSummary? = nil
         for (_ , nearInfo) in self.items {
             if (nearInfo.rssi > nearestRSSI) {
                 nearStone = nearInfo
+                nearestRSSI = nearInfo.rssi
             }
         }
         if (nearStone != nil) {

@@ -16,13 +16,19 @@ struct validationSet {
 }
 
 
+enum ResultType : UInt8 {
+    case FAILED = 0
+    case DUPLICATE
+    case SUCCESS
+    case ERROR
+}
+
 /**
  *
  * Every Crownstone has one of these classes, it is used to check which keys we should use to decrypt the payload.
  *
  */
 public class AdvertismentValidator {
-    
     public var validated = false
     public var validatedMode : CrownstoneMode = .unknown
     public var validatedReferenceId : String?
@@ -50,23 +56,21 @@ public class AdvertismentValidator {
     
     public func update(advertisement: Advertisement) {
         // dfu and setup crownstones can be identified without decryption.
-        let incomingOperationMode = advertisement.getOperationMode()
-        if (incomingOperationMode == CrownstoneMode.dfu || incomingOperationMode == CrownstoneMode.setup) {
-            self.advertisementIsValidated(validatedMode: incomingOperationMode)
-            self.operationMode = incomingOperationMode
-            
+        self.operationMode = advertisement.getOperationMode()
+        if (self.operationMode == CrownstoneMode.dfu || self.operationMode == CrownstoneMode.setup) {
+            self.advertisementIsValidated(validatedMode: self.operationMode)
             return
         }
         
         // we have verified this Crownstone before
-        if (self.validated && self.validatedMode == incomingOperationMode) {
+        if (self.validated && self.validatedMode == self.operationMode) {
             // we assume it's in operation mode, if not --> we're not verified
-            if (incomingOperationMode == CrownstoneMode.unknown) {
+            if (self.operationMode == CrownstoneMode.unknown) {
                 self.invalidate()
             }
             else if (self.validatedReferenceId != nil) {
                 // check if we can validate this message with the established key
-                if (!self.validate(advertisement, referenceId: self.validatedReferenceId!)) {
+                if (self.validate(advertisement, referenceId: self.validatedReferenceId!) == .FAILED) {
                     // if we fail to validate this with the previously accepted referenceId --> not verified!
                     self.invalidate()
                     self.attemptValidation(advertisement: advertisement)
@@ -80,7 +84,7 @@ public class AdvertismentValidator {
         }
         else {
             // if there is a mode change, we should invalidate.
-            if (self.validated && self.validatedMode != incomingOperationMode) {
+            if (self.validated && self.validatedMode != self.operationMode) {
                 self.invalidate()
             }
             
@@ -101,17 +105,21 @@ public class AdvertismentValidator {
    
     
     func attemptValidation(advertisement: Advertisement) {
-        let incomingOperationMode = advertisement.getOperationMode()
         var initialRun = false;
-        if (incomingOperationMode == CrownstoneMode.operation) {
+        if (self.operationMode == CrownstoneMode.operation) {
             for keySet in self.settings.keySetList {
                 // we want to check if this is the first time we try validation. The first time no key will return a valid measurement.
                 if (self.validationMap[keySet.referenceId] == nil) {
                     initialRun = true
                 }
                 
-                if (self.validate(advertisement, referenceId: keySet.referenceId)) {
-                    self.addValidMeasurement(operationMode: incomingOperationMode, referenceId: keySet.referenceId)
+
+                let validation = self.validate(advertisement, referenceId: keySet.referenceId)
+                if (validation == .SUCCESS) {
+                    self.addValidMeasurement(operationMode: self.operationMode, referenceId: keySet.referenceId)
+                    return
+                }
+                else if (validation == .DUPLICATE) {
                     return
                 }
             }
@@ -164,27 +172,28 @@ public class AdvertismentValidator {
     *   It will only be called on operation mode Crownstones.
     *   This method is the owner of the validationMap objects and is the only one that changes them.
     **/
-    func validate(_ advertisement: Advertisement, referenceId: String) -> Bool {
-        
+    func validate(_ advertisement: Advertisement, referenceId: String) -> ResultType {
         // we need to have a guest key for this reference Id
         let guestKey = self.settings.getGuestKey(referenceId: referenceId)
         if (guestKey == nil) {
-            return false
+            return .ERROR
         }
     
+        var firstTime = false
         if (self.validationMap[referenceId] == nil) {
             self.validationMap[referenceId] = validationSet()
+            firstTime = true
         }
         
         let scanResponse = advertisement.scanResponse!
-        var validationMap = self.validationMap[referenceId]!
+        let validationMap = self.validationMap[referenceId]!
         
         scanResponse.decrypt(guestKey!)
         
         var validMeasurement = false
-        if (validationMap.uniqueIdentifier != nil) {
+        if (validationMap.uniqueIdentifier != nil || firstTime) {
             // we match the unique identifier to check if the advertisement is different. If it is the same, we're checking duplicates.
-            if (validationMap.uniqueIdentifier! != scanResponse.uniqueIdentifier) {
+            if (validationMap.uniqueIdentifier == nil || validationMap.uniqueIdentifier! != scanResponse.uniqueIdentifier) {
                 if (scanResponse.validation != 0 && (scanResponse.opCode == 5 || scanResponse.opCode == 3)) {
                     //datatype 1 is the error packet, this does not have a validation element
                     if (scanResponse.dataType != 1) {
@@ -204,24 +213,28 @@ public class AdvertismentValidator {
                     }
                 }
             }
+            else {
+                self.validationMap[referenceId]!.uniqueIdentifier = scanResponse.uniqueIdentifier
+                self.validationMap[referenceId]!.crownstoneId     = scanResponse.crownstoneId
+                return .DUPLICATE
+            }
 
+            self.validationMap[referenceId]!.uniqueIdentifier = scanResponse.uniqueIdentifier
+            self.validationMap[referenceId]!.crownstoneId     = scanResponse.crownstoneId
             if (validMeasurement) {
                 // dont overflow.
                 if (validationMap.validMeasurementCount < 10) {
-                    validationMap.validMeasurementCount += 1
+                    self.validationMap[referenceId]!.validMeasurementCount += 1
                 }
+                return .SUCCESS
             }
             else {
                 // if this is an invalid measurement, we set the valid measurement counter back to 0
-                validationMap.validMeasurementCount = 0
+                self.validationMap[referenceId]!.validMeasurementCount = 0
+                return .FAILED
             }
         }
-        
-        validationMap.uniqueIdentifier = scanResponse.uniqueIdentifier
-        validationMap.crownstoneId     = scanResponse.crownstoneId
-        
-        // false here means not completely validated yet.
-        return validMeasurement
+        return .FAILED
     }
     
     

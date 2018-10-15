@@ -370,10 +370,7 @@ public class Bluenet {
     func _checkAdvertisement(_ data: Any) {
         // first we check if the data is conforming to an advertisment
         if let castData = data as? Advertisement {
-            // emit advertisementData
-            self.eventBus.emit("advertisementData", castData)
-            
-            // check if this is a Crownstone, if not we don't need to do anything more. Raw scans can subscribe to the rawAdvertismentData topic.
+            // check if this is a Crownstone, if not we don't need to do anything more. Raw scans can subscribe to the advertisementData topic.
             if (!castData.isCrownstoneFamily && castData.operationMode != .dfu) { return }
             
             let handle = castData.handle
@@ -421,6 +418,9 @@ public class Bluenet {
                 // emit nearestCrownstone
                 self.addToList(adv: castData, crownstoneList: self.crownstoneList, topic: "nearestCrownstone", validated: false)
             }
+            
+            // finally, we emit advertisementData. This has to be done at the end of this function to ensure this is also decrypted if that was possible.
+            self.eventBus.emit("advertisementData", castData)
         }
     }
     
