@@ -76,6 +76,10 @@ public class AdvertismentValidator {
                     self.invalidate()
                     self.attemptValidation(advertisement: advertisement)
                 }
+                else {
+                    // this is the referenceId of the keyset that validated the advertisment.
+                    advertisement.referenceId = self.validatedReferenceId
+                }
             }
             else {
                 // we do not have a validated reference Id --> we're not validated for operation mode.
@@ -117,8 +121,6 @@ public class AdvertismentValidator {
 
                 let validation = self.validate(advertisement, referenceId: keySet.referenceId)
                 if (validation == .SUCCESS) {
-                    // place the referenceID in to the advertisement to tell the system which key was used to decrypt this advertisement.
-                    advertisement.referenceId = keySet.referenceId
                     self.addValidMeasurement(operationMode: self.operationMode, referenceId: keySet.referenceId)
                     return
                 }
