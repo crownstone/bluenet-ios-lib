@@ -126,8 +126,6 @@ public class SetupHandler {
      */
     public func fastSetup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
         self.step = 0
-        self.verificationFailed = false
-        var successNotificationReceived = false
         return Promise<Void> { fulfill, reject in
             self.handleSetupPhaseEncryption()
                 .then{(_) -> Promise<Void> in
@@ -147,7 +145,6 @@ public class SetupHandler {
                                     if (payload == ResultValue.WAIT_FOR_SUCCESS.rawValue) {
                                         // thats ok
                                         self.eventBus.emit("setupProgress", 7)
-                                        successNotificationReceived = true
                                         return .CONTINUE
                                     }
                                     else if (payload == ResultValue.SUCCESS.rawValue) {
@@ -170,9 +167,6 @@ public class SetupHandler {
                         ,timeout: 3, successIfWriteSuccessful: true)
                 }
                 .then{(_) -> Promise<Void> in
-                    if (successNotificationReceived == false) {
-                        throw BleError.SETUP_FAILED
-                    }
                     LOG.info("BLUENET_LIB: SetupCommand Finished, disconnecting")
                     self.eventBus.emit("setupProgress", 11)
                     return self.bleManager.waitForPeripheralToDisconnect(timeout: 10)
