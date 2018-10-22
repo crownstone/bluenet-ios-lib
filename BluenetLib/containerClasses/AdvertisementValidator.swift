@@ -58,6 +58,7 @@ public class AdvertismentValidator {
         // dfu and setup crownstones can be identified without decryption.
         self.operationMode = advertisement.getOperationMode()
         if (self.operationMode == CrownstoneMode.dfu || self.operationMode == CrownstoneMode.setup) {
+            advertisement.parse()
             self.advertisementIsValidated(validatedMode: self.operationMode)
             return
         }

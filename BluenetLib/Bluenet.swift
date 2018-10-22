@@ -47,7 +47,7 @@ public class Bluenet {
     
     var reachableCrownstones = [String: AdvertismentValidator]()
     var setupList : CrownstoneContainer!
-    var dfuList : CrownstoneContainer!
+    var dfuList   : CrownstoneContainer!
     var crownstoneList: CrownstoneContainer!
     var validatedCrownstoneList: CrownstoneContainer!
     
