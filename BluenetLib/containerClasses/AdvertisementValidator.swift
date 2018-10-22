@@ -117,6 +117,8 @@ public class AdvertismentValidator {
 
                 let validation = self.validate(advertisement, referenceId: keySet.referenceId)
                 if (validation == .SUCCESS) {
+                    // place the referenceID in to the advertisement to tell the system which key was used to decrypt this advertisement.
+                    advertisement.referenceId = keySet.referenceId
                     self.addValidMeasurement(operationMode: self.operationMode, referenceId: keySet.referenceId)
                     return
                 }
