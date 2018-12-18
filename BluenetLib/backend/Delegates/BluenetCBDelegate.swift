@@ -133,7 +133,7 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
             BleManager.pendingPromise.reject(errorVal)
         }
         else {
-            BleManager.pendingPromise.reject(BleError.CONNECTION_FAILED)
+            BleManager.pendingPromise.reject(BluenetError.CONNECTION_FAILED)
         }
     }
     
@@ -171,7 +171,7 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
                 LOG.info("BLUENET_LIB: Disconnected succesfully")
                 // if the pending promise is NOT for disconnect, a disconnection event is a rejection.
                 if (BleManager.pendingPromise.type != .DISCONNECT) {
-                    BleManager.pendingPromise.reject(BleError.DISCONNECTED)
+                    BleManager.pendingPromise.reject(BluenetError.DISCONNECTED)
                 }
                 else {
                     BleManager.pendingPromise.fulfill(())

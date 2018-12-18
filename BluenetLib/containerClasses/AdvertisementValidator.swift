@@ -8,7 +8,6 @@
 
 import Foundation
 
-
 struct validationSet {
     var uniqueIdentifier: NSNumber? = nil
     var crownstoneId: UInt8          = 0
@@ -44,6 +43,7 @@ public class AdvertismentValidator {
     var settings : BluenetSettings!
     var validationMap = [String: validationSet]()
     var failedValidationCounter = 0
+    
     
     init(settings: BluenetSettings) {
         self.settings = settings
@@ -118,7 +118,6 @@ public class AdvertismentValidator {
                     initialRun = true
                 }
                 
-
                 let validation = self.validate(advertisement, referenceId: keySet.referenceId)
                 if (validation == .SUCCESS) {
                     self.addValidMeasurement(operationMode: self.operationMode, referenceId: keySet.referenceId)
@@ -199,7 +198,7 @@ public class AdvertismentValidator {
         if (validationMap.uniqueIdentifier != nil || firstTime) {
             // we match the unique identifier to check if the advertisement is different. If it is the same, we're checking duplicates.
             if (validationMap.uniqueIdentifier == nil || validationMap.uniqueIdentifier! != scanResponse.uniqueIdentifier) {
-                if (scanResponse.validation != 0 && (scanResponse.opCode == 5 || scanResponse.opCode == 3)) {
+                if (scanResponse.opCode == 5 || scanResponse.opCode == 3) {
                     //datatype 1 is the error packet, this does not have a validation element
                     if (scanResponse.dataType != 1) {
                         if (scanResponse.validation == 0xFA) {

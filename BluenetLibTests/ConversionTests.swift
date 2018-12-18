@@ -94,4 +94,11 @@ class ConversionTests: XCTestCase {
         XCTAssertEqual(Conversion.float_to_uint8_array(3.3),[51,51,83,64])
         XCTAssertEqual(Conversion.uint8_array_to_float([51,51,83,64]),3.3)
     }
+    
+    func testHexStringCnversion() {
+        print(Conversion.uint16_to_hex_string(0xf000))
+        print(Conversion.uint16_to_hex_string(0x0f00))
+        print(Conversion.uint16_to_hex_string(0x00f0))
+        print(Conversion.uint16_to_hex_string(0x000f))
+    }
 }

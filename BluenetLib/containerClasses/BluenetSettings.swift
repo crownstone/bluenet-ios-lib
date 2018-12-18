@@ -8,6 +8,12 @@
 
 import Foundation
 
+public struct LocationState {
+    var sphereUID: UInt8?
+    var locationId: UInt8?
+    var profileIndex: UInt8?
+}
+
 
 public class BluenetSettings {
     public var encryptionEnabled = false
@@ -22,7 +28,7 @@ public class BluenetSettings {
     public var sessionNonce : [UInt8]? = nil
     
     public var userLevel : UserLevel = .unknown
-    
+    public var locationState = LocationState()
     
     init() {}
     
@@ -32,6 +38,12 @@ public class BluenetSettings {
         for keySet in keySets {
             self.keySets[keySet.referenceId] = keySet
         }
+    }
+    
+    public func setLocationState(sphereUID: UInt8, locationId: UInt8, profileIndex: UInt8) {
+        self.locationState.sphereUID = sphereUID
+        self.locationState.locationId = locationId
+        self.locationState.profileIndex = profileIndex
     }
     
     public func getGuestKey(referenceId: String) -> [UInt8]? {

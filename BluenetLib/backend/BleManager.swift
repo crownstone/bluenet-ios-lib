@@ -11,94 +11,7 @@ import CoreBluetooth
 import SwiftyJSON
 import PromiseKit
 
-public enum BleError : Error {
-    case DISCONNECTED
-    case CONNECTION_CANCELLED
-    case CONNECTION_FAILED
-    case NOT_CONNECTED
-    case NO_SERVICES
-    case NO_CHARACTERISTICS
-    case SERVICE_DOES_NOT_EXIST
-    case CHARACTERISTIC_DOES_NOT_EXIST
-    case WRONG_TYPE_OF_PROMISE
-    case INVALID_UUID
-    case NOT_INITIALIZED
-    case CANNOT_SET_TIMEOUT_WITH_THIS_TYPE_OF_PROMISE
-    case TIMEOUT
-    case DISCONNECT_TIMEOUT
-    case ERROR_DISCONNECT_TIMEOUT
-    case AWAIT_DISCONNECT_TIMEOUT
-    case CANCEL_PENDING_CONNECTION_TIMEOUT
-    case CONNECT_TIMEOUT
-    case GET_SERVICES_TIMEOUT
-    case GET_CHARACTERISTICS_TIMEOUT
-    case READ_CHARACTERISTIC_TIMEOUT
-    case WRITE_CHARACTERISTIC_TIMEOUT
-    case ENABLE_NOTIFICATIONS_TIMEOUT
-    case NOTIFICATION_STREAM_TIMEOUT
-    case DISABLE_NOTIFICATIONS_TIMEOUT
-    case CANNOT_WRITE_AND_VERIFY
-    case CAN_NOT_CONNECT_TO_UUID
-    case COULD_NOT_FACTORY_RESET
-    case INCORRECT_RESPONSE_LENGTH
-    case UNKNOWN_TYPE
-    
-    // encryption errors
-    case INVALID_SESSION_REFERENCE_ID
-    case INVALID_SESSION_DATA
-    case NO_SESSION_NONCE_SET
-    case COULD_NOT_VALIDATE_SESSION_NONCE
-    case INVALID_SIZE_FOR_ENCRYPTED_PAYLOAD
-    case INVALID_SIZE_FOR_SESSION_NONCE_PACKET
-    case INVALID_PACKAGE_FOR_ENCRYPTION_TOO_SHORT
-    case INVALID_KEY_FOR_ENCRYPTION
-    case DO_NOT_HAVE_ENCRYPTION_KEY
-    case COULD_NOT_ENCRYPT
-    case COULD_NOT_ENCRYPT_KEYS_NOT_SET
-    case COULD_NOT_DECRYPT_KEYS_NOT_SET
-    case COULD_NOT_DECRYPT
-    case CAN_NOT_GET_PAYLOAD
-    case USERLEVEL_IN_READ_PACKET_INVALID
-    case READ_SESSION_NONCE_ZERO_MAYBE_ENCRYPTION_DISABLED
-    case SETUP_FAILED
-    
-    // recovery error
-    case NOT_IN_RECOVERY_MODE
-    case CANNOT_READ_FACTORY_RESET_CHARACTERISTIC
-    case RECOVER_MODE_DISABLED
-    
-    // input errors
-    case INVALID_TX_POWER_VALUE
-    
-    // mesh
-    case NO_KEEPALIVE_STATE_ITEMS
-    case NO_SWITCH_STATE_ITEMS
-    
-    // DFU
-    case DFU_OVERRULED
-    case DFU_ABORTED
-    case DFU_ERROR
-    case COULD_NOT_FIND_PERIPHERAL
-    case PACKETS_DO_NOT_MATCH
-    case NOT_IN_DFU_MODE
-    
-    // promise errors
-    case REPLACED_WITH_OTHER_PROMISE
-    
-    
-    // timer errors
-    case INCORRECT_SCHEDULE_ENTRY_INDEX
-    case INCORRECT_DATA_COUNT_FOR_ALL_TIMERS
-    case NO_SCHEDULE_ENTRIES_AVAILABLE
-    case NO_TIMER_FOUND
-    
-    // process errors
-    case PROCESS_ABORTED_WITH_ERROR
-    case UNKNOWN_PROCESS_TYPE
-    
-    // general errors
-    case INVALID_INPUT
-}
+
 
 struct timeoutDurations {
     static let disconnect              : Double = 3
@@ -127,7 +40,14 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     var connectedPeripheral: CBPeripheral?
     var connectingPeripheral: CBPeripheral?
     
+    
+    #if os(iOS)
     var BleState : CBCentralManagerState = .unknown
+    #endif
+    
+    #if os(watchOS)
+    var BleState : CBManagerState = .unknown
+    #endif
     var pendingPromise : promiseContainer!
     var eventBus : EventBus!
     var notificationEventBus : EventBus!
@@ -168,7 +88,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     }
     
     
-    public func setBackgroundScanning(newBackgroundState: Bool) {
+    public func setBackgroundOperations(newBackgroundState: Bool) {
         if (self.backgroundEnabled == newBackgroundState) {
             return
         }
@@ -178,7 +98,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         self.cBmanagerUpdatedState = false
         self.setCentralManager()
         
-        self.isReady().then{ _ in self.restoreScanning()}.catch{ err in print(err) }
+        self.isReady().done{ _ in self.restoreScanning()}.catch{ err in print(err) }
         
         // fallback.
         delay(3, { 
@@ -283,32 +203,36 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      * This method will fulfill when the bleManager is ready. It polls itself every 0.25 seconds. Never rejects.
      */
     public func isReady() -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             if (self.BleState != .poweredOn) {
-                delay(0.50, { _ = self.isReady().then{_ -> Void in fulfill(())} })
+                delay(0.50, { _ = self.isReady().done{_ -> Void in seal.fulfill(())} })
             }
             else {
-                fulfill(())
+                seal.fulfill(())
             }
         }
     }
     
+    public func wait(seconds: Double) -> Promise<Void> {
+        return Promise<Void> { seal in delay(seconds, seal.fulfill) }
+    }
+    
     public func waitToReconnect() -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in delay(timeoutDurations.waitForReconnect, fulfill) }
+        return Promise<Void> { seal in delay(timeoutDurations.waitForReconnect, seal.fulfill) }
     }
     
     public func waitForRestart() -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in delay(timeoutDurations.waitForRestart, fulfill) }
+        return Promise<Void> { seal in delay(timeoutDurations.waitForRestart, seal.fulfill) }
     }
     
     // this delay is set up for calls that need to write to storage.
     public func waitToWrite(_ iteration: UInt8 = 0) -> Promise<Void> {
         if (iteration > 0) {
             LOG.info("BLUENET_LIB: Could not verify immediatly, waiting longer between steps...")
-            return Promise<Void> { fulfill, reject in delay(2 * timeoutDurations.waitForWrite, fulfill) }
+            return Promise<Void> { seal in delay(2 * timeoutDurations.waitForWrite, seal.fulfill) }
         }
         
-        return Promise<Void> { fulfill, reject in delay(timeoutDurations.waitForWrite, fulfill) }
+        return Promise<Void> { seal in delay(timeoutDurations.waitForWrite, seal.fulfill) }
     }
 
     
@@ -333,23 +257,23 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      */
     public func connect(_ uuid: String) -> Promise<Void> {
         LOG.info("BLUENET_LIB: starting to connect")
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             if (self.BleState != .poweredOn) {
-                reject(BleError.NOT_INITIALIZED)
+                seal.reject(BluenetError.NOT_INITIALIZED)
             }
             else {
                 // start the connection
                 if (self.connectedPeripheral != nil) {
                     if (self.connectedPeripheral!.identifier.uuidString == uuid) {
                         LOG.info("BLUENET_LIB: Already connected to this peripheral")
-                        fulfill(());
+                        seal.fulfill(());
                     }
                     else {
                         LOG.info("BLUENET_LIB: Something is connected")
                         self.disconnect()
                             .then{ _ in self._connect(uuid)}
-                            .then{ _ in fulfill(())}
-                            .catch{ err in reject(err)}
+                            .done{ _ in seal.fulfill(())}
+                            .catch{ err in seal.reject(err)}
                     }
                 }
                 // cancel any connection attempt in progress.
@@ -357,14 +281,14 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     LOG.info("BLUENET_LIB: connection attempt in progress")
                     self.abortConnecting()
                         .then{ _ in return self._connect(uuid)}
-                        .then{ _ in fulfill(())}
-                        .catch{ err in reject(err)}
+                        .done{ _ in seal.fulfill(())}
+                        .catch{ err in seal.reject(err)}
                 }
                 else {
                     LOG.info("BLUENET_LIB: connecting...")
                     self._connect(uuid)
-                        .then{ _ in fulfill(())}
-                        .catch{ err in reject(err)}
+                        .done{ _ in seal.fulfill(())}
+                        .catch{ err in seal.reject(err)}
                 }
             }
         };
@@ -377,18 +301,18 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      *
      */
     func abortConnecting()  -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             LOG.info("BLUENET_LIB: starting to abort pending connection request")
             if let connectingPeripheralVal = self.connectingPeripheral {
                 LOG.info("BLUENET_LIB: pending connection detected")
                 // if there was a connection in progress, cancel it with an error
                 if (self.pendingPromise.type == .CONNECT) {
                     LOG.info("BLUENET_LIB: rejecting the connection promise")
-                    self.pendingPromise.reject(BleError.CONNECTION_CANCELLED)
+                    self.pendingPromise.reject(BluenetError.CONNECTION_CANCELLED)
                 }
                 
                 LOG.info("BLUENET_LIB: Waiting to cancel connection....")
-                self.pendingPromise.load(fulfill, reject, type: .CANCEL_PENDING_CONNECTION)
+                self.pendingPromise.load(seal.fulfill, seal.reject, type: .CANCEL_PENDING_CONNECTION)
                 self.pendingPromise.setDelayedReject(timeoutDurations.cancelPendingConnection, errorOnReject: .CANCEL_PENDING_CONNECTION_TIMEOUT)
                 
                 self.centralManager.cancelPeripheralConnection(connectingPeripheralVal)
@@ -397,7 +321,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 self.connectingPeripheral = nil
             }
             else {
-                fulfill(())
+                seal.fulfill(())
             }
         }
     }
@@ -407,16 +331,16 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      */
     func _connect(_ uuid: String) -> Promise<Void> {
         let nsUuid = UUID(uuidString: uuid)
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             if (nsUuid == nil) {
-                reject(BleError.INVALID_UUID)
+                seal.reject(BluenetError.INVALID_UUID)
             }
             else {
                 // get a peripheral from the known list (TODO: check what happens if it requests an unknown one)
                 let uuidArray = [nsUuid!]
                 let peripherals = self.centralManager.retrievePeripherals(withIdentifiers: uuidArray);
                 if (peripherals.count == 0) {
-                    reject(BleError.CAN_NOT_CONNECT_TO_UUID)
+                    seal.reject(BluenetError.CAN_NOT_CONNECT_TO_UUID)
                 }
                 else {
                     let peripheral = peripherals[0]
@@ -424,43 +348,46 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     self.connectingPeripheral!.delegate = self
                     
                     // setup the pending promise for connection
-                    self.pendingPromise.load(fulfill, reject, type: .CONNECT)
+                    self.pendingPromise.load(seal.fulfill, seal.reject, type: .CONNECT)
                     self.pendingPromise.setDelayedReject(timeoutDurations.connect, errorOnReject: .CONNECT_TIMEOUT)
                     self.centralManager.connect(connectingPeripheral!, options: nil)
                 }
             }
         }
-        .catch{(error: Error) -> Void in
+        .recover{(error: Error) -> Void in
+            // we want to hook into the failed connect to set the connecting peripheral to nil. The promise should still fail
+            // for other users of the returned promise.
             self.connectingPeripheral = nil
+            throw error
         }
     }
     
     
     public func waitForPeripheralToDisconnect(timeout : Double) -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             // only disconnect if we are actually connected!
             if (self.connectedPeripheral != nil) {
                 LOG.info("BLUENET_LIB: waiting for the connected peripheral to disconnect from us")
-                let disconnectPromise = Promise<Void> { success, failure in
+                let disconnectPromise = Promise<Void> { innerSeal in
                     // in case the connected peripheral has been disconnected beween the start and invocation of this method.
                     if (self.connectedPeripheral != nil) {
-                        self.pendingPromise.load(success, failure, type: .AWAIT_DISCONNECT)
+                        self.pendingPromise.load(innerSeal.fulfill, innerSeal.reject, type: .AWAIT_DISCONNECT)
                         self.pendingPromise.setDelayedReject(timeout, errorOnReject: .AWAIT_DISCONNECT_TIMEOUT)
                     }
                     else {
-                        success(())
+                        innerSeal.fulfill(())
                     }
                 }
                 // we clean up (self.connectedPeripheral = nil) inside the disconnect() method, thereby needing this inner promise
-                disconnectPromise.then { _ -> Void in
+                disconnectPromise.done { _ -> Void in
                     // make sure the connected peripheral is set to nil so we know nothing is connected
                     self.connectedPeripheral = nil
-                    fulfill(())
+                    seal.fulfill(())
                 }
-                .catch { err in reject(err) }
+                .catch { err in seal.reject(err) }
             }
             else {
-                fulfill(())
+                seal.fulfill(())
             }
         }
     }
@@ -469,17 +396,19 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      *  Disconnect from the connected BLE device
      */
     public func errorDisconnect() -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             // cancel any pending connections
             if (self.connectingPeripheral != nil) {
                 LOG.info("BLUENET_LIB: disconnecting from connecting peripheral due to error")
                 abortConnecting()
                     .then{ _ in return self._disconnect(errorMode: true) }
-                    .then{_ -> Void in fulfill(())}
-                    .catch{err in reject(err)}
+                    .done{_ -> Void in seal.fulfill(())}
+                    .catch{err in seal.reject(err)}
             }
             else {
-                self._disconnect(errorMode: true).then{_ -> Void in fulfill(())}.catch{err in reject(err)}
+                self._disconnect(errorMode: true)
+                    .done{_ -> Void in seal.fulfill(())}
+                    .catch{err in seal.reject(err)}
             }
         }
     }
@@ -488,54 +417,56 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      *  Disconnect from the connected BLE device
      */
     public func disconnect() -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             // cancel any pending connections
             if (self.connectingPeripheral != nil) {
                 LOG.info("BLUENET_LIB: disconnecting from connecting peripheral")
                 abortConnecting()
                     .then{ _ in return self._disconnect() }
-                    .then{_ -> Void in fulfill(())}
-                    .catch{err in reject(err)}
+                    .done{_ -> Void in seal.fulfill(())}
+                    .catch{err in seal.reject(err)}
             }
             else {
-                self._disconnect().then{_ -> Void in fulfill(())}.catch{err in reject(err)}
+                self._disconnect()
+                    .done{_ -> Void in seal.fulfill(())}
+                    .catch{err in seal.reject(err)}
             }
         }
     }
     
     
     func _disconnect(errorMode: Bool = false) -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             // only disconnect if we are actually connected!
             if (self.connectedPeripheral != nil) {
                 LOG.info("BLUENET_LIB: disconnecting from connected peripheral")
-                let disconnectPromise = Promise<Void> { success, failure in
+                let disconnectPromise = Promise<Void> { innerSeal in
                     // in case the connected peripheral has been disconnected beween the start and invocation of this method.
                     if (self.connectedPeripheral != nil) {
                         if (errorMode == true) {
-                            self.pendingPromise.load(success, failure, type: .ERROR_DISCONNECT)
+                            self.pendingPromise.load(innerSeal.fulfill, innerSeal.reject, type: .ERROR_DISCONNECT)
                             self.pendingPromise.setDelayedReject(timeoutDurations.errorDisconnect, errorOnReject: .ERROR_DISCONNECT_TIMEOUT)
                         }
                         else {
-                            self.pendingPromise.load(success, failure, type: .DISCONNECT)
+                            self.pendingPromise.load(innerSeal.fulfill, innerSeal.reject, type: .DISCONNECT)
                             self.pendingPromise.setDelayedReject(timeoutDurations.disconnect, errorOnReject: .DISCONNECT_TIMEOUT)
                         }
                         self.centralManager.cancelPeripheralConnection(self.connectedPeripheral!)
                     }
                     else {
-                        success(())
+                        innerSeal.fulfill(())
                     }
                 }
                 // we clean up (self.connectedPeripheral = nil) inside the disconnect() method, thereby needing this inner promise
-                disconnectPromise.then { _ -> Void in
+                disconnectPromise.done { _ -> Void in
                     // make sure the connected peripheral is set to nil so we know nothing is connected
                     self.connectedPeripheral = nil
-                    fulfill(())
+                    seal.fulfill(())
                 }
-                .catch { err in reject(err) }
+                .catch { err in seal.reject(err) }
             }
             else {
-                fulfill(())
+                seal.fulfill(())
             }
         }
     }
@@ -546,20 +477,20 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      *
      */
     public func getServicesFromDevice() -> Promise<[CBService]> {
-        return Promise<[CBService]> { fulfill, reject in
+        return Promise<[CBService]> { seal in
             if (connectedPeripheral != nil) {
                 if let services = connectedPeripheral!.services {
-                    fulfill(services)
+                    seal.fulfill(services)
                 }
                 else {
-                    self.pendingPromise.load(fulfill, reject, type: .GET_SERVICES)
+                    self.pendingPromise.load(seal.fulfill, seal.reject, type: .GET_SERVICES)
                     self.pendingPromise.setDelayedReject(timeoutDurations.getServices, errorOnReject: .GET_SERVICES_TIMEOUT)
                     // the fulfil and reject are handled in the peripheral delegate
                     connectedPeripheral!.discoverServices(nil) // then return services
                 }
             }
             else {
-                reject(BleError.NOT_CONNECTED)
+                seal.reject(BluenetError.NOT_CONNECTED)
             }
         }
     }
@@ -575,9 +506,9 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     }
     
     public func getCharacteristicsFromDevice(_ serviceId: String) -> Promise<[CBCharacteristic]> {
-        return Promise<[CBCharacteristic]> { fulfill, reject in
+        return Promise<[CBCharacteristic]> { seal in
             // if we are not connected, exit
-            if (connectedPeripheral != nil) {
+            if (self.connectedPeripheral != nil) {
                 // get all services from connected device (is cached if we already know it)
                 self.getServicesFromDevice()
                     // then get all characteristics from connected device (is cached if we already know it)
@@ -586,31 +517,31 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                             return self.getCharacteristicsFromDevice(service)
                         }
                         else {
-                            throw BleError.SERVICE_DOES_NOT_EXIST
+                            throw BluenetError.SERVICE_DOES_NOT_EXIST
                         }
                     }
                     // then get the characteristic we need if it is in the list.
-                    .then {(characteristics: [CBCharacteristic]) -> Void in
-                        fulfill(characteristics);
+                    .done {(characteristics: [CBCharacteristic]) -> Void in
+                        seal.fulfill(characteristics);
                     }
                     .catch {(error: Error) -> Void in
-                        reject(error)
+                        seal.reject(error)
                     }
             }
             else {
-                reject(BleError.NOT_CONNECTED)
+                seal.reject(BluenetError.NOT_CONNECTED)
             }
         }
     }
     
     func getCharacteristicsFromDevice(_ service: CBService) -> Promise<[CBCharacteristic]> {
-        return Promise<[CBCharacteristic]> { fulfill, reject in
+        return Promise<[CBCharacteristic]> { seal in
             if (connectedPeripheral != nil) {
                 if let characteristics = service.characteristics {
-                    fulfill(characteristics)
+                    seal.fulfill(characteristics)
                 }
                 else {
-                    self.pendingPromise.load(fulfill, reject, type: .GET_CHARACTERISTICS)
+                    self.pendingPromise.load(seal.fulfill, seal.reject, type: .GET_CHARACTERISTICS)
                     self.pendingPromise.setDelayedReject(timeoutDurations.getCharacteristics, errorOnReject: .GET_CHARACTERISTICS_TIMEOUT)
 
                     // the fulfil and reject are handled in the peripheral delegate
@@ -618,7 +549,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 }
             }
             else {
-                reject(BleError.NOT_CONNECTED)
+                seal.reject(BluenetError.NOT_CONNECTED)
             }
         }
     }
@@ -634,9 +565,9 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     }
     
     func getChacteristic(_ serviceId: String, _ characteristicId: String) -> Promise<CBCharacteristic> {
-        return Promise<CBCharacteristic> { fulfill, reject in
+        return Promise<CBCharacteristic> { seal in
             // if we are not connected, exit
-            if (connectedPeripheral != nil) {
+            if (self.connectedPeripheral != nil) {
                 // get all services from connected device (is cached if we already know it)
                 self.getServicesFromDevice()
                     // then get all characteristics from connected device (is cached if we already know it)
@@ -645,66 +576,66 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                             return self.getCharacteristicsFromDevice(service)
                         }
                         else {
-                            throw BleError.SERVICE_DOES_NOT_EXIST
+                            throw BluenetError.SERVICE_DOES_NOT_EXIST
                         }
                     }
                     // then get the characteristic we need if it is in the list.
-                    .then{(characteristics: [CBCharacteristic]) -> Void in
+                    .done{(characteristics: [CBCharacteristic]) -> Void in
                         if let characteristic = self.getCharacteristicFromList(characteristics, characteristicId) {
-                            fulfill(characteristic)
+                            seal.fulfill(characteristic)
                         }
                         else {
-                            throw BleError.CHARACTERISTIC_DOES_NOT_EXIST
+                            throw BluenetError.CHARACTERISTIC_DOES_NOT_EXIST
                         }
                     }
-                    .catch{err in reject(err)}
+                    .catch{err in seal.reject(err)}
             }
             else {
-                reject(BleError.NOT_CONNECTED)
+                seal.reject(BluenetError.NOT_CONNECTED)
             }
         }
     }
     
     public func readCharacteristicWithoutEncryption(_ service: String, characteristic: String) -> Promise<[UInt8]> {
-        return Promise<[UInt8]> { fulfill, reject in
+        return Promise<[UInt8]> { seal in
             self.settings.disableEncryptionTemporarily()
             self.readCharacteristic(service, characteristicId: characteristic)
-                .then{data -> Void in
+                .done{data -> Void in
                     self.settings.restoreEncryption()
-                    fulfill(data)
+                    seal.fulfill(data)
                 }
                 .catch{(error: Error) -> Void in
                     self.settings.restoreEncryption()
-                    reject(error)
+                    seal.reject(error)
                 }
         }
     }
     
     public func readCharacteristic(_ serviceId: String, characteristicId: String) -> Promise<[UInt8]> {
-        return Promise<[UInt8]> { fulfill, reject in
+        return Promise<[UInt8]> { seal in
             self.getChacteristic(serviceId, characteristicId)
-                .then{characteristic -> Void in
+                .done{characteristic -> Void in
                     if (self.connectedPeripheral != nil) {
-                        self.pendingPromise.load(fulfill, reject, type: .READ_CHARACTERISTIC)
+                        self.pendingPromise.load(seal.fulfill, seal.reject, type: .READ_CHARACTERISTIC)
                         self.pendingPromise.setDelayedReject(timeoutDurations.readCharacteristic, errorOnReject: .READ_CHARACTERISTIC_TIMEOUT)
                         
                         // the fulfil and reject are handled in the peripheral delegate
                         self.connectedPeripheral!.readValue(for: characteristic)
                     }
                     else {
-                        reject(BleError.NOT_CONNECTED)
+                        seal.reject(BluenetError.NOT_CONNECTED)
                     }
                 }
-                .catch{err in reject(err)}
+                .catch{err in seal.reject(err)}
         }
     }
     
     public func writeToCharacteristic(_ serviceId: String, characteristicId: String, data: Data, type: CBCharacteristicWriteType) -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             self.getChacteristic(serviceId, characteristicId)
-                .then{characteristic -> Void in
+                .done{characteristic -> Void in
                     if (self.connectedPeripheral != nil) {
-                        self.pendingPromise.load(fulfill, reject, type: .WRITE_CHARACTERISTIC)
+                        self.pendingPromise.load(seal.fulfill, seal.reject, type: .WRITE_CHARACTERISTIC)
                         
                         if (type == .withResponse) {
                             self.pendingPromise.setDelayedReject(timeoutDurations.writeCharacteristic, errorOnReject: .WRITE_CHARACTERISTIC_TIMEOUT)
@@ -731,19 +662,19 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         }
                     }
                     else {
-                        reject(BleError.NOT_CONNECTED)
+                        seal.reject(BluenetError.NOT_CONNECTED)
                     }
                 }
                 .catch{(error: Error) -> Void in
                     LOG.error("BLUENET_LIB: FAILED writing to characteristic \(error)")
-                    reject(error)
+                    seal.reject(error)
                 }
         }
     }
     
     public func enableNotifications(_ serviceId: String, characteristicId: String, callback: @escaping eventCallback) -> Promise<voidPromiseCallback> {
         var unsubscribeCallback : voidCallback? = nil
-        return Promise<voidPromiseCallback> { fulfill, reject in
+        return Promise<voidPromiseCallback> { seal in
             // if there is already a listener on this topic, we assume notifications are already enabled. We just add another listener
             if (self.notificationEventBus.hasListeners(serviceId + "_" + characteristicId)) {
                 unsubscribeCallback = self.notificationEventBus.on(serviceId + "_" + characteristicId, callback)
@@ -752,7 +683,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 let cleanupCallback : voidPromiseCallback = { 
                     return self.disableNotifications(serviceId, characteristicId: characteristicId, unsubscribeCallback: unsubscribeCallback!)
                 }
-                fulfill(cleanupCallback)
+                seal.fulfill(cleanupCallback)
             }
             else {
                 // we first get the characteristic from the device
@@ -762,55 +693,55 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         unsubscribeCallback = self.notificationEventBus.on(characteristic.service.uuid.uuidString + "_" + characteristic.uuid.uuidString, callback)
                         
                         // we now tell the device to notify us.
-                        return Promise<Void> { success, failure in
+                        return Promise<Void> { innerSeal in
                             if (self.connectedPeripheral != nil) {
                                 // the success and failure are handled in the peripheral delegate
-                                self.pendingPromise.load(success, failure, type: .ENABLE_NOTIFICATIONS)
+                                self.pendingPromise.load(innerSeal.fulfill, innerSeal.reject, type: .ENABLE_NOTIFICATIONS)
                                 self.pendingPromise.setDelayedReject(timeoutDurations.enableNotifications, errorOnReject: .ENABLE_NOTIFICATIONS_TIMEOUT)
                                 self.connectedPeripheral!.setNotifyValue(true, for: characteristic)
                             }
                             else {
-                                failure(BleError.NOT_CONNECTED)
+                                innerSeal.reject(BluenetError.NOT_CONNECTED)
                             }
                         }
                     }
-                    .then{_ -> Void in
+                    .done{_ -> Void in
                         let cleanupCallback : voidPromiseCallback = { self.disableNotifications(serviceId, characteristicId: characteristicId, unsubscribeCallback: unsubscribeCallback!) }
-                        fulfill(cleanupCallback)
+                        seal.fulfill(cleanupCallback)
                     }
                     .catch{(error: Error) -> Void in
                         // if something went wrong, we make sure the callback will not be fired.
                         if (unsubscribeCallback != nil) {
                             unsubscribeCallback!()
                         }
-                        reject(error)
+                        seal.reject(error)
                     }
             }
         }
     }
     
     func disableNotifications(_ serviceId: String, characteristicId: String, unsubscribeCallback: voidCallback) -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             // remove the callback
             unsubscribeCallback()
             
             // if there are still other callbacks listening, we're done!
             if (self.notificationEventBus.hasListeners(serviceId + "_" + characteristicId)) {
-                fulfill(())
+                seal.fulfill(())
             }
             // if we are no longer connected we dont need to clean up.
             else if (self.connectedPeripheral == nil) {
-                fulfill(())
+                seal.fulfill(())
             }
             else {
                 // if there are no more people listening, we tell the device to stop the notifications.
                 self.getChacteristic(serviceId, characteristicId)
-                    .then{characteristic -> Void in
+                    .done{characteristic -> Void in
                         if (self.connectedPeripheral == nil) {
-                            fulfill(())
+                            seal.fulfill(())
                         }
                         else {
-                            self.pendingPromise.load(fulfill, reject, type: .DISABLE_NOTIFICATIONS)
+                            self.pendingPromise.load(seal.fulfill, seal.reject, type: .DISABLE_NOTIFICATIONS)
                             self.pendingPromise.setDelayedReject(timeoutDurations.disableNotifications, errorOnReject: .DISABLE_NOTIFICATIONS_TIMEOUT)
                             
                             // the fulfil and reject are handled in the peripheral delegate
@@ -818,7 +749,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         }
                     }
                     .catch{(error: Error) -> Void in
-                        reject(error)
+                        seal.reject(error)
                     }
             }
         }
@@ -830,7 +761,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      * The merged, finalized reply to the write command will be in the fulfill of this promise.
      */
     public func setupSingleNotification(_ serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback) -> Promise<[UInt8]> {
-        return Promise<[UInt8]> { fulfill, reject in
+        return Promise<[UInt8]> { seal in
             var unsubscribe : voidPromiseCallback? = nil
             var collectedData = [UInt8]();
             
@@ -850,8 +781,8 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     collectedData = data
                 }
                 unsubscribe!()
-                    .then{ _  in fulfill(collectedData) }
-                    .catch{ err in reject(err) }
+                    .done{ _  in seal.fulfill(collectedData) }
+                    .catch{ err in seal.reject(err) }
             })
             
             
@@ -866,7 +797,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     unsubscribe = unsub
                     return writeCommand()
                 }
-                .catch{ err in reject(err) }
+                .catch{ err in seal.reject(err) }
         }
     }
     
@@ -875,7 +806,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      * The merged, finalized reply to the write command will be in the fulfill of this promise.
      */
     public func setupNotificationStream(_ serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback, resultHandler: @escaping processCallback, timeout: Double = 5, successIfWriteSuccessful: Bool = false) -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             var unsubscribe : voidPromiseCallback? = nil
             var streamFinished = false
             var writeSuccessful = false
@@ -893,7 +824,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     }
                     catch _ {
                         LOG.error("Error decrypting notifcation in stream!")
-                        reject(BleError.COULD_NOT_DECRYPT)
+                        seal.reject(BluenetError.COULD_NOT_DECRYPT)
                         return
                     }
                 }
@@ -906,8 +837,8 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     if (result == .FINISHED) {
                         streamFinished = true
                         unsubscribe!()
-                            .then{ _  in fulfill(()) }
-                            .catch{ err in reject(err) }
+                            .done{ _  in seal.fulfill(()) }
+                            .catch{ err in seal.reject(err) }
                     }
                     else if (result == .CONTINUE) {
                         // do nothing.
@@ -915,14 +846,14 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     else if (result == .ABORT_ERROR) {
                         streamFinished = true
                         unsubscribe!()
-                            .then{ _  in reject(BleError.PROCESS_ABORTED_WITH_ERROR) }
-                            .catch{ err in reject(err) }
+                            .done{ _  in seal.reject(BluenetError.PROCESS_ABORTED_WITH_ERROR) }
+                            .catch{ err in seal.reject(err) }
                     }
                     else {
                         streamFinished = true
                         unsubscribe!()
-                            .then{ _  in reject(BleError.UNKNOWN_PROCESS_TYPE) }
-                            .catch{ err in reject(err) }
+                            .done{ _  in seal.reject(BluenetError.UNKNOWN_PROCESS_TYPE) }
+                            .catch{ err in seal.reject(err) }
                     }
                 }
             })
@@ -939,20 +870,20 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     streamFinished = true
                     if (unsubscribe != nil) {
                         unsubscribe!()
-                            .then{ _ -> Void in
+                            .done{ _ -> Void in
                                 if (successIfWriteSuccessful && writeSuccessful) {
-                                    fulfill(())
+                                    seal.fulfill(())
                                 }
                                 else {
-                                    reject(BleError.NOTIFICATION_STREAM_TIMEOUT)
+                                    seal.reject(BluenetError.NOTIFICATION_STREAM_TIMEOUT)
                                 }
                             }
                             .catch{ err in
                                 if (successIfWriteSuccessful && writeSuccessful) {
-                                    fulfill(())
+                                    seal.fulfill(())
                                 }
                                 else {
-                                    reject(BleError.NOTIFICATION_STREAM_TIMEOUT)
+                                    seal.reject(BluenetError.NOTIFICATION_STREAM_TIMEOUT)
                                 }
                         }
                     }
@@ -964,10 +895,10 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     unsubscribe = unsub
                     return writeCommand()
                 }
-                .then{ _ -> Void in
+                .done{ _ -> Void in
                     writeSuccessful = true
                 }
-                .catch{ err in reject(err) }
+                .catch{ err in seal.reject(err) }
         }
     }
     
@@ -1079,7 +1010,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     pendingPromise.fulfill(services)
                 }
                 else {
-                    pendingPromise.reject(BleError.NO_SERVICES)
+                    pendingPromise.reject(BluenetError.NO_SERVICES)
                 }
             }
         }
@@ -1096,7 +1027,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     pendingPromise.fulfill(characteristics)
                 }
                 else {
-                    pendingPromise.reject(BleError.NO_CHARACTERISTICS)
+                    pendingPromise.reject(BluenetError.NO_CHARACTERISTICS)
                 }
             }
         }

@@ -65,6 +65,18 @@ public class Conversion {
     }
     
     
+    public static func uint16_to_hex_string(_ uint16: UInt16) -> String {
+        if (uint16 <= 0x000f) {
+            return "000" + String(format:"%1X", uint16)
+        }
+        else if (uint16 <= 0x00ff) {
+            return "00" + String(format:"%2X", uint16)
+        }
+        else if (uint16 <= 0x0fff) {
+            return "0" + String(format:"%3X", uint16)
+        }
+        return String(format:"%4X", uint16)
+    }
     
     public static func uint8_to_hex_string(_ byte: UInt8) -> String {
         if (byte < 0xf) {
@@ -249,17 +261,17 @@ public func Convert<T>(_ input: [UInt8]) throws -> T {
     switch(type) {
         case "Int8","UInt8":
             if (input.count == 0) {
-                throw BleError.INCORRECT_RESPONSE_LENGTH
+                throw BluenetError.INCORRECT_RESPONSE_LENGTH
             }
         break
         case "Int16","UInt16":
         if (input.count < 2) {
-            throw BleError.INCORRECT_RESPONSE_LENGTH
+            throw BluenetError.INCORRECT_RESPONSE_LENGTH
         }
         break
         case "Int32","UInt32","Float":
             if (input.count < 4) {
-                throw BleError.INCORRECT_RESPONSE_LENGTH
+                throw BluenetError.INCORRECT_RESPONSE_LENGTH
             }
             break
     default:

@@ -52,9 +52,11 @@ public class ConfigHandler {
 
     
     public func getPWMPeriod() -> Promise<NSNumber> {
-        return Promise<NSNumber> { fulfill, reject in
+        return Promise<NSNumber> { seal in
             let configPromise : Promise<UInt32> = self._getConfig(ConfigurationType.pwm_PERIOD)
-            configPromise.then{ period -> Void in fulfill(NSNumber(value: period)) }.catch{err in reject(err)}
+            configPromise
+                .done{ period -> Void in seal.fulfill(NSNumber(value: period)) }
+                .catch{err in seal.reject(err)}
         }
     }
     
@@ -84,52 +86,54 @@ public class ConfigHandler {
     }
     
     public func setUartState(_ state: NSNumber) -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             if (state == 3 || state == 1 || state == 0) {
                 let data = WriteConfigPacket(type: ConfigurationType.UART_ENABLED, payload8: state.uint8Value)
                 self._writeToConfig(packet: data.getPacket())
-                    .then{ _ in fulfill(()) }
-                    .catch{err in reject(err)}
+                    .done{ _ in seal.fulfill(()) }
+                    .catch{err in seal.reject(err)}
             }
             else {
                 LOG.warn("BluenetLib: setUartState: Only 0, 1, or 3 are allowed inputs. You gave: \(state).")
-                reject(BleError.INVALID_INPUT)
+                seal.reject(BluenetError.INVALID_INPUT)
             }
         }
     }
     
     public func setMeshChannel(_ channel: NSNumber) -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             if (channel == 37 || channel == 38 || channel == 39) {
                 let data = WriteConfigPacket(type: ConfigurationType.MESH_CHANNEL, payload8: channel.uint8Value)
                 self._writeToConfig(packet: data.getPacket())
-                    .then{ _ in fulfill(()) }
-                    .catch{err in reject(err)}
+                    .done{ _ in seal.fulfill(()) }
+                    .catch{err in seal.reject(err)}
             }
             else {
                 LOG.warn("BluenetLib: setMeshChannel: Only 37, 38 or 39 are allowed inputs. You gave: \(channel).")
-                reject(BleError.INVALID_INPUT)
+                seal.reject(BluenetError.INVALID_INPUT)
             }
         }
     }
     
     public func getMeshChannel() -> Promise<NSNumber> {
-        return Promise<NSNumber> { fulfill, reject in
+        return Promise<NSNumber> { seal in
             let configPromise : Promise<UInt8> = self._getConfig(ConfigurationType.MESH_CHANNEL)
-            configPromise.then{ channel -> Void in fulfill(NSNumber(value: channel)) }.catch{err in reject(err)}
+            configPromise
+                .done{ channel -> Void in seal.fulfill(NSNumber(value: channel)) }
+                .catch{err in seal.reject(err)}
         }
     }
     
     public func setTxPower (_ txPower: NSNumber) -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             if (txPower == -40 || txPower == -30 || txPower == -20 || txPower == -16 || txPower == -12 || txPower == -8 || txPower == -4 || txPower == 0 || txPower == 4) {
                 let data = WriteConfigPacket(type: ConfigurationType.tx_POWER, payload8: txPower.int8Value)
                 self._writeToConfig(packet: data.getPacket())
-                    .then{ _ in fulfill(()) }
-                    .catch{ err in reject(err) }
+                    .done{ _ in seal.fulfill(()) }
+                    .catch{ err in seal.reject(err) }
             }
             else {
-                reject(BleError.INVALID_TX_POWER_VALUE)
+                seal.reject(BluenetError.INVALID_TX_POWER_VALUE)
             }
         }
     }
@@ -145,7 +149,7 @@ public class ConfigHandler {
     
     
     public func _getConfig<T>(_ config : ConfigurationType) -> Promise<T> {
-        return Promise<T> { fulfill, reject in
+        return Promise<T> { seal in
             let writeCommand : voidPromiseCallback = { 
                 return self.bleManager.writeToCharacteristic(
                     CSServices.CrownstoneService,
@@ -154,7 +158,7 @@ public class ConfigHandler {
                     type: CBCharacteristicWriteType.withResponse);
             }
             self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ConfigRead, writeCommand: writeCommand)
-                .then{ data -> Void in
+                .done{ data -> Void in
                     var validData = [UInt8]()
                     if (data.count > 3) {
                         for i in (4...data.count - 1) {
@@ -163,17 +167,17 @@ public class ConfigHandler {
                         
                         do {
                             let result : T = try Convert(validData)
-                            fulfill(result)
+                            seal.fulfill(result)
                         }
                         catch let err {
-                            reject(err)
+                            seal.reject(err)
                         }
                     }
                     else {
-                        reject(BleError.INCORRECT_RESPONSE_LENGTH)
+                        seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
                     }
                 }
-                .catch{ err in reject(err) }
+                .catch{ err in seal.reject(err) }
         }
     }
 

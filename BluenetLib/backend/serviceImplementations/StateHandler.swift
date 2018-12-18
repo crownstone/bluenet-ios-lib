@@ -23,15 +23,15 @@ public class StateHandler {
     
     
     public func getErrors() -> Promise<CrownstoneErrors> {
-        return Promise<CrownstoneErrors> { fulfill, reject in
+        return Promise<CrownstoneErrors> { seal in
             self.getErrorBitmask()
-                .then{ data -> Void in
+                .done{ data -> Void in
                     let relevantDataArray = [data[0],data[1],data[2],data[3]]
                     let uint32 = Conversion.uint8_array_to_uint32(relevantDataArray)
                     let csError = CrownstoneErrors(bitMask: uint32)
-                    fulfill(csError)
+                    seal.fulfill(csError)
                 }
-                .catch{ err in reject(err) }
+                .catch{ err in seal.reject(err) }
         }
     }
     
@@ -44,9 +44,9 @@ public class StateHandler {
     }
     
     public func getSwitchStateFloat() -> Promise<Float> {
-        return Promise<Float> { fulfill, reject in
+        return Promise<Float> { seal in
             self.getSwitchState()
-                .then{ switchState -> Void in
+                .done{ switchState -> Void in
                     var returnState : Float = 0.0
                     if (switchState == 128) {
                         returnState = 1.0
@@ -54,34 +54,36 @@ public class StateHandler {
                     else if (switchState <= 100) {
                         returnState = 0.01 * NSNumber(value: switchState).floatValue * 0.99
                     }
-                    fulfill(returnState)
+                    seal.fulfill(returnState)
                 }
-                .catch{ err in reject(err) }
+                .catch{ err in seal.reject(err) }
         }
     }
     
     public func getTime() -> Promise<NSNumber> {
-        return Promise<NSNumber> { fulfill, reject in
+        return Promise<NSNumber> { seal in
             let timePromise : Promise<UInt32> = self._getState(StateType.time)
-            timePromise.then{ time -> Void in fulfill(NSNumber(value: time))}.catch{ err in reject(err) }
+            timePromise
+                .done{ time -> Void in seal.fulfill(NSNumber(value: time))}
+                .catch{ err in seal.reject(err) }
         }
     }
     
     public func getAllSchedules() -> Promise<[ScheduleConfigurator]> {
-        return Promise<[ScheduleConfigurator]> { fulfill, reject in
+        return Promise<[ScheduleConfigurator]> { seal in
             let dataPromise : Promise<[UInt8]> = self._getState(StateType.schedule)
             dataPromise
-                .then{ data -> Void in
+                .done{ data -> Void in
                     if (data.count == 0) {
                         LOG.error("Got empty list from scheduler state")
-                        reject(BleError.INCORRECT_DATA_COUNT_FOR_ALL_TIMERS)
+                        seal.reject(BluenetError.INCORRECT_DATA_COUNT_FOR_ALL_TIMERS)
                         return
                     }
             
                     let amountOfTimers : UInt8 = data[0]
                     
                     if (amountOfTimers == 0) {
-                        reject(BleError.NO_TIMER_FOUND)
+                        seal.reject(BluenetError.NO_TIMER_FOUND)
                         return
                     }
                     
@@ -94,7 +96,7 @@ public class StateHandler {
                     
                     if (data.count < totalCount) {
                         LOG.error("Got list of size \(data.count) from scheduler state: \(data)")
-                        reject(BleError.INCORRECT_DATA_COUNT_FOR_ALL_TIMERS)
+                        seal.reject(BluenetError.INCORRECT_DATA_COUNT_FOR_ALL_TIMERS)
                         return
                     }
                     
@@ -106,26 +108,27 @@ public class StateHandler {
                         }
                         result.append(ScheduleConfigurator(scheduleEntryIndex: NSNumber(value: i).uint8Value, data: datablock))
                     }
-                    fulfill(result)
+                    
+                    seal.fulfill(result)
                     
                 }
-                .catch{ err in reject(err) }
+                .catch{ err in seal.reject(err) }
         }
     }
     
     public func getAvailableScheduleEntryIndex() -> Promise<UInt8> {
-        return Promise<UInt8> { fulfill, reject in
+        return Promise<UInt8> { seal in
             self.getAllSchedules()
-                .then{ schedules -> Void in
+                .done{ schedules -> Void in
                     for schedule in schedules {
                         if (schedule.isAvailable()) {
-                            fulfill(schedule.scheduleEntryIndex)
+                            seal.fulfill(schedule.scheduleEntryIndex)
                             return
                         }
                     }
-                    reject(BleError.NO_SCHEDULE_ENTRIES_AVAILABLE)
+                    seal.reject(BluenetError.NO_SCHEDULE_ENTRIES_AVAILABLE)
                 }
-                .catch{ err in reject(err) }
+                .catch{ err in seal.reject(err) }
         }
     }
     
@@ -139,12 +142,12 @@ public class StateHandler {
     }
     
     public func _getState<T>(_ state : StateType) -> Promise<T> {
-        return Promise<T> { fulfill, reject in
+        return Promise<T> { seal in
             let writeCommand : voidPromiseCallback = { 
                 return self._writeToState(packet: ReadStatePacket(type: state).getPacket())
             }
             self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.StateRead, writeCommand: writeCommand)
-                .then{ data -> Void in
+                .done{ data -> Void in
                     var validData = [UInt8]()
                     // remove the state preamble
                     if (data.count > 3) {
@@ -154,17 +157,17 @@ public class StateHandler {
                         
                         do {
                             let result : T = try Convert(validData)
-                            fulfill(result)
+                            seal.fulfill(result)
                         }
                         catch let err {
-                            reject(err)
+                            seal.reject(err)
                         }
                     }
                     else {
-                        reject(BleError.INCORRECT_RESPONSE_LENGTH)
+                        seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
                     }
                 }
-                .catch{ err in reject(err) }
+                .catch{ err in seal.reject(err) }
         }
     }
     

@@ -24,7 +24,7 @@ public class ControlHandler {
     
     public func recoverByFactoryReset(_ uuid: String) -> Promise<Void> {
         self.bleManager.settings.disableEncryptionTemporarily()
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             self.bleManager.isReady() // first check if the bluenet lib is ready before using it for BLE things.
                 .then {(_) -> Promise<Void> in return self.bleManager.connect(uuid)}
                 .then {(_) -> Promise<Void> in return self._recoverByFactoryReset()}
@@ -38,31 +38,31 @@ public class ControlHandler {
                     self.bleManager.settings.restoreEncryption()
                     return self.bleManager.disconnect()
                 }
-                .then {(_) -> Void in fulfill(())}
+                .done {(_) -> Void in seal.fulfill(())}
                 .catch {(err) -> Void in
                     self.bleManager.settings.restoreEncryption()
-                    self.bleManager.disconnect().then{_ in reject(err)}.catch{_ in reject(err)}
+                    self.bleManager.disconnect().done{_ in seal.reject(err)}.catch{_ in seal.reject(err)}
                 }
         }
     }
 
     
     func _checkRecoveryProcess() -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             self.bleManager.readCharacteristic(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.FactoryReset)
-                .then{(result: [UInt8]) -> Void in
+                .done{(result: [UInt8]) -> Void in
                     if (result[0] == 1) {
-                        fulfill(())
+                        seal.fulfill(())
                     }
                     else if (result[0] == 2) {
-                        reject(BleError.RECOVER_MODE_DISABLED)
+                        seal.reject(BluenetError.RECOVER_MODE_DISABLED)
                     }
                     else {
-                        reject(BleError.NOT_IN_RECOVERY_MODE)
+                        seal.reject(BluenetError.NOT_IN_RECOVERY_MODE)
                     }
                 }
                 .catch{(err) -> Void in
-                    reject(BleError.CANNOT_READ_FACTORY_RESET_CHARACTERISTIC)
+                    seal.reject(BluenetError.CANNOT_READ_FACTORY_RESET_CHARACTERISTIC)
                 }
         }
     }
@@ -86,23 +86,23 @@ public class ControlHandler {
         return self._writeControlPacket(ControlPacketsGenerator.getCommandFactoryResetPacket())
             .then{(_) -> Promise<[UInt8]> in return self._readControlPacket()}
             .then{(response: [UInt8]) -> Promise<Void> in
-                return Promise<Void> {fulfill, reject in
+                return Promise<Void> { seal in
                     // new response types
                     if (response[0] == ControlType.factory_RESET.rawValue) {
                         let packet = ResultPacket(response)
                         let payload = packet.getUInt16Payload()
                         if (payload == ResultValue.SUCCESS.rawValue) {
-                            fulfill(())
+                            seal.fulfill(())
                         }
                         else {
-                            reject(BleError.COULD_NOT_FACTORY_RESET)
+                            seal.reject(BluenetError.COULD_NOT_FACTORY_RESET)
                         }
                     }
                     else if (response[0] == 0) { // legacy
-                        fulfill(())
+                        seal.fulfill(())
                     }
                     else {
-                        reject(BleError.COULD_NOT_FACTORY_RESET)
+                        seal.reject(BluenetError.COULD_NOT_FACTORY_RESET)
                     }
                 }
             }
@@ -125,7 +125,7 @@ public class ControlHandler {
     
     public func putInDFU() -> Promise<Void> {
         return self.bleManager.getServicesFromDevice()
-            .then{ services in
+            .then{ services -> Promise<Void> in
                 var isInDfuMode = false
                 for service in services {
                     if service.uuid.uuidString == DFUServiceUUID {
@@ -136,7 +136,7 @@ public class ControlHandler {
                 
                 if (isInDfuMode == true) {
                     LOG.info("BLUENET_LIB: Already in DFU.")
-                    return Promise<Void> { fulfill, reject in fulfill(()) }
+                    return Promise.value(())
                 }
                 
                 LOG.info("BLUENET_LIB: switching to DFU")
@@ -151,7 +151,7 @@ public class ControlHandler {
         }
         LOG.info("BLUENET_LIB: REQUESTING IMMEDIATE DISCONNECT FROM \(String(describing: connectedHandle))")
         return self._writeControlPacket(ControlPacketsGenerator.getDisconnectPacket())
-            .then{_ in
+            .then{_ -> Promise<Void> in
                 LOG.info("BLUENET_LIB: Written disconnect command, emitting event for... \(String(describing: connectedHandle))")
                 if (connectedHandle != nil) {
                     self.eventBus.emit("disconnectCommandWritten", connectedHandle!)
@@ -173,7 +173,7 @@ public class ControlHandler {
      **/
     public func toggleSwitchState(stateForOn : Float = 1.0) -> Promise<Float> {
         let stateHandler = StateHandler(bleManager: self.bleManager, eventBus: self.eventBus, settings: self.settings)
-        return Promise<Float> { fulfill, reject -> Void in
+        return Promise<Float> { seal -> Void in
             var newSwitchState : Float = 0;
             stateHandler.getSwitchState()
                 .then{ currentSwitchState -> Promise<Void> in
@@ -182,9 +182,9 @@ public class ControlHandler {
                     }
                     return self.setSwitchState(newSwitchState)
                 }
-                .then{ _ in fulfill(newSwitchState) }
+                .done{ _ in seal.fulfill(newSwitchState) }
                 .catch{(err) -> Void in
-                    reject(err)
+                    seal.reject(err)
                 }
         }
     }
@@ -239,32 +239,32 @@ public class ControlHandler {
     public func getAndSetSessionNonce() -> Promise<Void> {
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.CrownstoneService, characteristic: CrownstoneCharacteristics.SessionNonce)
             .then{(sessionNonce : [UInt8]) -> Promise<Void> in
-                return Promise <Void> { fulfill, reject in
+                return Promise <Void> { seal in
                     do {
                         if let guestKey = self.bleManager.settings.getGuestKey() {
                             let sessionNonce = try EncryptionHandler.decryptSessionNonce(sessionNonce, key: guestKey)
                             self.bleManager.settings.setSessionNonce(sessionNonce)
-                            fulfill(())
+                            seal.fulfill(())
                         }
                         else {
-                            throw BleError.DO_NOT_HAVE_ENCRYPTION_KEY
+                            throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY
                         }
                     }
                     catch let err {
-                        reject(err)
+                        seal.reject(err)
                     }
                 }
             }
             .recover{(err: Error) -> Promise<Void> in
-                return Promise <Void> { fulfill, reject in
+                return Promise <Void> { seal in
                     // we only want to pass this to the main promise of connect if we successfully received the nonce, but cant decrypt it.
-                    if let bleErr = err as? BleError {
-                        if bleErr == BleError.COULD_NOT_VALIDATE_SESSION_NONCE || bleErr == BleError.DO_NOT_HAVE_ENCRYPTION_KEY {
-                            reject(err)
+                    if let bleErr = err as? BluenetError {
+                        if bleErr == BluenetError.COULD_NOT_VALIDATE_SESSION_NONCE || bleErr == BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY {
+                            seal.reject(err)
                             return
                         }
                     }
-                    fulfill(())
+                    seal.fulfill(())
                 }
             }
     }
@@ -274,7 +274,7 @@ public class ControlHandler {
      **/
     public func setSchedule(scheduleConfig: ScheduleConfigurator) -> Promise<Void> {
         if (scheduleConfig.scheduleEntryIndex > 9) {
-            return Promise<Void> { fulfill, reject in reject(BleError.INCORRECT_SCHEDULE_ENTRY_INDEX) }
+            return Promise<Void> { seal in seal.reject(BluenetError.INCORRECT_SCHEDULE_ENTRY_INDEX) }
         }
         let packet = ControlPacketsGenerator.getSetSchedulePacket(data: scheduleConfig.getPacket())
 
@@ -287,7 +287,7 @@ public class ControlHandler {
      **/
     public func clearSchedule(scheduleEntryIndex: UInt8) -> Promise<Void> {
         if (scheduleEntryIndex > 9) {
-            return Promise<Void> { fulfill, reject in reject(BleError.INCORRECT_SCHEDULE_ENTRY_INDEX) }
+            return Promise<Void> { seal in seal.reject(BluenetError.INCORRECT_SCHEDULE_ENTRY_INDEX) }
         }
         
         return _writeControlPacket(ControlPacketsGenerator.getScheduleRemovePacket(timerIndex: scheduleEntryIndex))

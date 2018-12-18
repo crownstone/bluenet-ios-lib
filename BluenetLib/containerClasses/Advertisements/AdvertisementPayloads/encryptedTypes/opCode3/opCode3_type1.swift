@@ -65,6 +65,7 @@ func parseOpcode3_type1(serviceData : ScanResponsePacket, data : [UInt8], litePa
             ])
         )
         serviceData.powerUsageReal     = NSNumber(value: realPower).doubleValue / 8
+        
         // this packets has no validation
         serviceData.validation = 0
     }

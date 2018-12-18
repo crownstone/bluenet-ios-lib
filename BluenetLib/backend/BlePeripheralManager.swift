@@ -12,65 +12,37 @@ import CoreLocation
 import SwiftyJSON
 import PromiseKit
 
-public class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
-    
-    
-    public var peripheralManager : CBPeripheralManager!
-    
-    var pendingPromise : promiseContainer!
-    var eventBus : EventBus!
-    var notificationEventBus : EventBus!
-    public var settings : BluenetSettings!
-    
-    var decoupledDelegate = false
-    
-    var BleState : Int = 0
-    var backgroundEnabled = true
+#if os(iOS)
 
+class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
+    var peripheralManager : CBPeripheralManager!
+    var decoupledDelegate = false
+    var BleState : Int = 0
     var advertising = false
-    var restartRequired = false
  
-    public init(eventBus: EventBus, backgroundEnabled: Bool = true) {
+    public override init() {
         super.init();
-    
-        self.settings = BluenetSettings()
-        self.eventBus = eventBus
-        
-        self.backgroundEnabled = backgroundEnabled
-    
-        
         self.peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
-        
-        // initialize the pending promise containers
-        self.pendingPromise = promiseContainer()
     }
     
-    public func startAdvertising(uuidString: String) {
+    
+    public func startAdvertisingArray(uuidStrings: [String]) {
+        var serviceUUIDStrings : [CBUUID] = []
+        for uuidString in uuidStrings {
+            let serviceUuid = CBUUID(string: uuidString)
+            serviceUUIDStrings.append(serviceUuid)
+        }
+        self.startAdvertisingArray(uuids: serviceUUIDStrings)
+    }
+    
+    public func startAdvertisingArray(uuids: [CBUUID]) {
         if (self.advertising) {
             self.stopAdvertising()
         }
         self.advertising = true
-        let serviceUuid = CBUUID(string: uuidString)
-        let serialService = CBMutableService(type: serviceUuid, primary: true)
-        
-        peripheralManager.add(serialService)
-        self.peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey:[serviceUuid], CBAdvertisementDataLocalNameKey: APPNAME])
+        self.peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey:uuids, CBAdvertisementDataLocalNameKey: APPNAME])
     }
     
-    public func startAdvertisingArray(uuidStrings: [String]) {
-        if (self.advertising) {
-            self.stopAdvertising()
-        }
-         self.advertising = true
-        var serviceUUIDStrings : [CBUUID] = []
-        for uuidString in uuidStrings {
-            let serviceUuid = CBUUID(string: uuidString)
-            let serialService = CBMutableService(type: serviceUuid, primary: true)
-            serviceUUIDStrings.append(serviceUuid)
-            peripheralManager.add(serialService)
-        }
-        self.peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey:serviceUUIDStrings, CBAdvertisementDataLocalNameKey: APPNAME])
-    }
     
     public func stopAdvertising() {
         self.advertising = false
@@ -78,13 +50,14 @@ public class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
         self.peripheralManager.stopAdvertising()
     }
     
+    
     public func isReady() -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             if (self.BleState != 5) {
-                delay(0.50, { _ = self.isReady().then{_ -> Void in fulfill(())} })
+                delay(0.50, { _ = self.isReady().done{_ -> Void in seal.fulfill(())} })
             }
             else {
-               fulfill(())
+               seal.fulfill(())
             }
         }
     }
@@ -94,6 +67,7 @@ public class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
         
     }
     
+    
     public func peripheralManager(_ peripheral: CBPeripheralManager, willRestoreState dict: [String : Any]) {
         LOG.info("BLUENET_LIB: Peripheral manager WILL RESTORE STATE \(dict)");
     }
@@ -101,12 +75,7 @@ public class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
     
     public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         self.BleState = peripheral.state.rawValue
-    
-        if (peripheral.state.rawValue == 4) {
-            self.restartRequired = true
-        }
-       // else if (peripheral.state.rawValue == 5 && self.restartRequired == true) {
-       //     self.startAdvertising()
-       // }
     }
 }
+
+#endif

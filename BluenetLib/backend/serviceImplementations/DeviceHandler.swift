@@ -33,7 +33,7 @@ public class DeviceHandler {
     public func getSoftwareRevision() -> Promise<String> {
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.DeviceInformation, characteristic: DeviceCharacteristics.FirmwareRevision)
             .then{ data -> Promise<String> in
-                return Promise<String>{fulfill, reject in fulfill(Conversion.uint8_array_to_string(data))
+                return Promise<String>{seal in seal.fulfill(Conversion.uint8_array_to_string(data))
             }}
     }
     
@@ -64,7 +64,7 @@ public class DeviceHandler {
     public func getHardwareRevision() -> Promise<String> {
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.DeviceInformation, characteristic: DeviceCharacteristics.HardwareRevision)
             .then{ data -> Promise<String> in
-                return Promise<String>{fulfill, reject in fulfill(Conversion.uint8_array_to_string(data))
+                return Promise<String>{seal in seal.fulfill(Conversion.uint8_array_to_string(data))
             }}
     }
     
@@ -72,7 +72,7 @@ public class DeviceHandler {
     
     public func getBootloaderRevision() -> Promise<String> {
         return self.bleManager.getServicesFromDevice()
-            .then{ services in
+            .then{ services -> Promise<String> in
                 var isInDfuMode = false
                 for service in services {
                     if service.uuid.uuidString == DFUServiceUUID {
@@ -82,7 +82,7 @@ public class DeviceHandler {
                 }
                 
                 if (isInDfuMode == false) {
-                    throw BleError.NOT_IN_DFU_MODE
+                    throw BluenetError.NOT_IN_DFU_MODE
                 }
                 
                 return self.getSoftwareRevision()

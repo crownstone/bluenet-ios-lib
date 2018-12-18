@@ -21,7 +21,7 @@ public func delay(_ delay: Double, _ closure: @escaping ()->()) {
 
 
 
-
+#if os(iOS)
 /**
  * This will show an alert about location and forward the user to the settings page
  **/
@@ -32,7 +32,7 @@ public func showLocationAlert() {
     
     let settingsAction = UIAlertAction(title: "Settings", style: .default) { (alertAction) in
         // THIS IS WHERE THE MAGIC HAPPENS!!!! It triggers the settings page to change the permissions
-        if let appSettings = URL(string: UIApplicationOpenSettingsURLString) {
+        if let appSettings = URL(string: UIApplication.openSettingsURLString) {
             UIApplication.shared.openURL(appSettings)
         }
     }
@@ -44,6 +44,7 @@ public func showLocationAlert() {
     VIEWCONTROLLER!.present(alertController, animated: true, completion: nil)
 }
 
+#endif
 
 /**
  *

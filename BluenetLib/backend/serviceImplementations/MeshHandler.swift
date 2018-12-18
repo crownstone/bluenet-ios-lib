@@ -54,7 +54,7 @@ public class MeshHandler {
             return self._writeControlPacket(commandPayload)
         }
         else {
-            return Promise<Void> { fulfill, reject in reject(BleError.NO_KEEPALIVE_STATE_ITEMS)}
+            return Promise<Void> { seal in seal.reject(BluenetError.NO_KEEPALIVE_STATE_ITEMS)}
         }
     }
     
@@ -81,7 +81,7 @@ public class MeshHandler {
             return self._writeControlPacket(commandPayload)
         }
         else {
-            return Promise<Void> { fulfill, reject in reject(BleError.NO_SWITCH_STATE_ITEMS)}
+            return Promise<Void> { seal in seal.reject(BluenetError.NO_SWITCH_STATE_ITEMS)}
         }
     }
     

@@ -41,7 +41,7 @@ public class Bluenet {
     // todo: set back to private, currently public for DEBUG
     var counter : UInt64 = 0
     public let bleManager : BleManager!
-    public let blePeripheralManager : BlePeripheralManager!
+    let peripheralStateManager : PeripheralStateManager!
     public var settings : BluenetSettings!
     let eventBus : EventBus!
     
@@ -56,14 +56,17 @@ public class Bluenet {
     var encryptionMap = [String: String]()
 
     // declare the classes handling the library protocol
+#if os(iOS)
     public let dfu      : DfuHandler!
-    public let config   : ConfigHandler!
-    public let setup    : SetupHandler!
-    public let control  : ControlHandler!
-    public let power    : PowerHandler!
-    public let mesh     : MeshHandler!
-    public let device   : DeviceHandler!
-    public let state    : StateHandler!
+#endif
+    public let config     : ConfigHandler!
+    public let setup      : SetupHandler!
+    public let control    : ControlHandler!
+    public let power      : PowerHandler!
+    public let mesh       : MeshHandler!
+    public let device     : DeviceHandler!
+    public let state      : StateHandler!
+    public let broadcast  : BroadcastHandler!
 
     
     // MARK: API
@@ -79,7 +82,7 @@ public class Bluenet {
         self.settings   = BluenetSettings()
         self.eventBus   = EventBus()
         self.bleManager = BleManager(eventBus: self.eventBus, settings: settings, backgroundEnabled: backgroundEnabled)
-        self.blePeripheralManager = BlePeripheralManager(eventBus: self.eventBus, backgroundEnabled: backgroundEnabled);
+        self.peripheralStateManager = PeripheralStateManager(eventBus: self.eventBus, settings: settings, backgroundEnabled: backgroundEnabled)
         
         self.setupList               = CrownstoneContainer(setupMode: true,  dfuMode: false)
         self.dfuList                 = CrownstoneContainer(setupMode: false, dfuMode: true )
@@ -87,14 +90,17 @@ public class Bluenet {
         self.validatedCrownstoneList = CrownstoneContainer(setupMode: true,  dfuMode: true )
        
         // pass on the shared objects to the worker classes
+    #if os(iOS)
         self.dfu     = DfuHandler(     bleManager:bleManager, eventBus: eventBus, settings: settings)
-        self.config  = ConfigHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings)
-        self.setup   = SetupHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings)
-        self.control = ControlHandler( bleManager:bleManager, eventBus: eventBus, settings: settings)
-        self.power   = PowerHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings)
-        self.mesh    = MeshHandler(    bleManager:bleManager, eventBus: eventBus, settings: settings)
-        self.device  = DeviceHandler(  bleManager:bleManager, eventBus: eventBus, settings: settings)
-        self.state   = StateHandler(   bleManager:bleManager, eventBus: eventBus, settings: settings)
+    #endif
+        self.config    = ConfigHandler(   bleManager:bleManager,                   eventBus: eventBus, settings: settings)
+        self.setup     = SetupHandler(    bleManager:bleManager,                   eventBus: eventBus, settings: settings)
+        self.control   = ControlHandler(  bleManager:bleManager,                   eventBus: eventBus, settings: settings)
+        self.power     = PowerHandler(    bleManager:bleManager,                   eventBus: eventBus, settings: settings)
+        self.mesh      = MeshHandler(     bleManager:bleManager,                   eventBus: eventBus, settings: settings)
+        self.device    = DeviceHandler(   bleManager:bleManager,                   eventBus: eventBus, settings: settings)
+        self.state     = StateHandler(    bleManager:bleManager,                   eventBus: eventBus, settings: settings)
+        self.broadcast = BroadcastHandler(peripheralStateManager: self.peripheralStateManager, eventBus: eventBus, settings: settings)
         
         _ = eventBus.on("disconnectCommandWritten", self._storeDisconnectCommandList)
         
@@ -111,20 +117,14 @@ public class Bluenet {
         self.bleManager.disableBatterySaving()
     }
     
-    public func setBackgroundScanning(newBackgroundState: Bool) {
-        self.bleManager.setBackgroundScanning(newBackgroundState: newBackgroundState)
+    public func setBackgroundOperations(newBackgroundState: Bool) {
+        self.bleManager.setBackgroundOperations(newBackgroundState: newBackgroundState)
+        self.peripheralStateManager.setBackgroundOperations(newBackgroundState: newBackgroundState)
     }
     
-    public func startAdvertising(uuidString: String = "c005") {
-        self.blePeripheralManager.startAdvertising(uuidString: uuidString)
-    }
-    
-    public func startAdvertisingArray(uuidStrings: [String]) {
-        self.blePeripheralManager.startAdvertisingArray(uuidStrings: uuidStrings)
-    }
-    
-    public func stopAdvertising() {
-        self.blePeripheralManager.stopAdvertising()
+    public func setLocationState(sphereUID: UInt8, locationId: UInt8, profileIndex: UInt8) {
+        self.settings.setLocationState(sphereUID: sphereUID, locationId: locationId, profileIndex: profileIndex)
+        self.eventBus.emit("newLocationState", true)
     }
     
     
@@ -133,6 +133,16 @@ public class Bluenet {
             encryptionEnabled: encryptionEnabled,
             keySets: keySets
         )
+        
+        for (_, validator) in self.reachableCrownstones {
+            validator.releaseLockOnDecryption()
+        }
+    }
+    
+    
+    
+    public func startAdvertisingArray(uuids: [UInt16]) {
+        self.peripheralStateManager.advertiseArray(uuids: uuids)
     }
     
     
@@ -241,7 +251,7 @@ public class Bluenet {
      * Should be used to make sure commands are not send before it's finished and get stuck.
      */
     public func isPeripheralReady() -> Promise<Void> {
-        return self.blePeripheralManager.isReady()
+        return self.peripheralStateManager.blePeripheralManager.isReady()
     }
 
     
@@ -267,25 +277,30 @@ public class Bluenet {
             return self.bleManager.connect(handle)
                 .then{_ -> Promise<Void> in
                     LOG.info("BLUENET_LIB: connected!")
-                    return Promise<Void> {fulfill, reject in
+                    return Promise<Void> {seal in
                         if (self.settings.isEncryptionEnabled()) {
                             // we have to validate if the referenceId is valid here, otherwise we cannot do encryption
+                            var activeReferenceId = referenceId
+                            
                             if (referenceId == nil) {
-                                return reject(BleError.INVALID_SESSION_REFERENCE_ID)
+                                activeReferenceId = self.getReferenceId(handle: handle)
+                                if (activeReferenceId == nil) {
+                                    return seal.reject(BluenetError.INVALID_SESSION_REFERENCE_ID)
+                                }
                             }
                             
-                            if (self.settings.setSessionId(referenceId: referenceId!) == false) {
-                                return reject(BleError.INVALID_SESSION_REFERENCE_ID)
+                            if (self.settings.setSessionId(referenceId: activeReferenceId!) == false) {
+                                return seal.reject(BluenetError.INVALID_SESSION_REFERENCE_ID)
                             }
                             
                             self.control.getAndSetSessionNonce()
-                                .then{_ -> Void in
-                                    fulfill(())
+                                .done{_ -> Void in
+                                    seal.fulfill(())
                                 }
-                                .catch{err in reject(err)}
+                                .catch{err in seal.reject(err)}
                         }
                         else {
-                            fulfill(())
+                            seal.fulfill(())
                         }
                     }
                 };
@@ -293,9 +308,11 @@ public class Bluenet {
         
         if (delayTime != 0) {
             LOG.info("BLUENET_LIB: Delaying connection to \(handle) with \(delayTime) seconds since it recently got a disconnectCommand.")
-            return Promise<Void> {fulfill, reject in
+            return Promise<Void> { seal in
                 delay(delayTime, {
-                    connectionCommand().then{ _ in fulfill(()) }.catch{err in reject(err) }
+                    connectionCommand()
+                        .done{ _ in seal.fulfill(()) }
+                        .catch{err in seal.reject(err) }
                 })
             }
         }
@@ -317,9 +334,17 @@ public class Bluenet {
     /**
      * Get the state of the BLE controller.
      */
+    #if os(iOS)
     public func getBleState() -> CBCentralManagerState {
         return self.bleManager.BleState
     }
+    #endif
+    
+    #if os(watchOS)
+    public func getBleState() -> CBManagerState {
+        return self.bleManager.BleState
+    }
+    #endif
     
     /**
      * Re-emit the state of the BLE controller.
@@ -342,6 +367,10 @@ public class Bluenet {
         return self.bleManager.waitToReconnect()
     }
     
+    public func wait(_ seconds: Double) -> Promise<Void> {
+        return self.bleManager.wait(seconds: seconds)
+    }
+    
     public func waitToWrite() -> Promise<Void> {
         return self.bleManager.waitToWrite(0)
     }
@@ -351,11 +380,18 @@ public class Bluenet {
     }
     
     public func applicationWillEnterForeground() {
-        
+        self.peripheralStateManager.applicationWillEnterForeground()
     }
     
     public func applicationDidEnterBackground() {
-        
+        self.peripheralStateManager.applicationDidEnterBackground()
+    }
+    
+    public func getReferenceId(handle: String) -> String? {
+        if let validator = self.reachableCrownstones[handle] {
+            return validator.validatedReferenceId
+        }
+        return nil
     }
     
     // MARK: util

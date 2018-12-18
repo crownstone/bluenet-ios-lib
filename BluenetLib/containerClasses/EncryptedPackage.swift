@@ -20,7 +20,7 @@ class EncryptedPackage {
     init(data: Data) throws {
         let prefixLength = PACKET_NONCE_LENGTH + PACKET_USERLEVEL_LENGTH
         if (data.count < prefixLength) {
-            throw BleError.INVALID_PACKAGE_FOR_ENCRYPTION_TOO_SHORT
+            throw BluenetError.INVALID_PACKAGE_FOR_ENCRYPTION_TOO_SHORT
         }
         
         nonce = [UInt8](repeating: 0, count: PACKET_NONCE_LENGTH);
@@ -29,7 +29,7 @@ class EncryptedPackage {
         
         // 20 is the minimal size of a packet (3+1+16)
         if (dataArray.count < 20) {
-            throw BleError.INVALID_PACKAGE_FOR_ENCRYPTION_TOO_SHORT
+            throw BluenetError.INVALID_PACKAGE_FOR_ENCRYPTION_TOO_SHORT
         }
         
         // copy the nonce over to the class var
@@ -40,7 +40,7 @@ class EncryptedPackage {
         
         // only allow 0, 1, 2 for Admin, User, Guest and 100 for Setup
         if (dataArray[PACKET_NONCE_LENGTH] > 2 && dataArray[PACKET_NONCE_LENGTH] != UInt8(UserLevel.setup.rawValue)) {
-            throw BleError.INVALID_KEY_FOR_ENCRYPTION
+            throw BluenetError.INVALID_KEY_FOR_ENCRYPTION
         }
         
         // get the key from the data
@@ -50,7 +50,7 @@ class EncryptedPackage {
             userLevel = packageLevel!
         }
         else {
-            throw BleError.USERLEVEL_IN_READ_PACKET_INVALID
+            throw BluenetError.USERLEVEL_IN_READ_PACKET_INVALID
         }
         
         // copy the nonce over to the class var
@@ -59,7 +59,7 @@ class EncryptedPackage {
         }
         
         if (payloadData.count % 16 != 0) {
-            throw BleError.INVALID_SIZE_FOR_ENCRYPTED_PAYLOAD
+            throw BluenetError.INVALID_SIZE_FOR_ENCRYPTED_PAYLOAD
         }
         
         payload = payloadData;
@@ -69,6 +69,6 @@ class EncryptedPackage {
         if (payload != nil) {
             return payload!
         }
-        throw BleError.CAN_NOT_GET_PAYLOAD
+        throw BluenetError.CAN_NOT_GET_PAYLOAD
     }
 }

@@ -20,7 +20,7 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
     
     fileprivate var dfuController : DFUServiceController?
     var pendingDFUPromiseFulfill : (()) -> Void = {_ in }
-    var pendingDFUPromiseReject : (BleError) -> Void  = {_ in }
+    var pendingDFUPromiseReject : (BluenetError) -> Void  = {_ in }
     var promisePending = false
     
     let secureDFU = false
@@ -41,20 +41,20 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
      **/
     public func startDFU(handle: String, firmwareURL: URL) -> Promise<Void> {
         if (self.promisePending == true) {
-            self.rejectPromise(BleError.DFU_OVERRULED)
+            self.rejectPromise(BluenetError.DFU_OVERRULED)
             _ = dfuController?.abort()
             dfuController = nil
         }
         
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             self.promisePending = true
             let dfuPeripheral = self.bleManager.getPeripheral(handle)
 
-            self.pendingDFUPromiseReject = reject
-            self.pendingDFUPromiseFulfill = fulfill
+            self.pendingDFUPromiseReject = seal.reject
+            self.pendingDFUPromiseFulfill = seal.fulfill
             
             guard dfuPeripheral != nil else {
-                self.rejectPromise(BleError.COULD_NOT_FIND_PERIPHERAL)
+                self.rejectPromise(BluenetError.COULD_NOT_FIND_PERIPHERAL)
                 return
             }
             
@@ -89,7 +89,7 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
                 LOG.verbose("DFU: completed")
             case .aborted:
                 self.eventBus.emit("dfuStateDidChange", "aborted")
-                self.rejectPromise(BleError.DFU_ABORTED)
+                self.rejectPromise(BluenetError.DFU_ABORTED)
                 LOG.verbose("DFU: aborted")
             default:
                 LOG.verbose("DFU: default")
@@ -103,20 +103,20 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
     public func dfuError(_ error: DFUError, didOccurWithMessage message: String) {
         LOG.error("Error \(error.rawValue): \(message)")
         self.eventBus.emit("dfuError", "\(error.rawValue): \(message)")
-        self.rejectPromise(BleError.DFU_ERROR)
+        self.rejectPromise(BluenetError.DFU_ERROR)
     }
     
     public func bootloaderToNormalMode(uuid: String) -> Promise<Void> {
         var cleanup : voidPromiseCallback?
         self.bleManager.settings.disableEncryptionTemporarily()
         var success = false
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             self.bleManager.isReady() // first check if the bluenet lib is ready before using it for BLE things.
                 .then {(_) -> Promise<Void> in return self.bleManager.connect(uuid)}
                 .then {(_) -> Promise<Void> in
-                    return Promise<Void> { fulfill2, reject2 in
+                    return Promise<Void> { innerSeal in
                         self.bleManager.getServicesFromDevice()
-                            .then{ services -> Void in
+                            .done{ services -> Void in
                                 var isInDfuMode = false
                                 for service in services {
                                     if service.uuid.uuidString == DFUServiceUUID {
@@ -126,13 +126,13 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
                                 }
                                 
                                 if (isInDfuMode == false) {
-                                    reject2(BleError.NOT_IN_DFU_MODE)
+                                    innerSeal.reject(BluenetError.NOT_IN_DFU_MODE)
                                 }
                                 else {
-                                    fulfill2(())
+                                    innerSeal.fulfill(())
                                 }
                             }
-                            .catch{ err in reject2(err) }
+                            .catch{ err in innerSeal.reject(err) }
                     }
                 }
                 .then {(_) -> Promise<voidPromiseCallback> in return self.setupNotifications() /*the bootloader requires the user to subscribe to notifications in order to function*/}
@@ -142,15 +142,15 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
                     return self._writeResetCommand()
                 }
                 .recover{(err: Error) -> Promise<Void> in
-                    return Promise <Void> { fulfill2, reject2 in
+                    return Promise <Void> { innerSeal in
                         // we only want to pass this to the main promise of connect if we successfully received the nonce, but cant decrypt it.
-                        if let bleErr = err as? BleError {
-                            if bleErr != BleError.NOT_IN_DFU_MODE {
-                                reject2(err)
+                        if let bleErr = err as? BluenetError {
+                            if bleErr != BluenetError.NOT_IN_DFU_MODE {
+                                innerSeal.reject(err)
                                 return
                             }
                         }
-                        fulfill2(())
+                        innerSeal.fulfill(())
                     }
                 }
                 .then {(_) -> Promise<Void> in
@@ -159,27 +159,27 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
                         return cleanup!()
                     }
                     else {
-                        return Promise <Void> { fulfill2, reject2 in fulfill2(()) }
+                        return Promise.value(())
                     }
                 }
                 .then {(_) -> Promise<Void> in
                     cleanup = nil
                     return self.bleManager.disconnect()
                 }
-                .then {(_) -> Void in fulfill(())}
+                .done {(_) -> Void in seal.fulfill(())}
                 .catch {(err) -> Void in
                     self.bleManager.settings.restoreEncryption()
                     if (cleanup != nil) {
                         _ = cleanup!()
                     }
                     self.bleManager.disconnect()
-                        .then{_ -> Void in
-                            if (success) { fulfill(()) }
-                            else { reject(err) }
+                        .done{_ -> Void in
+                            if (success) { seal.fulfill(()) }
+                            else { seal.reject(err) }
                         }
                         .catch{_ in
-                            if (success) { fulfill(()) }
-                            else { reject(err) }
+                            if (success) { seal.fulfill(()) }
+                            else { seal.reject(err) }
                         }
             }
         }
@@ -227,7 +227,7 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
     }
 
     
-    func rejectPromise(_ err: BleError) {
+    func rejectPromise(_ err: BluenetError) {
         if (self.promisePending) {
             self.promisePending = false
             self.pendingDFUPromiseReject(err)

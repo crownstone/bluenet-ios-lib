@@ -31,7 +31,7 @@ public class SetupHandler {
     
     
     func handleSetupPhaseEncryption() -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             self.bleManager.settings.disableEncryptionTemporarily()
             self.getSessionKey()
                 .then{(key: [UInt8]) -> Promise<[UInt8]> in
@@ -39,15 +39,15 @@ public class SetupHandler {
                     self.bleManager.settings.loadSetupKey(key)
                     return self.getSessionNonce()
                 }
-                .then{(nonce: [UInt8]) -> Void in
+                .done{(nonce: [UInt8]) -> Void in
                     self.eventBus.emit("setupProgress", 2)
                     self.bleManager.settings.setSessionNonce(nonce)
                     self.bleManager.settings.restoreEncryption()
-                    fulfill(())
+                    seal.fulfill(())
                 }
                 .catch{(err: Error) -> Void in
                     self.bleManager.settings.restoreEncryption()
-                    reject(err)
+                    seal.reject(err)
             }
         }
     }
@@ -57,29 +57,29 @@ public class SetupHandler {
      */
     public func setup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
         // if the crownstone has the new setupControl characteristic, we can do the quick setup.
-        return Promise<Void> { fulfill, reject -> Void in
+        return Promise<Void> { seal -> Void in
             self.bleManager.getChacteristic(CSServices.SetupService, SetupCharacteristics.SetupControl)
                 .then{(characteristic) -> Promise<Void> in
                     // here we can do fastSetup
                     LOG.info("BLUENET_LIB: Fast Setup is supported. Performing..")
                     return self.fastSetup(crownstoneId: crownstoneId, adminKey: adminKey, memberKey: memberKey, guestKey: guestKey, meshAccessAddress: meshAccessAddress, ibeaconUUID: ibeaconUUID, ibeaconMajor: ibeaconMajor, ibeaconMinor: ibeaconMinor)
                 }
-                .then{(_) -> Void in fulfill(()) }
+                .done{(_) -> Void in seal.fulfill(()) }
                 .catch{(err: Error) in
-                    if let bleErr = err as? BleError {
-                        if (bleErr == BleError.CHARACTERISTIC_DOES_NOT_EXIST) {
+                    if let bleErr = err as? BluenetError {
+                        if (bleErr == BluenetError.CHARACTERISTIC_DOES_NOT_EXIST) {
                             // do normal setup.
                             LOG.info("BLUENET_LIB: Fast Setup is NOT supported. Performing classic setup..")
                             self.classicSetup(crownstoneId: crownstoneId, adminKey: adminKey, memberKey: memberKey, guestKey: guestKey, meshAccessAddress: meshAccessAddress, ibeaconUUID: ibeaconUUID, ibeaconMajor: ibeaconMajor, ibeaconMinor: ibeaconMinor)
-                                .then{(_) -> Void in fulfill(()) }
-                                .catch{(setupError: Error) -> Void in reject(setupError) }
+                                .done{(_) -> Void in seal.fulfill(()) }
+                                .catch{(setupError: Error) -> Void in seal.reject(setupError) }
                         }
                         else {
-                            reject(err)
+                            seal.reject(err)
                         }
                     }
                     else {
-                        reject(err)
+                        seal.reject(err)
                     }
                 }
         }
@@ -91,7 +91,7 @@ public class SetupHandler {
     public func classicSetup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
         self.step = 0
         self.verificationFailed = false
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             self.handleSetupPhaseEncryption()
                 .then{(_) -> Promise<Void> in return self.setHighTX()}
                 .then{(_) -> Promise<Void> in return self.setupNotifications()}
@@ -104,11 +104,11 @@ public class SetupHandler {
                 .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 9);  return self.writeIBeaconMajor(ibeaconMajor)}
                 .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 10); return self.writeIBeaconMinor(ibeaconMinor)}
                 .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 11); return self.wrapUp()}
-                .then{(_) -> Void in
+                .done{(_) -> Void in
                     LOG.info("BLUENET_LIB: Setup Finished")
                     self.eventBus.emit("setupProgress", 13);
                     self.bleManager.settings.exitSetup()
-                    fulfill(())
+                    seal.fulfill(())
                 }
                 .catch{(err: Error) -> Void in
                     self.eventBus.emit("setupProgress", 0);
@@ -116,7 +116,7 @@ public class SetupHandler {
                     self.bleManager.settings.exitSetup()
                     self.bleManager.settings.restoreEncryption()
                     _ = self.bleManager.errorDisconnect()
-                    reject(err)
+                    seal.reject(err)
             }
         }
     }
@@ -126,7 +126,7 @@ public class SetupHandler {
      */
     public func fastSetup(crownstoneId: UInt16, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> Promise<Void> {
         self.step = 0
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             self.handleSetupPhaseEncryption()
                 .then{(_) -> Promise<Void> in
                     self.eventBus.emit("setupProgress", 4);
@@ -171,18 +171,18 @@ public class SetupHandler {
                     self.eventBus.emit("setupProgress", 11)
                     return self.bleManager.waitForPeripheralToDisconnect(timeout: 10)
                 }
-                .then{(_) -> Void in
+                .done{(_) -> Void in
                     LOG.info("BLUENET_LIB: Setup Finished")
                     self.eventBus.emit("setupProgress", 13)
                     self.bleManager.settings.exitSetup()
-                    fulfill(())
+                    seal.fulfill(())
                 }
                 .catch{(err: Error) -> Void in
                     self.eventBus.emit("setupProgress", 0)
                     self.bleManager.settings.exitSetup()
                     self.bleManager.settings.restoreEncryption()
                     _ = self.bleManager.errorDisconnect()
-                    reject(err)
+                    seal.reject(err)
             }
         }
     }
@@ -226,22 +226,23 @@ public class SetupHandler {
     
     public func putInDFU() -> Promise<Void> {
         LOG.info("put in DFU during setup.")
+        
         let packet : [UInt8] = [66]
         self.bleManager.settings.disableEncryptionTemporarily()
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             self.bleManager.writeToCharacteristic(
                 CSServices.SetupService,
                 characteristicId: SetupCharacteristics.GoToDFU,
-                data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                data: Data(bytes: packet, count: packet.count),
                 type: CBCharacteristicWriteType.withResponse
             )
-            .then{_ -> Void in
+            .done{_ -> Void in
                 self.bleManager.settings.restoreEncryption()
-                fulfill(())
+                seal.fulfill(())
             }
             .catch{(err: Error) -> Void in
                 self.bleManager.settings.restoreEncryption()
-                reject(err)
+                seal.reject(err)
             }
         }
     }
@@ -250,10 +251,10 @@ public class SetupHandler {
      * Get the MAC address as a F3:D4:A1:CC:FF:32 String
      */
     public func getMACAddress() -> Promise<String> {
-        return Promise<String> { fulfill, reject in
+        return Promise<String> { seal in
             self.bleManager.readCharacteristicWithoutEncryption(CSServices.SetupService, characteristic: SetupCharacteristics.MacAddress)
-                .then{data -> Void in LOG.info("\(data)"); fulfill(Conversion.uint8_array_to_macAddress(data))}
-                .catch{err in reject(err)}
+                .done{data -> Void in LOG.info("\(data)"); seal.fulfill(Conversion.uint8_array_to_macAddress(data))}
+                .catch{err in seal.reject(err)}
         }
     }
     
@@ -264,9 +265,10 @@ public class SetupHandler {
     public func factoryReset() -> Promise<Void> {
         return self.handleSetupPhaseEncryption()
             .then{(_) -> Promise<Void> in return self._factoryReset() }
-            .then{(_) -> Void in _ = self.bleManager.disconnect() }
+            .done{(_) -> Void in
+                _ = self.bleManager.disconnect()
+        }
     }
-
     
     public func _factoryReset() -> Promise<Void> {
         LOG.info("factoryReset in setup")
@@ -355,21 +357,21 @@ public class SetupHandler {
                     callback: notificationCallback
                 )
             }
-            .then{ callback -> Void in self.unsubscribeNotificationCallback = callback }
+            .done{ callback -> Void in self.unsubscribeNotificationCallback = callback }
     }
     
     func clearNotifications() -> Promise<Void> {
-        return Promise<Void> { fulfill, reject in
+        return Promise<Void> { seal in
             if (unsubscribeNotificationCallback != nil) {
                 unsubscribeNotificationCallback!()
-                    .then{ _ -> Void in
+                    .done{ _ -> Void in
                         self.unsubscribeNotificationCallback = nil
-                        fulfill(())
+                        seal.fulfill(())
                     }
                     .catch{ _ in }
             }
             else {
-                fulfill(())
+                seal.fulfill(())
             }
         }
     }
@@ -388,15 +390,15 @@ public class SetupHandler {
                     return self.bleManager.waitToWrite()
                 }
                 else {
-                    return Promise<Void> { fulfill, reject in fulfill(()) }
+                    return Promise<Void> { seal in seal.fulfill(()) }
                 }
             }
             .then{_ -> Promise<Bool> in
                 let packet = ReadConfigPacket(type: type).getPacket()
                 // Make sure we first provide the fulfillment function before we ask for the notifications.
-                return Promise<Bool> { fulfill, reject in
+                return Promise<Bool> { seal in
                     self.matchPacket = initialPacket
-                    self.validationResult = fulfill
+                    self.validationResult = seal.fulfill
                     self.validationComplete = false
                     let stepId = self.step
                     
@@ -405,21 +407,21 @@ public class SetupHandler {
                         if (self.validationComplete == false && self.step == stepId) {
                             self.validationResult = { _ in }
                             self.matchPacket = []
-                            fulfill(false)
+                            seal.fulfill(false)
                         }
                     })
                     
-                    self._writeConfigPacket(packet).catch{ err in reject(err) }
+                    self._writeConfigPacket(packet).catch{ err in seal.reject(err) }
                 }
             }
             .then{ match -> Promise<Void> in
                 if (match) {
-                    return Promise<Void> { fulfill, reject in fulfill(()) }
+                    return Promise<Void> { seal in seal.fulfill(()) }
                 }
                 else {
                     self.verificationFailed = true
                     if (iteration > 2) {
-                        return Promise<Void> { fulfill, reject in reject(BleError.CANNOT_WRITE_AND_VERIFY) }
+                        return Promise<Void> { seal in seal.reject(BluenetError.CANNOT_WRITE_AND_VERIFY) }
                     }
                     return self._writeAndVerify(type, payload:payload, iteration: iteration+1)
                 }
@@ -460,22 +462,22 @@ public class SetupHandler {
                 )
             }
             .recover{(err: Error) -> Promise<Void> in
-                return Promise <Void> { fulfill, reject in
+                return Promise <Void> { seal in
                     // we only want to pass this to the main promise of connect if we successfully received the nonce, but cant decrypt it.
-                    if let bleErr = err as? BleError {
-                        if (bleErr == BleError.CHARACTERISTIC_DOES_NOT_EXIST) {
+                    if let bleErr = err as? BluenetError {
+                        if (bleErr == BluenetError.CHARACTERISTIC_DOES_NOT_EXIST) {
                             self.bleManager.writeToCharacteristic(
                                 CSServices.SetupService,
                                 characteristicId: SetupCharacteristics.Control,
                                 data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
                                 type: CBCharacteristicWriteType.withResponse
                                 )
-                                .then{ _ -> Void in fulfill(())}
-                                .catch{(err2: Error) -> Void in reject(err2) }
+                                .done{ _ -> Void in seal.fulfill(())}
+                                .catch{(err2: Error) -> Void in seal.reject(err2) }
                             return
                         }
                     }
-                    reject(err)
+                    seal.reject(err)
                 }
             }
     }

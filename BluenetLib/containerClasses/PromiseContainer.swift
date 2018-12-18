@@ -106,11 +106,11 @@ class promiseContainer {
             delay(delayTimeInSeconds, { self.fulfill(()) })
         }
         else {
-            _rejectPromise(BleError.CANNOT_SET_TIMEOUT_WITH_THIS_TYPE_OF_PROMISE)
+            _rejectPromise(BluenetError.CANNOT_SET_TIMEOUT_WITH_THIS_TYPE_OF_PROMISE)
         }
     }
     
-    func setDelayedReject(_ delayTimeInSeconds: Double, errorOnReject: BleError) {
+    func setDelayedReject(_ delayTimeInSeconds: Double, errorOnReject: BluenetError) {
         let rejectId = getUUID()
         self.rejectId = rejectId
         delay(delayTimeInSeconds, {
@@ -152,7 +152,7 @@ class promiseContainer {
             }
             else {
                 LOG.error("DEALLOCATING PROMISE OF TYPE \(self.type) \(self.promiseType) TO SET: \(newPromiseType)")
-                self.reject(BleError.REPLACED_WITH_OTHER_PROMISE)
+                self.reject(BluenetError.REPLACED_WITH_OTHER_PROMISE)
                 self._clear()
             }
         }
@@ -165,7 +165,7 @@ class promiseContainer {
                 _fulfillVoidPromise()
             }
             else {
-                _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
+                _rejectPromise(BluenetError.WRONG_TYPE_OF_PROMISE)
             }
             _clear()
         }
@@ -178,7 +178,7 @@ class promiseContainer {
                 _fulfillIntPromise(data)
             }
             else {
-                _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
+                _rejectPromise(BluenetError.WRONG_TYPE_OF_PROMISE)
             }
         }
         _clear()
@@ -191,7 +191,7 @@ class promiseContainer {
                 _fulfillServiceListPromise(data)
             }
             else {
-                _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
+                _rejectPromise(BluenetError.WRONG_TYPE_OF_PROMISE)
             }
         }
         _clear()
@@ -204,7 +204,7 @@ class promiseContainer {
                 _fulfillCharacteristicListPromise(data)
             }
             else {
-                _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
+                _rejectPromise(BluenetError.WRONG_TYPE_OF_PROMISE)
             }
         }
         _clear()
@@ -217,7 +217,7 @@ class promiseContainer {
                 _fulfillCharacteristicPromise(data)
             }
             else {
-                _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
+                _rejectPromise(BluenetError.WRONG_TYPE_OF_PROMISE)
             }
         }
         _clear()
@@ -230,7 +230,7 @@ class promiseContainer {
                 _fulfillDataPromise(data)
             }
             else {
-                _rejectPromise(BleError.WRONG_TYPE_OF_PROMISE)
+                _rejectPromise(BluenetError.WRONG_TYPE_OF_PROMISE)
             }
         }
         _clear()
