@@ -41,15 +41,12 @@ func RC5ExpandKey(key: [UInt8]) -> [UInt16] {
         S[i] = S[i-1] &+ Q
     }
     
-    var i = keyLength-1
     L[c-1] = 0
-    
-    while i != -1 {
+    for i in (0...keyLength-1).reversed() {
         L[i/u] = (L[i/u] << 8) + UInt16(key[i])
-        i -= 1
     }
     
-    i = 0;
+    var i = 0;
     var j = 0
     var k = 0
     var A : UInt16 = 0
@@ -64,7 +61,6 @@ func RC5ExpandKey(key: [UInt8]) -> [UInt16] {
         k += 1
         i = (i+1) % t
         j = (j+1) % c
-        
     }
     
     return S
