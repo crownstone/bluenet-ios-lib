@@ -32,9 +32,11 @@ class PeripheralStateManager {
         _ = self.eventBus.on("verifiedAdvertisementData", self._trackStoneTime)
     }
     
+    
     public func applicationWillEnterForeground() {
         self.stopBackgroundBroadcasts()
     }
+    
     
     public func applicationDidEnterBackground() {
         self.stopActiveBroadcasts()
@@ -82,8 +84,12 @@ class PeripheralStateManager {
     }
     
     func startBackgroundBroadcasts() {
-        // TODO: This will map the sphereUID and the locationId to the overflow area
-        
+        if let referenceId = self.settings.locationState.referenceId {
+            if let key = self.settings.getGuestKey(referenceId: referenceId) {
+                let uuids = BroadcastProtocol.getServicesForBackgroundBroadcast(locationState: self.settings.locationState, key: key)
+                self.blePeripheralManager.startAdvertisingArray(uuids: uuids)
+            }
+        }
     }
     
     
@@ -112,6 +118,10 @@ class PeripheralStateManager {
     func advertiseArray(uuids: [UInt16]) {
         let broadcastUUIDs = BroadcastProtocol.convertUInt16ListToUUID(uuids)
         self.blePeripheralManager.startAdvertisingArray(uuids: broadcastUUIDs)
+    }
+    
+    func advertiseArray(uuids: [CBUUID]) {
+        self.blePeripheralManager.startAdvertisingArray(uuids: uuids)
     }
   
     
@@ -189,8 +199,7 @@ class PeripheralStateManager {
             let otherUUIDs = try BroadcastProtocol.getUInt16ServiceNumbers(
                 locationState: self.settings.locationState,
                 protocolVersion: 1,
-                accessLevel: self.settings.userLevel,
-                time: getCurrentTimestampForCrownstone()
+                accessLevel: self.settings.userLevel
             )
             
             var nonce = [UInt8]()

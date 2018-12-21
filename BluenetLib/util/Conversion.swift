@@ -79,7 +79,7 @@ public class Conversion {
     }
     
     public static func uint8_to_hex_string(_ byte: UInt8) -> String {
-        if (byte < 0xf) {
+        if (byte <= 0x0f) {
             return "0" + String(format:"%1X", byte)
         }
         else {
@@ -159,6 +159,18 @@ public class Conversion {
         let ns = NSNumber(value: val as UInt32)
         return ns.int32Value
     }
+    
+    public static func uint32_to_uint16_array(_ val: UInt32) -> [UInt16] {
+        return [
+            UInt16((val >> 0 & 0x0000FFFF)),
+            UInt16((val >> 16))
+        ]
+    }
+    
+    public static func uint16_array_to_uint32(_ uint16Array: [UInt16]) -> UInt32 {
+        return UInt32(uint16Array[0]) + UInt32(uint16Array[1]) << 16
+    }
+    
     
     public static func uint8_to_bit_array(_ val: UInt8) -> [Bool] {
         var result = [Bool](repeating: false, count: 8)

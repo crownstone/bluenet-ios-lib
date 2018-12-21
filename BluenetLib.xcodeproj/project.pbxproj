@@ -142,7 +142,17 @@
 		FAA023F121C2A4D30059A64D /* BroadcastElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA023F021C2A4D30059A64D /* BroadcastElement.swift */; };
 		FAA1381F21B8035800044CF7 /* TimeUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA1381E21B8035800044CF7 /* TimeUtil.swift */; };
 		FAA40BD92199D20A00ACF053 /* WatchLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA40BD52199CD9000ACF053 /* WatchLogger.swift */; };
+		FAAB602A21CBCD9700183587 /* BluenetErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA843F1D21B6E47800F633A3 /* BluenetErrors.swift */; };
+		FAAB602B21CBCD9F00183587 /* TimeUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA1381E21B8035800044CF7 /* TimeUtil.swift */; };
+		FAAB602E21CBCDF300183587 /* PeripheralStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA843F1B21B6DDD200F633A3 /* PeripheralStateManager.swift */; };
+		FAAB602F21CBCE0000183587 /* BroadcastPackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA023EB21C275EF0059A64D /* BroadcastPackets.swift */; };
+		FAAB603021CBCE0200183587 /* BroadcastProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA843EFF21B6D51800F633A3 /* BroadcastProtocol.swift */; };
+		FAAB603121CBCE1800183587 /* BroadcastBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA023ED21C2A3B10059A64D /* BroadcastBuffer.swift */; };
+		FAAB603221CBCE1B00183587 /* BroadcastElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA023F021C2A4D30059A64D /* BroadcastElement.swift */; };
+		FAAB603321CBCE3800183587 /* BroadcastHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA843EFD21B6D3A600F633A3 /* BroadcastHandler.swift */; };
 		FAD2AFD72189F85D00458520 /* BluenetWatch.h in Headers */ = {isa = PBXBuildFile; fileRef = FAD2AFD52189F85D00458520 /* BluenetWatch.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FADA183D21CA7E6C0066DF9F /* RC5.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADA183C21CA7E6C0066DF9F /* RC5.swift */; };
+		FADA183E21CA7E6C0066DF9F /* RC5.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADA183C21CA7E6C0066DF9F /* RC5.swift */; };
 		FAE862621CF4B3830027539D /* Cartfile in Resources */ = {isa = PBXBuildFile; fileRef = FAE862611CF4B3830027539D /* Cartfile */; };
 /* End PBXBuildFile section */
 
@@ -250,6 +260,7 @@
 		FAD2AFD32189F85D00458520 /* BluenetWatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BluenetWatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAD2AFD52189F85D00458520 /* BluenetWatch.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BluenetWatch.h; sourceTree = "<group>"; };
 		FAD2AFD62189F85D00458520 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FADA183C21CA7E6C0066DF9F /* RC5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RC5.swift; sourceTree = "<group>"; };
 		FAE862611CF4B3830027539D /* Cartfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Cartfile; sourceTree = "<group>"; };
 		FAE9371D1D14453000945989 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -410,6 +421,7 @@
 			isa = PBXGroup;
 			children = (
 				FA5882A41E38C0F100913AE6 /* EncryptionHandler.swift */,
+				FADA183C21CA7E6C0066DF9F /* RC5.swift */,
 			);
 			path = encryption;
 			sourceTree = "<group>";
@@ -630,7 +642,7 @@
 				TargetAttributes = {
 					FA3C18781CBBDA6B00A11CF7 = {
 						CreatedOnToolsVersion = 7.3;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1010;
 					};
 					FA3C18821CBBDA6B00A11CF7 = {
 						CreatedOnToolsVersion = 7.3;
@@ -638,6 +650,7 @@
 					};
 					FAD2AFD22189F85D00458520 = {
 						CreatedOnToolsVersion = 10.0;
+						LastSwiftMigration = 1010;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -753,6 +766,7 @@
 				FA0B813B1F94BB510090168B /* BluenetCBDelegate.swift in Sources */,
 				FA5882C01E38C0F100913AE6 /* Bluenet.swift in Sources */,
 				FA843F0021B6D51800F633A3 /* BroadcastProtocol.swift in Sources */,
+				FADA183D21CA7E6C0066DF9F /* RC5.swift in Sources */,
 				FA7065DC2003AE8F00C833FE /* opCode1.swift in Sources */,
 				FA5882C71E38C0F100913AE6 /* EncryptedPackage.swift in Sources */,
 				FA5882CB1E38C0F100913AE6 /* PowerSamples.swift in Sources */,
@@ -787,26 +801,33 @@
 				FA94D02321A6E62F00AB8331 /* ControlHandler.swift in Sources */,
 				FA94D02421A6E62F00AB8331 /* DeviceHandler.swift in Sources */,
 				FA94D02621A6E62F00AB8331 /* MeshHandler.swift in Sources */,
+				FAAB603221CBCE1B00183587 /* BroadcastElement.swift in Sources */,
 				FA94D02721A6E62F00AB8331 /* PowerHandler.swift in Sources */,
 				FA94D02821A6E62F00AB8331 /* SetupHandler.swift in Sources */,
 				FA94D02921A6E62F00AB8331 /* StateHandler.swift in Sources */,
+				FAAB602B21CBCD9F00183587 /* TimeUtil.swift in Sources */,
 				FA94D02A21A6E62F00AB8331 /* opCode4_type0.swift in Sources */,
 				FA94D02B21A6E62F00AB8331 /* opCode3_type0.swift in Sources */,
 				FA94D02C21A6E62F00AB8331 /* opCode3_type1.swift in Sources */,
 				FA94D02D21A6E62F00AB8331 /* opCode3_type2.swift in Sources */,
 				FA94D02E21A6E62F00AB8331 /* opCode3_type3.swift in Sources */,
+				FAAB603021CBCE0200183587 /* BroadcastProtocol.swift in Sources */,
 				FA94D02F21A6E62F00AB8331 /* opCode1.swift in Sources */,
 				FA94D03021A6E62F00AB8331 /* opCode2.swift in Sources */,
 				FA94D03121A6E62F00AB8331 /* opCode3.swift in Sources */,
+				FAAB603321CBCE3800183587 /* BroadcastHandler.swift in Sources */,
 				FA94D03221A6E62F00AB8331 /* opCode4.swift in Sources */,
 				FA94D03321A6E62F00AB8331 /* opCode5.swift in Sources */,
 				FA94D03421A6E62F00AB8331 /* opCode6.swift in Sources */,
+				FAAB603121CBCE1800183587 /* BroadcastBuffer.swift in Sources */,
 				FA94D03521A6E62F00AB8331 /* Advertisement.swift in Sources */,
 				FA94D03621A6E62F00AB8331 /* ScanResponse.swift in Sources */,
 				FA94D03821A6E62F00AB8331 /* AdvertisementValidator.swift in Sources */,
 				FA94D03921A6E62F00AB8331 /* CrownstoneContainer.swift in Sources */,
 				FA94D03A21A6E62F00AB8331 /* BluenetSettings.swift in Sources */,
+				FAAB602F21CBCE0000183587 /* BroadcastPackets.swift in Sources */,
 				FA94D03B21A6E62F00AB8331 /* CrownstoneErrors.swift in Sources */,
+				FAAB602E21CBCDF300183587 /* PeripheralStateManager.swift in Sources */,
 				FA94D03C21A6E62F00AB8331 /* EncryptedPackage.swift in Sources */,
 				FA94D03D21A6E62F00AB8331 /* Firmware.swift in Sources */,
 				FA94D03F21A6E62F00AB8331 /* NearestItem.swift in Sources */,
@@ -816,10 +837,12 @@
 				FA94D04421A6E63000AB8331 /* KeySet.swift in Sources */,
 				FA94D04521A6E63000AB8331 /* EncryptionHandler.swift in Sources */,
 				FA94D04621A6E63000AB8331 /* BlePackets.swift in Sources */,
+				FADA183E21CA7E6C0066DF9F /* RC5.swift in Sources */,
 				FA94D04721A6E63000AB8331 /* MeshPackets.swift in Sources */,
 				FA94D04821A6E63000AB8331 /* BluenetTypes.swift in Sources */,
 				FA94D04921A6E63000AB8331 /* Characteristics.swift in Sources */,
 				FA94D04A21A6E63000AB8331 /* Services.swift in Sources */,
+				FAAB602A21CBCD9700183587 /* BluenetErrors.swift in Sources */,
 				FA94D04B21A6E63000AB8331 /* SchedulerPackets.swift in Sources */,
 				FA94D04C21A6E63000AB8331 /* WatchLogger.swift in Sources */,
 				FA94D04D21A6E63000AB8331 /* Conversion.swift in Sources */,
@@ -963,6 +986,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -982,7 +1006,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -992,6 +1016,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1011,7 +1036,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -1057,6 +1082,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
@@ -1082,6 +1108,7 @@
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 4;
 				WATCHOS_DEPLOYMENT_TARGET = 5.0;
@@ -1094,6 +1121,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;

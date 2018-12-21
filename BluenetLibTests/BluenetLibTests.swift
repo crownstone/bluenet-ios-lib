@@ -183,4 +183,13 @@ class BluenetLibTests: XCTestCase {
         print(dict)
     }
     
+    func testBroadcast() {
+        let key : [UInt8] = [1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6]
+        
+        let locationState = LocationState(sphereUID: 10,locationId: 10,profileIndex: 3, referenceId: nil)
+        
+        _ = BroadcastProtocol.getServicesForBackgroundBroadcast(locationState: locationState, key: key)
+        
+    }
+    
 }

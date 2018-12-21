@@ -9,9 +9,17 @@
 import Foundation
 
 public struct LocationState {
-    var sphereUID: UInt8?
-    var locationId: UInt8?
-    var profileIndex: UInt8?
+    public var sphereUID    : UInt8? = nil
+    public var locationId   : UInt8? = nil
+    public var profileIndex : UInt8? = nil
+    public var referenceId  : String? = nil
+    
+    public init(sphereUID:UInt8? = nil,locationId:UInt8? = nil,profileIndex:UInt8? = nil,referenceId:String? = nil) {
+        self.sphereUID = sphereUID
+        self.locationId = locationId
+        self.profileIndex = profileIndex
+        self.referenceId = referenceId
+    }
 }
 
 
@@ -28,7 +36,7 @@ public class BluenetSettings {
     public var sessionNonce : [UInt8]? = nil
     
     public var userLevel : UserLevel = .unknown
-    public var locationState = LocationState()
+    var locationState = LocationState()
     
     init() {}
     
@@ -40,20 +48,14 @@ public class BluenetSettings {
         }
     }
     
-    public func setLocationState(sphereUID: UInt8, locationId: UInt8, profileIndex: UInt8) {
+    public func setLocationState(sphereUID: UInt8, locationId: UInt8, profileIndex: UInt8, referenceId: String) {
         self.locationState.sphereUID = sphereUID
         self.locationState.locationId = locationId
         self.locationState.profileIndex = profileIndex
+        self.locationState.referenceId = referenceId
     }
     
-    public func getGuestKey(referenceId: String) -> [UInt8]? {
-        if self.keySets[referenceId] != nil {
-            return self.keySets[referenceId]!.guestKey
-        }
-        else {
-            return nil
-        }
-    }
+  
     
     public func setSessionId(referenceId: String) -> Bool {
         self.setupKey = nil
@@ -100,6 +102,17 @@ public class BluenetSettings {
         }
         return nil
     }
+    
+    
+    func getGuestKey(referenceId: String) -> [UInt8]? {
+        if self.keySets[referenceId] != nil {
+            return self.keySets[referenceId]!.guestKey
+        }
+        else {
+            return nil
+        }
+    }
+    
     
     func _checkSessionId() -> Bool {
         if self.sessionReferenceId == nil {

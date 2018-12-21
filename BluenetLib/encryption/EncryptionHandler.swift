@@ -143,65 +143,24 @@ class EncryptionHandler {
      * This method is used to encrypt data with the CTR method and wrap the envelope around it according to protocol V5
      */
     static func encryptBroadcast(_ payload: Data, settings: BluenetSettings, nonce: [UInt8]) throws -> Data {
-        if (settings.sessionNonce == nil) {
-            throw BluenetError.NO_SESSION_NONCE_SET
-        }
-        
         if (settings.userLevel == .unknown) {
             throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY
         }
         
-        // unpack the session data
-        let sessionData = try SessionData(settings.sessionNonce!)
-        
         // get byte array from data
         let payloadArray = payload.bytes
         
-        // create Nonce array
-        var nonce = [UInt8](repeating: 0, count: PACKET_NONCE_LENGTH)
+        let IV = nonce + [UInt8](repeating: 0, count: NONCE_LENGTH - nonce.count)
         
-        // fill Nonce with random stuff
-        for i in [Int](0...PACKET_NONCE_LENGTH-1) {
-            nonce[i] = getRandomNumbers()
-        }
-        
-        let IV = try generateIV(nonce, sessionData: sessionData.sessionNonce)
         // get key
         let key = try _getKey(settings)
         
-        // pad payload with sessionId
-        var paddedPayload = [UInt8](repeating: 0, count: payloadArray.count + SESSION_KEY_LENGTH)
-        for i in [Int](0...SESSION_KEY_LENGTH-1) {
-            paddedPayload[i] = sessionData.validationKey[i]
-        }
-        
-        // put the input data in the padded payload
-        for (index, element) in payloadArray.enumerated() {
-            paddedPayload[index+SESSION_KEY_LENGTH] = element
-        }
-        
         // manually padd the payload since the CryptoSwift version is not working for CTR.
-        let finalPayloadForEncryption = zeroPadding.add(to: paddedPayload, blockSize: 16);
+        let finalPayloadForEncryption = zeroPadding.add(to: payloadArray, blockSize: 16);
         
         // do the actual encryption
         let encryptedPayload = try AES(key: key, blockMode: CryptoSwift.CTR(iv: IV), padding: .noPadding).encrypt(finalPayloadForEncryption)
-        var result = [UInt8](repeating: 0, count: PACKET_NONCE_LENGTH+PACKET_USERLEVEL_LENGTH + encryptedPayload.count)
-        
-        // copy nonce into result
-        for i in [Int](0...PACKET_NONCE_LENGTH-1) {
-            result[i] = nonce[i]
-        }
-        
-        // put level into result
-        result[PACKET_NONCE_LENGTH] = UInt8(settings.userLevel.rawValue)
-        
-        // copy encrypted payload into the result
-        for i in [Int](0...encryptedPayload.count-1) {
-            let index = i + PACKET_NONCE_LENGTH + PACKET_USERLEVEL_LENGTH
-            result[index] = encryptedPayload[i]
-        }
-        
-        return Data(bytes:result)
+        return Data(bytes:encryptedPayload.reversed())
     }
     
     
@@ -340,5 +299,17 @@ class EncryptionHandler {
             IV[i + PACKET_NONCE_LENGTH] = sessionData[i]
         }
         return IV
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    static func encryptRC5(_ payload: UInt32, key: [UInt8]) {
+        //
     }
 }
