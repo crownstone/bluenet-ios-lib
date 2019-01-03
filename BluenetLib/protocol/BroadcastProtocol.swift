@@ -51,7 +51,7 @@ public class BroadcastProtocol {
         
         var result = [UInt16]()
         
-        let RC5Component = BroadcastProtocol.getRC5Payload(locationState: locationState, devicePreferences: devicePreferences, key: key)
+        let RC5Component = BroadcastProtocol.getRC5Payload(validationNonce: 0, locationState: locationState, devicePreferences: devicePreferences, key: key)
         result.append(BroadcastProtocol._constructProtocolBlock(protocolVersion, locationState.sphereUID, accessLevel))
         result.append(BroadcastProtocol._getFirstRC5Block(RC5Component))
         result.append(BroadcastProtocol._getSecondRC5Block(RC5Component))
@@ -80,8 +80,10 @@ public class BroadcastProtocol {
      * | 16b                             | 6b          | 3b            | 4b               | 1b                | 1b             | 1b             |
      *
      **/
-    static func getRC5Payload(locationState: LocationState, devicePreferences: DevicePreferences, key: [UInt8]) -> UInt32 {
+    static func getRC5Payload(validationNonce: UInt16, locationState: LocationState, devicePreferences: DevicePreferences, key: [UInt8]) -> UInt32 {
         var rc5Payload : UInt32 = 0
+        
+        rc5Payload += UInt32(validationNonce) << 16
         
         if let locationId = locationState.locationId {
             rc5Payload += (NSNumber(value: locationId).uint32Value & 0x0000003F) << 10
@@ -176,9 +178,9 @@ public class BroadcastProtocol {
     
     
     
-    public static func getServicesForBackgroundBroadcast(locationState: LocationState, key: [UInt8]) -> [CBUUID] {
+    public static func getServicesForBackgroundBroadcast(locationState: LocationState, devicePreferences: DevicePreferences, key: [UInt8]) -> [CBUUID] {
         var payload = s128Bits()
-        let block = _constructBackgroundBlock(locationState: locationState, key: key)
+        let block = _constructBackgroundBlock(locationState: locationState, devicePreferences: devicePreferences, key: key)
         payload.a = block
         payload.a += block >> 42
         payload.b += block << 22
@@ -263,20 +265,15 @@ public class BroadcastProtocol {
      *
      * Will return 64 bits, zero padded at the back
      **/
-    static func _constructBackgroundBlock(locationState: LocationState, key: [UInt8]) -> UInt64 {
-        var encryptingBlock : UInt32 = 0;
+    static func _constructBackgroundBlock(locationState: LocationState, devicePreferences: DevicePreferences, key: [UInt8]) -> UInt64 {
         let time = NSNumber(value: getCurrentTimestampForCrownstone()).uint32Value
         var validationTime = NSNumber(value: (time >> 7 & 0x0000FFFF)).uint16Value
         
         // HACK OVERRIDE
         validationTime = 0xCAFE
         
-        encryptingBlock += UInt32(validationTime) << 16
-        if let locationId = locationState.locationId {
-            encryptingBlock += UInt32(locationId)
-        }
+        let encryptedBlock = BroadcastProtocol.getRC5Payload(validationNonce: validationTime, locationState: locationState, devicePreferences: devicePreferences, key: key)
         
-        let encryptedBlock = RC5Encrypt(input: encryptingBlock, key: key)
         var data : UInt64 = 0
 
         if let sphereUID = locationState.sphereUID {

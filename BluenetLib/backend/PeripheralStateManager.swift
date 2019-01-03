@@ -175,7 +175,7 @@ class PeripheralStateManager {
     func _refreshBackgroundBroadcasts() {
         if let referenceId = self.settings.locationState.referenceId {
             if let key = self.settings.getGuestKey(referenceId: referenceId) {
-                let uuids = BroadcastProtocol.getServicesForBackgroundBroadcast(locationState: self.settings.locationState, key: key)
+                let uuids = BroadcastProtocol.getServicesForBackgroundBroadcast(locationState: self.settings.locationState, devicePreferences: self.settings.devicePreferences, key: key)
                 self.blePeripheralManager.startAdvertisingArray(uuids: uuids)
             }
         }
