@@ -73,6 +73,8 @@ class BroadcastBuffer {
             }
         }
         
+        // HACK OVERRIDE
+        nonceToUse = 0xCAFEBABE
         
 //        print("Creating buffer packet")
 //        print("time \(Conversion.uint32_to_uint8_array(nonceToUse))")

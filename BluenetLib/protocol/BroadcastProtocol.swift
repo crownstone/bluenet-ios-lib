@@ -24,6 +24,8 @@ public class BroadcastProtocol {
         if (settings.setSessionId(referenceId: referenceId)) {
             do {                
                 // we reverse the input here to save time on the Crownstones.
+                
+                // HACK TO HAVE A STATIC NONCE
                 let encryptedData = try EncryptionHandler.encryptBroadcast(Data(bytes:data), settings: settings, nonce: nonce)
                 return CBUUID(data: encryptedData)
             }
@@ -264,7 +266,10 @@ public class BroadcastProtocol {
     static func _constructBackgroundBlock(locationState: LocationState, key: [UInt8]) -> UInt64 {
         var encryptingBlock : UInt32 = 0;
         let time = NSNumber(value: getCurrentTimestampForCrownstone()).uint32Value
-        let validationTime = NSNumber(value: (time >> 7 & 0x0000FFFF)).uint16Value
+        var validationTime = NSNumber(value: (time >> 7 & 0x0000FFFF)).uint16Value
+        
+        // HACK OVERRIDE
+        validationTime = 0xCAFE
         
         encryptingBlock += UInt32(validationTime) << 16
         if let locationId = locationState.locationId {
