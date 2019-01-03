@@ -167,6 +167,17 @@ public class Conversion {
         ]
     }
     
+    public static func uint32_to_uint16_reversed_array(_ val: UInt32) -> [UInt16] {
+        return [
+            UInt16((val >> 16)),
+            UInt16((val >> 0 & 0x0000FFFF))
+        ]
+    }
+    
+    public static func uint16_reversed_array_to_uint32(_ uint16Array: [UInt16]) -> UInt32 {
+        return UInt32(uint16Array[1]) + UInt32(uint16Array[0]) << 16
+    }
+    
     public static func uint16_array_to_uint32(_ uint16Array: [UInt16]) -> UInt32 {
         return UInt32(uint16Array[0]) + UInt32(uint16Array[1]) << 16
     }

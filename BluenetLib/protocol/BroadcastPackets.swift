@@ -47,17 +47,26 @@ class BroadcastStone_SetTimePacket {
     }
 }
 
-class BackgroundPacket {
-    var protocolVersion : UInt8
-    var sphereUID : UInt8
-    var payload : UInt32
+
+class Broadcast_ForegroundBasePacket {
+    var crownstoneId : UInt8
+    var time         : UInt32
     
-    init(protocolVersion: UInt8, sphereUID: UInt8, payload: UInt32) {
-        self.protocolVersion = protocolVersion
-        self.sphereUID = sphereUID
-        self.payload = payload
+    init(crownstoneId: UInt8, time: UInt32) {
+        self.crownstoneId = crownstoneId
+        self.time = time
+    }
+    
+    func getPacket() -> [UInt8] {
+        var arr = [UInt8]()
+        arr.append(self.crownstoneId)
+        arr += Conversion.uint32_to_uint8_array(self.time)
+        
+        return arr
     }
 }
+
+
 
 
 

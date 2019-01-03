@@ -127,6 +127,11 @@ public class Bluenet {
         self.eventBus.emit("newLocationState", true)
     }
     
+    public func setDevicePreferences(rssiOffset: Int8, tapToToggle: Bool) {
+        self.settings.setDevicePreferences(rssiOffset: rssiOffset, tapToToggle: tapToToggle)
+        self.eventBus.emit("newDevicePreferences", true)
+    }
+    
     
     public func loadKeysets(encryptionEnabled: Bool, keySets: [KeySet]) {
         self.settings.loadKeySets(
@@ -139,7 +144,11 @@ public class Bluenet {
         }
     }
     
-    
+    #if os(iOS)
+    public func startAdvertising() {
+        self.peripheralStateManager.startAdvertising()
+    }
+    #endif
     
     public func startAdvertisingArray(uuids: [UInt16]) {
         self.peripheralStateManager.advertiseArray(uuids: uuids)

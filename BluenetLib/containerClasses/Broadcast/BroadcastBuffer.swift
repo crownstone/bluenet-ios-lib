@@ -14,6 +14,9 @@ public enum BroadcastType : UInt8 {
     case setTime = 2
     case updateTime = 3
     
+    
+    case foregroundBase = 100
+    
     case other = 255
 }
 
@@ -71,16 +74,16 @@ class BroadcastBuffer {
         }
         
         
-        print("Creating buffer packet")
-        print("time \(Conversion.uint32_to_uint8_array(nonceToUse))")
-        print("type \(self.type.rawValue)")
-        print("length \(NSNumber(value: self.elements.count).uint8Value)")
+//        print("Creating buffer packet")
+//        print("time \(Conversion.uint32_to_uint8_array(nonceToUse))")
+//        print("type \(self.type.rawValue)")
+//        print("length \(NSNumber(value: self.elements.count).uint8Value)")
         
         data += Conversion.uint32_to_uint8_array(nonceToUse)
         data.append(self.type.rawValue)
         data.append(NSNumber(value: self.elements.count).uint8Value)
         for element in self.elements {
-            print("ElementPacket \(element.getPacket())")
+//            print("ElementPacket \(element.getPacket())")
             data += element.getPacket()
         }
         

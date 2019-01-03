@@ -195,10 +195,20 @@ class BluenetLibTests: XCTestCase {
     
     func testRC5() {
         let key : [UInt8] = [1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6]
+        let key2 = Conversion.string_to_uint8_array("guestKeyForOther")
         
         let s = RC5ExpandKey(key: key)
         
         XCTAssertEqual(s, [16160, 23794, 48080, 6127, 11770, 21865, 29281, 34441, 8708, 55074, 26751, 7977, 8239, 32703, 9128, 5605, 47398, 63696, 16646, 40342, 61206, 18736, 18378, 32683, 22325, 45994])
-        print(s)
+        
+        let input : UInt32 = 971374602
+        let enc = RC5Encrypt(input: input, key: key2)
+        print("ENC", enc)
+        let dec = RC5Decrypt(input: enc, key: key2)
+        print("dec", dec)
+        
+        XCTAssertEqual(input, dec)
+        
+        
     }
 }

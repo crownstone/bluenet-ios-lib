@@ -39,7 +39,7 @@ public class BroadcastProtocol {
     }
     
     
-    static func getUInt16ServiceNumbers(locationState: LocationState, protocolVersion: NSNumber, accessLevel: UserLevel) throws -> [UInt16]  {
+    static func getUInt16ServiceNumbers(locationState: LocationState, devicePreferences: DevicePreferences, protocolVersion: NSNumber, accessLevel: UserLevel, key : [UInt8]) throws -> [UInt16]  {
         guard (locationState.locationId != nil   && locationState.locationId!  < 64 || locationState.locationId   == nil) else {
             throw BluenetError.INVALID_BROADCAST_ACCESS_LEVEL
         }
@@ -49,13 +49,15 @@ public class BroadcastProtocol {
         
         var result = [UInt16]()
         
-        result.append(BroadcastProtocol._constructProtocolBlock(protocolVersion, accessLevel, locationState.profileIndex))
-        result.append(BroadcastProtocol._constructLocationBlock(locationState.sphereUID, locationState.locationId))
-        result.append(BroadcastProtocol._constructPayloadBlock(0,0))
-        result.append(BroadcastProtocol._constructPayloadExtBlock(0))
+        let RC5Component = BroadcastProtocol.getRC5Payload(locationState: locationState, devicePreferences: devicePreferences, key: key)
+        result.append(BroadcastProtocol._constructProtocolBlock(protocolVersion, locationState.sphereUID, accessLevel))
+        result.append(BroadcastProtocol._getFirstRC5Block(RC5Component))
+        result.append(BroadcastProtocol._getSecondRC5Block(RC5Component))
+        result.append(BroadcastProtocol._getThirdRC5Block(RC5Component))
         
         return result
     }
+    
     
     static func convertUInt16ListToUUID(_ uintList : [UInt16]) -> [CBUUID] {
         var result = [CBUUID]()
@@ -69,21 +71,52 @@ public class BroadcastProtocol {
     
     
     /**
-    * This is an UInt16 is constructed from an index flag, then a protocol, finally an access level and a profileIndex
+     * This is an UInt32 which will be encrypted
+     *
+     * | Reserved                        | LocationId  | Profile Index | RSSI Calibration | Flag: t2t enabled | Flag: reserved | Flag: reserved |
+     * | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 | 0 0 0         | 0 0 0 0          | 0                 | 0              | 0              |
+     * | 16b                             | 6b          | 3b            | 4b               | 1b                | 1b             | 1b             |
+     *
+     **/
+    static func getRC5Payload(locationState: LocationState, devicePreferences: DevicePreferences, key: [UInt8]) -> UInt32 {
+        var rc5Payload : UInt32 = 0
+        
+        if let locationId = locationState.locationId {
+            rc5Payload += (NSNumber(value: locationId).uint32Value & 0x0000003F) << 10
+        }
+        
+        if let profileIdx = locationState.profileIndex {
+            rc5Payload += (NSNumber(value: profileIdx).uint32Value & 0x00000007) << 7
+        }
+        
+        rc5Payload += (NSNumber(value: (devicePreferences.rssiOffset / 4) + 8).uint32Value & 0x0000000F) << 3
+        
+        if (devicePreferences.tapToToggle) {
+            rc5Payload += UInt32(1) << 2
+        }
+        
+        return RC5Encrypt(input: rc5Payload, key: key)
+    }
+    
+ 
+    
+    
+    /**
+    * This is an UInt16 is constructed from an index flag, then a protocol,  the Sphere passkey and the access level
     *
-    * | Index |  Protocol version |  Access Level |  ProfileIndex |
-    * | 0 0   |  0 0 0 0 0 0 0 0  |  0 0 0        |  0 0 0        |
-    * | 2b    |  8b               |  3b           |  3b           |
+    * | Index |  Protocol version |  Sphere UID      |  Access Level |
+    * | 0 0   |  0 0 0            |  0 0 0 0 0 0 0 0 |  0 0 0        |
+    * | 2b    |  3b               |  8b              |  3b           |
     *
     **/
-    static func _constructProtocolBlock(_ protocolVersion: NSNumber, _  accessLevel: UserLevel, _ profileIndex: UInt8?) -> UInt16 {
+    static func _constructProtocolBlock(_ protocolVersion: NSNumber, _ spherePasskey: UInt8?, _  accessLevel: UserLevel) -> UInt16 {
         var block : UInt16 = 0;
         
-        block += (protocolVersion.uint16Value << 6) & 0x3FFF
-        block += NSNumber(value: accessLevel.rawValue).uint16Value & 0x0007 << 3
-        if (profileIndex != nil) {
-            block += UInt16(profileIndex!) & 0x0007
+        block += (protocolVersion.uint16Value & 0x0007) << 11
+        if (spherePasskey != nil) {
+            block += (UInt16(spherePasskey!) & 0x00FF) << 3
         }
+        block += NSNumber(value: accessLevel.rawValue).uint16Value & 0x0007
         
         return block
     }
@@ -91,59 +124,51 @@ public class BroadcastProtocol {
     
     
     /**
-     * This is an UInt16 is constructed from an index flag, Sphere Passkey used to identify the sphere, and a locationId
+     * TThe first chunk of RC5 data and reserved chunk of public bits
      *
-     * | Index |  SphereUID       |  Location Id  |
-     * | 0 1   |  0 0 0 0 0 0 0 0 |  0 0 0 0 0 0  |
-     * | 2b    |  8b              |  6b           |
+     * | Index |  Reserved             |  First chunk of RC5Data  |
+     * | 0 1   |  0 0 0 0 0 0 0 0 0 0  |  0 0 0 0                 |
+     * | 2b    |  8b                   |  4b                      |
      *
      **/
-    static func _constructLocationBlock(_ spherePasskey: UInt8?, _ locationId: UInt8?) -> UInt16 {
+    static func _getFirstRC5Block(_ RC5: UInt32) -> UInt16 {
         var block : UInt16 = 0;
         
         block += 1 << 14 // place index
-        if (spherePasskey != nil) {
-            block += UInt16(spherePasskey!) << 6 & 0x3FFF
-        }
         
-        if (locationId != nil) {
-            block += UInt16(locationId!) & 0x003F
-        }
+        block += NSNumber(value: (RC5 & 0xF0000000) >> 28).uint16Value
         
         return block
     }
     
     /**
      *
-     *
-     * | Index |  Type    |  Payload                  |
-     * | 1 0   |  0 0 0 0 |  0 0 0 0 0 0 0 0 0 0 0 0  |
-     * | 2b    |  4b      |  12b                      |
+     * | Index |  RC chunk 2                       |
+     * | 1 0   |  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0  |
+     * | 2b    |  14b                              |
      *
      **/
-    static func _constructPayloadBlock(_ type: NSNumber, _  payload: NSNumber) -> UInt16 {
+    static func _getSecondRC5Block(_ RC5: UInt32) -> UInt16 {
         var block : UInt16 = 0;
         
         block += 1 << 15 // place index
-        block += type.uint16Value << 12 & 0x3FFF
-        block += payload.uint16Value    & 0x3FFF
         
+        block += NSNumber(value: (RC5 & 0x0FFFC000) >> 14).uint16Value
         return block
     }
     
     /**
      *
-     * | Index |  Payload extended             |
-     * | 1 1   |  0 0 0 0 0 0 0 0 0 0 0 0 0 0  |
-     * | 2b    |  14b                          |
+     * | Index |  RC chunk 3                       |
+     * | 1 1   |  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0  |
+     * | 2b    |  14b                              |
      *
      **/
-    static func _constructPayloadExtBlock(_ payload: UInt16) -> UInt16 {
+    static func _getThirdRC5Block(_ RC5: UInt32) -> UInt16 {
         var block : UInt16 = 0;
         
         block += 3 << 14 // place index
-        block += payload & 0x3FFF
-    
+        block += NSNumber(value: RC5 & 0x00003FFF).uint16Value
         return block
     }
     
@@ -151,7 +176,6 @@ public class BroadcastProtocol {
     
     public static func getServicesForBackgroundBroadcast(locationState: LocationState, key: [UInt8]) -> [CBUUID] {
         var payload = s128Bits()
-        
         let block = _constructBackgroundBlock(locationState: locationState, key: key)
         payload.a = block
         payload.a += block >> 42
@@ -165,7 +189,6 @@ public class BroadcastProtocol {
                 str += " "
             }
         }
-        print("i", str)
         
         str = ""
         for i in (0..<64).reversed() {
@@ -174,8 +197,7 @@ public class BroadcastProtocol {
                 str += " "
             }
         }
-        print("a", str)
-        
+
         str = ""
         for i in (0..<64).reversed() {
              str += String(payload.b >> i & 0x01)
@@ -183,7 +205,6 @@ public class BroadcastProtocol {
                 str += " "
             }
         }
-        print("b", str)
         
     
         
@@ -192,12 +213,10 @@ public class BroadcastProtocol {
         for i in (0..<64).reversed() {
             uint8Buf.append(payload.a >> i & 0x01 == 1)
             if (uint8Buf.count == 8) {
-                print("Casting \(uint8Buf) to \(Conversion.uint8_to_hex_string(Conversion.bit_array_to_uint8(uint8Buf.reversed())))")
                 str += Conversion.uint8_to_hex_string(Conversion.bit_array_to_uint8(uint8Buf.reversed()))
                 uint8Buf.removeAll()
             }
         }
-        print("a hex", str)
         
 
         for i in (0..<64).reversed() {
@@ -207,7 +226,6 @@ public class BroadcastProtocol {
                 uint8Buf.removeAll()
             }
         }
-        print("b hex", str)
 
         
         var services = [CBUUID]()
@@ -248,14 +266,12 @@ public class BroadcastProtocol {
         let time = NSNumber(value: getCurrentTimestampForCrownstone()).uint32Value
         let validationTime = NSNumber(value: (time >> 7 & 0x0000FFFF)).uint16Value
         
-        
         encryptingBlock += UInt32(validationTime) << 16
         if let locationId = locationState.locationId {
             encryptingBlock += UInt32(locationId)
         }
         
         let encryptedBlock = RC5Encrypt(input: encryptingBlock, key: key)
-        
         var data : UInt64 = 0
 
         if let sphereUID = locationState.sphereUID {

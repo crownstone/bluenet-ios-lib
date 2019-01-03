@@ -9,12 +9,14 @@
 import Foundation
 import PromiseKit
 
+let DEFAULT_BROADCAST_DURATION : Double = 1
+
 class BroadcastElement {
     var type : BroadcastType
     var singular = false
     var seal : Resolver<Void>
     var packet : [UInt8]
-    var requiredDuration : Double = 2
+    var requiredDuration : Double = DEFAULT_BROADCAST_DURATION
     var completed = false
     var referenceId : String
     

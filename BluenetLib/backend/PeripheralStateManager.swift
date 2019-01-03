@@ -15,7 +15,12 @@ class PeripheralStateManager {
     var blePeripheralManager : BlePeripheralManager!
     var elements = [BroadcastElement]()
     
+    var advertising = false
+    
+    var baseRefreshTickPostponed = false
+    
     var runningBroadcastCycle = false
+    var runningCommandCycle = false
     var backgroundEnabled: Bool
     let eventBus : EventBus!
     
@@ -30,60 +35,144 @@ class PeripheralStateManager {
         
         // track time difference between crownstones and this phone per referenceId
         _ = self.eventBus.on("verifiedAdvertisementData", self._trackStoneTime)
+        _ = self.eventBus.on("newLocationState",     { _ in self.updateAdvertisements() })
+        _ = self.eventBus.on("newDevicePreferences", { _ in self.updateAdvertisements() })
     }
     
+  
     
-    public func applicationWillEnterForeground() {
+    #if os(watchOS)
+    
+    #endif
+/**   BACKGROUND STATE HANDLING METHODS **/
+    func applicationWillEnterForeground() {
         self.stopBackgroundBroadcasts()
+        self.startForegroundBroadcasts()
     }
     
-    
-    public func applicationDidEnterBackground() {
-        self.stopActiveBroadcasts()
+    func applicationDidEnterBackground() {
+        self.stopForegroundBroadcasts()
         self.startBackgroundBroadcasts()
     }
-    
     
     func setBackgroundOperations(newBackgroundState: Bool) {
         self.backgroundEnabled = newBackgroundState
     }
+/** \ BACKGROUND STATE HANDLING METHODS **/
     
-
-    func loadElement(element: BroadcastElement) {
-        self._handleDuplicates(incomingElement: element)
-        
-        self.elements.append(element)
-        self.broadcast()
-    }
-
-    func broadcast() {
-        if (self.runningBroadcastCycle) {
-            // update the buffer, a tick is scheduled anyway
+    
+    func updateAdvertisements() {
+        if (self.runningCommandCycle) {
             self._broadcastElements()
         }
-        else {
-            self.tick()
+        else if (self.runningBroadcastCycle) {
+            self.updateBaseAdvertisement()
         }
     }
     
+    #if os(iOS)
+/**   GLOBAL ADVERTISING STATE HANDLING METHODS **/
+    func startAdvertising() {
+        self.advertising = true
+        let state = UIApplication.shared.applicationState
+        if state == .background {
+            self.startBackgroundBroadcasts()
+        }
+        else {
+            self.startForegroundBroadcasts()
+        }
+    }
+    
+    func stopAdvertising() {
+        self.advertising = false
+        let state = UIApplication.shared.applicationState
+        if state == .background {
+            self.stopBackgroundBroadcasts()
+        }
+        else {
+            self.stopForegroundBroadcasts()
+        }
+    }
+    #endif
     
     func stopBroadcasting() {
         self.blePeripheralManager.stopAdvertising()
     }
+/** \ GLOBAL ADVERTISING STATE HANDLING METHODS **/
     
     
-    func stopActiveBroadcasts() {
+    
+// MARK: Foreground Methods
+/**   FOREGROUND METHODS **/
+    func startForegroundBroadcasts() {
+        if (self.advertising) {
+            self._startForegroundBroadcasts()
+        }
+    }
+    
+    func _startForegroundBroadcasts() {
+        if (self.runningBroadcastCycle == false) {
+            self.baseRefreshTick()
+        }
+        else {
+            self._refreshForegroundBroadcasts()
+        }
+    }
+    
+    func _refreshForegroundBroadcasts() {
+        if let referenceId = self.settings.locationState.referenceId {
+            let bufferToBroadcast = BroadcastBuffer(referenceId: referenceId, type: .foregroundBase)
+            self._broadcastBuffer(bufferToBroadcast)
+        }
+        else {
+            print("PROBLEM - updateBaseAdvertisement: No active referenceId")
+        }
+    }
+    
+    func stopForegroundBroadcasts() {
         // this will fail all promises and clear the buffers.
         // background broadcasting should be enabled after this.
         for element in self.elements {
             element.fail()
         }
-        
         self.elements.removeAll()
+        
+        // officially end the command cycle if this was running
+        if (self.runningCommandCycle) {
+            self.endCommandCycle()
+        }
+        
+        // finally, we stop the broadcasting of all active services
         self.stopBroadcasting()
     }
     
+    /**   COMMAND METHODS **/
+
+    func loadElement(element: BroadcastElement) {
+        self._handleDuplicates(incomingElement: element)
+        
+        self.elements.append(element)
+        self.broadcastCommand()
+    }
+
+    /** \ COMMAND METHODS **/
+/** \ FOREGROUND METHODS **/
+    
+    
+    
+    
+// MARK: Background Methods
+/**   BACKGROUND METHODS **/
     func startBackgroundBroadcasts() {
+        if (self.runningBroadcastCycle == false) {
+            self.baseRefreshTick()
+        }
+        else {
+            self._refreshBackgroundBroadcasts()
+        }
+    }
+    
+    func _refreshBackgroundBroadcasts() {
         if let referenceId = self.settings.locationState.referenceId {
             if let key = self.settings.getGuestKey(referenceId: referenceId) {
                 let uuids = BroadcastProtocol.getServicesForBackgroundBroadcast(locationState: self.settings.locationState, key: key)
@@ -92,29 +181,81 @@ class PeripheralStateManager {
         }
     }
     
-    
     func stopBackgroundBroadcasts() {
         self.stopBroadcasting()
     }
+/** \ BACKGROUND METHODS **/
     
     
-    func tick() {
-        self._updateElementState()
-        
-        if (self.elements.count > 0) {
-            self.runningBroadcastCycle = true
+    
+
+   
+
+    func broadcastCommand() {
+        if (self.runningCommandCycle) {
+            // update the buffer, a tick is scheduled anyway
             self._broadcastElements()
-            delay( 0.25, { self.tick() })
         }
         else {
-            self.runningBroadcastCycle = false
-            self.stopBroadcasting()
+            self.startCommandCycle()
         }
     }
     
+    func startCommandCycle() {
+        self.runningCommandCycle = true
+        self.commandTick()
+    }
+    
+    func endCommandCycle() {
+        self.runningCommandCycle = false
+        if (self.baseRefreshTickPostponed == true) {
+            self.baseRefreshTick()
+        }
+    }
+    
+    func commandTick() {
+        self.runningCommandCycle = true
+        self._updateElementState()
+        if (self.elements.count > 0) {
+            self._broadcastElements()
+            delay( 0.25, { self.commandTick() })
+        }
+        else {
+            self.endCommandCycle()
+        }
+    }
+    
+    func baseRefreshTick() {
+        if (self.advertising) {
+            self.runningBroadcastCycle = true
+            if (self.runningCommandCycle == true) {
+                self.baseRefreshTickPostponed = true
+            }
+            else {
+                self.updateBaseAdvertisement()
+                delay( 30, self.baseRefreshTick )
+            }
+        }
+    }
+    
+    
+    func updateBaseAdvertisement() {
+        #if os(iOS)
+        let state = UIApplication.shared.applicationState
+        if state == .background {
+            self._refreshBackgroundBroadcasts()
+        }
+        else {
+            self._refreshForegroundBroadcasts()
+        }
+        #endif
+    }
+    
+    
+    
+   
+    
     // MARK: Dev
-    
-    
     func advertiseArray(uuids: [UInt16]) {
         let broadcastUUIDs = BroadcastProtocol.convertUInt16ListToUUID(uuids)
         self.blePeripheralManager.startAdvertisingArray(uuids: broadcastUUIDs)
@@ -194,35 +335,42 @@ class PeripheralStateManager {
         if let offset = self.timeOffsetMap[referenceIdOfBuffer] {
             time -= offset
         }
-        let packet = bufferToBroadcast.getPacket(validationNonce: NSNumber(value:time).uint32Value)
-        do {
-            let otherUUIDs = try BroadcastProtocol.getUInt16ServiceNumbers(
-                locationState: self.settings.locationState,
-                protocolVersion: 1,
-                accessLevel: self.settings.userLevel
-            )
-            
-            var nonce = [UInt8]()
-            for uuidNum in otherUUIDs {
-                nonce += Conversion.uint16_to_uint8_array(uuidNum)
-            }
-            
+        if (settings.setSessionId(referenceId: referenceIdOfBuffer) == false) {
+            print("Invalid referenceId")
+            return
+        }
+        
+        if let guestKey = self.settings.getGuestKey(referenceId: referenceIdOfBuffer) {
+            let packet = bufferToBroadcast.getPacket(validationNonce: NSNumber(value:time).uint32Value)
             do {
-                let encryptedUUID = try BroadcastProtocol.getEncryptedServiceUUID(referenceId: referenceIdOfBuffer, settings: self.settings, data: packet, nonce: nonce)
+                let otherUUIDs = try BroadcastProtocol.getUInt16ServiceNumbers(
+                    locationState: self.settings.locationState,
+                    devicePreferences: self.settings.devicePreferences,
+                    protocolVersion: 1,
+                    accessLevel: self.settings.userLevel,
+                    key: guestKey
+                )
                 
-                var broadcastUUIDs = BroadcastProtocol.convertUInt16ListToUUID(otherUUIDs)
-                print("Short UUIDs to Broadcast:", otherUUIDs)
-                broadcastUUIDs.append(encryptedUUID)
-                print("Long UUID to Broadcast:", encryptedUUID)
-                self.blePeripheralManager.startAdvertisingArray(uuids: broadcastUUIDs)
-                bufferToBroadcast.blocksAreBroadcasting()
+                var nonce = [UInt8]()
+                for uuidNum in otherUUIDs {
+                    nonce += Conversion.uint16_to_uint8_array(uuidNum)
+                }
+                
+                do {
+                    let encryptedUUID = try BroadcastProtocol.getEncryptedServiceUUID(referenceId: referenceIdOfBuffer, settings: self.settings, data: packet, nonce: nonce)
+                    
+                    var broadcastUUIDs = BroadcastProtocol.convertUInt16ListToUUID(otherUUIDs)
+                    broadcastUUIDs.append(encryptedUUID)
+                    self.blePeripheralManager.startAdvertisingArray(uuids: broadcastUUIDs)
+                    bufferToBroadcast.blocksAreBroadcasting()
+                }
+                catch let err {
+                    print("Could not get uint16 ids", err)
+                }
             }
             catch let err {
-                print("Could not get uint16 ids", err)
+                print("Could not get encrypted service uuid", err)
             }
-        }
-        catch let err {
-            print("Could not get encrypted service uuid", err)
         }
     }
 
