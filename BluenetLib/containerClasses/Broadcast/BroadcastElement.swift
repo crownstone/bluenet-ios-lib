@@ -9,7 +9,7 @@
 import Foundation
 import PromiseKit
 
-let DEFAULT_BROADCAST_DURATION : Double = 1
+let DEFAULT_BROADCAST_DURATION : Double = 1.5
 
 class BroadcastElement {
     var type : BroadcastType
@@ -31,7 +31,7 @@ class BroadcastElement {
     
     init(
         referenceId: String, type: BroadcastType, packet: [UInt8], seal: Resolver<Void>,             // required
-        target: UInt8? = nil, singular: Bool = false, duration: Double = 2, customValidationNonce: UInt32? = nil // options
+        target: UInt8? = nil, singular: Bool = false, duration: Double = DEFAULT_BROADCAST_DURATION, customValidationNonce: UInt32? = nil // options
         ) {
         
         self.referenceId = referenceId
@@ -69,8 +69,9 @@ class BroadcastElement {
             
             let broadcastTime = self.endTime - self.startTime
             self.totalTimeBroadcasted += broadcastTime
-            
+            // print("TEST: Element stoppedBroadcasting, \(broadcastTime) \(self.totalTimeBroadcasted) \(self.requiredDuration)")
             if (self.totalTimeBroadcasted >= self.requiredDuration) {
+                // print("TEST: Element DONE")
                 self.seal.fulfill(())
                 self.completed = true
             }

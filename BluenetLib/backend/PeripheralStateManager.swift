@@ -106,12 +106,14 @@ class PeripheralStateManager {
 // MARK: Foreground Methods
 /**   FOREGROUND METHODS **/
     func startForegroundBroadcasts() {
+        // print("TEST: startForegroundBroadcasts")
         if (self.advertising) {
             self._startForegroundBroadcasts()
         }
     }
     
     func _startForegroundBroadcasts() {
+        // print("TEST: _startForegroundBroadcasts")
         if (self.runningBroadcastCycle == false) {
             self.baseRefreshTick()
         }
@@ -131,6 +133,7 @@ class PeripheralStateManager {
     }
     
     func stopForegroundBroadcasts() {
+        // print("TEST: stopForegroundBroadcasts")
         // this will fail all promises and clear the buffers.
         // background broadcasting should be enabled after this.
         for element in self.elements {
@@ -165,6 +168,7 @@ class PeripheralStateManager {
 // MARK: Background Methods
 /**   BACKGROUND METHODS **/
     func startBackgroundBroadcasts() {
+        // print("TEST: startBackgroundBroadcasts")
         if (self.runningBroadcastCycle == false) {
             self.baseRefreshTick()
         }
@@ -183,6 +187,7 @@ class PeripheralStateManager {
     }
     
     func stopBackgroundBroadcasts() {
+        // print("TEST: stopBackgroundBroadcasts")
         self.stopBroadcasting()
     }
 /** \ BACKGROUND METHODS **/
@@ -212,9 +217,13 @@ class PeripheralStateManager {
         if (self.baseRefreshTickPostponed == true) {
             self.baseRefreshTick()
         }
+        else {
+            self.updateBaseAdvertisement()
+        }
     }
     
     func commandTick() {
+        // print("TEST: CommandTick")
         self.runningCommandCycle = true
         self._updateElementState()
         if (self.elements.count > 0) {
@@ -227,6 +236,7 @@ class PeripheralStateManager {
     }
     
     func baseRefreshTick() {
+        // print("TEST: baseRefreshTick")
         if (self.advertising) {
             self.runningBroadcastCycle = true
             if (self.runningCommandCycle == true) {
@@ -247,6 +257,7 @@ class PeripheralStateManager {
     
     func updateBaseAdvertisement() {
         #if os(iOS)
+        // print("TEST: updateBaseAdvertisement")
         let state = UIApplication.shared.applicationState
         if state == .background {
             self._refreshBackgroundBroadcasts()
