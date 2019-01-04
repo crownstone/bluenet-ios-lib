@@ -138,6 +138,7 @@ public class Bluenet {
             encryptionEnabled: encryptionEnabled,
             keySets: keySets
         )
+        self.eventBus.emit("newKeysets", true)
         
         for (_, validator) in self.reachableCrownstones {
             validator.releaseLockOnDecryption()

@@ -35,6 +35,7 @@ class PeripheralStateManager {
         
         // track time difference between crownstones and this phone per referenceId
         _ = self.eventBus.on("verifiedAdvertisementData", self._trackStoneTime)
+        _ = self.eventBus.on("newKeysets",           { _ in self.updateAdvertisements() })
         _ = self.eventBus.on("newLocationState",     { _ in self.updateAdvertisements() })
         _ = self.eventBus.on("newDevicePreferences", { _ in self.updateAdvertisements() })
     }
