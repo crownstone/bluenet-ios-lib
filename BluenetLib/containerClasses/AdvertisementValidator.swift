@@ -50,8 +50,6 @@ public class AdvertismentValidator {
     }
     
     
-    
-    
     public func releaseLockOnDecryption() {
         self.cantDecrypt = false
         self.failedValidationCounter = 0
@@ -78,6 +76,9 @@ public class AdvertismentValidator {
                     // if we fail to validate this with the previously accepted referenceId --> not verified!
                     self.invalidate()
                     self.attemptValidation(advertisement: advertisement)
+                    if self.validated {
+                        advertisement.referenceId = self.validatedReferenceId
+                    }
                 }
                 else {
                     // this is the referenceId of the keyset that validated the advertisment.
@@ -140,6 +141,7 @@ public class AdvertismentValidator {
     }
     
     public func validate(referenceId: String) {
+        self.releaseLockOnDecryption()
         self.advertisementIsValidated(validatedMode: .operation, referenceId: referenceId)
     }
     
