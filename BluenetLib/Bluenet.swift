@@ -165,6 +165,10 @@ public class Bluenet {
     }
     #endif
     
+    public func cancelAllActiveBroadcasts() {
+        self.peripheralStateManager.stopActiveBroadcasts()
+    }
+    
     public func startAdvertisingArray(uuids: [UInt16]) {
         self.peripheralStateManager.advertiseArray(uuids: uuids)
     }

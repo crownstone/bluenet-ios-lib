@@ -41,17 +41,16 @@ class PeripheralStateManager {
     }
     
   
-    
-    #if os(watchOS)
-    
-    #endif
+
 /**   BACKGROUND STATE HANDLING METHODS **/
     func applicationWillEnterForeground() {
+        print("Peripheral received application will enter foreground")
         self.stopBackgroundBroadcasts()
         self.startForegroundBroadcasts()
     }
     
     func applicationDidEnterBackground() {
+        print("Peripheral received application did enter background")
         self.stopForegroundBroadcasts()
         self.startBackgroundBroadcasts()
     }
@@ -149,6 +148,23 @@ class PeripheralStateManager {
         // finally, we stop the broadcasting of all active services
         self.stopBroadcasting()
     }
+    
+    public func stopActiveBroadcasts() {
+        // print("TEST: stopForegroundBroadcasts")
+        // this will fail all promises and clear the buffers.
+        // background broadcasting should be enabled after this.
+        for element in self.elements {
+            element.fail()
+        }
+        self.elements.removeAll()
+        
+        // officially end the command cycle if this was running
+        if (self.runningCommandCycle) {
+            self.endCommandCycle()
+        }
+        
+    }
+    
     
     /**   COMMAND METHODS **/
 
