@@ -93,7 +93,7 @@ public class BroadcastProtocol {
             rc5Payload += (NSNumber(value: profileIdx).uint32Value & 0x00000007) << 7
         }
         
-        rc5Payload += (NSNumber(value: (devicePreferences.rssiOffset / 4) + 8).uint32Value & 0x0000000F) << 3
+        rc5Payload += (NSNumber(value: (devicePreferences.rssiOffset / 2) + 8).uint32Value & 0x0000000F) << 3
         
         if (devicePreferences.tapToToggle) {
             rc5Payload += UInt32(1) << 2
