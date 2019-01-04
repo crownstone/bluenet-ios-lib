@@ -49,6 +49,9 @@ public class AdvertismentValidator {
         self.settings = settings
     }
     
+    
+    
+    
     public func releaseLockOnDecryption() {
         self.cantDecrypt = false
         self.failedValidationCounter = 0
@@ -136,6 +139,9 @@ public class AdvertismentValidator {
         }
     }
     
+    public func validate(referenceId: String) {
+        self.advertisementIsValidated(validatedMode: .operation, referenceId: referenceId)
+    }
     
     
     func advertisementIsValidated(validatedMode: CrownstoneMode, referenceId : String? = nil) {

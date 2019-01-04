@@ -132,6 +132,16 @@ public class Bluenet {
         self.eventBus.emit("newDevicePreferences", true)
     }
     
+    public func setKnownValidatedHandle(handle: String, referenceId: String) {
+        if let candidate = self.reachableCrownstones[handle] {
+            candidate.validate(referenceId: referenceId)
+        }
+        else {
+            self.reachableCrownstones[handle] = AdvertismentValidator(settings: self.settings)
+            self.reachableCrownstones[handle]!.validate(referenceId: referenceId)
+        }
+    }
+    
     
     public func loadKeysets(encryptionEnabled: Bool, keySets: [KeySet]) {
         self.settings.loadKeySets(
