@@ -148,6 +148,10 @@ public class Bluenet {
     public func startAdvertising() {
         self.peripheralStateManager.startAdvertising()
     }
+    
+    public func stopAdvertising() {
+        self.peripheralStateManager.stopAdvertising()
+    }
     #endif
     
     public func startAdvertisingArray(uuids: [UInt16]) {
