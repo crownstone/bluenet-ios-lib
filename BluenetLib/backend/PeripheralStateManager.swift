@@ -237,6 +237,11 @@ class PeripheralStateManager {
                 delay( 30, self.baseRefreshTick )
             }
         }
+        else {
+            if (runningBroadcastCycle) {
+                self.runningBroadcastCycle = false
+            }
+        }
     }
     
     
