@@ -228,11 +228,16 @@ class PeripheralStateManager {
     
     func endCommandCycle() {
         self.runningCommandCycle = false
-        if (self.baseRefreshTickPostponed == true) {
-            self.baseRefreshTick()
+        if (self.advertising == false) {
+            self.stopBroadcasting()
         }
         else {
-            self.updateBaseAdvertisement()
+            if (self.baseRefreshTickPostponed == true) {
+                self.baseRefreshTick()
+            }
+            else {
+                self.updateBaseAdvertisement()
+            }
         }
     }
     
