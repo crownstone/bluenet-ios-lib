@@ -55,7 +55,11 @@ public class BluenetSettings {
     var locationState = LocationState()
     var devicePreferences = DevicePreferences()
     
-    init() {}
+    var backgroundState = false
+    
+    init() {
+        self._checkBackgroundState()
+    }
     
     public func loadKeySets(encryptionEnabled: Bool, keySets: [KeySet]) {
         self.encryptionEnabled = encryptionEnabled
@@ -208,5 +212,30 @@ public class BluenetSettings {
             return false
         }
         return encryptionEnabled
+    }
+    
+    func _checkBackgroundState() {
+        #if os(iOS)
+        if (Thread.isMainThread == true) {
+            let state = UIApplication.shared.applicationState
+            if state == .background {
+                self.backgroundState = true
+            }
+            else {
+                self.backgroundState = false
+            }
+        }
+        else {
+            DispatchQueue.main.sync{
+                let state = UIApplication.shared.applicationState
+                if state == .background {
+                    self.backgroundState = true
+                }
+                else {
+                    self.backgroundState = false
+                }
+            }
+        }
+        #endif
     }
 }

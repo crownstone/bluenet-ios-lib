@@ -412,10 +412,12 @@ public class Bluenet {
     }
     
     public func applicationWillEnterForeground() {
+        self.settings.backgroundState = false
         self.peripheralStateManager.applicationWillEnterForeground()
     }
     
     public func applicationDidEnterBackground() {
+        self.settings.backgroundState = true
         self.peripheralStateManager.applicationDidEnterBackground()
     }
     

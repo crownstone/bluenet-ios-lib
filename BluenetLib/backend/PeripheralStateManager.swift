@@ -74,8 +74,7 @@ class PeripheralStateManager {
 /**   GLOBAL ADVERTISING STATE HANDLING METHODS **/
     func startAdvertising() {
         self.advertising = true
-        let state = UIApplication.shared.applicationState
-        if state == .background {
+        if self.settings.backgroundState {
             self.startBackgroundBroadcasts()
         }
         else {
@@ -85,8 +84,7 @@ class PeripheralStateManager {
     
     func stopAdvertising() {
         self.advertising = false
-        let state = UIApplication.shared.applicationState
-        if state == .background {
+        if self.settings.backgroundState {
             self.stopBackgroundBroadcasts()
         }
         else {
@@ -274,8 +272,7 @@ class PeripheralStateManager {
     func updateBaseAdvertisement() {
         #if os(iOS)
         // print("TEST: updateBaseAdvertisement")
-        let state = UIApplication.shared.applicationState
-        if state == .background {
+        if self.settings.backgroundState {
             self._refreshBackgroundBroadcasts()
         }
         else {
