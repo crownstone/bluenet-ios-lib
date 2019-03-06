@@ -94,6 +94,7 @@ class PeripheralStateManager {
     #endif
     
     func stopBroadcasting() {
+//        print("TEST: stopBroadcasting")
         self.blePeripheralManager.stopAdvertising()
     }
 /** \ GLOBAL ADVERTISING STATE HANDLING METHODS **/
@@ -103,14 +104,14 @@ class PeripheralStateManager {
 // MARK: Foreground Methods
 /**   FOREGROUND METHODS **/
     func startForegroundBroadcasts() {
-        // print("TEST: startForegroundBroadcasts")
+//         print("TEST: startForegroundBroadcasts")
         if (self.advertising) {
             self._startForegroundBroadcasts()
         }
     }
     
     func _startForegroundBroadcasts() {
-        // print("TEST: _startForegroundBroadcasts")
+//         print("TEST: _startForegroundBroadcasts")
         if (self.runningBroadcastCycle == false) {
             self.baseRefreshTick()
         }
@@ -120,11 +121,13 @@ class PeripheralStateManager {
     }
     
     func _refreshForegroundBroadcasts() {
+//        print("TEST: _refreshForegroundBroadcasts")
         if let referenceId = self.settings.locationState.referenceId {
             let bufferToBroadcast = BroadcastBuffer(referenceId: referenceId, type: .foregroundBase)
             self._broadcastBuffer(bufferToBroadcast)
         }
         else {
+            self.stopBroadcasting()
             print("PROBLEM - updateBaseAdvertisement: No active referenceId")
         }
     }
@@ -182,7 +185,7 @@ class PeripheralStateManager {
 // MARK: Background Methods
 /**   BACKGROUND METHODS **/
     func startBackgroundBroadcasts() {
-        // print("TEST: startBackgroundBroadcasts")
+//         print("TEST: startBackgroundBroadcasts")
         if (self.runningBroadcastCycle == false) {
             self.baseRefreshTick()
         }
@@ -192,6 +195,7 @@ class PeripheralStateManager {
     }
     
     func _refreshBackgroundBroadcasts() {
+//        print("TEST: _refreshBackgroundBroadcasts")
         if let referenceId = self.settings.locationState.referenceId {
             if let key = self.settings.getGuestKey(referenceId: referenceId) {
                 let uuids = BroadcastProtocol.getServicesForBackgroundBroadcast(locationState: self.settings.locationState, devicePreferences: self.settings.devicePreferences, key: key)
@@ -201,15 +205,11 @@ class PeripheralStateManager {
     }
     
     func stopBackgroundBroadcasts() {
-        // print("TEST: stopBackgroundBroadcasts")
+//         print("TEST: stopBackgroundBroadcasts")
         self.stopBroadcasting()
     }
 /** \ BACKGROUND METHODS **/
     
-    
-    
-
-   
 
     func broadcastCommand() {
         if (self.runningCommandCycle) {
@@ -255,7 +255,7 @@ class PeripheralStateManager {
     }
     
     func baseRefreshTick() {
-        // print("TEST: baseRefreshTick")
+//         print("TEST: baseRefreshTick")
         if (self.advertising) {
             self.runningBroadcastCycle = true
             if (self.runningCommandCycle == true) {
@@ -276,7 +276,7 @@ class PeripheralStateManager {
     
     func updateBaseAdvertisement() {
         #if os(iOS)
-        // print("TEST: updateBaseAdvertisement")
+//         print("TEST: updateBaseAdvertisement")
         if self.settings.backgroundState {
             self._refreshBackgroundBroadcasts()
         }
@@ -371,7 +371,7 @@ class PeripheralStateManager {
             time -= offset
         }
         if (settings.setSessionId(referenceId: referenceIdOfBuffer) == false) {
-            print("Invalid referenceId")
+            print("Error in _broadcastBuffer Invalid referenceId")
             return
         }
         

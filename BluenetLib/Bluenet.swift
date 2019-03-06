@@ -157,6 +157,7 @@ public class Bluenet {
     
     #if os(iOS)
     public func startAdvertising() {
+        print("START ADV")
         self.peripheralStateManager.startAdvertising()
     }
     

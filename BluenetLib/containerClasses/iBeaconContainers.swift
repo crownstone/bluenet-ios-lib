@@ -43,16 +43,14 @@ public class iBeaconPacket: iBeaconPacketProtocol {
     public var major: NSNumber
     public var minor: NSNumber
     public var rssi : NSNumber
-    public var distance : NSNumber
     public var idString: String
     public var referenceId: String
     
-    init(uuid: String, major: NSNumber, minor: NSNumber, distance: NSNumber, rssi: NSNumber, referenceId: String) {
+    init(uuid: String, major: NSNumber, minor: NSNumber, rssi: NSNumber, referenceId: String) {
         self.uuid = uuid
         self.major = major
         self.minor = minor
         self.rssi = rssi
-        self.distance = distance
         self.referenceId = referenceId
         
         // we claim that the uuid, major and minor combination is unique.
@@ -65,7 +63,6 @@ public class iBeaconPacket: iBeaconPacketProtocol {
         dataDict["uuid"]  = self.uuid
         dataDict["major"] = self.major
         dataDict["minor"] = self.minor
-        dataDict["distance"]  = self.distance
         dataDict["rssi"]  = self.rssi
         dataDict["referenceId"]  = self.referenceId
         
@@ -83,7 +80,6 @@ public class iBeaconPacket: iBeaconPacketProtocol {
             "major" : self.major,
             "minor" : self.minor,
             "rssi" : self.rssi,
-            "distance" : self.distance,
             "referenceId" : self.referenceId,
         ]
         
