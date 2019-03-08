@@ -91,12 +91,15 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     
     
     func _handleStateUpdate(_ state: Any) {
+        LOG.info("BLUENET_LIB: Handling a state update \(state)")
         if let stateStr = state as? String {
+            LOG.info("BLUENET_LIB: Handling a state update for state: \(stateStr)")
             switch (stateStr) {
-            case "reset":
+            case "resetting":
+                LOG.info("BLUENET_LIB: Cleaning up after BLE reset.")
                 self.connectedPeripheral = nil
                 self.connectingPeripheral = nil
-                self.pendingPromise._clear()
+                self.pendingPromise.clearDueToReset()
             default:
                 break
             }

@@ -95,9 +95,10 @@ class promiseContainer {
     
     
     func initShared(_ reject: @escaping (Error) -> Void, _ type: RequestType) {
-        completed = false
+        self.completed = false
+        self.rejectId = ""
         self.loadedPromise = true
-        _rejectPromise = reject
+        self._rejectPromise = reject
         self.type = type
     }
     
@@ -134,7 +135,7 @@ class promiseContainer {
         loadedPromise = false
         _fulfillVoidPromise               = { }
         _fulfillIntPromise                = {_ in }
-        _fulfillServiceListPromise        = {_ in }
+        _fulfillServiceListPromise         = {_ in }
         _fulfillCharacteristicListPromise = {_ in }
         _fulfillCharacteristicPromise     = {_ in }
         _fulfillDataPromise               = {_ in }
@@ -142,11 +143,31 @@ class promiseContainer {
     
     }
     
+    func clearDueToReset() {
+        LOG.error("BLE RESET TRIGGERED.")
+        if (self.completed == false && self.loadedPromise == true) {
+            // An exception is added so disconnect is always safe to repeat.
+            // Usually, there is an extra disconnect in catch statements just in case.
+            if (self.type == .DISCONNECT) {
+                self.fulfill(())
+                self._clear()
+            }
+            else {
+                self.reject(BluenetError.BLE_RESET)
+                self._clear()
+            }
+        }
+        else {
+            self._clear()
+        }
+    }
+    
+
     func _cancelAnyPreviousPromise(newPromiseType: RequestType) {
         if (self.completed == false && self.loadedPromise == true) {
             // An exception is added so disconnect is always safe to repeat.
             // Usually, there is an extra disconnect in catch statements just in case.
-            if (self.type == .DISCONNECT && newPromiseType == self.type) {
+            if (self.type == .DISCONNECT && newPromiseType == .DISCONNECT) {
                 self.fulfill(())
                 self._clear()
             }

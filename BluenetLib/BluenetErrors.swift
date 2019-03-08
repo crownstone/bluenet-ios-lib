@@ -81,6 +81,7 @@ public enum BluenetError : Error {
     
     // promise errors
     case REPLACED_WITH_OTHER_PROMISE
+    case BLE_RESET
     
     
     // timer errors
