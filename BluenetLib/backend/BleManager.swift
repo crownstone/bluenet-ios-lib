@@ -85,8 +85,23 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         
         // initialize the pending promise containers
         self.pendingPromise = promiseContainer()
+        
+        _ = self.eventBus.on("bleStatus", self._handleStateUpdate)
     }
     
+    
+    func _handleStateUpdate(_ state: Any) {
+        if let stateStr = state as? String {
+            switch (stateStr) {
+            case "reset":
+                self.connectedPeripheral = nil
+                self.connectingPeripheral = nil
+                self.pendingPromise._clear()
+            default:
+                break
+            }
+        }
+    }
     
     public func setBackgroundOperations(newBackgroundState: Bool) {
         if (self.backgroundEnabled == newBackgroundState) {
@@ -457,7 +472,6 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         innerSeal.fulfill(())
                     }
                 }
-                // we clean up (self.connectedPeripheral = nil) inside the disconnect() method, thereby needing this inner promise
                 disconnectPromise.done { _ -> Void in
                     // make sure the connected peripheral is set to nil so we know nothing is connected
                     self.connectedPeripheral = nil

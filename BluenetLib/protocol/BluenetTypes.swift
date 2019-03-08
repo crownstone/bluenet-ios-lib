@@ -128,7 +128,6 @@ public enum StateType : UInt8 {
 public enum OpCode : UInt8 {
     case read = 0
     case write
-    case notify
 }
 
 //*********** Mesh ***********//
