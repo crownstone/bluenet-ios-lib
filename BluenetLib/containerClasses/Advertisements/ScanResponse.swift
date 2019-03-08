@@ -58,11 +58,14 @@ public class ScanResponsePacket {
     public var deviceType          :   DeviceType = .undefined
     public var rssiOfExternalCrownstone : Int8  = 0
     
+    var serviceUUID : String? = nil
+    
     var validData = false
     public var dataReadyForUse = false // decryption is successful
     
-    init(_ data: [UInt8]) {
+    init(_ data: [UInt8], serviceUUID: String? = nil) {
         self.data = data
+        self.serviceUUID = serviceUUID
         
         validData = true
         if (self.data.count == 18) {
@@ -79,6 +82,7 @@ public class ScanResponsePacket {
             validData = false
         }
     }
+    
     
     func getOperationMode() -> CrownstoneMode {
         if (self.validData == false) {
@@ -106,13 +110,17 @@ public class ScanResponsePacket {
         }
     }
     
+    
     func parse() {
         if (self.validData) {
             switch (self.opCode) {
             case 1:
                 parseOpcode1(serviceData: self, data: data)
+                self._getLegacyDeviceType()
             case 2:
+                // this is not used and has never been released
                 parseOpcode2(serviceData: self, data: data)
+                self._getLegacyDeviceType()
             case 3:
                 parseOpcode3(serviceData: self, data: data)
             case 4:
@@ -128,15 +136,33 @@ public class ScanResponsePacket {
     }
     
     
+    func _getLegacyDeviceType() {
+        if let uuid = self.serviceUUID {
+            switch (uuid) {
+            case CrownstonePlugAdvertisementServiceUUID:
+                self.deviceType = .plug
+            case CrownstoneBuiltinAdvertisementServiceUUID:
+                self.deviceType = .builtin
+            case GuidestoneAdvertisementServiceUUID:
+                self.deviceType = .guidestone
+            default:
+                self.deviceType = .undefined
+            }
+        }
+    }
+    
+    
     public func hasCrownstoneDataFormat() -> Bool {
         return validData
     }
+    
     
     public func getUniqueElement() -> String {
         return Conversion.uint8_array_to_hex_string(
                 Conversion.uint32_to_uint8_array(self.uniqueIdentifier.uint32Value)
         )
     }
+    
     
     public func getDictionary() -> NSDictionary {
         let errorsDictionary = CrownstoneErrors(bitMask: self.errorsBitmask).getDictionary()
@@ -174,9 +200,11 @@ public class ScanResponsePacket {
         return returnDict as NSDictionary
     }
     
+    
     public func getJSON() -> JSON {
         return JSON(self.getDictionary())
     }
+    
     
     public func stringify() -> String {
         return JSONUtils.stringify(self.getJSON())

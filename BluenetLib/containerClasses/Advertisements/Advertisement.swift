@@ -61,7 +61,7 @@ public class Advertisement {
             if (id == CrownstonePlugAdvertisementServiceUUID ||
                 id == CrownstoneBuiltinAdvertisementServiceUUID ||
                 id == GuidestoneAdvertisementServiceUUID) {
-                self.scanResponse        =  ScanResponsePacket(data)
+                self.scanResponse        =  ScanResponsePacket(data, serviceUUID: id)
                 self.isCrownstoneFamily  =  self.scanResponse!.hasCrownstoneDataFormat()
                 break
             }
