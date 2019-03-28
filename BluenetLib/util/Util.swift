@@ -14,7 +14,7 @@ import Foundation
  *
  * @param delay = delay in seconds
  */
-public func delay(_ delay: Double, _ closure: @escaping ()->()) {
+public func delay(_ delay: Double, _ closure: @escaping ()->(Void)) {
     DispatchQueue.main.asyncAfter(
         deadline: DispatchTime.now() + Double(Int64(delay * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC), execute: closure)
 }

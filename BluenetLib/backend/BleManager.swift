@@ -48,7 +48,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     #if os(watchOS)
     var BleState : CBManagerState = .unknown
     #endif
-    var pendingPromise : promiseContainer!
+    var pendingPromise = promiseContainer()
     var eventBus : EventBus!
     var notificationEventBus : EventBus!
     public var settings : BluenetSettings!
@@ -84,7 +84,6 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         
         
         // initialize the pending promise containers
-        self.pendingPromise = promiseContainer()
         
         _ = self.eventBus.on("bleStatus", self._handleStateUpdate)
     }
@@ -95,7 +94,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         if let stateStr = state as? String {
             LOG.info("BLUENET_LIB: Handling a state update for state: \(stateStr)")
             switch (stateStr) {
-            case "resetting":
+            case "resetting", "poweredOff":
                 LOG.info("BLUENET_LIB: Cleaning up after BLE reset.")
                 self.connectedPeripheral = nil
                 self.connectingPeripheral = nil
@@ -232,25 +231,35 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     }
     
     public func wait(seconds: Double) -> Promise<Void> {
-        return Promise<Void> { seal in delay(seconds, seal.fulfill) }
+        return Promise<Void> { seal in
+            delay(seconds, seal.fulfill)
+        }
     }
     
     public func waitToReconnect() -> Promise<Void> {
-        return Promise<Void> { seal in delay(timeoutDurations.waitForReconnect, seal.fulfill) }
+        return Promise<Void> { seal in
+            delay(timeoutDurations.waitForReconnect, seal.fulfill)
+        }
     }
     
     public func waitForRestart() -> Promise<Void> {
-        return Promise<Void> { seal in delay(timeoutDurations.waitForRestart, seal.fulfill) }
+        return Promise<Void> { seal in
+            delay(timeoutDurations.waitForRestart, seal.fulfill)
+        }
     }
     
     // this delay is set up for calls that need to write to storage.
     public func waitToWrite(_ iteration: UInt8 = 0) -> Promise<Void> {
         if (iteration > 0) {
             LOG.info("BLUENET_LIB: Could not verify immediatly, waiting longer between steps...")
-            return Promise<Void> { seal in delay(2 * timeoutDurations.waitForWrite, seal.fulfill) }
+            return Promise<Void> { seal in
+                delay(2 * timeoutDurations.waitForWrite, seal.fulfill)
+            }
         }
         
-        return Promise<Void> { seal in delay(timeoutDurations.waitForWrite, seal.fulfill) }
+        return Promise<Void> { seal in
+            delay(timeoutDurations.waitForWrite, seal.fulfill)
+        }
     }
 
     
