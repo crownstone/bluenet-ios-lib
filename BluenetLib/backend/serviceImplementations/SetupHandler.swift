@@ -258,6 +258,29 @@ public class SetupHandler {
         }
     }
     
+    public func pulse() -> Promise<Void> {
+        let switchOn  = ControlPacketsGenerator.getSwitchStatePacket(1)
+        let switchOff = ControlPacketsGenerator.getSwitchStatePacket(0)
+        return Promise<Void> { seal in
+            self.handleSetupPhaseEncryption()
+                .then{ self._writeSetupControlPacket(switchOn) }
+                .then{ self.bleManager.wait(seconds: 1) }
+                .then{ self._writeSetupControlPacket(switchOff) }
+                .done{
+                    _ = self.bleManager.disconnect();
+                    self.bleManager.settings.exitSetup();
+                    seal.fulfill(())
+                }
+                .catch{(err: Error) -> Void in
+                    self.bleManager.settings.exitSetup()
+                    self.bleManager.settings.restoreEncryption()
+                    _ = self.bleManager.errorDisconnect()
+                    seal.reject(err)
+                }
+        }
+    
+    }
+    
     
     /**
      * This will handle the factory reset during setup mode.
