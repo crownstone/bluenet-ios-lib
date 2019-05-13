@@ -38,10 +38,10 @@ public class DeviceHandler {
     }
     
     /**
-     * Returns a symvar version number like "1.4.0" We default to 1.4.0 if we cannot get this from the Crownstone.
+     * Returns a symvar version number like "1.4.0"
      */
     public func getBootloaderRevisionInAppMode() -> Promise<String> {
-        return Promise<String> { seal in seal.fulfill("1.4.0") }
+        return Promise<String> { seal in seal.fulfill("") }
     }
     
     /**
