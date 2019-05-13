@@ -34,7 +34,14 @@ public class DeviceHandler {
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.DeviceInformation, characteristic: DeviceCharacteristics.FirmwareRevision)
             .then{ data -> Promise<String> in
                 return Promise<String>{seal in seal.fulfill(Conversion.uint8_array_to_string(data))
-            }}
+                }}
+    }
+    
+    /**
+     * Returns a symvar version number like "1.4.0" We default to 1.4.0 if we cannot get this from the Crownstone.
+     */
+    public func getBootloaderRevisionInAppMode() -> Promise<String> {
+        return Promise<String> { seal in seal.fulfill("1.4.0") }
     }
     
     /**
@@ -82,7 +89,7 @@ public class DeviceHandler {
                 }
                 
                 if (isInDfuMode == false) {
-                    throw BluenetError.NOT_IN_DFU_MODE
+                    return self.getBootloaderRevisionInAppMode()
                 }
                 
                 return self.getSoftwareRevision()
