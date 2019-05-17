@@ -69,9 +69,7 @@ class BroadcastElement {
             
             let broadcastTime = self.endTime - self.startTime
             self.totalTimeBroadcasted += broadcastTime
-            // print("TEST: Element stoppedBroadcasting, \(broadcastTime) \(self.totalTimeBroadcasted) \(self.requiredDuration)")
             if (self.totalTimeBroadcasted >= self.requiredDuration) {
-                // print("TEST: Element DONE")
                 self.seal.fulfill(())
                 self.completed = true
             }

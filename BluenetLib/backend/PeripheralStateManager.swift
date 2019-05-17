@@ -10,17 +10,79 @@ import Foundation
 import PromiseKit
 import CoreBluetooth
 
+/**
+ 
+ The PeripheralStateManager (PSM)
+ 
+ This class is the one governing what is broadcasted and how it does this.
+ 
+ We differentiate between 3 states:
+ 1 - foreground base broadcasts
+ 2 - foreground active command broadcasts
+ 3 - background broadcasts
+ 
+ 
+ 1 - Foreground base broadcasts
+ 
+ When advertising is enabled, and we're in the foreground, the base broadcast cycle is started. This is done with the baseRefreshTick.
+ The payload of the base broadcast is updated every 30 seconds. If a new tick is triggered while an active broadcast(2) is running,
+ we postpone the tick and resume it when the active commands end.
+ 
+ The base broadcast has an emptry buffer at the moment, but it does carry the sphereUID and locationUID for the new behaviour localization update.
+ It has to refresh to keep the nonce valid. See protocol for more info.
+ 
+ 
+ 2 - Active Command Broadcasts:
+ Commands are loaded into the PSM in elements. These are entered into the loadElement method.
+ These elements are class instances of BroadcastElement. They are queued in the PSM, appended and tracked.
+ Once an element is loaded, the commandCycle starts.
+ 
+ Each element keeps track of how long it has been broadcasted.
+ 
+ CommandCycle:
+    It updates the payload every 0.25 seconds. This is called the Command Tick (commandTick)
+    The payload is determined by the first element in the queue. The referenceId and type of this element is applied to the entire BroadcastBuffer
+    We then loop through the other elements, to see if they can join in the payload. We can fit a number of multiswitch commands in a buffer.
+ 
+ When all required elements have been broadcast and the queue is empty, the command cycle ends and the baseTick continues.
+ 
+ 
+ 3 - Background Broadcasts
+ 
+ On iOS we are stuck with the different types between foreground and background broadcasts.
+ The background uses the same baseRefreshTick with the 30 second interval. The updateBaseAdvertisement is the one determining foregroudn or background.
+ 
+---------------------
+ 
+ Switching between 1 and 3:
+ 
+ There are lifecycle methods
+     func applicationWillEnterForeground()
+     func applicationDidEnterBackground()
+ which are called by the application using the lib to ensure correct switching between foreground and background.
+ On switching from foreground to background, all promises for all pending and busy elements are failed.
+ 
+ --------------------
+ 
+ The advertising boolean is a master enable/disable for the base ticks 1 and 3. It is triggered by the
+ startAdvertising() and the stopAdvertising() functions.
+ 
+ backgroundEnabled is an override to kill background advertising. The advertising will stop when the phone enters the background if this is false.
+ 
+ the settings.devicePreferences contain the use useBackgroundBroadcasts and useBaseBroadcasts overrides.
+ 
+ **/
+
 class PeripheralStateManager {
     var settings: BluenetSettings
     var blePeripheralManager : BlePeripheralManager!
     var elements = [BroadcastElement]()
     
     var advertising = false
-    
     var baseRefreshTickPostponed = false
     
     var runningBroadcastCycle = false
-    var runningCommandCycle = false
+    var runningCommandCycle = false // this means there are active commands being broadcasted
     var backgroundEnabled: Bool
     let eventBus : EventBus!
     
@@ -35,14 +97,14 @@ class PeripheralStateManager {
         
         // track time difference between crownstones and this phone per referenceId
         _ = self.eventBus.on("verifiedAdvertisementData", self._trackStoneTime)
-        _ = self.eventBus.on("newKeysets",           { _ in self.updateAdvertisements() })
-        _ = self.eventBus.on("newLocationState",     { _ in self.updateAdvertisements() })
-        _ = self.eventBus.on("newDevicePreferences", { _ in self.updateAdvertisements() })
+        _ = self.eventBus.on("newKeysets",              { _ in self.updateAdvertisements() })
+        _ = self.eventBus.on("newLocationState",       { _ in self.updateAdvertisements() })
+        _ = self.eventBus.on("newDevicePreferences",   { _ in self.updateAdvertisements() })
     }
     
   
 
-/**   BACKGROUND STATE HANDLING METHODS **/
+    /**   BACKGROUND STATE HANDLING METHODS **/
     func applicationWillEnterForeground() {
         print("Peripheral received application will enter foreground")
         self.stopBackgroundBroadcasts()
@@ -57,8 +119,13 @@ class PeripheralStateManager {
     
     func setBackgroundOperations(newBackgroundState: Bool) {
         self.backgroundEnabled = newBackgroundState
+        
+        // disable base background advertisements
+        if newBackgroundState == false && self.settings.backgroundState && self.runningCommandCycle == false {
+            self.stopBroadcasting()
+        }
     }
-/** \ BACKGROUND STATE HANDLING METHODS **/
+    /** \ BACKGROUND STATE HANDLING METHODS **/
     
     
     func updateAdvertisements() {
@@ -71,7 +138,7 @@ class PeripheralStateManager {
     }
     
     #if os(iOS)
-/**   GLOBAL ADVERTISING STATE HANDLING METHODS **/
+    /**   GLOBAL ADVERTISING STATE HANDLING METHODS, this is not used for watchOS as it has no background **/
     func startAdvertising() {
         self.advertising = true
         if self.settings.backgroundState {
@@ -94,24 +161,21 @@ class PeripheralStateManager {
     #endif
     
     func stopBroadcasting() {
-//        print("TEST: stopBroadcasting")
         self.blePeripheralManager.stopAdvertising()
     }
-/** \ GLOBAL ADVERTISING STATE HANDLING METHODS **/
+    /** \ GLOBAL ADVERTISING STATE HANDLING METHODS **/
     
     
     
 // MARK: Foreground Methods
-/**   FOREGROUND METHODS **/
+    /**   FOREGROUND METHODS **/
     func startForegroundBroadcasts() {
-//         print("TEST: startForegroundBroadcasts")
         if (self.advertising) {
             self._startForegroundBroadcasts()
         }
     }
     
     func _startForegroundBroadcasts() {
-//         print("TEST: _startForegroundBroadcasts")
         if (self.runningBroadcastCycle == false) {
             self.baseRefreshTick()
         }
@@ -121,7 +185,10 @@ class PeripheralStateManager {
     }
     
     func _refreshForegroundBroadcasts() {
-//        print("TEST: _refreshForegroundBroadcasts")
+        if (self.settings.devicePreferences.useBaseBroadcasts == false) {
+            return self.stopBroadcasting()
+        }
+        
         if let referenceId = self.settings.locationState.referenceId {
             let bufferToBroadcast = BroadcastBuffer(referenceId: referenceId, type: .foregroundBase)
             self._broadcastBuffer(bufferToBroadcast)
@@ -166,26 +233,30 @@ class PeripheralStateManager {
         
     }
     
+   
+/** \ FOREGROUND METHODS **/
+    
     
     /**   COMMAND METHODS **/
-
+    
     func loadElement(element: BroadcastElement) {
+        // existing elements of the same type for the same stone will be overwritten (old switch 0, replaced by new switch 1)
         self._handleDuplicates(incomingElement: element)
         
         self.elements.append(element)
         self.broadcastCommand()
     }
-
+    
     /** \ COMMAND METHODS **/
-/** \ FOREGROUND METHODS **/
-    
-    
     
     
 // MARK: Background Methods
-/**   BACKGROUND METHODS **/
+    /**   BACKGROUND METHODS **/
     func startBackgroundBroadcasts() {
-//         print("TEST: startBackgroundBroadcasts")
+        if (self.backgroundEnabled == false || self.settings.devicePreferences.useBackgroundBroadcasts == false) {
+            return self.stopBackgroundBroadcasts()
+        }
+        
         if (self.runningBroadcastCycle == false) {
             self.baseRefreshTick()
         }
@@ -195,7 +266,10 @@ class PeripheralStateManager {
     }
     
     func _refreshBackgroundBroadcasts() {
-//        print("TEST: _refreshBackgroundBroadcasts")
+        if (self.backgroundEnabled == false || self.settings.devicePreferences.useBackgroundBroadcasts == false) {
+            return self.stopBackgroundBroadcasts()
+        }
+        
         if let referenceId = self.settings.locationState.referenceId {
             if let key = self.settings.getGuestKey(referenceId: referenceId) {
                 let uuids = BroadcastProtocol.getServicesForBackgroundBroadcast(locationState: self.settings.locationState, devicePreferences: self.settings.devicePreferences, key: key)
@@ -205,12 +279,12 @@ class PeripheralStateManager {
     }
     
     func stopBackgroundBroadcasts() {
-//         print("TEST: stopBackgroundBroadcasts")
         self.stopBroadcasting()
     }
 /** \ BACKGROUND METHODS **/
     
-
+    
+// MARK: functionality
     func broadcastCommand() {
         if (self.runningCommandCycle) {
             // update the buffer, a tick is scheduled anyway
@@ -236,6 +310,8 @@ class PeripheralStateManager {
                 self.baseRefreshTick()
             }
             else {
+                // updateBaseAdvertisement assumes there is an active base tick.
+                // If it was postponed, we can't use this and have to go through the baseRefreshTick
                 self.updateBaseAdvertisement()
             }
         }
@@ -255,7 +331,22 @@ class PeripheralStateManager {
     }
     
     func baseRefreshTick() {
-//         print("TEST: baseRefreshTick")
+        // we check if we are allowed to do base refreshes or if we should stop. We can only do this if there is no active command cycle
+        if (self.runningCommandCycle == false) {
+            if self.settings.backgroundState {
+                if (self.backgroundEnabled == false || self.settings.devicePreferences.useBackgroundBroadcasts == false) {
+                    self.runningBroadcastCycle = false
+                    return self.stopBroadcasting()
+                }
+            }
+            else {
+                if (self.settings.devicePreferences.useBackgroundBroadcasts == false) {
+                    self.runningBroadcastCycle = false
+                    return self.stopBroadcasting()
+                }
+            }
+        }
+            
         if (self.advertising) {
             self.runningBroadcastCycle = true
             if (self.runningCommandCycle == true) {

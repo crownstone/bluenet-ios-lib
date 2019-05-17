@@ -36,6 +36,23 @@ public typealias eventCallback = (Any) -> Void
    |                                |                      |     of available stones in setup mode and return the closest.
    |  "nearestCrownstone"           |     NearestItem      |     When a verified advertisement packet in setup mode is received, we check the list
    |                                |                      |     of available stones in setup mode and return the closest.
+ 
+ Advertising API:
+ 
+ startAdvertising() --> used for the phone to start advertising. This will start the ticks. If this is not called, broadcast commands can still be sent.
+ 
+ stopAdvertising() --> stop advertising the base payloads and fail all active elements. Completely Stop Broadcasting. 
+ 
+ cancelAllActiveBroadcasts() --> fail all commands that are broadcasting. Will revert to the base advertisements
+ 
+ startAdvertisingArray(uuids: [UInt16]) --> direct control ol broadcast payload. Does not use the bluenet broadcasting at all. Used by watch.
+ 
+ startAdvertisingArray(uuids: [CBUUID]) --> direct control ol broadcast payload. Does not use the bluenet broadcasting at all. Used by watch.
+ 
+ isPeripheralReady() --> check if ready to advertise
+ 
+ 
+ 
  */
 public class Bluenet {
     // todo: set back to private, currently public for DEBUG
@@ -127,8 +144,8 @@ public class Bluenet {
         self.eventBus.emit("newLocationState", true)
     }
     
-    public func setDevicePreferences(rssiOffset: Int8, tapToToggle: Bool) {
-        self.settings.setDevicePreferences(rssiOffset: rssiOffset, tapToToggle: tapToToggle)
+    public func setDevicePreferences(rssiOffset: Int8, tapToToggle: Bool, useBackgroundBroadcasts: Bool, useBaseBroadcasts: Bool) {
+        self.settings.setDevicePreferences(rssiOffset: rssiOffset, tapToToggle: tapToToggle, useBackgroundBroadcasts: useBackgroundBroadcasts, useBaseBroadcasts: useBaseBroadcasts)
         self.eventBus.emit("newDevicePreferences", true)
     }
     
@@ -157,7 +174,6 @@ public class Bluenet {
     
     #if os(iOS)
     public func startAdvertising() {
-        print("START ADV")
         self.peripheralStateManager.startAdvertising()
     }
     
