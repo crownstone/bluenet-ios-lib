@@ -245,6 +245,9 @@ public class BroadcastProtocol {
         for i in (0..<64).reversed() {
             if ((payload.b >> i & 0x01) == 1) {
                 let idx = (63-i)+64
+                
+                if (idx == 69) { continue } // this is the service hash of a new apple watch, triggering a popup on ios phones. We ignore it.
+                
                 services.append(CBUUID(string: serviceMap[idx]))
             }
         }
