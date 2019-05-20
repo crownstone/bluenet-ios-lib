@@ -43,6 +43,8 @@ import CoreBluetooth
     It updates the payload every 0.25 seconds. This is called the Command Tick (commandTick)
     The payload is determined by the first element in the queue. The referenceId and type of this element is applied to the entire BroadcastBuffer
     We then loop through the other elements, to see if they can join in the payload. We can fit a number of multiswitch commands in a buffer.
+    Once a commandCycle is over (0.25 seconds), the _updateElementState method will sort the element list depending on broadcast timestamp. This interleaves
+    the elements elegantly.
  
  When all required elements have been broadcast and the queue is empty, the command cycle ends and the baseTick continues.
  

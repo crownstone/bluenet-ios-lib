@@ -18,9 +18,6 @@ func ROTR(input: UInt16, shift: UInt16) -> UInt16 {
     return (input >> shift | input << (16-shift))
 }
 
-
-
-
 func RC5ExpandKey(key: [UInt8]) -> [UInt16] {
     // commenting out code that dynamically calculates variables because we will never use different values.
 //    let P : UInt16 = 0xB7E1

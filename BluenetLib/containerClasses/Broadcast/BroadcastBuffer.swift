@@ -57,7 +57,7 @@ class BroadcastBuffer {
             }
         }
         
-        if (elements.count + 1) * self.elementSize <= AVAILABLE_PAYLOAD_SIZE {
+        if (elements.count + 1) * self.elementSize > AVAILABLE_PAYLOAD_SIZE {
             return true
         }
         return false
