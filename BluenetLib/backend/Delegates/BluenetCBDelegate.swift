@@ -97,8 +97,8 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
             handle: peripheral.identifier.uuidString,
             name: peripheral.name,
             rssi: RSSI,
-            serviceData: advertisementData["kCBAdvDataServiceData"] as Any,
-            serviceUUID: advertisementData["kCBAdvDataServiceUUIDs"] as Any
+            serviceData: advertisementData["kCBAdvDataServiceData"] as? [CBUUID: Data],
+            serviceUUID: advertisementData["kCBAdvDataServiceUUIDs"] as? [CBUUID]
         )
     
         BleManager.eventBus.emit("rawAdvertisementData",emitData)

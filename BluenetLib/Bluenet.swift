@@ -252,7 +252,10 @@ public class Bluenet {
         self.bleManager.stopScanning()
         self.bleManager.startScanningForServices(serviceUUIDs, uniqueOnly: false)
     }
-    
+    public func startScanningForServices(_ serviceUUIDs: [CBUUID]) {
+        self.bleManager.stopScanning()
+        self.bleManager.startScanningForServicesCBUUID(serviceUUIDs, uniqueOnly: false)
+    }
     
     /**
      * Start actively scanning for BLE devices containing a specific serviceUUID.
@@ -276,6 +279,11 @@ public class Bluenet {
         self.bleManager.stopScanning()
         self.bleManager.startScanningForServices(serviceUUIDs, uniqueOnly: true)
     }
+    public func startScanningForServicesUniqueOnly(_ serviceUUIDs: [CBUUID]) {
+        self.bleManager.stopScanning()
+        self.bleManager.startScanningForServicesCBUUID(serviceUUIDs, uniqueOnly: true)
+    }
+    
     
     
     /**

@@ -9,34 +9,34 @@
 import Foundation
 
 func parseOpcode3_type1(serviceData : ScanResponsePacket, data : [UInt8], liteParse: Bool) {
-    if (data.count == 17) {
+    if (data.count == 16) {
         // opCode   = data[0]
         // dataType = data[1]
         serviceData.errorMode = true
         
-        serviceData.partialTimestamp = Conversion.uint8_array_to_uint16([data[13],data[14]])
+        serviceData.partialTimestamp = Conversion.uint8_array_to_uint16([data[12],data[13]])
         serviceData.uniqueIdentifier = NSNumber(value: serviceData.partialTimestamp)
         
         if (liteParse) {
             return
         }
         
-        serviceData.crownstoneId  = data[2]
+        serviceData.crownstoneId  = data[1]
         serviceData.errorsBitmask = Conversion.uint8_array_to_uint32([
+            data[2],
             data[3],
             data[4],
-            data[5],
-            data[6]
+            data[5]
         ])
         
         serviceData.errorTimestamp = Conversion.uint8_array_to_uint32([
+            data[6],
             data[7],
             data[8],
-            data[9],
-            data[10]
+            data[9]
         ])
         
-        serviceData.flagsBitmask = data[11]
+        serviceData.flagsBitmask = data[10]
         // bitmask states
         let bitmaskArray = Conversion.uint8_to_bit_array(serviceData.flagsBitmask)
         
@@ -47,7 +47,7 @@ func parseOpcode3_type1(serviceData : ScanResponsePacket, data : [UInt8], litePa
         serviceData.timeSet          = bitmaskArray[4]
         serviceData.switchCraftEnabled = bitmaskArray[5]
         
-        serviceData.temperature  = Conversion.uint8_to_int8(data[12])
+        serviceData.temperature  = Conversion.uint8_to_int8(data[11])
 
         if (serviceData.timeSet) {
             serviceData.timestamp = NSNumber(value: reconstructTimestamp(currentTimestamp: NSDate().timeIntervalSince1970, LsbTimestamp: serviceData.partialTimestamp)).doubleValue
@@ -60,8 +60,8 @@ func parseOpcode3_type1(serviceData : ScanResponsePacket, data : [UInt8], litePa
         
         let realPower = Conversion.uint16_to_int16(
             Conversion.uint8_array_to_uint16([
-                data[15],
-                data[16]
+                data[14],
+                data[15]
             ])
         )
         serviceData.powerUsageReal     = NSNumber(value: realPower).doubleValue / 8

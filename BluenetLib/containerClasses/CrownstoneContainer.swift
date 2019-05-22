@@ -22,8 +22,12 @@ public class CrownstoneContainer {
     // config
     let timeout : Double = 20 //seconds
     
+    var lastRemoval : Double = 0
+    
     var setupMode: Bool = false
     var dfuMode:   Bool = false
+    
+    var nearest : CrownstoneSummary? = nil
     
     init(setupMode: Bool, dfuMode: Bool) {
         self.setupMode = setupMode
@@ -43,6 +47,16 @@ public class CrownstoneContainer {
             else {
                 self.items[handle] = CrownstoneSummary(name: name, handle: handle, rssi: rssi, updatedAt: currentTime, validated: validated)
             }
+            
+            if self.nearest != nil {
+                if self.nearest!.rssi < self.items[handle]!.rssi {
+                    self.nearest = self.items[handle]
+                }
+                else if self.nearest!.handle == handle {
+                    self.nearest = nil
+                }
+            }
+            
         }
     }
     
@@ -56,6 +70,10 @@ public class CrownstoneContainer {
         let currentTime = Date().timeIntervalSince1970
         self.removeExpired(currentTime: currentTime)
         
+        if self.nearest != nil {
+            return NearestItem(nearStone: self.nearest!, setupMode: self.setupMode, dfuMode: self.dfuMode)
+        }
+        
         var nearestRSSI = -1000
         var nearStone : CrownstoneSummary? = nil
         for (_ , nearInfo) in self.items {
@@ -65,6 +83,8 @@ public class CrownstoneContainer {
             }
         }
         if (nearStone != nil) {
+            self.nearest = nearStone!
+            
             // nearest elements in here (setup and dfu) are always considered verified
             return NearestItem(nearStone: nearStone!, setupMode: self.setupMode, dfuMode: self.dfuMode)
         }
@@ -73,10 +93,23 @@ public class CrownstoneContainer {
     }
     
     func removeExpired(currentTime: Double) {
+        // only check this once every second at most
+        if currentTime - self.lastRemoval < 1 {
+            return
+        }
+        
         for (handle, nearInfo) in self.items {
             if currentTime - nearInfo.updatedAt > self.timeout {
                 self.items.removeValue(forKey: handle)
+
+                if self.nearest != nil {
+                    if self.nearest!.handle == nearInfo.handle {
+                        self.nearest = nil
+                    }
+                }
             }
         }
+        
+        self.lastRemoval = currentTime
     }
 }

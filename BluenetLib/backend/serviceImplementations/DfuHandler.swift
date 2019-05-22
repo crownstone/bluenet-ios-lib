@@ -119,7 +119,7 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
                             .done{ services -> Void in
                                 var isInDfuMode = false
                                 for service in services {
-                                    if service.uuid.uuidString == DFUServiceUUID {
+                                    if service.uuid == DFUServiceUUID {
                                         isInDfuMode = true
                                         break
                                     }
@@ -189,7 +189,7 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
         let packet : [UInt8] = [0x06]
         LOG.info("BLUENET_LIB: Writing DFU reset command. \(packet)")
         return self.bleManager.writeToCharacteristic(
-            DFUServices.DFU,
+            DFUServices.DFU.uuidString,
             characteristicId: DFUCharacteristics.ControlPoint,
             data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
             type: CBCharacteristicWriteType.withResponse
@@ -199,7 +199,7 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
     func setupNotifications() -> Promise<voidPromiseCallback> {
         let notificationCallback = {(data: Any) -> Void in }
         return self.bleManager.enableNotifications(
-            DFUServices.DFU,
+            DFUServices.DFU.uuidString,
             characteristicId: DFUCharacteristics.ControlPoint,
             callback: notificationCallback
         )

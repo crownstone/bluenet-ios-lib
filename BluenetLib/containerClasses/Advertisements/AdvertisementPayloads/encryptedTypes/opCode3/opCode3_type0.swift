@@ -9,11 +9,11 @@
 import Foundation
 
 func parseOpcode3_type0(serviceData : ScanResponsePacket, data : [UInt8], liteParse: Bool) {
-    if (data.count == 17) {
-        // opCode   = data[0]
-        // dataType = data[1]
+    if (data.count == 16) {
+        // opCode   = first byte of payload, not the decrypted
+        // dataType = data[0]
         
-        serviceData.partialTimestamp = Conversion.uint8_array_to_uint16([data[13],data[14]])
+        serviceData.partialTimestamp = Conversion.uint8_array_to_uint16([data[12],data[13]])
         serviceData.uniqueIdentifier = NSNumber(value: serviceData.partialTimestamp)
         
         if (liteParse) {
@@ -22,9 +22,9 @@ func parseOpcode3_type0(serviceData : ScanResponsePacket, data : [UInt8], litePa
         
         serviceData.stateOfExternalCrownstone = false
         
-        serviceData.crownstoneId = data[2]
-        serviceData.switchState  = data[3]
-        serviceData.flagsBitmask = data[4]
+        serviceData.crownstoneId = data[1]
+        serviceData.switchState  = data[2]
+        serviceData.flagsBitmask = data[3]
         // bitmask states
         let bitmaskArray = Conversion.uint8_to_bit_array(serviceData.flagsBitmask)
         
@@ -35,13 +35,13 @@ func parseOpcode3_type0(serviceData : ScanResponsePacket, data : [UInt8], litePa
         serviceData.timeSet          = bitmaskArray[4]
         serviceData.switchCraftEnabled = bitmaskArray[5]
         
-        serviceData.temperature  = Conversion.uint8_to_int8(data[5])
+        serviceData.temperature  = Conversion.uint8_to_int8(data[4])
         
-        let powerFactor = Conversion.uint8_to_int8(data[6])
+        let powerFactor = Conversion.uint8_to_int8(data[5])
         let realPower = Conversion.uint16_to_int16(
             Conversion.uint8_array_to_uint16([
-                data[7],
-                data[8]
+                data[6],
+                data[7]
             ])
         )
         
@@ -60,10 +60,10 @@ func parseOpcode3_type0(serviceData : ScanResponsePacket, data : [UInt8], litePa
         
         let accumulatedEnergy = Conversion.uint32_to_int32(
             Conversion.uint8_array_to_uint32([
+                data[8],
                 data[9],
                 data[10],
-                data[11],
-                data[12]
+                data[11]
             ])
         );
         serviceData.accumulatedEnergy = NSNumber(value: accumulatedEnergy).int64Value * 64
@@ -75,7 +75,9 @@ func parseOpcode3_type0(serviceData : ScanResponsePacket, data : [UInt8], litePa
             serviceData.timestamp = NSNumber(value: serviceData.partialTimestamp).doubleValue // this is now a counter
         }
         
-        serviceData.validation = data[16]
+        // 14 is reserved
+        
+        serviceData.validation = data[15]
     }
 }
 

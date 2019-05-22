@@ -23,12 +23,12 @@ public class Advertisement {
     public var isCrownstoneFamily  : Bool = false
     public var operationMode : CrownstoneMode = .unknown
     
-    public var serviceData = [String: [UInt8]]()
+//    public var serviceData = [String: [UInt8]]()
     public var serviceDataAvailable : Bool
-    public var serviceUUID : String?
+    public var serviceUUID : CBUUID?
     public var scanResponse : ScanResponsePacket?
     
-    init(handle: String, name: String?, rssi: NSNumber, serviceData: Any, serviceUUID: Any) {
+    init(handle: String, name: String?, rssi: NSNumber, serviceData: [CBUUID: Data]?, serviceUUID: [CBUUID]?) {
         if (name != nil) {
             self.name = name!
         }
@@ -38,34 +38,30 @@ public class Advertisement {
         self.handle = handle
         self.rssi = rssi
         self.serviceDataAvailable = false
-
-        if let castData = serviceUUID as? [CBUUID] {
-            self.serviceUUID = castData[0].uuidString // assuming only one service data uuid
+        
+        if serviceData != nil {
+            for (serviceCUUID, data) in serviceData! {
+                self.serviceUUID = serviceCUUID
+                self.serviceDataAvailable = true
+                if (self.serviceUUID == CrownstonePlugAdvertisementServiceUUID ||
+                    self.serviceUUID == CrownstoneBuiltinAdvertisementServiceUUID ||
+                    self.serviceUUID == GuidestoneAdvertisementServiceUUID) {
+                    self.scanResponse        =  ScanResponsePacket(data.bytes, serviceUUID: self.serviceUUID)
+                    self.isCrownstoneFamily  =  self.scanResponse!.hasCrownstoneDataFormat()
+                    break
+                }
+            }
+        }
+        
+        
+        if self.serviceUUID == nil && serviceUUID != nil && serviceUUID!.count > 0 {
+            self.serviceUUID = serviceUUID![0] // assuming only one service data uuid
             if (self.serviceUUID == DFUServiceUUID) {
                 self.operationMode = .dfu
             }
         }
         
-        if let castData = serviceData as? [CBUUID: Data] {
-            for (serviceCUUID, data) in castData {
-                // convert data to uint8 array
-                let uint8Arr = Array(UnsafeBufferPointer(start: (data as NSData).bytes.bindMemory(to: UInt8.self, capacity: data.count), count: data.count))
-                self.serviceData[serviceCUUID.uuidString] = uint8Arr
-                self.serviceUUID = serviceCUUID.uuidString
-                self.serviceDataAvailable = true
-                self.operationMode = .unknown
-            }
-        }
         
-        for (id, data) in self.serviceData {
-            if (id == CrownstonePlugAdvertisementServiceUUID ||
-                id == CrownstoneBuiltinAdvertisementServiceUUID ||
-                id == GuidestoneAdvertisementServiceUUID) {
-                self.scanResponse        =  ScanResponsePacket(data, serviceUUID: id)
-                self.isCrownstoneFamily  =  self.scanResponse!.hasCrownstoneDataFormat()
-                break
-            }
-        }
         
         self.operationMode = self.getOperationMode()
     }
@@ -78,24 +74,6 @@ public class Advertisement {
         return numberArray
     }
     
-    func getServiceDataJSON() -> JSON {
-        if (self.serviceDataAvailable) {
-            for (id, data) in self.serviceData {
-                if ((
-                    id == CrownstonePlugAdvertisementServiceUUID ||
-                    id == CrownstoneBuiltinAdvertisementServiceUUID ||
-                    id == GuidestoneAdvertisementServiceUUID) &&
-                    self.scanResponse != nil) {
-                    return self.scanResponse!.getJSON()
-                }
-                else {
-                    return JSON(self.getNumberArray(data))
-                }
-            }
-        }
-
-        return JSON([])
-    }
 
     public func getUniqueElement() -> String {
         if ((scanResponse) != nil) {
@@ -130,7 +108,7 @@ public class Advertisement {
                 returnDict["serviceData"] = self.scanResponse!.getDictionary()
             }
             else {
-                returnDict["serviceData"] = self.getNumberArray(self.serviceData[self.serviceUUID!]!)
+                returnDict["serviceData"] = nil
             }
         }
         
@@ -168,7 +146,7 @@ public class Advertisement {
     
     public func parse() {
         if (serviceDataAvailable && self.scanResponse != nil) {
-            self.scanResponse!.parse()
+            self.scanResponse!.parseWithoutEncrypting()
         }
     }
     

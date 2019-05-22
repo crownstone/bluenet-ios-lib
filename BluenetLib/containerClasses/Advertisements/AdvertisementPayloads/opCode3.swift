@@ -9,8 +9,8 @@
 import Foundation
 
 func parseOpcode3(serviceData : ScanResponsePacket, data : [UInt8], liteParse: Bool = false) {
-    if (data.count == 17) {
-        serviceData.dataType = data[1]
+    if (data.count == 16) {
+        serviceData.dataType = data[0]
         switch (serviceData.dataType) {
         case 0:
             parseOpcode3_type0(serviceData: serviceData, data: data, liteParse: liteParse)

@@ -9,25 +9,25 @@
 import Foundation
 
 func parseOpcode4_type0(serviceData : ScanResponsePacket, data : [UInt8], liteParse: Bool) {
-    if (data.count == 17) {
+    if (data.count == 16) {
         // opCode   = data[0]
         // dataType = data[1]
         
-        serviceData.uniqueIdentifier = NSNumber(value: data[12])
+        serviceData.uniqueIdentifier = NSNumber(value: data[11])
         
         if (liteParse) {
             return
         }
         
-        serviceData.switchState  = data[2]
-        serviceData.flagsBitmask = data[3]
-        serviceData.temperature  = Conversion.uint8_to_int8(data[4])
+        serviceData.switchState  = data[1]
+        serviceData.flagsBitmask = data[2]
+        serviceData.temperature  = Conversion.uint8_to_int8(data[3])
         
-        let powerFactor = Conversion.uint8_to_int8(data[5])
+        let powerFactor = Conversion.uint8_to_int8(data[4])
         let realPower = Conversion.uint16_to_int16(
             Conversion.uint8_array_to_uint16([
-                data[6],
-                data[7]
+                data[5],
+                data[6]
             ])
         )
         
@@ -45,10 +45,10 @@ func parseOpcode4_type0(serviceData : ScanResponsePacket, data : [UInt8], litePa
         serviceData.powerUsageApparent = serviceData.powerUsageReal / serviceData.powerFactor
         
         serviceData.errorsBitmask = Conversion.uint8_array_to_uint32([
+            data[7],
             data[8],
             data[9],
-            data[10],
-            data[11]
+            data[10]
         ])
         
         

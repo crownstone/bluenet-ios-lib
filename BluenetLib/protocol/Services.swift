@@ -7,19 +7,12 @@
 //
 
 import Foundation
+import CoreBluetooth
 
-/*
- *
- *
- *  These are valid for SDK 0.8.0
- *
- *
- */
-
-public let CrownstonePlugAdvertisementServiceUUID = "C001"
-public let CrownstoneBuiltinAdvertisementServiceUUID = "C002"
-public let GuidestoneAdvertisementServiceUUID = "C003"
-public let DFUServiceUUID = "00001530-1212-EFDE-1523-785FEABCD123"
+public let CrownstonePlugAdvertisementServiceUUID = CBUUID(string: "C001")
+public let CrownstoneBuiltinAdvertisementServiceUUID = CBUUID(string: "C002")
+public let GuidestoneAdvertisementServiceUUID = CBUUID(string: "C003")
+public let DFUServiceUUID = CBUUID(string: "00001530-1212-EFDE-1523-785FEABCD123")
 
 public struct CSServices {
     public static let DeviceInformation         = "180a"

@@ -964,13 +964,17 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     }
     
     public func startScanningForServices(_ serviceUUIDs: [String], uniqueOnly: Bool = false) {
-        self.disableBatterySaving(doNotChangeScanning: true)
-        self.scanning = true
-        self.scanUniqueOnly = uniqueOnly
         var services = [CBUUID]()
         for service in serviceUUIDs {
             services.append(CBUUID(string: service))
         }
+        self.startScanningForServicesCBUUID(services, uniqueOnly: uniqueOnly)
+    }
+    
+    public func startScanningForServicesCBUUID(_ services: [CBUUID], uniqueOnly: Bool = false) {
+        self.disableBatterySaving(doNotChangeScanning: true)
+        self.scanning = true
+        self.scanUniqueOnly = uniqueOnly
         self.scanningStateStored = true
         
         self.scanningForServices = services
@@ -980,9 +984,10 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             return
         }
         
-        LOG.info("BLUENET_LIB: start scanning for multiple services \(serviceUUIDs)")
+        LOG.info("BLUENET_LIB: start scanning for multiple services \(services)")
         centralManager.scanForPeripherals(withServices: services, options:[CBCentralManagerScanOptionAllowDuplicatesKey: !uniqueOnly])
     }
+    
     
     public func pauseScanning() {
         LOG.info("BLUENET_LIB: pausing scan")

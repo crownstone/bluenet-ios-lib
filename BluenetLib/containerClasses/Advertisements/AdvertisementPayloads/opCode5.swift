@@ -9,31 +9,23 @@
 import Foundation
 
 func parseOpcode5(serviceData : ScanResponsePacket, data : [UInt8], liteParse: Bool = false) {
-    if (data.count == 18) {
-        if let type = DeviceType(rawValue: data[1]) {
-            serviceData.deviceType = type
-        }
-        else {
-            serviceData.deviceType = DeviceType.undefined
-        }
-      
-        serviceData.dataType = data[2]
-
-        let slice : [UInt8] = Array(data[1...])
+    if (data.count == 16) {
+        serviceData.dataType = data[0]
+        
         switch (serviceData.dataType) {
         case 0:
-            parseOpcode3_type0(serviceData: serviceData, data: slice, liteParse: liteParse)
+            parseOpcode3_type0(serviceData: serviceData, data: data, liteParse: liteParse)
         case 1:
-            parseOpcode3_type1(serviceData: serviceData, data: slice, liteParse: liteParse)
+            parseOpcode3_type1(serviceData: serviceData, data: data, liteParse: liteParse)
         case 2:
-            parseOpcode3_type2(serviceData: serviceData, data: slice, liteParse: liteParse)
-            serviceData.rssiOfExternalCrownstone = Conversion.uint8_to_int8(slice[15])
+            parseOpcode3_type2(serviceData: serviceData, data: data, liteParse: liteParse)
+            serviceData.rssiOfExternalCrownstone = Conversion.uint8_to_int8(data[15])
         case 3:
-            parseOpcode3_type3(serviceData: serviceData, data: slice, liteParse: liteParse)
-            serviceData.rssiOfExternalCrownstone = Conversion.uint8_to_int8(slice[15])
+            parseOpcode3_type3(serviceData: serviceData, data: data, liteParse: liteParse)
+            serviceData.rssiOfExternalCrownstone = Conversion.uint8_to_int8(data[15])
         default:
             // LOG.warn("Advertisement opCode 3: Got an unknown typeCode \(data[1])")
-            parseOpcode3_type0(serviceData: serviceData, data: slice, liteParse: liteParse)
+            parseOpcode3_type0(serviceData: serviceData, data: data, liteParse: liteParse)
         }
     }
 }

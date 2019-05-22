@@ -33,7 +33,6 @@ public class ScanResponsePacket {
     public var setupMode           :   Bool     = false
     public var stateOfExternalCrownstone : Bool = false
     public var data                :   [UInt8]!
-    public var encryptedData       :   [UInt8]!
     public var encryptedDataStartIndex : Int = 1
     
     public var dimmingAvailable    :   Bool     = false
@@ -58,24 +57,22 @@ public class ScanResponsePacket {
     public var deviceType          :   DeviceType = .undefined
     public var rssiOfExternalCrownstone : Int8  = 0
     
-    var serviceUUID : String? = nil
+    var serviceUUID : CBUUID? = nil
     
     var validData = false
     public var dataReadyForUse = false // decryption is successful
     
-    init(_ data: [UInt8], serviceUUID: String? = nil) {
+    init(_ data: [UInt8], serviceUUID: CBUUID? = nil) {
         self.data = data
         self.serviceUUID = serviceUUID
         
         validData = true
         if (self.data.count == 18) {
             self.opCode = data[0]
-            self.encryptedData = Array(data[2...])
             self.encryptedDataStartIndex = 2
         }
         else if (self.data.count == 17) {
             self.opCode = data[0]
-            self.encryptedData = Array(data[1...])
             self.encryptedDataStartIndex = 1
         }
         else {
@@ -111,26 +108,46 @@ public class ScanResponsePacket {
     }
     
     
-    func parse() {
+    func parseWithoutEncrypting() {
+        if self.data != nil {
+            self.parse(decryptedData: Array(self.data![self.encryptedDataStartIndex...]))
+        }
+    }
+    
+    func parse(decryptedData: [UInt8]) {
         if (self.validData) {
             switch (self.opCode) {
             case 1:
-                parseOpcode1(serviceData: self, data: data)
+                parseOpcode1(serviceData: self, data: decryptedData)
                 self._getLegacyDeviceType()
             case 2:
                 // this is not used and has never been released
-                parseOpcode2(serviceData: self, data: data)
+                parseOpcode2(serviceData: self, data: decryptedData)
                 self._getLegacyDeviceType()
             case 3:
-                parseOpcode3(serviceData: self, data: data)
+                parseOpcode3(serviceData: self, data: decryptedData)
             case 4:
-                parseOpcode4(serviceData: self, data: data)
+                parseOpcode4(serviceData: self, data: decryptedData)
             case 5:
-                parseOpcode5(serviceData: self, data: data)
+                self.getDeviceTypeFromPublicData()
+                parseOpcode5(serviceData: self, data: decryptedData)
             case 6:
-                parseOpcode6(serviceData: self, data: data)
+                self.getDeviceTypeFromPublicData()
+                parseOpcode6(serviceData: self, data: decryptedData)
             default:
-                parseOpcode5(serviceData: self, data: data)
+                self.getDeviceTypeFromPublicData()
+                parseOpcode5(serviceData: self, data: decryptedData)
+            }
+        }
+    }
+    
+    func getDeviceTypeFromPublicData() {
+        if (self.data.count == 18) {
+            if let type = DeviceType(rawValue: data[1]) {
+                self.deviceType = type
+            }
+            else {
+                self.deviceType = DeviceType.undefined
             }
         }
     }
@@ -212,25 +229,18 @@ public class ScanResponsePacket {
     
     
     public func decrypt(_ key: [UInt8]) {
-        if (validData == true && self.encryptedData.count == 16) {
+        if (validData == true) {
             do {
-                let result = try EncryptionHandler.decryptAdvertisement(self.encryptedData, key: key)
+                let decryptedData = try EncryptionHandler.decryptAdvertisementSlice(self.data![self.encryptedDataStartIndex...], key: key)
                 
-                for i in [Int](0...result.count-1) {
-                    self.data[i+self.encryptedDataStartIndex] = result[i]
-                }
-                
-                // parse the data again based on the decrypted result
-                self.parse()
+                // parse the data based on the decrypted result
+                self.parse(decryptedData: decryptedData)
                 self.dataReadyForUse = true
             }
             catch let err {
                 self.dataReadyForUse = false
                 LOG.error("Could not decrypt advertisement \(err)")
             }
-        }
-        else {
-            
         }
     }
 }

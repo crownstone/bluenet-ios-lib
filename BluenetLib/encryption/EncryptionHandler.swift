@@ -186,6 +186,12 @@ class EncryptionHandler {
         return Data(bytes:encryptedPayload)
     }
     
+    static func decryptAdvertisementSlice(_ input: ArraySlice<UInt8>, key: [UInt8]) throws -> [UInt8] {
+        guard key.count   == 16 else { throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY }
+        guard input.count == 16 else { throw BluenetError.INVALID_PACKAGE_FOR_ENCRYPTION_TOO_SHORT }
+        return try AES(key: key, blockMode: CryptoSwift.ECB(), padding: .noPadding).decrypt(input)
+    }
+    
     static func decryptAdvertisement(_ input: [UInt8], key: [UInt8]) throws -> [UInt8] {
         guard key.count   == 16 else { throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY }
         guard input.count == 16 else { throw BluenetError.INVALID_PACKAGE_FOR_ENCRYPTION_TOO_SHORT }
