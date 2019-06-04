@@ -273,7 +273,7 @@ class PeripheralStateManager {
         }
         
         if let referenceId = self.settings.locationState.referenceId {
-            if let key = self.settings.getGuestKey(referenceId: referenceId) {
+            if let key = self.settings.getBasicKey(referenceId: referenceId) {
                 let uuids = BroadcastProtocol.getServicesForBackgroundBroadcast(locationState: self.settings.locationState, devicePreferences: self.settings.devicePreferences, key: key)
                 self.blePeripheralManager.startAdvertisingArray(uuids: uuids)
             }
@@ -468,7 +468,7 @@ class PeripheralStateManager {
             return
         }
         
-        if let guestKey = self.settings.getGuestKey(referenceId: referenceIdOfBuffer) {
+        if let basicKey = self.settings.getBasicKey(referenceId: referenceIdOfBuffer) {
             let packet = bufferToBroadcast.getPacket(validationNonce: NSNumber(value:time).uint32Value)
             do {
                 let otherUUIDs = try BroadcastProtocol.getUInt16ServiceNumbers(
@@ -476,7 +476,7 @@ class PeripheralStateManager {
                     devicePreferences: self.settings.devicePreferences,
                     protocolVersion: 1,
                     accessLevel: self.settings.userLevel,
-                    key: guestKey
+                    key: basicKey
                 )
                 
                 var nonce = [UInt8]()

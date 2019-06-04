@@ -12,7 +12,7 @@ import CryptoSwift
 public enum UserLevel: Int {
     case admin   = 0
     case member  = 1
-    case guest   = 2
+    case basic   = 2
     case setup   = 100
     case unknown = 255
 }
@@ -271,8 +271,8 @@ class EncryptionHandler {
             key = settings.getAdminKey()
         case .member:
             key = settings.getMemberKey()
-        case .guest:
-            key = settings.getGuestKey()
+        case .basic:
+            key = settings.getBasicKey()
         case .setup:
             key = settings.setupKey
         default:

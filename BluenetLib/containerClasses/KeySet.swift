@@ -10,14 +10,15 @@ import Foundation
 
 
 public class KeySet {
-    public var adminKey  : [UInt8]? = nil
-    public var memberKey : [UInt8]? = nil
-    public var guestKey  : [UInt8]? = nil
+    public var adminKey       : [UInt8]? = nil
+    public var memberKey      : [UInt8]? = nil
+    public var basicKey       : [UInt8]? = nil
+    public var serviceDataKey : [UInt8]? = nil
     public var initializedKeys = false
     public var referenceId : String = "unknown"
     public var userLevel : UserLevel = .unknown
     
-    public init(adminKey: String?, memberKey: String?, guestKey: String?, referenceId: String) {
+    public init(adminKey: String?, memberKey: String?, basicKey: String?, serviceDataKey: String?, referenceId: String) {
         self.referenceId = referenceId
         
         if (adminKey != nil) {
@@ -32,11 +33,17 @@ public class KeySet {
         else {
             self.memberKey = nil;
         }
-        if (guestKey != nil) {
-            self.guestKey = Conversion.ascii_or_hex_string_to_16_byte_array(guestKey!)
+        if (basicKey != nil) {
+            self.basicKey = Conversion.ascii_or_hex_string_to_16_byte_array(basicKey!)
         }
         else {
-            self.guestKey = nil;
+            self.basicKey = nil;
+        }
+        if (serviceDataKey != nil) {
+            self.serviceDataKey = Conversion.ascii_or_hex_string_to_16_byte_array(serviceDataKey!)
+        }
+        else {
+            self.serviceDataKey = nil;
         }
         
         self.initializedKeys = true
@@ -51,8 +58,8 @@ public class KeySet {
         else if (self.memberKey != nil && self.memberKey!.count == 16) {
             userLevel = .member
         }
-        else if (self.guestKey != nil && self.guestKey!.count == 16) {
-            userLevel = .guest
+        else if (self.basicKey != nil && self.basicKey!.count == 16) {
+            userLevel = .basic
         }
         else {
             userLevel = .unknown

@@ -120,19 +120,41 @@ public class BluenetSettings {
     }
     
     /**
-     * This gets the guest key of the session reference keySet
+     * This gets the basic key of the session reference keySet
      **/
-    func getGuestKey() -> [UInt8]? {
+    func getBasicKey() -> [UInt8]? {
         if self._checkSessionId() {
-            return keySets[self.sessionReferenceId!]!.guestKey
+            return keySets[self.sessionReferenceId!]!.basicKey
         }
         return nil
     }
     
     
-    func getGuestKey(referenceId: String) -> [UInt8]? {
+    /**
+     * This gets the basic key of the session reference keySet
+     **/
+    func getServiceDataKey() -> [UInt8]? {
+        if self._checkSessionId() {
+            return keySets[self.sessionReferenceId!]!.serviceDataKey
+        }
+        return nil
+    }
+    
+    /**
+     * This gets the basic key of the session reference keySet
+     **/
+    func getServiceDataKey(referenceId: String) -> [UInt8]? {
         if self.keySets[referenceId] != nil {
-            return self.keySets[referenceId]!.guestKey
+            return self.keySets[referenceId]!.serviceDataKey
+        }
+        else {
+            return nil
+        }
+    }
+    
+    func getBasicKey(referenceId: String) -> [UInt8]? {
+        if self.keySets[referenceId] != nil {
+            return self.keySets[referenceId]!.basicKey
         }
         else {
             return nil
@@ -160,7 +182,7 @@ public class BluenetSettings {
         
         let adminKey = self.getAdminKey()
         let memberKey = self.getMemberKey()
-        let guestKey = self.getGuestKey()
+        let basicKey = self.getBasicKey()
         
         if (adminKey != nil && adminKey!.count == 16) {
             userLevel = .admin
@@ -168,8 +190,8 @@ public class BluenetSettings {
         else if (memberKey != nil && memberKey!.count == 16) {
             userLevel = .member
         }
-        else if (guestKey != nil && guestKey!.count == 16) {
-            userLevel = .guest
+        else if (basicKey != nil && basicKey!.count == 16) {
+            userLevel = .basic
         }
         else {
             userLevel = .unknown

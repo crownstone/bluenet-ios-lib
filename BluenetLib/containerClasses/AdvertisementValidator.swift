@@ -186,8 +186,8 @@ public class AdvertismentValidator {
     **/
     func validate(_ advertisement: Advertisement, referenceId: String) -> ResultType {
         // we need to have a guest key for this reference Id
-        let guestKey = self.settings.getGuestKey(referenceId: referenceId)
-        if (guestKey == nil) {
+        let serviceDataKey = self.settings.getServiceDataKey(referenceId: referenceId)
+        if (serviceDataKey == nil) {
             return .ERROR
         }
     
@@ -200,7 +200,7 @@ public class AdvertismentValidator {
         let scanResponse = advertisement.scanResponse!
         let validationMap = self.validationMap[referenceId]!
         
-        scanResponse.decrypt(guestKey!)
+        scanResponse.decrypt(serviceDataKey!)
         
         var validMeasurement = false
         if (validationMap.uniqueIdentifier != nil || firstTime) {

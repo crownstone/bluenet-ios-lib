@@ -135,7 +135,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             self.centralManager = CBCentralManager(
                 delegate: self.CBDelegateBackground,
                 queue: nil,
-                options: [CBCentralManagerOptionShowPowerAlertKey: true, CBCentralManagerOptionRestoreIdentifierKey: APPNAME +  "BluenetIOS"]
+                options: [CBCentralManagerOptionShowPowerAlertKey: true, CBCentralManagerOptionRestoreIdentifierKey: APPNAME + "BluenetIOS"]
             )
         }
         else {
