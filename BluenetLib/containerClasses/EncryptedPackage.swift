@@ -38,7 +38,7 @@ class EncryptedPackage {
         }
         
         
-        // only allow 0, 1, 2 for Admin, User, Guest and 100 for Setup
+        // only allow 0, 1, 2 for Admin, User, Basic and 100 for Setup
         if (dataArray[PACKET_NONCE_LENGTH] > 2 && dataArray[PACKET_NONCE_LENGTH] != UInt8(UserLevel.setup.rawValue)) {
             throw BluenetError.INVALID_KEY_FOR_ENCRYPTION
         }

@@ -580,15 +580,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         }
     }
     
-    func getCharacteristicFromList(_ list: [CBCharacteristic], _ uuid: String) -> CBCharacteristic? {
-        let matchString = uuid.uppercased()
-        for characteristic in list {
-            if (characteristic.uuid.uuidString == matchString) {
-                return characteristic
-            }
-        }
-        return nil;
-    }
+    
     
     func getChacteristic(_ serviceId: String, _ characteristicId: String) -> Promise<CBCharacteristic> {
         return Promise<CBCharacteristic> { seal in
@@ -607,7 +599,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     }
                     // then get the characteristic we need if it is in the list.
                     .done{(characteristics: [CBCharacteristic]) -> Void in
-                        if let characteristic = self.getCharacteristicFromList(characteristics, characteristicId) {
+                        if let characteristic = getCharacteristicFromList(characteristics, characteristicId) {
                             seal.fulfill(characteristic)
                         }
                         else {

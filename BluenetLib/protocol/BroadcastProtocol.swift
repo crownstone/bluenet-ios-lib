@@ -43,7 +43,7 @@ public class BroadcastProtocol {
     
     static func getUInt16ServiceNumbers(locationState: LocationState, devicePreferences: DevicePreferences, protocolVersion: NSNumber, accessLevel: UserLevel, key : [UInt8]) throws -> [UInt16]  {
         guard (locationState.locationId != nil   && locationState.locationId!  < 64 || locationState.locationId   == nil) else {
-            throw BluenetError.INVALID_BROADCAST_ACCESS_LEVEL
+            throw BluenetError.INVALID_BROADCAST_LOCATION_ID
         }
         guard (locationState.profileIndex != nil && locationState.profileIndex! < 4 || locationState.profileIndex == nil) else {
             throw BluenetError.INVALID_BROADCAST_PROFILE_INDEX
@@ -260,7 +260,7 @@ public class BroadcastProtocol {
     
     /**
      *
-     * | Protocol |  Sphere UID       |  RC5 encrypted with guest key      32b                            | padding 0 times 22
+     * | Protocol |  Sphere UID       |  RC5 encrypted with basic key      32b                            | padding 0 times 22
      * | 1 1      |  0 0 0 0 0 0 0 0  |  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0  |
      * | 2b       |  8b               | | validation 16b                | payload 16b                   | |
      *

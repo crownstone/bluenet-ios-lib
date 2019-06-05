@@ -41,6 +41,7 @@ public struct SetupCharacteristics {
     public static let SetupControl     = "24f10007-7d10-4805-bfc1-7663a01c3bff"
     public static let GoToDFU          = "24f10006-7d10-4805-bfc1-7663a01c3bff"
     public static let SessionNonce     = "24f10008-7d10-4805-bfc1-7663a01c3bff"
+    public static let SetupControlV2   = "24f10009-7d10-4805-bfc1-7663a01c3bff"
 }
 
 public struct GeneralCharacteristics {

@@ -185,7 +185,7 @@ public class AdvertismentValidator {
     *   This method is the owner of the validationMap objects and is the only one that changes them.
     **/
     func validate(_ advertisement: Advertisement, referenceId: String) -> ResultType {
-        // we need to have a guest key for this reference Id
+        // we need to have a serviceData key for this reference Id
         let serviceDataKey = self.settings.getServiceDataKey(referenceId: referenceId)
         if (serviceDataKey == nil) {
             return .ERROR

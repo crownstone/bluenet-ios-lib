@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CoreBluetooth
 
 /**
  * Delay a callback
@@ -51,4 +52,14 @@ public func showLocationAlert() {
  **/
 public func getUUID() -> String {
     return UUID().uuidString
+}
+
+public func getCharacteristicFromList(_ list: [CBCharacteristic], _ uuid: String) -> CBCharacteristic? {
+    let matchString = uuid.uppercased()
+    for characteristic in list {
+        if (characteristic.uuid.uuidString == matchString) {
+            return characteristic
+        }
+    }
+    return nil;
 }

@@ -8,7 +8,9 @@
 
 import XCTest
 import CryptoSwift
+import PromiseKit
 @testable import BluenetLib
+
 
 class EncryptionTests: XCTestCase {
     var settings : BluenetSettings!
@@ -18,10 +20,97 @@ class EncryptionTests: XCTestCase {
         
         // Put setup code here. This method is called before the invocation of each test method in the class.
         settings = BluenetSettings()
-        //settings.loadKeys(encryptionEnabled: true, adminKey: "AdminKeyOf16Byte", memberKey: "MemberKeyOf16Byt", guestKey: "GuestKeyOf16Byte", referenceId: "test")
+        
+        settings.loadKeySets(encryptionEnabled: true, keySets: [
+            KeySet(adminKey: "myKeyTheBestKey1",
+                   memberKey: "myKeyTheBestKey2",
+                   basicKey: "myKeyTheBestKey3",
+                   serviceDataKey: "myKeyTheBestKey3",
+                   referenceId: "test")
+            ])
+        
+        settings.setLocationState(
+            sphereUID: 1,
+            locationId: 0,
+            profileIndex: 1,
+            referenceId: "test"
+        )
+        settings.setDevicePreferences(
+            rssiOffset: -10,
+            tapToToggle: false,
+            useBackgroundBroadcasts:true,
+            useBaseBroadcasts: true
+        )
+        
         
         BLUENET_ENCRYPTION_TESTING = true
         
+    }
+    
+    
+    func testBroadcastPayload() {
+        let exp = expectation(description: "Example")
+        let a = Promise<Void> { seal in
+            let switchState : UInt8 = 60
+            let stoneId : UInt8 = 3
+            let packet  = BroadcastStone_SwitchPacket(crownstoneId: stoneId, state: switchState).getPacket()
+            let element = BroadcastElement(referenceId: "test", type: .multiSwitch, packet: packet, seal: seal, target: stoneId)
+            
+            // check in which referenceId the first block to be advertised lives and what it's type is.
+            let broadcastType = element.type
+            let broadcastReferenceId = element.referenceId
+            
+            // create a buffer that will be broadcast
+            let bufferToBroadcast = BroadcastBuffer(referenceId: broadcastReferenceId, type: broadcastType)
+            bufferToBroadcast.loadElement(element)
+        
+            
+            let referenceIdOfBuffer = bufferToBroadcast.referenceId
+            var time : Double = 100000.0
+            
+            if let basicKey = self.settings.getBasicKey(referenceId: "test") {
+                let payload = BroadcastProtocol.getRC5Payload(validationNonce: 0, locationState: self.settings.locationState, devicePreferences: self.settings.devicePreferences, key: basicKey)
+                print("RC5", payload)
+            }
+            
+            if let basicKey = self.settings.getBasicKey(referenceId: referenceIdOfBuffer) {
+                let packet = bufferToBroadcast.getPacket(validationNonce: NSNumber(value:time).uint32Value)
+                do {
+                    let otherUUIDs = try BroadcastProtocol.getUInt16ServiceNumbers(
+                        locationState: self.settings.locationState,
+                        devicePreferences: self.settings.devicePreferences,
+                        protocolVersion: 1,
+                        accessLevel: self.settings.userLevel,
+                        key: basicKey
+                    )
+                    
+                    var nonce = [UInt8]()
+                    for uuidNum in otherUUIDs {
+                        nonce += Conversion.uint16_to_uint8_array(uuidNum)
+                    }
+                    
+                    do {
+                        print("128bit buffer unencrypted", packet)
+                        let encryptedUUID = try BroadcastProtocol.getEncryptedServiceUUID(referenceId: referenceIdOfBuffer, settings: self.settings, data: packet, nonce: nonce)
+                        
+                        var broadcastUUIDs = BroadcastProtocol.convertUInt16ListToUUID(otherUUIDs)
+                        broadcastUUIDs.append(encryptedUUID)
+                        print("BroadcastUUIDs", otherUUIDs)
+                        print("BroadcastUUIDs", encryptedUUID)
+                    }
+                    catch let err {
+                        print("Could not get uint16 ids", err)
+                    }
+                }
+                catch let err {
+                    print("Could not get encrypted service uuid", err)
+                }
+            }
+            
+            
+        }
+        
+        waitForExpectations(timeout: 1, handler: nil)
     }
 //    
 //    override func tearDown() {

@@ -81,6 +81,7 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         }
     }
     
+    
     public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         // in some processes, the encryption can be disabled temporarily. Advertisements CAN come in in this period and be misfigured by the lack of decryption.
         // to avoid this, we do not listen to advertisements while the encryption is TEMPORARILY disabled.

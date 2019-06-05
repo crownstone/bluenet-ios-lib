@@ -241,8 +241,8 @@ public class ControlHandler {
             .then{(sessionNonce : [UInt8]) -> Promise<Void> in
                 return Promise <Void> { seal in
                     do {
-                        if let guestKey = self.bleManager.settings.getBasicKey() {
-                            let sessionNonce = try EncryptionHandler.decryptSessionNonce(sessionNonce, key: guestKey)
+                        if let basicKey = self.bleManager.settings.getBasicKey() {
+                            let sessionNonce = try EncryptionHandler.decryptSessionNonce(sessionNonce, key: basicKey)
                             self.bleManager.settings.setSessionNonce(sessionNonce)
                             seal.fulfill(())
                         }

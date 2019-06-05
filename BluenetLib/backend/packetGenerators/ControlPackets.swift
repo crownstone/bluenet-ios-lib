@@ -128,5 +128,30 @@ public class ControlPacketsGenerator {
         
         return ControlPacket(type: .setup, payloadArray: data).getPacket()
     }
+    
+    public static func getSetupPacketV2(
+        crownstoneId: UInt8, sphereId: UInt8,
+        adminKey: String, memberKey: String, basicKey: String, meshNetworkKey: String, meshApplicationKey: String, meshDeviceKey: String,
+        ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16
+        ) -> [UInt8] {
+        var data : [UInt8] = []
+        data.append(crownstoneId)
+        data.append(sphereId)
+        
+        data += Conversion.ascii_or_hex_string_to_16_byte_array(adminKey)
+        data += Conversion.ascii_or_hex_string_to_16_byte_array(memberKey)
+        data += Conversion.ascii_or_hex_string_to_16_byte_array(basicKey)
+        
+        data += Conversion.ascii_or_hex_string_to_16_byte_array(meshNetworkKey)
+        data += Conversion.ascii_or_hex_string_to_16_byte_array(meshApplicationKey)
+        data += Conversion.ascii_or_hex_string_to_16_byte_array(meshDeviceKey)
+
+        
+        data += Conversion.ibeaconUUIDString_to_reversed_uint8_array(ibeaconUUID)
+        data += Conversion.uint16_to_uint8_array(ibeaconMajor)
+        data += Conversion.uint16_to_uint8_array(ibeaconMinor)
+        
+        return ControlPacket(type: .setup, payloadArray: data).getPacket()
+    }
 
 }
