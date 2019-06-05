@@ -192,7 +192,7 @@ public class SetupHandler {
                 ibeaconMinor: ibeaconMinor
             )
         }
-        return self._fastSetup(writeCommand: writeCommand)
+        return self._fastSetup(characteristicId: SetupCharacteristics.SetupControlV2, writeCommand: writeCommand)
     }
     
     
@@ -213,13 +213,13 @@ public class SetupHandler {
                 ibeaconMinor: ibeaconMinor
             )
         }
-        return self._fastSetup(writeCommand: writeCommand)
+        return self._fastSetup(characteristicId: SetupCharacteristics.SetupControl, writeCommand: writeCommand)
     }
     
     /**
      * This will handle the complete setup. We expect bonding has already been done by now.
      */
-    func _fastSetup(writeCommand: @escaping voidPromiseCallback) -> Promise<Void> {
+    func _fastSetup(characteristicId: String, writeCommand: @escaping voidPromiseCallback) -> Promise<Void> {
         self.step = 0
         return Promise<Void> { seal in
             self.handleSetupPhaseEncryption()
@@ -227,7 +227,7 @@ public class SetupHandler {
                     self.eventBus.emit("setupProgress", 4);
                     return self.bleManager.setupNotificationStream(
                         CSServices.SetupService,
-                        characteristicId: SetupCharacteristics.SetupControl,
+                        characteristicId: characteristicId,
                         writeCommand: writeCommand,
                         resultHandler: {(returnData) -> ProcessType in
                             if let data = returnData as? [UInt8] {
