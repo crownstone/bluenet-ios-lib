@@ -309,7 +309,7 @@ public class SetupHandler {
         )
         return self.bleManager.writeToCharacteristic(
             CSServices.SetupService,
-            characteristicId: SetupCharacteristics.SetupControl,
+            characteristicId: SetupCharacteristics.SetupControlV2,
             data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
             type: CBCharacteristicWriteType.withResponse
         )

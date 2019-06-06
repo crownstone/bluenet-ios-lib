@@ -143,10 +143,9 @@ public class ControlPacketsGenerator {
         data += Conversion.ascii_or_hex_string_to_16_byte_array(basicKey)
         data += Conversion.ascii_or_hex_string_to_16_byte_array(serviceDataKey)
         
-        data += Conversion.ascii_or_hex_string_to_16_byte_array(meshNetworkKey)
-        data += Conversion.ascii_or_hex_string_to_16_byte_array(meshApplicationKey)
         data += Conversion.ascii_or_hex_string_to_16_byte_array(meshDeviceKey)
-
+        data += Conversion.ascii_or_hex_string_to_16_byte_array(meshApplicationKey)
+        data += Conversion.ascii_or_hex_string_to_16_byte_array(meshNetworkKey)
         
         data += Conversion.ibeaconUUIDString_to_reversed_uint8_array(ibeaconUUID)
         data += Conversion.uint16_to_uint8_array(ibeaconMajor)
