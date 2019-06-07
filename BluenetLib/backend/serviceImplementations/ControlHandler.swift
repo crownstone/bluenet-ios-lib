@@ -83,7 +83,12 @@ public class ControlHandler {
     }
     
     public func commandFactoryReset() -> Promise<Void> {
+        var writeWasSuccessful = false
         return self._writeControlPacket(ControlPacketsGenerator.getCommandFactoryResetPacket())
+            .then{(_) -> Promise<Void> in
+                writeWasSuccessful = true
+                return self.bleManager.waitToWrite()
+            }
             .then{(_) -> Promise<[UInt8]> in return self._readControlPacket()}
             .then{(response: [UInt8]) -> Promise<Void> in
                 return Promise<Void> { seal in
@@ -106,6 +111,18 @@ public class ControlHandler {
                     }
                 }
             }
+            .recover{(err: Error) -> Promise<Void> in
+                return Promise <Void> { seal in
+                    // we only want to pass this to the main promise of connect if we successfully received the nonce, but cant decrypt it.
+                    if let bleErr = err as? BluenetError {
+                        if bleErr == BluenetError.DISCONNECTED && writeWasSuccessful == true {
+                            seal.fulfill(())
+                            return
+                        }
+                    }
+                    seal.reject((err))
+                }
+        }
     }
     
     
