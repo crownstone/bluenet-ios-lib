@@ -603,34 +603,33 @@ public class SetupHandler {
     }
     
     func _writeSetupControlPacket(_ packet: [UInt8]) -> Promise<Void> {
-        return self.bleManager.getChacteristic(CSServices.SetupService, SetupCharacteristics.SetupControl)
-            .then{(characteristic) -> Promise<Void> in
-                return self.bleManager.writeToCharacteristic(
-                    CSServices.SetupService,
-                    characteristicId: SetupCharacteristics.SetupControl,
-                    data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-                    type: CBCharacteristicWriteType.withResponse
-                )
-            }
-            .recover{(err: Error) -> Promise<Void> in
-                return Promise <Void> { seal in
-                    // we only want to pass this to the main promise of connect if we successfully received the nonce, but cant decrypt it.
-                    if let bleErr = err as? BluenetError {
-                        if (bleErr == BluenetError.CHARACTERISTIC_DOES_NOT_EXIST) {
-                            self.bleManager.writeToCharacteristic(
-                                CSServices.SetupService,
-                                characteristicId: SetupCharacteristics.Control,
-                                data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-                                type: CBCharacteristicWriteType.withResponse
-                                )
-                                .done{ _ -> Void in seal.fulfill(())}
-                                .catch{(err2: Error) -> Void in seal.reject(err2) }
-                            return
-                        }
-                    }
-                    seal.reject(err)
+        return self.bleManager.getCharacteristicsFromDevice(CSServices.SetupService)
+            .then{(characteristics) -> Promise<Void> in
+                if getCharacteristicFromList(characteristics, SetupCharacteristics.SetupControlV2) != nil {
+                    return self.bleManager.writeToCharacteristic(
+                        CSServices.SetupService,
+                        characteristicId: SetupCharacteristics.SetupControlV2,
+                        data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                        type: CBCharacteristicWriteType.withResponse
+                    )
                 }
-            }
+                else if getCharacteristicFromList(characteristics, SetupCharacteristics.SetupControl) != nil {
+                    return self.bleManager.writeToCharacteristic(
+                        CSServices.SetupService,
+                        characteristicId: SetupCharacteristics.SetupControl,
+                        data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                        type: CBCharacteristicWriteType.withResponse
+                    )
+                }
+                else {
+                    return self.bleManager.writeToCharacteristic(
+                        CSServices.SetupService,
+                        characteristicId: SetupCharacteristics.Control,
+                        data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                        type: CBCharacteristicWriteType.withResponse
+                    )
+                }
+        }
     }
     
     
