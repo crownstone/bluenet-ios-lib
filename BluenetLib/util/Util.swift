@@ -54,6 +54,18 @@ public func getUUID() -> String {
     return UUID().uuidString
 }
 
+
+public func getServiceFromList(_ list: [CBService], _ uuid: String) -> CBService? {
+    let matchString = uuid.uppercased()
+    for service in list {
+        if (service.uuid.uuidString == matchString) {
+            return service
+        }
+    }
+    return nil;
+}
+
+
 public func getCharacteristicFromList(_ list: [CBCharacteristic], _ uuid: String) -> CBCharacteristic? {
     let matchString = uuid.uppercased()
     for characteristic in list {

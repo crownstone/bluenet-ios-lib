@@ -332,32 +332,42 @@ public class Bluenet {
         let connectionCommand : voidPromiseCallback = {
             LOG.info("BLUENET_LIB: Connecting to \(handle) now.")
             return self.bleManager.connect(handle)
-                .then{_ -> Promise<Void> in
+                .then{_ -> Promise<[CBService]> in
                     LOG.info("BLUENET_LIB: connected!")
-                    return Promise<Void> {seal in
-                        if (self.settings.isEncryptionEnabled()) {
-                            // we have to validate if the referenceId is valid here, otherwise we cannot do encryption
-                            var activeReferenceId = referenceId
-                            
-                            if (referenceId == nil) {
-                                activeReferenceId = self.getReferenceId(handle: handle)
-                                if (activeReferenceId == nil) {
+                    return self.bleManager.getServicesFromDevice()
+                }
+                .then{ services -> Promise<Void> in
+                    if getServiceFromList(services, CSServices.SetupService) == nil {
+                        // setup mode, handle the setup encryption.
+                        return self.setup.handleSetupPhaseEncryption()
+                    }
+                    else {
+                        // operation mode (or dfu mode), setup the session nonce.
+                        return Promise<Void> {seal in
+                            if (self.settings.isEncryptionEnabled()) {
+                                // we have to validate if the referenceId is valid here, otherwise we cannot do encryption
+                                var activeReferenceId = referenceId
+                                
+                                if (referenceId == nil) {
+                                    activeReferenceId = self.getReferenceId(handle: handle)
+                                    if (activeReferenceId == nil) {
+                                        return seal.reject(BluenetError.INVALID_SESSION_REFERENCE_ID)
+                                    }
+                                }
+                                
+                                if (self.settings.setSessionId(referenceId: activeReferenceId!) == false) {
                                     return seal.reject(BluenetError.INVALID_SESSION_REFERENCE_ID)
                                 }
+                                
+                                self.control.getAndSetSessionNonce()
+                                    .done{_ -> Void in
+                                        seal.fulfill(())
+                                    }
+                                    .catch{err in seal.reject(err)}
                             }
-                            
-                            if (self.settings.setSessionId(referenceId: activeReferenceId!) == false) {
-                                return seal.reject(BluenetError.INVALID_SESSION_REFERENCE_ID)
+                            else {
+                                seal.fulfill(())
                             }
-                            
-                            self.control.getAndSetSessionNonce()
-                                .done{_ -> Void in
-                                    seal.fulfill(())
-                                }
-                                .catch{err in seal.reject(err)}
-                        }
-                        else {
-                            seal.fulfill(())
                         }
                     }
                 };

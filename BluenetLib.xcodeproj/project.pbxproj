@@ -12,6 +12,7 @@
 		FA1F799F21A328CF00E05F31 /* Watch.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1F799E21A328CF00E05F31 /* Watch.swift */; };
 		FA225EF321359C7900549058 /* CrownstoneContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA225EF221359C7900549058 /* CrownstoneContainer.swift */; };
 		FA2261C11E55A7B9001D0262 /* DeviceHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA2261C01E55A7B9001D0262 /* DeviceHandler.swift */; };
+		FA29280522C110BD004ABB5E /* BleUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA29280422C110BD004ABB5E /* BleUtil.swift */; };
 		FA2D0F6E1E1BFD88006A8260 /* iOSDFULibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA2D0F6D1E1BFD88006A8260 /* iOSDFULibrary.framework */; };
 		FA2DCB681DD0C99300D5A893 /* BluenetLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA3C18791CBBDA6B00A11CF7 /* BluenetLib.framework */; };
 		FA3FC25B1ED3499C00DD2F76 /* StateHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3FC25A1ED3499C00DD2F76 /* StateHandler.swift */; };
@@ -172,6 +173,7 @@
 		FA1F799E21A328CF00E05F31 /* Watch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Watch.swift; sourceTree = "<group>"; };
 		FA225EF221359C7900549058 /* CrownstoneContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrownstoneContainer.swift; sourceTree = "<group>"; };
 		FA2261C01E55A7B9001D0262 /* DeviceHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceHandler.swift; sourceTree = "<group>"; };
+		FA29280422C110BD004ABB5E /* BleUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleUtil.swift; sourceTree = "<group>"; };
 		FA2D0F6D1E1BFD88006A8260 /* iOSDFULibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iOSDFULibrary.framework; path = Carthage/Build/iOS/iOSDFULibrary.framework; sourceTree = "<group>"; };
 		FA2EEF771DA3FF9A0096B67F /* CryptoSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoSwift.framework; path = Carthage/Build/iOS/CryptoSwift.framework; sourceTree = "<group>"; };
 		FA2EEF781DA3FF9A0096B67F /* PromiseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PromiseKit.framework; path = Carthage/Build/iOS/PromiseKit.framework; sourceTree = "<group>"; };
@@ -451,6 +453,7 @@
 				FA5882B21E38C0F100913AE6 /* NotificationMerger.swift */,
 				FA5882B31E38C0F100913AE6 /* Util.swift */,
 				FAA1381E21B8035800044CF7 /* TimeUtil.swift */,
+				FA29280422C110BD004ABB5E /* BleUtil.swift */,
 			);
 			path = util;
 			sourceTree = "<group>";
@@ -758,6 +761,7 @@
 				FA5882DC1E38C0F100913AE6 /* Util.swift in Sources */,
 				FA3FC25B1ED3499C00DD2F76 /* StateHandler.swift in Sources */,
 				FA5882D81E38C0F100913AE6 /* Conversion.swift in Sources */,
+				FA29280522C110BD004ABB5E /* BleUtil.swift in Sources */,
 				FA5882D91E38C0F100913AE6 /* Eventbus.swift in Sources */,
 				FA5882B91E38C0F100913AE6 /* BleManager.swift in Sources */,
 				FA5882D01E38C0F100913AE6 /* Globals.swift in Sources */,

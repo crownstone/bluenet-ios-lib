@@ -129,8 +129,7 @@ public class SetupHandler {
         self.step = 0
         self.verificationFailed = false
         return Promise<Void> { seal in
-            self.handleSetupPhaseEncryption()
-                .then{(_) -> Promise<Void> in return self.setHighTX()}
+            self.setHighTX()
                 .then{(_) -> Promise<Void> in return self.setupNotifications()}
                 .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 3);  return self.writeCrownstoneId(crownstoneId)}
                 .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 4);  return self.writeAdminKey(adminKey)}
@@ -222,42 +221,39 @@ public class SetupHandler {
     func _fastSetup(characteristicId: String, writeCommand: @escaping voidPromiseCallback) -> Promise<Void> {
         self.step = 0
         return Promise<Void> { seal in
-            self.handleSetupPhaseEncryption()
-                .then{(_) -> Promise<Void> in
-                    self.eventBus.emit("setupProgress", 4);
-                    return self.bleManager.setupNotificationStream(
-                        CSServices.SetupService,
-                        characteristicId: characteristicId,
-                        writeCommand: writeCommand,
-                        resultHandler: {(returnData) -> ProcessType in
-                            if let data = returnData as? [UInt8] {
-                                let packet = ResultPacket(data)
-                                if (packet.valid) {
-                                    let payload = packet.getUInt16Payload()
-                                    if (payload == ResultValue.WAIT_FOR_SUCCESS.rawValue) {
-                                        // thats ok
-                                        self.eventBus.emit("setupProgress", 7)
-                                        return .CONTINUE
-                                    }
-                                    else if (payload == ResultValue.SUCCESS.rawValue) {
-                                        return .FINISHED
-                                    }
-                                    else {
-                                        return .ABORT_ERROR
-                                    }
-                                }
-                                else {
-                                    // stop, something went wrong
-                                    return .ABORT_ERROR
-                                }
+            self.eventBus.emit("setupProgress", 4);
+            self.bleManager.setupNotificationStream(
+                CSServices.SetupService,
+                characteristicId: characteristicId,
+                writeCommand: writeCommand,
+                resultHandler: {(returnData) -> ProcessType in
+                    if let data = returnData as? [UInt8] {
+                        let packet = ResultPacket(data)
+                        if (packet.valid) {
+                            let payload = packet.getUInt16Payload()
+                            if (payload == ResultValue.WAIT_FOR_SUCCESS.rawValue) {
+                                // thats ok
+                                self.eventBus.emit("setupProgress", 7)
+                                return .CONTINUE
+                            }
+                            else if (payload == ResultValue.SUCCESS.rawValue) {
+                                return .FINISHED
                             }
                             else {
-                                // stop, something went wrong
                                 return .ABORT_ERROR
                             }
+                        }
+                        else {
+                            // stop, something went wrong
+                            return .ABORT_ERROR
+                        }
                     }
-                        ,timeout: 3, successIfWriteSuccessful: true)
-                }
+                    else {
+                        // stop, something went wrong
+                        return .ABORT_ERROR
+                    }
+                },
+                timeout: 3, successIfWriteSuccessful: true)
                 .then{(_) -> Promise<Void> in
                     LOG.info("BLUENET_LIB: SetupCommand Finished, disconnecting")
                     self.eventBus.emit("setupProgress", 11)
@@ -390,10 +386,9 @@ public class SetupHandler {
         let switchOn  = ControlPacketsGenerator.getSwitchStatePacket(1)
         let switchOff = ControlPacketsGenerator.getSwitchStatePacket(0)
         return Promise<Void> { seal in
-            self.handleSetupPhaseEncryption()
-                .then{ self._writeSetupControlPacket(switchOn) }
+            _writeSetupControlPacket(bleManager: self.bleManager, switchOn)
                 .then{ self.bleManager.wait(seconds: 1) }
-                .then{ self._writeSetupControlPacket(switchOff) }
+                .then{ _writeSetupControlPacket(bleManager: self.bleManager, switchOff) }
                 .done{
                     _ = self.bleManager.disconnect();
                     self.bleManager.settings.exitSetup();
@@ -414,23 +409,20 @@ public class SetupHandler {
      * This will handle the factory reset during setup mode.
      */
     public func factoryReset() -> Promise<Void> {
-        return self.handleSetupPhaseEncryption()
-            .then{(_) -> Promise<Void> in return self._factoryReset() }
-            .done{(_) -> Void in
-                _ = self.bleManager.disconnect()
-        }
+        return self._factoryReset()
+            .done{ (_) -> Void in _ = self.bleManager.disconnect() }
     }
     
     public func _factoryReset() -> Promise<Void> {
         LOG.info("factoryReset in setup")
         let packet = ControlPacket(type: .factory_RESET).getPacket()
-        return self._writeSetupControlPacket(packet)
+        return _writeSetupControlPacket(bleManager: self.bleManager, packet)
     }
     
     public func setHighTX() -> Promise<Void> {
         LOG.info("setHighTX")
         let packet = ControlPacket(type: .increase_TX).getPacket()
-        return self._writeSetupControlPacket(packet)
+        return _writeSetupControlPacket(bleManager: self.bleManager, packet)
     }
     public func writeCrownstoneId(_ id: UInt16) -> Promise<Void> {
         LOG.info("writeCrownstoneId")
@@ -467,7 +459,7 @@ public class SetupHandler {
     public func finalizeSetup() -> Promise<Void> {
         LOG.info("finalizeSetup")
         let packet = ControlPacket(type: .validate_SETUP).getPacket()
-        return self._writeSetupControlPacket(packet)
+        return _writeSetupControlPacket(bleManager: self.bleManager, packet)
     }
     
     func setupNotifications() -> Promise<Void> {
@@ -602,35 +594,7 @@ public class SetupHandler {
         return match
     }
     
-    func _writeSetupControlPacket(_ packet: [UInt8]) -> Promise<Void> {
-        return self.bleManager.getCharacteristicsFromDevice(CSServices.SetupService)
-            .then{(characteristics) -> Promise<Void> in
-                if getCharacteristicFromList(characteristics, SetupCharacteristics.SetupControlV2) != nil {
-                    return self.bleManager.writeToCharacteristic(
-                        CSServices.SetupService,
-                        characteristicId: SetupCharacteristics.SetupControlV2,
-                        data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-                        type: CBCharacteristicWriteType.withResponse
-                    )
-                }
-                else if getCharacteristicFromList(characteristics, SetupCharacteristics.SetupControl) != nil {
-                    return self.bleManager.writeToCharacteristic(
-                        CSServices.SetupService,
-                        characteristicId: SetupCharacteristics.SetupControl,
-                        data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-                        type: CBCharacteristicWriteType.withResponse
-                    )
-                }
-                else {
-                    return self.bleManager.writeToCharacteristic(
-                        CSServices.SetupService,
-                        characteristicId: SetupCharacteristics.Control,
-                        data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-                        type: CBCharacteristicWriteType.withResponse
-                    )
-                }
-        }
-    }
+    
     
     
 }

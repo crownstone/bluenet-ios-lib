@@ -520,16 +520,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             }
         }
     }
-    
-    func _getServiceFromList(_ list:[CBService], _ uuid: String) -> CBService? {
-        let matchString = uuid.uppercased()
-        for service in list {
-            if (service.uuid.uuidString == matchString) {
-                return service
-            }
-        }
-        return nil;
-    }
+
     
     public func getCharacteristicsFromDevice(_ serviceId: String) -> Promise<[CBCharacteristic]> {
         return Promise<[CBCharacteristic]> { seal in
@@ -539,7 +530,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 self.getServicesFromDevice()
                     // then get all characteristics from connected device (is cached if we already know it)
                     .then {(services: [CBService]) -> Promise<[CBCharacteristic]> in // get characteristics
-                        if let service = self._getServiceFromList(services, serviceId) {
+                        if let service = getServiceFromList(services, serviceId) {
                             return self.getCharacteristicsFromDevice(service)
                         }
                         else {
@@ -590,7 +581,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 self.getServicesFromDevice()
                     // then get all characteristics from connected device (is cached if we already know it)
                     .then{(services: [CBService]) -> Promise<[CBCharacteristic]> in
-                        if let service = self._getServiceFromList(services, serviceId) {
+                        if let service = getServiceFromList(services, serviceId) {
                             return self.getCharacteristicsFromDevice(service)
                         }
                         else {

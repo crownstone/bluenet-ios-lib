@@ -178,6 +178,10 @@ public class ControlHandler {
             }
     }
     
+    
+    /**
+     State is a number: 0 or 1
+     */
     public func switchRelay(_ state: UInt8) -> Promise<Void> {
         LOG.info("BLUENET_LIB: switching relay to \(state)")
         return self._writeControlPacket(ControlPacketsGenerator.getRelaySwitchPacket(state))
@@ -206,6 +210,10 @@ public class ControlHandler {
         }
     }
     
+    
+    /**
+    State is a number between 0 and 1
+    */
     public func switchPWM(_ state: Float) -> Promise<Void> {
         LOG.info("BLUENET_LIB: switching PWM to \(state)")
         return self._writeControlPacket(ControlPacketsGenerator.getPwmSwitchPacket(state))
@@ -311,12 +319,20 @@ public class ControlHandler {
     }
 
     func _writeControlPacket(_ packet: [UInt8]) -> Promise<Void> {
-        return self.bleManager.writeToCharacteristic(
-            CSServices.CrownstoneService,
-            characteristicId: CrownstoneCharacteristics.Control,
-            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-            type: CBCharacteristicWriteType.withResponse
-        )
+        return self.bleManager.getServicesFromDevice()
+            .then{ services -> Promise<Void> in
+                if getServiceFromList(services, CSServices.SetupService) == nil {
+                    return _writeSetupControlPacket(bleManager: self.bleManager, packet)
+                }
+                else {
+                    return self.bleManager.writeToCharacteristic(
+                        CSServices.CrownstoneService,
+                        characteristicId: CrownstoneCharacteristics.Control,
+                        data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                        type: CBCharacteristicWriteType.withResponse
+                    )
+                }
+            }
     }
     
     
