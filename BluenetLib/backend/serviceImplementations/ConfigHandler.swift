@@ -139,45 +139,67 @@ public class ConfigHandler {
     }
     
     func _writeToConfig(packet: [UInt8]) -> Promise<Void> {
-        return self.bleManager.writeToCharacteristic(
-            CSServices.CrownstoneService,
-            characteristicId: CrownstoneCharacteristics.ConfigControl,
-            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-            type: CBCharacteristicWriteType.withResponse
-        )
+        return self.bleManager.getServicesFromDevice()
+            .then{ services -> Promise<Void> in
+                if getServiceFromList(services, CSServices.SetupService) == nil {
+                    return self.bleManager.writeToCharacteristic(
+                        CSServices.SetupService,
+                        characteristicId: SetupCharacteristics.ConfigControl,
+                        data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                        type: CBCharacteristicWriteType.withResponse
+                    )
+                }
+                else {
+                    return self.bleManager.writeToCharacteristic(
+                        CSServices.CrownstoneService,
+                        characteristicId: CrownstoneCharacteristics.ConfigControl,
+                        data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                        type: CBCharacteristicWriteType.withResponse
+                    )
+                }
+        }
+        
+        
+        
     }
     
     
     public func _getConfig<T>(_ config : ConfigurationType) -> Promise<T> {
-        return Promise<T> { seal in
-            let writeCommand : voidPromiseCallback = { 
-                return self.bleManager.writeToCharacteristic(
-                    CSServices.CrownstoneService,
-                    characteristicId: CrownstoneCharacteristics.ConfigControl,
-                    data: ReadConfigPacket(type: config).getNSData(),
-                    type: CBCharacteristicWriteType.withResponse);
-            }
-            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ConfigRead, writeCommand: writeCommand)
-                .done{ data -> Void in
-                    var validData = [UInt8]()
-                    if (data.count > 3) {
-                        for i in (4...data.count - 1) {
-                            validData.append(data[i])
-                        }
-                        
-                        do {
-                            let result : T = try Convert(validData)
-                            seal.fulfill(result)
-                        }
-                        catch let err {
-                            seal.reject(err)
-                        }
-                    }
-                    else {
-                        seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
-                    }
+        return self.bleManager.getServicesFromDevice()
+            .then{ services -> Promise<T> in
+                var service = CSServices.CrownstoneService;
+                var characteristic = CrownstoneCharacteristics.ConfigRead
+                if getServiceFromList(services, CSServices.SetupService) == nil {
+                    service = CSServices.SetupService;
+                    characteristic = SetupCharacteristics.ConfigRead
                 }
-                .catch{ err in seal.reject(err) }
+            
+                return Promise<T> { seal in
+                    let writeCommand : voidPromiseCallback = {
+                        return self._writeToConfig(packet: ReadConfigPacket(type: config).getPacket())
+                    }
+                    self.bleManager.setupSingleNotification(service, characteristicId: characteristic, writeCommand: writeCommand)
+                        .done{ data -> Void in
+                            var validData = [UInt8]()
+                            if (data.count > 3) {
+                                for i in (4...data.count - 1) {
+                                    validData.append(data[i])
+                                }
+                                
+                                do {
+                                    let result : T = try Convert(validData)
+                                    seal.fulfill(result)
+                                }
+                                catch let err {
+                                    seal.reject(err)
+                                }
+                            }
+                            else {
+                                seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
+                            }
+                        }
+                        .catch{ err in seal.reject(err) }
+                }
         }
     }
 
