@@ -321,7 +321,7 @@ public class ControlHandler {
     func _writeControlPacket(_ packet: [UInt8]) -> Promise<Void> {
         return self.bleManager.getServicesFromDevice()
             .then{ services -> Promise<Void> in
-                if getServiceFromList(services, CSServices.SetupService) == nil {
+                if getServiceFromList(services, CSServices.SetupService) != nil {
                     return _writeSetupControlPacket(bleManager: self.bleManager, packet)
                 }
                 else {

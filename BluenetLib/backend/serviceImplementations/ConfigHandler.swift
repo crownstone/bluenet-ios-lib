@@ -141,7 +141,7 @@ public class ConfigHandler {
     func _writeToConfig(packet: [UInt8]) -> Promise<Void> {
         return self.bleManager.getServicesFromDevice()
             .then{ services -> Promise<Void> in
-                if getServiceFromList(services, CSServices.SetupService) == nil {
+                if getServiceFromList(services, CSServices.SetupService) != nil {
                     return self.bleManager.writeToCharacteristic(
                         CSServices.SetupService,
                         characteristicId: SetupCharacteristics.ConfigControl,
@@ -169,7 +169,7 @@ public class ConfigHandler {
             .then{ services -> Promise<T> in
                 var service = CSServices.CrownstoneService;
                 var characteristic = CrownstoneCharacteristics.ConfigRead
-                if getServiceFromList(services, CSServices.SetupService) == nil {
+                if getServiceFromList(services, CSServices.SetupService) != nil {
                     service = CSServices.SetupService;
                     characteristic = SetupCharacteristics.ConfigRead
                 }

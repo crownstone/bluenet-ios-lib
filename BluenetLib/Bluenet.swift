@@ -337,7 +337,7 @@ public class Bluenet {
                     return self.bleManager.getServicesFromDevice()
                 }
                 .then{ services -> Promise<Void> in
-                    if getServiceFromList(services, CSServices.SetupService) == nil {
+                    if getServiceFromList(services, CSServices.SetupService) != nil {
                         // setup mode, handle the setup encryption.
                         return self.setup.handleSetupPhaseEncryption()
                     }
