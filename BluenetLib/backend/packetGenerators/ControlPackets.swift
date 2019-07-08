@@ -131,7 +131,7 @@ public class ControlPacketsGenerator {
     
     public static func getSetupPacketV2(
         crownstoneId: UInt8, sphereId: UInt8,
-        adminKey: String, memberKey: String, basicKey: String, serviceDataKey: String, meshNetworkKey: String, meshApplicationKey: String, meshDeviceKey: String,
+        adminKey: String, memberKey: String, basicKey: String, localizationKey: String, serviceDataKey: String, meshNetworkKey: String, meshApplicationKey: String, meshDeviceKey: String,
         ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16
         ) -> [UInt8] {
         var data : [UInt8] = []
@@ -142,6 +142,7 @@ public class ControlPacketsGenerator {
         data += Conversion.ascii_or_hex_string_to_16_byte_array(memberKey)
         data += Conversion.ascii_or_hex_string_to_16_byte_array(basicKey)
         data += Conversion.ascii_or_hex_string_to_16_byte_array(serviceDataKey)
+        data += Conversion.ascii_or_hex_string_to_16_byte_array(localizationKey)
         
         data += Conversion.ascii_or_hex_string_to_16_byte_array(meshDeviceKey)
         data += Conversion.ascii_or_hex_string_to_16_byte_array(meshApplicationKey)

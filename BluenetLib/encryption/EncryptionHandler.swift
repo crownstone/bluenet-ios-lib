@@ -306,16 +306,4 @@ class EncryptionHandler {
         }
         return IV
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    static func encryptRC5(_ payload: UInt32, key: [UInt8]) {
-        //
-    }
 }

@@ -146,7 +146,7 @@ public class Advertisement {
     
     public func parse() {
         if (serviceDataAvailable && self.scanResponse != nil) {
-            self.scanResponse!.parseWithoutEncrypting()
+            self.scanResponse!.parseWithoutDecrypting()
         }
     }
     

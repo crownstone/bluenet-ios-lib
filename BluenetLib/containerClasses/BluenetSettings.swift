@@ -162,6 +162,16 @@ public class BluenetSettings {
     }
     
     
+    func getLocalizationKey(referenceId: String) -> [UInt8]? {
+        if self.keySets[referenceId] != nil {
+            return self.keySets[referenceId]!.localizationKey
+        }
+        else {
+            return nil
+        }
+    }
+    
+    
     func _checkSessionId() -> Bool {
         if self.sessionReferenceId == nil {
             return false

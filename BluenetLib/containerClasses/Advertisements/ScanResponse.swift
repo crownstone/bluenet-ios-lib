@@ -62,7 +62,7 @@ public class ScanResponsePacket {
     var validData = false
     public var dataReadyForUse = false // decryption is successful
     
-    init(_ data: [UInt8], serviceUUID: CBUUID? = nil) {
+    init(_ data: [UInt8], serviceUUID: CBUUID? = nil) {        
         self.data = data
         self.serviceUUID = serviceUUID
         
@@ -108,7 +108,7 @@ public class ScanResponsePacket {
     }
     
     
-    func parseWithoutEncrypting() {
+    func parseWithoutDecrypting() {
         if self.data != nil {
             self.parse(decryptedData: Array(self.data![self.encryptedDataStartIndex...]))
         }

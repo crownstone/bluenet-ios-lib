@@ -468,7 +468,7 @@ class PeripheralStateManager {
             return
         }
         
-        if let basicKey = self.settings.getBasicKey(referenceId: referenceIdOfBuffer) {
+        if let localizationKey = self.settings.getLocalizationKey(referenceId: referenceIdOfBuffer) {
             let packet = bufferToBroadcast.getPacket(validationNonce: NSNumber(value:time).uint32Value)
             do {
                 let otherUUIDs = try BroadcastProtocol.getUInt16ServiceNumbers(
@@ -476,7 +476,7 @@ class PeripheralStateManager {
                     devicePreferences: self.settings.devicePreferences,
                     protocolVersion: 1,
                     accessLevel: self.settings.userLevel,
-                    key: basicKey
+                    key: localizationKey
                 )
                 
                 var nonce = [UInt8]()

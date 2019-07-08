@@ -13,12 +13,13 @@ public class KeySet {
     public var adminKey       : [UInt8]? = nil
     public var memberKey      : [UInt8]? = nil
     public var basicKey       : [UInt8]? = nil
+    public var localizationKey: [UInt8]? = nil
     public var serviceDataKey : [UInt8]? = nil
     public var initializedKeys = false
     public var referenceId : String = "unknown"
     public var userLevel : UserLevel = .unknown
     
-    public init(adminKey: String?, memberKey: String?, basicKey: String?, serviceDataKey: String?, referenceId: String) {
+    public init(adminKey: String?, memberKey: String?, basicKey: String?, localizationKey: String?, serviceDataKey: String?, referenceId: String) {
         self.referenceId = referenceId
         
         if (adminKey != nil) {
@@ -38,6 +39,12 @@ public class KeySet {
         }
         else {
             self.basicKey = nil;
+        }
+        if (localizationKey != nil) {
+            self.localizationKey = Conversion.ascii_or_hex_string_to_16_byte_array(localizationKey!)
+        }
+        else {
+            self.localizationKey = nil;
         }
         if (serviceDataKey != nil) {
             self.serviceDataKey = Conversion.ascii_or_hex_string_to_16_byte_array(serviceDataKey!)
