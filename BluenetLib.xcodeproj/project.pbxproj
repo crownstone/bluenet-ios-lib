@@ -154,6 +154,7 @@
 		FAD2AFD72189F85D00458520 /* BluenetWatch.h in Headers */ = {isa = PBXBuildFile; fileRef = FAD2AFD52189F85D00458520 /* BluenetWatch.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FADA183D21CA7E6C0066DF9F /* RC5.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADA183C21CA7E6C0066DF9F /* RC5.swift */; };
 		FADA183E21CA7E6C0066DF9F /* RC5.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADA183C21CA7E6C0066DF9F /* RC5.swift */; };
+		FADB742122D3798100DCB92B /* BleUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA29280422C110BD004ABB5E /* BleUtil.swift */; };
 		FAE862621CF4B3830027539D /* Cartfile in Resources */ = {isa = PBXBuildFile; fileRef = FAE862611CF4B3830027539D /* Cartfile */; };
 /* End PBXBuildFile section */
 
@@ -847,6 +848,7 @@
 				FA94D04521A6E63000AB8331 /* EncryptionHandler.swift in Sources */,
 				FA94D04621A6E63000AB8331 /* BlePackets.swift in Sources */,
 				FADA183E21CA7E6C0066DF9F /* RC5.swift in Sources */,
+				FADB742122D3798100DCB92B /* BleUtil.swift in Sources */,
 				FA94D04721A6E63000AB8331 /* MeshPackets.swift in Sources */,
 				FA94D04821A6E63000AB8331 /* BluenetTypes.swift in Sources */,
 				FA94D04921A6E63000AB8331 /* Characteristics.swift in Sources */,
