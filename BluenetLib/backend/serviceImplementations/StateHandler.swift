@@ -43,6 +43,10 @@ public class StateHandler {
         return self._getState(StateType.switch_STATE)
     }
     
+    public func getResetCounter() -> Promise<UInt16> {
+        return self._getState(StateType.reset_COUNTER)
+    }
+    
     public func getSwitchStateFloat() -> Promise<Float> {
         return Promise<Float> { seal in
             self.getSwitchState()
