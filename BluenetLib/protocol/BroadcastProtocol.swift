@@ -186,52 +186,61 @@ public class BroadcastProtocol {
         payload.b += block << 22
         payload.b += block >> 20
         
-        var str = ""
-        for i in (0..<64).reversed() {
-            str += String(block >> i & 0x01)
-            if (i == 22) {
-                str += " "
-            }
-        }
         
-        str = ""
-        for i in (0..<64).reversed() {
-            str += String(payload.a >> i & 0x01)
-            if (i == 22) {
-                str += " "
-            }
-        }
-
-        str = ""
-        for i in (0..<64).reversed() {
-             str += String(payload.b >> i & 0x01)
-            if (i == 40) {
-                str += " "
-            }
-        }
+        // print the entire sequence as bits
+//        var str = ""
+//        for i in (0..<64).reversed() {
+//            str += String(block >> i & 0x01)
+//            if (i == 22) {
+//                str += " "
+//            }
+//        }
+//        print("part1", str)
+//
+//
+//        str = ""
+//        for i in (0..<64).reversed() {
+//            str += String(payload.a >> i & 0x01)
+//            if (i == 22) {
+//                str += " "
+//            }
+//        }
+//
+//        print("part2", str)
+//
+//        str = ""
+//        for i in (0..<64).reversed() {
+//             str += String(payload.b >> i & 0x01)
+//            if (i == 64-20) {
+//                str += " "
+//            }
+//        }
+//
+//        print("part3", str)
         
     
         
-        var uint8Buf = [Bool]()
-        str = "0x01"
-        for i in (0..<64).reversed() {
-            uint8Buf.append(payload.a >> i & 0x01 == 1)
-            if (uint8Buf.count == 8) {
-                str += Conversion.uint8_to_hex_string(Conversion.bit_array_to_uint8(uint8Buf.reversed()))
-                uint8Buf.removeAll()
-            }
-        }
         
-
-        for i in (0..<64).reversed() {
-            uint8Buf.append(payload.b >> i & 0x01 == 1)
-            if (uint8Buf.count == 8) {
-                str += Conversion.uint8_to_hex_string(Conversion.bit_array_to_uint8(uint8Buf.reversed()))
-                uint8Buf.removeAll()
-            }
-        }
-
-        
+        // printing the entire payload as a hex string
+//        var uint8Buf = [Bool]()
+//        str = "0x01"
+//        for i in (0..<64).reversed() {
+//            uint8Buf.append(payload.a >> i & 0x01 == 1)
+//            if (uint8Buf.count == 8) {
+//                str += Conversion.uint8_to_hex_string(Conversion.bit_array_to_uint8(uint8Buf.reversed()))
+//                uint8Buf.removeAll()
+//            }
+//        }
+//
+//
+//        for i in (0..<64).reversed() {
+//            uint8Buf.append(payload.b >> i & 0x01 == 1)
+//            if (uint8Buf.count == 8) {
+//                str += Conversion.uint8_to_hex_string(Conversion.bit_array_to_uint8(uint8Buf.reversed()))
+//                uint8Buf.removeAll()
+//            }
+//        }
+//        print("Payload as HEX string", str)
         var services = [CBUUID]()
 
         

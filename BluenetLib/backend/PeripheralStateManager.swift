@@ -273,7 +273,7 @@ class PeripheralStateManager {
         }
         
         if let referenceId = self.settings.locationState.referenceId {
-            if let key = self.settings.getBasicKey(referenceId: referenceId) {
+            if let key = self.settings.getLocalizationKey(referenceId: referenceId) {
                 let uuids = BroadcastProtocol.getServicesForBackgroundBroadcast(locationState: self.settings.locationState, devicePreferences: self.settings.devicePreferences, key: key)
                 self.blePeripheralManager.startAdvertisingArray(uuids: uuids)
             }

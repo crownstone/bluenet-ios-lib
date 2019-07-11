@@ -51,6 +51,17 @@ class EncryptionTests: XCTestCase {
     
     
     
+    func testBackground() {
+        if let referenceId = self.settings.locationState.referenceId {
+            if let key = self.settings.getLocalizationKey(referenceId: referenceId) {
+                let uuids = BroadcastProtocol.getServicesForBackgroundBroadcast(locationState: self.settings.locationState, devicePreferences: self.settings.devicePreferences, key: key)
+                
+                print("UUIDs", uuids)
+            }
+        }
+        
+    }
+    
     func testBart() {
         let exp = expectation(description: "Example")
         var elements : [BroadcastElement] = []
