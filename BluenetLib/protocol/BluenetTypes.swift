@@ -163,6 +163,7 @@ public enum DeviceType : UInt8 {
     case guidestone = 2
     case builtin = 3
     case crownstoneUSB = 4
+    case builtinOne = 5
 }
 
 
