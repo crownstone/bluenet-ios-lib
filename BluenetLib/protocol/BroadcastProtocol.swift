@@ -45,7 +45,7 @@ public class BroadcastProtocol {
         guard (locationState.locationId != nil   && locationState.locationId!  < 64 || locationState.locationId   == nil) else {
             throw BluenetError.INVALID_BROADCAST_LOCATION_ID
         }
-        guard (locationState.profileIndex != nil && locationState.profileIndex! < 4 || locationState.profileIndex == nil) else {
+        guard (locationState.profileIndex != nil && locationState.profileIndex! < 8 || locationState.profileIndex == nil) else {
             throw BluenetError.INVALID_BROADCAST_PROFILE_INDEX
         }
         

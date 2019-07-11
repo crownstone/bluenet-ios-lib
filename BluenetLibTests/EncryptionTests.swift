@@ -22,28 +22,171 @@ class EncryptionTests: XCTestCase {
         settings = BluenetSettings()
         
         settings.loadKeySets(encryptionEnabled: true, keySets: [
-            KeySet(adminKey: "myKeyTheBestKey1",
-                   memberKey: "myKeyTheBestKey2",
-                   basicKey: "myKeyTheBestKey3",
-                   serviceDataKey: "myKeyTheBestKey3",
+            KeySet(adminKey: "adminKeyForCrown",
+                   memberKey: "memberKeyForHome",
+                   basicKey: "guestKeyForOther",
+                   localizationKey: "localizationKeyX",
+                   serviceDataKey: "myServiceDataKey",
                    referenceId: "test")
             ])
         
         settings.setLocationState(
-            sphereUID: 1,
-            locationId: 0,
-            profileIndex: 1,
+            sphereUID: 234,
+            locationId: 60,
+            profileIndex: 6,
             referenceId: "test"
         )
         settings.setDevicePreferences(
             rssiOffset: -10,
-            tapToToggle: false,
+            tapToToggle: true,
             useBackgroundBroadcasts:true,
             useBaseBroadcasts: true
         )
         
         
         BLUENET_ENCRYPTION_TESTING = true
+        
+    }
+    
+    
+    
+    
+    func testBart() {
+        let exp = expectation(description: "Example")
+        var elements : [BroadcastElement] = []
+
+        let promise = Promise<Void> { seal in
+        
+            elements.append(
+                BroadcastElement(
+                    referenceId:"test",
+                    type: .multiSwitch,
+                    packet: BroadcastStone_SwitchPacket(crownstoneId: 7, state: 100).getPacket(),
+                    seal: seal,
+                    target: 7
+                )
+            )
+            elements.append(
+                BroadcastElement(
+                    referenceId:"test",
+                    type: .multiSwitch,
+                    packet: BroadcastStone_SwitchPacket(crownstoneId: 6, state: 100).getPacket(),
+                    seal: seal,
+                    target: 6
+                )
+            )
+            elements.append(
+                BroadcastElement(
+                    referenceId:"test",
+                    type: .multiSwitch,
+                    packet: BroadcastStone_SwitchPacket(crownstoneId: 5, state: 100).getPacket(),
+                    seal: seal,
+                    target: 5
+                )
+            )
+            elements.append(
+                BroadcastElement(
+                    referenceId:"test",
+                    type: .multiSwitch,
+                    packet: BroadcastStone_SwitchPacket(crownstoneId: 4, state: 100).getPacket(),
+                    seal: seal,
+                    target: 4
+                )
+            )
+            elements.append(
+                BroadcastElement(
+                    referenceId:"test",
+                    type: .multiSwitch,
+                    packet: BroadcastStone_SwitchPacket(crownstoneId: 3, state: 100).getPacket(),
+                    seal: seal,
+                    target: 3
+                )
+            )
+            
+            
+            print("elements", elements)
+            
+            let broadcastType = elements[0].type
+            let broadcastReferenceId = elements[0].referenceId
+            
+            // create a buffer that will be broadcast
+            let bufferToBroadcast = BroadcastBuffer(referenceId: broadcastReferenceId, type: broadcastType)
+            
+            // singular elements will immediately mark the buffer as full.
+            for element in elements {
+                if (bufferToBroadcast.accepts(element)) {
+                    bufferToBroadcast.loadElement(element)
+                    // if the buffer is now full, stop the loop.
+                    if (bufferToBroadcast.isFull()) {
+                        break
+                    }
+                }
+            }
+            
+            let referenceIdOfBuffer = bufferToBroadcast.referenceId
+            var time = 0
+            if (settings.setSessionId(referenceId: referenceIdOfBuffer) == false) {
+                print("Error in _broadcastBuffer Invalid referenceId")
+                return
+            }
+            
+            if let localizationKey = self.settings.getLocalizationKey(referenceId: referenceIdOfBuffer) {
+                let packet = bufferToBroadcast.getPacket(validationNonce: NSNumber(value:time).uint32Value)
+                do {
+                    print("generating short uuids")
+                    let otherUUIDs = try BroadcastProtocol.getUInt16ServiceNumbers(
+                        locationState: self.settings.locationState,
+                        devicePreferences: self.settings.devicePreferences,
+                        protocolVersion: 0,
+                        accessLevel: self.settings.userLevel,
+                        key: localizationKey
+                    )
+                    
+                    var nonce = [UInt8]()
+                    for uuidNum in otherUUIDs {
+                        nonce += Conversion.uint16_to_uint8_array(uuidNum)
+                    }
+                    
+                    do {
+                        print("unencyptedUUID", packet, "nonce",nonce)
+                        let encryptedUUID = try BroadcastProtocol.getEncryptedServiceUUID(referenceId: referenceIdOfBuffer, settings: self.settings, data: packet, nonce: nonce)
+                        print("encryptedUUID", encryptedUUID)
+                        var broadcastUUIDs = BroadcastProtocol.convertUInt16ListToUUID(otherUUIDs)
+                        broadcastUUIDs.append(encryptedUUID)
+                        print(broadcastUUIDs)
+                    }
+                    catch let err {
+                        print("Could not get uint16 ids", err)
+                    }
+                }
+                catch let err {
+                    print("Could not get encrypted service uuid", err)
+                }
+            }
+            
+            seal.fulfill(())
+            exp.fulfill()
+        }
+        
+        waitForExpectations(timeout: 1, handler: nil)
+        
+    }
+    
+    
+    
+    
+    
+    func testRC5() {
+        let key = Conversion.ascii_or_hex_string_to_16_byte_array("localizationKeyX")
+        
+        print("key", key)
+        let expandedKey = RC5ExpandKey(key: key)
+        print("expandedKey", expandedKey)
+        
+        let encrypted = RC5Encrypt(input: 123456789, S: expandedKey);
+        print("encrypted", encrypted);
+        
+        
         
     }
     

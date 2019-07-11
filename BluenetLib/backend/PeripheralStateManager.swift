@@ -474,7 +474,7 @@ class PeripheralStateManager {
                 let otherUUIDs = try BroadcastProtocol.getUInt16ServiceNumbers(
                     locationState: self.settings.locationState,
                     devicePreferences: self.settings.devicePreferences,
-                    protocolVersion: 1,
+                    protocolVersion: 0,
                     accessLevel: self.settings.userLevel,
                     key: localizationKey
                 )
