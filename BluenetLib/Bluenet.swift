@@ -139,8 +139,8 @@ public class Bluenet {
         self.peripheralStateManager.setBackgroundOperations(newBackgroundState: newBackgroundState)
     }
     
-    public func setLocationState(sphereUID: UInt8, locationId: UInt8, profileIndex: UInt8, referenceId: String) {
-        self.settings.setLocationState(sphereUID: sphereUID, locationId: locationId, profileIndex: profileIndex, referenceId: referenceId)
+    public func setLocationState(sphereUID: UInt8, locationId: UInt8, profileIndex: UInt8, deviceToken: UInt8, referenceId: String) {
+        self.settings.setLocationState(sphereUID: sphereUID, locationId: locationId, profileIndex: profileIndex, deviceToken: deviceToken, referenceId: referenceId)
         self.eventBus.emit("newLocationState", true)
     }
     

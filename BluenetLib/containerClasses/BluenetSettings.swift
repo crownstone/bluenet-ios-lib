@@ -9,16 +9,22 @@
 import Foundation
 
 public struct LocationState {
-    public var sphereUID    : UInt8? = nil
-    public var locationId   : UInt8? = nil
-    public var profileIndex : UInt8? = nil
+    public var sphereUID    : UInt8 = 0
+    public var locationId   : UInt8 = 0
+    public var profileIndex : UInt8 = 0
+    public var deviceToken  : UInt8 = 0
     public var referenceId  : String? = nil
     
-    public init(sphereUID:UInt8? = nil,locationId:UInt8? = nil,profileIndex:UInt8? = nil,referenceId:String? = nil) {
-        self.sphereUID = sphereUID
-        self.locationId = locationId
-        self.profileIndex = profileIndex
-        self.referenceId = referenceId
+    public init(sphereUID: UInt8, locationId: UInt8, profileIndex: UInt8 , deviceToken: UInt8, referenceId: String) {
+        self.sphereUID     = sphereUID
+        self.locationId    = locationId
+        self.profileIndex  = profileIndex
+        self.deviceToken   = deviceToken
+        self.referenceId   = referenceId
+    }
+    
+    public init() {
+        
     }
 }
 
@@ -68,10 +74,11 @@ public class BluenetSettings {
         }
     }
     
-    public func setLocationState(sphereUID: UInt8, locationId: UInt8, profileIndex: UInt8, referenceId: String) {
+    public func setLocationState(sphereUID: UInt8, locationId: UInt8, profileIndex: UInt8, deviceToken: UInt8, referenceId: String) {
         self.locationState.sphereUID = sphereUID
         self.locationState.locationId = locationId
         self.locationState.profileIndex = profileIndex
+        self.locationState.deviceToken = deviceToken
         self.locationState.referenceId = referenceId
     }
     

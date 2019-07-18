@@ -42,10 +42,10 @@ public class BroadcastProtocol {
     
     
     static func getUInt16ServiceNumbers(locationState: LocationState, devicePreferences: DevicePreferences, protocolVersion: NSNumber, accessLevel: UserLevel, key : [UInt8]) throws -> [UInt16]  {
-        guard (locationState.locationId != nil   && locationState.locationId!  < 64 || locationState.locationId   == nil) else {
+        guard (locationState.locationId < 64) else {
             throw BluenetError.INVALID_BROADCAST_LOCATION_ID
         }
-        guard (locationState.profileIndex != nil && locationState.profileIndex! < 8 || locationState.profileIndex == nil) else {
+        guard (locationState.profileIndex < 8) else {
             throw BluenetError.INVALID_BROADCAST_PROFILE_INDEX
         }
         
@@ -53,7 +53,7 @@ public class BroadcastProtocol {
         
         let RC5Component = BroadcastProtocol.getRC5Payload(validationNonce: 0, locationState: locationState, devicePreferences: devicePreferences, key: key)
         result.append(BroadcastProtocol._constructProtocolBlock(protocolVersion, locationState.sphereUID, accessLevel))
-        result.append(BroadcastProtocol._getFirstRC5Block(RC5Component))
+        result.append(BroadcastProtocol._getFirstRC5Block(deviceToken: locationState.deviceToken, RC5: RC5Component))
         result.append(BroadcastProtocol._getSecondRC5Block(RC5Component))
         result.append(BroadcastProtocol._getThirdRC5Block(RC5Component))
         
@@ -85,13 +85,9 @@ public class BroadcastProtocol {
         
         rc5Payload += UInt32(validationNonce) << 16
         
-        if let locationId = locationState.locationId {
-            rc5Payload += (NSNumber(value: locationId).uint32Value & 0x0000003F) << 10
-        }
+        rc5Payload += (NSNumber(value: locationState.locationId).uint32Value & 0x0000003F) << 10
         
-        if let profileIdx = locationState.profileIndex {
-            rc5Payload += (NSNumber(value: profileIdx).uint32Value & 0x00000007) << 7
-        }
+        rc5Payload += (NSNumber(value: locationState.profileIndex).uint32Value & 0x00000007) << 7
         
         rc5Payload += (NSNumber(value: (devicePreferences.rssiOffset / 2) + 8).uint32Value & 0x0000000F) << 3
         
@@ -130,15 +126,18 @@ public class BroadcastProtocol {
     /**
      * TThe first chunk of RC5 data and reserved chunk of public bits
      *
-     * | Index |  Reserved             |  First chunk of RC5Data  |
-     * | 0 1   |  0 0 0 0 0 0 0 0 0 0  |  0 0 0 0                 |
-     * | 2b    |  8b                   |  4b                      |
+     * | Index |  Reserved  |  Device Token     |  First chunk of RC5Data  |
+     * | 0 1   |  0 0       |  0 0 0 0 0 0 0 0  |  0 0 0 0                 |
+     * | 2b    |  2b        |  8b               |  4b                      |
      *
      **/
-    static func _getFirstRC5Block(_ RC5: UInt32) -> UInt16 {
+    static func _getFirstRC5Block(deviceToken: UInt8, RC5: UInt32) -> UInt16 {
         var block : UInt16 = 0;
         
         block += 1 << 14 // place index
+        
+        // place device token
+        block += NSNumber(value: deviceToken).uint16Value << 4
         
         block += NSNumber(value: (RC5 & 0xF0000000) >> 28).uint16Value
         
@@ -288,9 +287,7 @@ public class BroadcastProtocol {
         
         var data : UInt64 = 0
 
-        if let sphereUID = locationState.sphereUID {
-            data += UInt64(sphereUID) << 54
-        }
+        data += UInt64(locationState.sphereUID) << 54
         
         data += UInt64(encryptedBlock) << 22
         
