@@ -85,6 +85,88 @@ public class ConfigHandler {
         return self._writeToConfig(packet: data.getPacket())
     }
     
+    public func getSwitchcraftThreshold() -> Promise<Float> {
+        return self._getConfig(ConfigurationType.SWITCHCRAFT_THRESHOLD)
+    }
+    
+    public func setSwitchcraftThreshold(value: Float) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.SWITCHCRAFT_THRESHOLD, payloadFloat: value)
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
+    public func getMaxChipTemp() -> Promise<Int8> {
+        return self._getConfig(ConfigurationType.max_CHIP_TEMP)
+    }
+    
+    public func setMaxChipTemp(value: Int8) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.max_CHIP_TEMP, payload8: Conversion.int8_to_uint8(value))
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
+    public func getDimmerTempUpThreshold() -> Promise<Float> {
+        return self._getConfig(ConfigurationType.DIMMER_TEMP_UP_VOLTAGE)
+    }
+    
+    public func setDimmerTempUpThreshold(value: Float) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.DIMMER_TEMP_UP_VOLTAGE, payloadFloat: value)
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
+    public func getDimmerTempDownThreshold() -> Promise<Float> {
+        return self._getConfig(ConfigurationType.DIMMER_TEMP_DOWN_VOLTAGE)
+    }
+    
+    public func setDimmerTempDownThreshold(value: Float) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.DIMMER_TEMP_DOWN_VOLTAGE, payloadFloat: value)
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
+    public func getVoltageZero() -> Promise<Int32> {
+        return self._getConfig(ConfigurationType.voltage_ZERO)
+    }
+    
+    public func setVoltageZero(value: Int32) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.voltage_ZERO, payload32: Conversion.int32_to_uint32(value))
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
+    public func getCurrentZero() -> Promise<Int32> {
+        return self._getConfig(ConfigurationType.current_ZERO)
+    }
+    
+    public func setCurrentZero(value: Int32) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.current_ZERO, payload32: Conversion.int32_to_uint32(value))
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
+    public func getPowerZero() -> Promise<Int32> {
+        return self._getConfig(ConfigurationType.power_ZERO)
+    }
+    
+    public func setPowerZero(value: Int32) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.power_ZERO, payload32: Conversion.int32_to_uint32(value))
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
+    public func getVoltageMultiplier() -> Promise<Float> {
+        return self._getConfig(ConfigurationType.voltage_MULTIPLIER)
+    }
+    
+    public func setVoltageMultiplier(value: Float) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.voltage_MULTIPLIER, payloadFloat: value)
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
+    public func getCurrentMultiplier() -> Promise<Float> {
+        return self._getConfig(ConfigurationType.current_MULITPLIER)
+    }
+    
+    public func setCurrentMultiplier(value: Float) -> Promise<Void> {
+        let data = WriteConfigPacket(type: ConfigurationType.current_MULITPLIER, payloadFloat: value)
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
+    
     public func setUartState(_ state: NSNumber) -> Promise<Void> {
         return Promise<Void> { seal in
             if (state == 3 || state == 1 || state == 0) {
@@ -157,10 +239,7 @@ public class ConfigHandler {
                         type: CBCharacteristicWriteType.withResponse
                     )
                 }
-        }
-        
-        
-        
+        }        
     }
     
     

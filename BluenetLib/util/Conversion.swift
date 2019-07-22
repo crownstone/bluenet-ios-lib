@@ -160,6 +160,11 @@ public class Conversion {
         return ns.int32Value
     }
     
+    public static func int32_to_uint32(_ val: Int32) -> UInt32 {
+        let ns = NSNumber(value: val as Int32)
+        return ns.uint32Value
+    }
+    
     public static func uint32_to_uint16_array(_ val: UInt32) -> [UInt16] {
         return [
             UInt16((val >> 0 & 0x0000FFFF)),
@@ -248,7 +253,6 @@ public class Conversion {
     }
     
     public static func uint8_to_int8(_ val: UInt8) -> Int8 {
-        
         let ns = NSNumber(value: val as UInt8)
         return ns.int8Value
     }

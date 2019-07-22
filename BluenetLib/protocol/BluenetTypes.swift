@@ -98,13 +98,19 @@ public enum ConfigurationType : UInt8 {
     case CURRENT_CONSUMPTION_THRESHOLD = 50
     case CURRENT_CONSUMPTION_THRESHOLD_DIMMER = 51
     case DIMMER_TEMP_UP_VOLTAGE = 52
-    case DIMEMR_TEMP_DOWN_VOLTAGE = 53
+    case DIMMER_TEMP_DOWN_VOLTAGE = 53
     case PWM_ALLOWED = 54
     case SWITCH_LOCKED = 55
     case SWITCHCRAFT_ENABLED = 56
     case SWITCHCRAFT_THRESHOLD = 57
     case MESH_CHANNEL = 58
     case UART_ENABLED = 59
+    case DEVICE_NAME = 60
+    case SERVICE_DATA_KEY = 61
+    case MESH_DEVICE_KEY = 62
+    case MESH_APPLICATION_KEY = 63
+    case MESH_NETWORK_KEY = 64
+    case LOCALIZATION_KEY = 65
 }
 
 public enum MeshHandle : UInt8 {

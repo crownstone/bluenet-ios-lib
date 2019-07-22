@@ -87,6 +87,7 @@ class PeripheralStateManager {
     var runningCommandCycle = false // this means there are active commands being broadcasted
     var backgroundEnabled: Bool
     let eventBus : EventBus!
+    var broadcastCounter : UInt8 = 0
     
     var timeOffsetMap = [String: Double]() // track time difference between crownstones and this phone per referenceId
     var timeStoneMap  = [String: Double]() // track time difference between crownstones and this phone per referenceId
@@ -246,6 +247,7 @@ class PeripheralStateManager {
         self._handleDuplicates(incomingElement: element)
         
         self.elements.append(element)
+        self.broadcastCounter = self.broadcastCounter &+ 1
         self.broadcastCommand()
     }
     
@@ -472,6 +474,7 @@ class PeripheralStateManager {
             let packet = bufferToBroadcast.getPacket(validationNonce: NSNumber(value:time).uint32Value)
             do {
                 let otherUUIDs = try BroadcastProtocol.getUInt16ServiceNumbers(
+                    broadcastCounter: self.broadcastCounter,
                     locationState: self.settings.locationState,
                     devicePreferences: self.settings.devicePreferences,
                     protocolVersion: 0,

@@ -41,7 +41,14 @@ public class BroadcastProtocol {
     }
     
     
-    static func getUInt16ServiceNumbers(locationState: LocationState, devicePreferences: DevicePreferences, protocolVersion: NSNumber, accessLevel: UserLevel, key : [UInt8]) throws -> [UInt16]  {
+    static func getUInt16ServiceNumbers(
+        broadcastCounter: UInt8,
+        locationState: LocationState,
+        devicePreferences: DevicePreferences,
+        protocolVersion: NSNumber,
+        accessLevel: UserLevel,
+        key : [UInt8]
+    ) throws -> [UInt16]  {
         guard (locationState.locationId < 64) else {
             throw BluenetError.INVALID_BROADCAST_LOCATION_ID
         }
@@ -51,7 +58,9 @@ public class BroadcastProtocol {
         
         var result = [UInt16]()
         
-        let RC5Component = BroadcastProtocol.getRC5Payload(validationNonce: 0, locationState: locationState, devicePreferences: devicePreferences, key: key)
+        let firstPart = NSNumber(value: broadcastCounter).uint16Value << 8
+        
+        let RC5Component = BroadcastProtocol.getRC5Payload(firstPart: firstPart, locationState: locationState, devicePreferences: devicePreferences, key: key)
         result.append(BroadcastProtocol._constructProtocolBlock(protocolVersion, locationState.sphereUID, accessLevel))
         result.append(BroadcastProtocol._getFirstRC5Block(deviceToken: locationState.deviceToken, RC5: RC5Component))
         result.append(BroadcastProtocol._getSecondRC5Block(RC5Component))
@@ -74,16 +83,18 @@ public class BroadcastProtocol {
     
     /**
      * This is an UInt32 which will be encrypted
+     * | ----------- First Part ---------- |
+     * | Counter         | Reserved        | LocationId  | Profile Index | RSSI Calibration | Flag: t2t enabled | Flag: ignore for behaviour | Flag: reserved |
+     * | 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 | 0 0 0         | 0 0 0 0          | 0                 | 0                          | 0              |
+     * | 8b              | 8b              | 6b          | 3b            | 4b               | 1b                | 1b                         | 1b             |
      *
-     * | Reserved                        | LocationId  | Profile Index | RSSI Calibration | Flag: t2t enabled | Flag: reserved | Flag: reserved |
-     * | 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 | 0 0 0 0 0 0 | 0 0 0         | 0 0 0 0          | 0                 | 0              | 0              |
-     * | 16b                             | 6b          | 3b            | 4b               | 1b                | 1b             | 1b             |
+     * The first part will be a validation nonce in the background.
      *
      **/
-    static func getRC5Payload(validationNonce: UInt16, locationState: LocationState, devicePreferences: DevicePreferences, key: [UInt8]) -> UInt32 {
+    static func getRC5Payload(firstPart: UInt16, locationState: LocationState, devicePreferences: DevicePreferences, key: [UInt8]) -> UInt32 {
         var rc5Payload : UInt32 = 0
         
-        rc5Payload += UInt32(validationNonce) << 16
+        rc5Payload += UInt32(firstPart) << 16
         
         rc5Payload += (NSNumber(value: locationState.locationId).uint32Value & 0x0000003F) << 10
         
@@ -283,7 +294,7 @@ public class BroadcastProtocol {
         // HACK OVERRIDE
         validationTime = 0xCAFE
         
-        let encryptedBlock = BroadcastProtocol.getRC5Payload(validationNonce: validationTime, locationState: locationState, devicePreferences: devicePreferences, key: key)
+        let encryptedBlock = BroadcastProtocol.getRC5Payload(firstPart: validationTime, locationState: locationState, devicePreferences: devicePreferences, key: key)
         
         var data : UInt64 = 0
 
