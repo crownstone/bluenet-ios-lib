@@ -103,7 +103,7 @@ public class ConfigHandler {
         return self._writeToConfig(packet: data.getPacket())
     }
     
-    public func getDimmerCurrentThreshold() -> Promise<Float> {
+    public func getDimmerCurrentThreshold() -> Promise<UInt16> {
         return self._getConfig(ConfigurationType.CURRENT_CONSUMPTION_THRESHOLD_DIMMER)
     }
     
