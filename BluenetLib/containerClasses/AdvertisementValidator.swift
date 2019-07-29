@@ -20,6 +20,7 @@ enum ResultType : UInt8 {
     case DUPLICATE
     case SUCCESS
     case ERROR
+    case INVALID_DATA
 }
 
 /**
@@ -127,7 +128,7 @@ public class AdvertismentValidator {
                     self.addValidMeasurement(operationMode: self.operationMode, referenceId: keySet.referenceId)
                     return
                 }
-                else if (validation == .DUPLICATE) {
+                else if (validation == .DUPLICATE || validation == .INVALID_DATA) {
                     return
                 }
             }
@@ -185,28 +186,40 @@ public class AdvertismentValidator {
     *   This method is the owner of the validationMap objects and is the only one that changes them.
     **/
     func validate(_ advertisement: Advertisement, referenceId: String) -> ResultType {
+        let scanResponse = advertisement.scanResponse!
+        if (!scanResponse.validData) {
+            return .INVALID_DATA
+        }
+        
+        
+        
+        // the decryption key used to be the basic key. In the new firmware (3.0.0+) we have a separate key for this: the serviceData key.
         // we need to have a serviceData key for this reference Id
-        let serviceDataKey = self.settings.getServiceDataKey(referenceId: referenceId)
-        if (serviceDataKey == nil) {
+        var decryptionKey = self.settings.getBasicKey(referenceId: referenceId)
+        if (scanResponse.opCode >= 7) {
+            decryptionKey = self.settings.getServiceDataKey(referenceId: referenceId)
+        }
+        
+        if (decryptionKey == nil) {
             return .ERROR
         }
-    
+        
         var firstTime = false
         if (self.validationMap[referenceId] == nil) {
             self.validationMap[referenceId] = validationSet()
             firstTime = true
         }
         
-        let scanResponse = advertisement.scanResponse!
+        
         let validationMap = self.validationMap[referenceId]!
         
-        scanResponse.decrypt(serviceDataKey!)
+        scanResponse.decrypt(decryptionKey!)
         
         var validMeasurement = false
         if (validationMap.uniqueIdentifier != nil || firstTime) {
             // we match the unique identifier to check if the advertisement is different. If it is the same, we're checking duplicates.
             if (validationMap.uniqueIdentifier == nil || validationMap.uniqueIdentifier! != scanResponse.uniqueIdentifier) {
-                if (scanResponse.opCode == 5 || scanResponse.opCode == 3) {
+                if (scanResponse.opCode == 7 || scanResponse.opCode == 5 || scanResponse.opCode == 3) {
                     //datatype 1 is the error packet, this does not have a validation element
                     if (scanResponse.dataType != 1) {
                         if (scanResponse.validation == 0xFA) {

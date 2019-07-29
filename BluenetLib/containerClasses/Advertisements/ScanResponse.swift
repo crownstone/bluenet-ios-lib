@@ -98,7 +98,7 @@ public class ScanResponsePacket {
                 return CrownstoneMode.operation
             case 4:
                 return CrownstoneMode.setup
-            case 5:
+            case 5, 7:
                 return CrownstoneMode.operation
             case 6:
                 return CrownstoneMode.setup
@@ -128,7 +128,8 @@ public class ScanResponsePacket {
                 parseOpcode3(serviceData: self, data: decryptedData)
             case 4:
                 parseOpcode4(serviceData: self, data: decryptedData)
-            case 5:
+            case 5, 7:
+                // 5 and 7 have the same payload, but they use a different key.
                 self.getDeviceTypeFromPublicData()
                 parseOpcode5(serviceData: self, data: decryptedData)
             case 6:
