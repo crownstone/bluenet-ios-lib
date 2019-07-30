@@ -15,13 +15,16 @@ import PromiseKit
 #if os(iOS)
 
 class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
-    var peripheralManager : CBPeripheralManager!
+    var peripheralManager : CBPeripheralManager? = nil
     var decoupledDelegate = false
     var BleState : Int = 0
     var advertising = false
  
     public override init() {
         super.init();
+    }
+    
+    public func startPeripheral() {
         self.peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
     }
     
@@ -40,14 +43,22 @@ class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
             self.stopAdvertising()
         }
         self.advertising = true
-        self.peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey:uuids, CBAdvertisementDataLocalNameKey: APPNAME])
+        
+        if self.peripheralManager == nil {
+            self.startPeripheral()
+        }
+        
+        self.peripheralManager!.startAdvertising([CBAdvertisementDataServiceUUIDsKey:uuids, CBAdvertisementDataLocalNameKey: APPNAME])
     }
     
     
     public func stopAdvertising() {
         self.advertising = false
-        self.peripheralManager.removeAllServices()
-        self.peripheralManager.stopAdvertising()
+        
+        if self.peripheralManager != nil {
+            self.peripheralManager!.removeAllServices()
+            self.peripheralManager!.stopAdvertising()
+        }
     }
     
     

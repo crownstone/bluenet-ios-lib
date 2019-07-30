@@ -126,6 +126,10 @@ public class Bluenet {
         _ = self.eventBus.on("rawAdvertisementData", self._checkAdvertisement)
     }
     
+    public func startPeripheral() {
+        self.peripheralStateManager.startPeripheral()
+    }
+    
     public func enableBatterySaving() {
         self.bleManager.enableBatterySaving()
     }

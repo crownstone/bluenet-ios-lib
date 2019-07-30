@@ -105,7 +105,9 @@ class PeripheralStateManager {
         _ = self.eventBus.on("newDevicePreferences",   { _ in self.updateAdvertisements() })
     }
     
-  
+    func startPeripheral() {
+        self.blePeripheralManager.startPeripheral()
+    }
 
     /**   BACKGROUND STATE HANDLING METHODS **/
     func applicationWillEnterForeground() {
