@@ -93,10 +93,10 @@ class PeripheralStateManager {
     var timeStoneMap  = [String: Double]() // track time difference between crownstones and this phone per referenceId
     
     init(eventBus: EventBus, settings: BluenetSettings, backgroundEnabled: Bool = true) {
-        self.blePeripheralManager = BlePeripheralManager()
         self.settings = settings
         self.eventBus = eventBus
         self.backgroundEnabled = backgroundEnabled
+        self.blePeripheralManager = BlePeripheralManager(eventBus: self.eventBus)
         
         // track time difference between crownstones and this phone per referenceId
         _ = self.eventBus.on("verifiedAdvertisementData", self._trackStoneTime)
@@ -107,6 +107,10 @@ class PeripheralStateManager {
     
     func startPeripheral() {
         self.blePeripheralManager.startPeripheral()
+    }
+    
+    func checkBroadcastAuthorization() -> String {
+        return self.blePeripheralManager.checkBroadcastAuthorization()
     }
 
     /**   BACKGROUND STATE HANDLING METHODS **/

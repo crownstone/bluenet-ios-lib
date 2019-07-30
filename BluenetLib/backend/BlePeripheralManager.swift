@@ -19,13 +19,18 @@ class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
     var decoupledDelegate = false
     var BleState : Int = 0
     var advertising = false
+    var eventBus : EventBus!
  
-    public override init() {
-        super.init();
+    init(eventBus: EventBus) {
+        self.eventBus = eventBus
+        
+        super.init()
     }
     
     public func startPeripheral() {
-        self.peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
+        if (self.peripheralManager == nil) {
+            self.peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
+        }
     }
     
     
@@ -35,7 +40,29 @@ class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
             let serviceUuid = CBUUID(string: uuidString)
             serviceUUIDStrings.append(serviceUuid)
         }
+        
         self.startAdvertisingArray(uuids: serviceUUIDStrings)
+    }
+    
+    public func checkBroadcastAuthorization() -> String {
+        let status = CBPeripheralManager.authorizationStatus()
+        var statusStr = "unknown"
+        switch status {
+            case .notDetermined:
+                eventBus.emit("bleBroadcastStatus", "notDetermined")
+                statusStr = "notDetermined"
+            case .restricted:
+                eventBus.emit("bleBroadcastStatus", "restricted")
+                statusStr = "restricted"
+            case .denied:
+                eventBus.emit("bleBroadcastStatus", "denied")
+                statusStr = "denied"
+            case .authorized:
+                eventBus.emit("bleBroadcastStatus", "authorized")
+                statusStr = "authorized"
+        }
+        
+        return statusStr
     }
     
     public func startAdvertisingArray(uuids: [CBUUID]) {
@@ -46,6 +73,11 @@ class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
         
         if self.peripheralManager == nil {
             self.startPeripheral()
+        }
+        
+        // throw event if we are not authorized
+        if (CBPeripheralManager.authorizationStatus() != .authorized) {
+            _ = self.checkBroadcastAuthorization()
         }
         
         self.peripheralManager!.startAdvertising([CBAdvertisementDataServiceUUIDsKey:uuids, CBAdvertisementDataLocalNameKey: APPNAME])
@@ -79,9 +111,9 @@ class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
     }
     
     
-    public func peripheralManager(_ peripheral: CBPeripheralManager, willRestoreState dict: [String : Any]) {
-        LOG.info("BLUENET_LIB: Peripheral manager WILL RESTORE STATE \(dict)");
-    }
+//    public func peripheralManager(_ peripheral: CBPeripheralManager, willRestoreState dict: [String : Any]) {
+//        LOG.info("BLUENET_LIB: Peripheral manager WILL RESTORE STATE \(dict)");
+//    }
     
     
     public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {

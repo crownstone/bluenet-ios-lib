@@ -126,6 +126,10 @@ public class Bluenet {
         _ = self.eventBus.on("rawAdvertisementData", self._checkAdvertisement)
     }
     
+    public func checkBroadcastAuthorization() -> String {
+        return self.peripheralStateManager.checkBroadcastAuthorization()
+    }
+    
     public func startPeripheral() {
         self.peripheralStateManager.startPeripheral()
     }
