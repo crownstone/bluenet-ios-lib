@@ -217,14 +217,14 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
             .then{ services -> Promise<voidPromiseCallback> in
                 if getServiceFromList(services, DFUServices.SecureDFU.uuidString) != nil {
                     return self.bleManager.enableNotifications(
-                        DFUServices.DFU.uuidString,
+                        DFUServices.SecureDFU.uuidString,
                         characteristicId: DFUCharacteristics.ControlPoint,
                         callback: notificationCallback
                     )
                 }
                 else {
                     return self.bleManager.enableNotifications(
-                        DFUServices.SecureDFU.uuidString,
+                        DFUServices.DFU.uuidString,
                         characteristicId: DFUCharacteristics.ControlPoint,
                         callback: notificationCallback
                     )
