@@ -76,8 +76,8 @@ public struct MeshCharacteristics {
 }
 
 public struct SecureDFUCharacteristics {
-    public static let ControlPoint   = "0001"
-    public static let Packet         = "0002"
+    public static let ControlPoint   = "8EC90001-F315-4F60-9FB8-838830DAEA50"
+    public static let Packet         = "8EC90002-F315-4F60-9FB8-838830DAEA50"
 }
 
 public struct DFUCharacteristics {
