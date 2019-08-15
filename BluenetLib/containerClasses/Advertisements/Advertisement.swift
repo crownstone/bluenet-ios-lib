@@ -56,7 +56,7 @@ public class Advertisement {
         
         if self.serviceUUID == nil && serviceUUID != nil && serviceUUID!.count > 0 {
             self.serviceUUID = serviceUUID![0] // assuming only one service data uuid
-            if (self.serviceUUID == DFUServiceUUID) {
+            if (self.serviceUUID == DFUServiceUUID || self.serviceUUID == DFUSecureServiceUUID) {
                 self.operationMode = .dfu
             }
         }

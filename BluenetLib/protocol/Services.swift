@@ -29,4 +29,5 @@ public struct CSServices {
 
 public struct DFUServices {
     public static let DFU = DFUServiceUUID
+    public static let SecureDFU = DFUSecureServiceUUID
 }

@@ -82,7 +82,7 @@ public class DeviceHandler {
             .then{ services -> Promise<String> in
                 var isInDfuMode = false
                 for service in services {
-                    if service.uuid == DFUServiceUUID {
+                    if service.uuid == DFUServiceUUID || service.uuid == DFUSecureServiceUUID {
                         isInDfuMode = true
                         break
                     }

@@ -106,6 +106,7 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
         self.rejectPromise(BluenetError.DFU_ERROR)
     }
     
+    
     public func bootloaderToNormalMode(uuid: String) -> Promise<Void> {
         var cleanup : voidPromiseCallback?
         self.bleManager.settings.disableEncryptionTemporarily()
@@ -119,7 +120,7 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
                             .done{ services -> Void in
                                 var isInDfuMode = false
                                 for service in services {
-                                    if service.uuid == DFUServiceUUID {
+                                    if service.uuid == DFUServiceUUID || service.uuid == DFUSecureServiceUUID {
                                         isInDfuMode = true
                                         break
                                     }
@@ -186,23 +187,49 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
     }
     
     func _writeResetCommand() -> Promise<Void> {
-        let packet : [UInt8] = [0x06]
-        LOG.info("BLUENET_LIB: Writing DFU reset command. \(packet)")
-        return self.bleManager.writeToCharacteristic(
-            DFUServices.DFU.uuidString,
-            characteristicId: DFUCharacteristics.ControlPoint,
-            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-            type: CBCharacteristicWriteType.withResponse
-        )
+        LOG.info("BLUENET_LIB: Writing DFU reset command.")
+        return self.bleManager.getServicesFromDevice()
+            .then{ services -> Promise<Void> in
+                if getServiceFromList(services, DFUServices.SecureDFU.uuidString) != nil {
+                    let packet : [UInt8] = [0x0C]
+                    return self.bleManager.writeToCharacteristic(
+                        DFUServices.SecureDFU.uuidString,
+                        characteristicId: DFUCharacteristics.ControlPoint,
+                        data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                        type: CBCharacteristicWriteType.withResponse
+                    )
+                }
+                else {
+                    let packet : [UInt8] = [0x06]
+                    return self.bleManager.writeToCharacteristic(
+                        DFUServices.DFU.uuidString,
+                        characteristicId: DFUCharacteristics.ControlPoint,
+                        data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                        type: CBCharacteristicWriteType.withResponse
+                    )
+                }
+        }
     }
     
     func setupNotifications() -> Promise<voidPromiseCallback> {
         let notificationCallback = {(data: Any) -> Void in }
-        return self.bleManager.enableNotifications(
-            DFUServices.DFU.uuidString,
-            characteristicId: DFUCharacteristics.ControlPoint,
-            callback: notificationCallback
-        )
+        return self.bleManager.getServicesFromDevice()
+            .then{ services -> Promise<voidPromiseCallback> in
+                if getServiceFromList(services, DFUServices.SecureDFU.uuidString) != nil {
+                    return self.bleManager.enableNotifications(
+                        DFUServices.DFU.uuidString,
+                        characteristicId: DFUCharacteristics.ControlPoint,
+                        callback: notificationCallback
+                    )
+                }
+                else {
+                    return self.bleManager.enableNotifications(
+                        DFUServices.SecureDFU.uuidString,
+                        characteristicId: DFUCharacteristics.ControlPoint,
+                        callback: notificationCallback
+                    )
+                }
+        }
     }
     
     
