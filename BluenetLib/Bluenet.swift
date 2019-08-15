@@ -222,7 +222,8 @@ public class Bluenet {
             CrownstoneBuiltinAdvertisementServiceUUID,
             CrownstonePlugAdvertisementServiceUUID,
             GuidestoneAdvertisementServiceUUID,
-            DFUServiceUUID
+            DFUServiceUUID,
+            DFUSecureServiceUUID
         ])
     }
     
@@ -238,7 +239,8 @@ public class Bluenet {
             CrownstoneBuiltinAdvertisementServiceUUID,
             CrownstonePlugAdvertisementServiceUUID,
             GuidestoneAdvertisementServiceUUID,
-            DFUServiceUUID
+            DFUServiceUUID,
+            DFUSecureServiceUUID
         ])
     }
     
