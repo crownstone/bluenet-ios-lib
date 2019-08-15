@@ -194,7 +194,7 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
                     let packet : [UInt8] = [0x0C]
                     return self.bleManager.writeToCharacteristic(
                         DFUServices.SecureDFU.uuidString,
-                        characteristicId: DFUCharacteristics.ControlPoint,
+                        characteristicId: SecureDFUCharacteristics.ControlPoint,
                         data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
                         type: CBCharacteristicWriteType.withResponse
                     )
@@ -218,7 +218,7 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
                 if getServiceFromList(services, DFUServices.SecureDFU.uuidString) != nil {
                     return self.bleManager.enableNotifications(
                         DFUServices.SecureDFU.uuidString,
-                        characteristicId: DFUCharacteristics.ControlPoint,
+                        characteristicId: SecureDFUCharacteristics.ControlPoint,
                         callback: notificationCallback
                     )
                 }
