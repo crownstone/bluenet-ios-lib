@@ -96,7 +96,13 @@ class PeripheralStateManager {
         self.settings = settings
         self.eventBus = eventBus
         self.backgroundEnabled = backgroundEnabled
-        self.blePeripheralManager = BlePeripheralManager(eventBus: self.eventBus)
+        #if os(iOS)
+            self.blePeripheralManager = BlePeripheralManager(eventBus: self.eventBus)
+        #endif
+        
+        #if os(watchOS)
+            self.blePeripheralManager = BlePeripheralManager()
+        #endif
         
         // track time difference between crownstones and this phone per referenceId
         _ = self.eventBus.on("verifiedAdvertisementData", self._trackStoneTime)
@@ -105,6 +111,8 @@ class PeripheralStateManager {
         _ = self.eventBus.on("newDevicePreferences",   { _ in self.updateAdvertisements() })
     }
     
+    
+    #if os(iOS)
     func startPeripheral() {
         self.blePeripheralManager.startPeripheral()
     }
@@ -112,6 +120,9 @@ class PeripheralStateManager {
     func checkBroadcastAuthorization() -> String {
         return self.blePeripheralManager.checkBroadcastAuthorization()
     }
+    #endif
+    
+ 
 
     /**   BACKGROUND STATE HANDLING METHODS **/
     func applicationWillEnterForeground() {
