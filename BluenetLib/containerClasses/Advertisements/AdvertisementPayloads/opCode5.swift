@@ -19,10 +19,8 @@ func parseOpcode5(serviceData : ScanResponsePacket, data : [UInt8], liteParse: B
             parseOpcode3_type1(serviceData: serviceData, data: data, liteParse: liteParse)
         case 2:
             parseOpcode3_type2(serviceData: serviceData, data: data, liteParse: liteParse)
-            serviceData.rssiOfExternalCrownstone = Conversion.uint8_to_int8(data[15])
         case 3:
             parseOpcode3_type3(serviceData: serviceData, data: data, liteParse: liteParse)
-            serviceData.rssiOfExternalCrownstone = Conversion.uint8_to_int8(data[15])
         default:
             // LOG.warn("Advertisement opCode 3: Got an unknown typeCode \(data[1])")
             parseOpcode3_type0(serviceData: serviceData, data: data, liteParse: liteParse)
