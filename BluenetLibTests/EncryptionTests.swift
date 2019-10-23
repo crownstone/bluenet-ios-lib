@@ -34,6 +34,7 @@ class EncryptionTests: XCTestCase {
             sphereUID: 234,
             locationId: 60,
             profileIndex: 6,
+            deviceToken: 2,
             referenceId: "test"
         )
         settings.setDevicePreferences(
@@ -146,6 +147,7 @@ class EncryptionTests: XCTestCase {
                 do {
                     print("generating short uuids")
                     let otherUUIDs = try BroadcastProtocol.getUInt16ServiceNumbers(
+                        broadcastCounter: 4,
                         locationState: self.settings.locationState,
                         devicePreferences: self.settings.devicePreferences,
                         protocolVersion: 0,

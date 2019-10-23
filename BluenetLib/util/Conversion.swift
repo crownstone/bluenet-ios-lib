@@ -37,6 +37,19 @@ public class Conversion {
         ]
     }
     
+    public static func uint64_to_uint8_array(_ value: UInt64) -> [UInt8] {
+        return [
+            UInt8((value >> 0 & 0xFF)),
+            UInt8((value >> 8 & 0xFF)),
+            UInt8((value >> 16 & 0xFF)),
+            UInt8((value >> 24 & 0xFF)),
+            UInt8((value >> 32 & 0xFF)),
+            UInt8((value >> 40 & 0xFF)),
+            UInt8((value >> 48 & 0xFF)),
+            UInt8((value >> 56 & 0xFF)),
+        ]
+    }
+    
     public static func string_to_uint8_array(_ string: String) -> [UInt8] {
         var arr = [UInt8]();
         for c in string {

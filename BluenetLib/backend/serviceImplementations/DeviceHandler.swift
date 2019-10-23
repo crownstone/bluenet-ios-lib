@@ -34,7 +34,7 @@ public class DeviceHandler {
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.DeviceInformation, characteristic: DeviceCharacteristics.FirmwareRevision)
             .then{ data -> Promise<String> in
                 return Promise<String>{seal in seal.fulfill(Conversion.uint8_array_to_string(data))
-                }}
+            }}
     }
     
     /**

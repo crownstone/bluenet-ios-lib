@@ -75,6 +75,8 @@
 		FA76EF2120976EDB0046DCDE /* ResultPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA76EF2020976EDB0046DCDE /* ResultPacket.swift */; };
 		FA7BE69A1E4487B8009E633D /* MeshHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7BE6991E4487B8009E633D /* MeshHandler.swift */; };
 		FA7BE69E1E449287009E633D /* MeshPackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7BE69D1E449287009E633D /* MeshPackets.swift */; };
+		FA82930A235F21DC0072D9FE /* BehaviourHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA829309235F21DC0072D9FE /* BehaviourHandler.swift */; };
+		FA82930D235F2D8A0072D9FE /* Behaviour.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA82930C235F2D8A0072D9FE /* Behaviour.swift */; };
 		FA843EFE21B6D3A600F633A3 /* BroadcastHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA843EFD21B6D3A600F633A3 /* BroadcastHandler.swift */; };
 		FA843F0021B6D51800F633A3 /* BroadcastProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA843EFF21B6D51800F633A3 /* BroadcastProtocol.swift */; };
 		FA843F1C21B6DDD200F633A3 /* PeripheralStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA843F1B21B6DDD200F633A3 /* PeripheralStateManager.swift */; };
@@ -245,6 +247,8 @@
 		FA79874F1DF6B3380005EB86 /* BluenetLocalizationLib.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BluenetLocalizationLib.md; sourceTree = "<group>"; };
 		FA7BE6991E4487B8009E633D /* MeshHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeshHandler.swift; sourceTree = "<group>"; };
 		FA7BE69D1E449287009E633D /* MeshPackets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeshPackets.swift; sourceTree = "<group>"; };
+		FA829309235F21DC0072D9FE /* BehaviourHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviourHandler.swift; sourceTree = "<group>"; };
+		FA82930C235F2D8A0072D9FE /* Behaviour.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Behaviour.swift; sourceTree = "<group>"; };
 		FA843EFD21B6D3A600F633A3 /* BroadcastHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastHandler.swift; sourceTree = "<group>"; };
 		FA843EFF21B6D51800F633A3 /* BroadcastProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastProtocol.swift; sourceTree = "<group>"; };
 		FA843F1B21B6DDD200F633A3 /* PeripheralStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeripheralStateManager.swift; sourceTree = "<group>"; };
@@ -394,6 +398,7 @@
 				FA5882901E38C0F000913AE6 /* PowerHandler.swift */,
 				FA5882911E38C0F000913AE6 /* SetupHandler.swift */,
 				FA3FC25A1ED3499C00DD2F76 /* StateHandler.swift */,
+				FA829309235F21DC0072D9FE /* BehaviourHandler.swift */,
 			);
 			path = serviceImplementations;
 			sourceTree = "<group>";
@@ -401,6 +406,7 @@
 		FA5882971E38C0F000913AE6 /* containerClasses */ = {
 			isa = PBXGroup;
 			children = (
+				FA82930B235F2D7B0072D9FE /* Behaviour */,
 				FAA023EF21C2A4BB0059A64D /* Broadcast */,
 				FA7065DA2003AE6A00C833FE /* Advertisements */,
 				FA4B67902138414D0050CE9D /* AdvertisementValidator.swift */,
@@ -530,6 +536,14 @@
 				FA747B151E4B0FBA00255820 /* ControlPackets.swift */,
 			);
 			path = packetGenerators;
+			sourceTree = "<group>";
+		};
+		FA82930B235F2D7B0072D9FE /* Behaviour */ = {
+			isa = PBXGroup;
+			children = (
+				FA82930C235F2D8A0072D9FE /* Behaviour.swift */,
+			);
+			path = Behaviour;
 			sourceTree = "<group>";
 		};
 		FAA023EF21C2A4BB0059A64D /* Broadcast */ = {
@@ -761,9 +775,11 @@
 				FA7065F32003DEC100C833FE /* opCode4_type0.swift in Sources */,
 				FA5882DC1E38C0F100913AE6 /* Util.swift in Sources */,
 				FA3FC25B1ED3499C00DD2F76 /* StateHandler.swift in Sources */,
+				FA82930A235F21DC0072D9FE /* BehaviourHandler.swift in Sources */,
 				FA5882D81E38C0F100913AE6 /* Conversion.swift in Sources */,
 				FA29280522C110BD004ABB5E /* BleUtil.swift in Sources */,
 				FA5882D91E38C0F100913AE6 /* Eventbus.swift in Sources */,
+				FA82930D235F2D8A0072D9FE /* Behaviour.swift in Sources */,
 				FA5882B91E38C0F100913AE6 /* BleManager.swift in Sources */,
 				FA5882D01E38C0F100913AE6 /* Globals.swift in Sources */,
 				FA7065E72003BD5300C833FE /* opCode3_type0.swift in Sources */,

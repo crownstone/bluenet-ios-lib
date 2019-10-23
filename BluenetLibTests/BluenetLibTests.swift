@@ -214,4 +214,15 @@ class BluenetLibTests: XCTestCase {
         
         
     }
+    
+    
+    func testFletcher32() {
+        let abcde : [UInt8] = [97,98,99,100,101] // abcde
+        let abcdef : [UInt8] = [97,98,99,100,101,102] // abcdef
+        let abcdefgh : [UInt8] = [97,98,99,100,101,102,103,104] // abcdefgh
+        
+        XCTAssertEqual(4031760169, fletcher32(abcde))
+        XCTAssertEqual(1448095018, fletcher32(abcdef))
+        XCTAssertEqual(3957429649, fletcher32(abcdefgh))
+    }
 }

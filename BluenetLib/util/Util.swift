@@ -75,3 +75,40 @@ public func getCharacteristicFromList(_ list: [CBCharacteristic], _ uuid: String
     }
     return nil;
 }
+
+public func fletcher32(_ data: [UInt8]) -> UInt32 {
+    var data16 = [UInt16]()
+    
+    var index = 1
+    while index < data.count {
+        data16.append(Conversion.uint8_array_to_uint16([data[index-1],data[index]]))
+        index += 2
+    }
+    if (data.count % 2 != 0) {
+        data16.append(Conversion.uint8_array_to_uint16([data[data.count-1],0]))
+    }
+    
+    return fletcher32(data16)
+}
+
+
+public func fletcher32( _ data: [UInt16]) -> UInt32 {
+    var c0 : UInt32 = 0
+    var c1 : UInt32 = 0
+    let iterations : Int = data.count / 360
+    var length : Int = data.count
+    var index = 0;
+    for _ in 0...iterations {
+        let blockLength = min(360, length)
+        for _ in 0...blockLength - 1 {
+            c0 = c0 + UInt32(data[index]);
+            c1 = c1 + c0;
+            index += 1
+        }
+        c0 = c0 % 65535;
+        c1 = c1 % 65535;
+        length -= 360
+    }
+        
+    return (c1 << 16 | c0);
+}
