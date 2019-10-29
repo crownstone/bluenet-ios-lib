@@ -18,6 +18,8 @@
 		FA3FC25B1ED3499C00DD2F76 /* StateHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3FC25A1ED3499C00DD2F76 /* StateHandler.swift */; };
 		FA3FC25D1ED34DEF00DD2F76 /* ConversionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3FC25C1ED34DEF00DD2F76 /* ConversionTests.swift */; };
 		FA3FC25F1ED4346200DD2F76 /* CrownstoneErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3FC25E1ED4346200DD2F76 /* CrownstoneErrors.swift */; };
+		FA44DC4523685E99001CA4B8 /* ConnectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA44DC4423685E99001CA4B8 /* ConnectionState.swift */; };
+		FA44DC4723688C64001CA4B8 /* StatePackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA44DC4623688C64001CA4B8 /* StatePackets.swift */; };
 		FA4B678F213839B60050CE9D /* KeySet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4B678E213839B60050CE9D /* KeySet.swift */; };
 		FA4B67912138414D0050CE9D /* AdvertisementValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4B67902138414D0050CE9D /* AdvertisementValidator.swift */; };
 		FA535A752076855000B6B793 /* opCode5.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA535A742076855000B6B793 /* opCode5.swift */; };
@@ -27,7 +29,6 @@
 		FA5882BB1E38C0F100913AE6 /* ConfigHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58828D1E38C0F000913AE6 /* ConfigHandler.swift */; };
 		FA5882BC1E38C0F100913AE6 /* ControlHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58828E1E38C0F000913AE6 /* ControlHandler.swift */; };
 		FA5882BD1E38C0F100913AE6 /* DfuHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58828F1E38C0F000913AE6 /* DfuHandler.swift */; };
-		FA5882BE1E38C0F100913AE6 /* PowerHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882901E38C0F000913AE6 /* PowerHandler.swift */; };
 		FA5882BF1E38C0F100913AE6 /* SetupHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882911E38C0F000913AE6 /* SetupHandler.swift */; };
 		FA5882C01E38C0F100913AE6 /* Bluenet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882921E38C0F000913AE6 /* Bluenet.swift */; };
 		FA5882C21E38C0F100913AE6 /* BluenetLocalization.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882941E38C0F000913AE6 /* BluenetLocalization.swift */; };
@@ -93,7 +94,6 @@
 		FA94D02321A6E62F00AB8331 /* ControlHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58828E1E38C0F000913AE6 /* ControlHandler.swift */; };
 		FA94D02421A6E62F00AB8331 /* DeviceHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA2261C01E55A7B9001D0262 /* DeviceHandler.swift */; };
 		FA94D02621A6E62F00AB8331 /* MeshHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7BE6991E4487B8009E633D /* MeshHandler.swift */; };
-		FA94D02721A6E62F00AB8331 /* PowerHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882901E38C0F000913AE6 /* PowerHandler.swift */; };
 		FA94D02821A6E62F00AB8331 /* SetupHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882911E38C0F000913AE6 /* SetupHandler.swift */; };
 		FA94D02921A6E62F00AB8331 /* StateHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3FC25A1ED3499C00DD2F76 /* StateHandler.swift */; };
 		FA94D02A21A6E62F00AB8331 /* opCode4_type0.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065F22003DEC100C833FE /* opCode4_type0.swift */; };
@@ -186,6 +186,8 @@
 		FA3FC25A1ED3499C00DD2F76 /* StateHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateHandler.swift; sourceTree = "<group>"; };
 		FA3FC25C1ED34DEF00DD2F76 /* ConversionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConversionTests.swift; sourceTree = "<group>"; };
 		FA3FC25E1ED4346200DD2F76 /* CrownstoneErrors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CrownstoneErrors.swift; sourceTree = "<group>"; };
+		FA44DC4423685E99001CA4B8 /* ConnectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionState.swift; sourceTree = "<group>"; };
+		FA44DC4623688C64001CA4B8 /* StatePackets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatePackets.swift; sourceTree = "<group>"; };
 		FA4B678E213839B60050CE9D /* KeySet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySet.swift; sourceTree = "<group>"; };
 		FA4B67902138414D0050CE9D /* AdvertisementValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvertisementValidator.swift; sourceTree = "<group>"; };
 		FA535A742076855000B6B793 /* opCode5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode5.swift; sourceTree = "<group>"; };
@@ -195,7 +197,6 @@
 		FA58828D1E38C0F000913AE6 /* ConfigHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigHandler.swift; sourceTree = "<group>"; };
 		FA58828E1E38C0F000913AE6 /* ControlHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ControlHandler.swift; sourceTree = "<group>"; };
 		FA58828F1E38C0F000913AE6 /* DfuHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DfuHandler.swift; sourceTree = "<group>"; };
-		FA5882901E38C0F000913AE6 /* PowerHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PowerHandler.swift; sourceTree = "<group>"; };
 		FA5882911E38C0F000913AE6 /* SetupHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetupHandler.swift; sourceTree = "<group>"; };
 		FA5882921E38C0F000913AE6 /* Bluenet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bluenet.swift; sourceTree = "<group>"; };
 		FA5882931E38C0F000913AE6 /* BluenetLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BluenetLib.h; sourceTree = "<group>"; };
@@ -395,7 +396,6 @@
 				FA2261C01E55A7B9001D0262 /* DeviceHandler.swift */,
 				FA58828F1E38C0F000913AE6 /* DfuHandler.swift */,
 				FA7BE6991E4487B8009E633D /* MeshHandler.swift */,
-				FA5882901E38C0F000913AE6 /* PowerHandler.swift */,
 				FA5882911E38C0F000913AE6 /* SetupHandler.swift */,
 				FA3FC25A1ED3499C00DD2F76 /* StateHandler.swift */,
 				FA829309235F21DC0072D9FE /* BehaviourHandler.swift */,
@@ -419,9 +419,9 @@
 				FA58829E1E38C0F100913AE6 /* NearestItem.swift */,
 				FA58829F1E38C0F100913AE6 /* PowerSamples.swift */,
 				FA5882A01E38C0F100913AE6 /* PromiseContainer.swift */,
-				FA76EF2020976EDB0046DCDE /* ResultPacket.swift */,
 				FA5882A21E38C0F100913AE6 /* TrainingData.swift */,
 				FA4B678E213839B60050CE9D /* KeySet.swift */,
+				FA44DC4423685E99001CA4B8 /* ConnectionState.swift */,
 			);
 			path = containerClasses;
 			sourceTree = "<group>";
@@ -439,6 +439,7 @@
 			isa = PBXGroup;
 			children = (
 				FA5882A91E38C0F100913AE6 /* BlePackets.swift */,
+				FA76EF2020976EDB0046DCDE /* ResultPacket.swift */,
 				FAA023EB21C275EF0059A64D /* BroadcastPackets.swift */,
 				FA843EFF21B6D51800F633A3 /* BroadcastProtocol.swift */,
 				FA7BE69D1E449287009E633D /* MeshPackets.swift */,
@@ -534,6 +535,7 @@
 			isa = PBXGroup;
 			children = (
 				FA747B151E4B0FBA00255820 /* ControlPackets.swift */,
+				FA44DC4623688C64001CA4B8 /* StatePackets.swift */,
 			);
 			path = packetGenerators;
 			sourceTree = "<group>";
@@ -655,7 +657,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 1020;
+				LastUpgradeCheck = 1110;
 				ORGANIZATIONNAME = "Alex de Mulder";
 				TargetAttributes = {
 					FA3C18781CBBDA6B00A11CF7 = {
@@ -749,7 +751,6 @@
 				FA5882BB1E38C0F100913AE6 /* ConfigHandler.swift in Sources */,
 				FA7065E92003BD6500C833FE /* opCode3_type3.swift in Sources */,
 				FA843F1C21B6DDD200F633A3 /* PeripheralStateManager.swift in Sources */,
-				FA5882BE1E38C0F100913AE6 /* PowerHandler.swift in Sources */,
 				FA5882C21E38C0F100913AE6 /* BluenetLocalization.swift in Sources */,
 				FA5882BC1E38C0F100913AE6 /* ControlHandler.swift in Sources */,
 				FA4B678F213839B60050CE9D /* KeySet.swift in Sources */,
@@ -779,6 +780,7 @@
 				FA5882D81E38C0F100913AE6 /* Conversion.swift in Sources */,
 				FA29280522C110BD004ABB5E /* BleUtil.swift in Sources */,
 				FA5882D91E38C0F100913AE6 /* Eventbus.swift in Sources */,
+				FA44DC4723688C64001CA4B8 /* StatePackets.swift in Sources */,
 				FA82930D235F2D8A0072D9FE /* Behaviour.swift in Sources */,
 				FA5882B91E38C0F100913AE6 /* BleManager.swift in Sources */,
 				FA5882D01E38C0F100913AE6 /* Globals.swift in Sources */,
@@ -792,6 +794,7 @@
 				FA0B813B1F94BB510090168B /* BluenetCBDelegate.swift in Sources */,
 				FA5882C01E38C0F100913AE6 /* Bluenet.swift in Sources */,
 				FA843F0021B6D51800F633A3 /* BroadcastProtocol.swift in Sources */,
+				FA44DC4523685E99001CA4B8 /* ConnectionState.swift in Sources */,
 				FADA183D21CA7E6C0066DF9F /* RC5.swift in Sources */,
 				FA7065DC2003AE8F00C833FE /* opCode1.swift in Sources */,
 				FA5882C71E38C0F100913AE6 /* EncryptedPackage.swift in Sources */,
@@ -828,7 +831,6 @@
 				FA94D02421A6E62F00AB8331 /* DeviceHandler.swift in Sources */,
 				FA94D02621A6E62F00AB8331 /* MeshHandler.swift in Sources */,
 				FAAB603221CBCE1B00183587 /* BroadcastElement.swift in Sources */,
-				FA94D02721A6E62F00AB8331 /* PowerHandler.swift in Sources */,
 				FA94D02821A6E62F00AB8331 /* SetupHandler.swift in Sources */,
 				FA94D02921A6E62F00AB8331 /* StateHandler.swift in Sources */,
 				FAAB602B21CBCD9F00183587 /* TimeUtil.swift in Sources */,
@@ -1014,7 +1016,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -1049,7 +1051,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;

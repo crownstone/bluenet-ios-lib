@@ -10,53 +10,70 @@ import Foundation
 import PromiseKit
 import CoreBluetooth
 
-public class ControlPacketsGenerator {
+
+
+ class ControlPacketsGeneratorClass {
+    var controlVersion : ControlVersionType = .v1
     
-    public static func getFactoryResetPacket() -> [UInt8] {
+    init() {}
+    
+     func getFactoryResetPacket() -> [UInt8] {
         return Conversion.reverse(Conversion.hex_string_to_uint8_array("deadbeef"));
     }
     
-    public static func getSetSchedulePacket(data: [UInt8]) -> [UInt8] {
+    
+    /** LEGACY **/
+     func getSetSchedulePacket(data: [UInt8]) -> [UInt8] {
         return ControlPacket(type: .schedule_ENTRY, payloadArray: data).getPacket()
     }
     
-    public static func getScheduleRemovePacket(timerIndex: UInt8) -> [UInt8] {
+    /** LEGACY **/
+     func getScheduleRemovePacket(timerIndex: UInt8) -> [UInt8] {
         return ControlPacket(type: .schedule_REMOVE, payload8: timerIndex).getPacket()
     }
     
-    public static func getCommandFactoryResetPacket() -> [UInt8] {
-        return FactoryResetPacket().getPacket()
+     func getCommandFactoryResetPacket() -> [UInt8] {
+        if controlVersion == .v2 { return FactoryResetPacketV2().getPacket()}
+        else                     { return FactoryResetPacket().getPacket()}
     }
     
-    public static func getSwitchStatePacket(_ state: Float) -> [UInt8] {
+     func getSwitchStatePacket(_ state: Float) -> [UInt8] {
         let switchState = min(1,max(0,state))*100
         
-        let packet = ControlPacket(type: .switch, payload8: NSNumber(value: switchState as Float).uint8Value)
-        return packet.getPacket()
+        if controlVersion == .v2 { return ControlPacketV2(type: .switch, payload8: NSNumber(value: switchState as Float).uint8Value).getPacket()}
+        else                     { return ControlPacket(  type: .switch, payload8: NSNumber(value: switchState as Float).uint8Value).getPacket() }
+        
     }
     
-    public static func getResetPacket() -> [UInt8] {
-        return ControlPacket(type: .reset).getPacket()
+     func getResetPacket() -> [UInt8] {
+        if controlVersion == .v2 { return ControlPacketV2(type: .reset).getPacket()}
+        else                     { return ControlPacket(  type: .reset).getPacket()}
     }
     
-    public static func getPutInDFUPacket() -> [UInt8] {
-        return ControlPacket(type: .goto_DFU).getPacket()
+     func getPutInDFUPacket() -> [UInt8] {
+        if controlVersion == .v2 { return ControlPacketV2(type: .goto_DFU).getPacket()}
+        else                     { return ControlPacket(  type: .goto_DFU).getPacket()}
     }
     
-    public static func getDisconnectPacket() -> [UInt8] {
-        return ControlPacket(type: .disconnect).getPacket()
+     func getDisconnectPacket() -> [UInt8] {
+        if controlVersion == .v2 { return ControlPacketV2(type: .disconnect).getPacket()}
+        else                     { return ControlPacket(  type: .disconnect).getPacket()}
     }
     
-    public static func getRelaySwitchPacket(_ state: UInt8) -> [UInt8] {
-        return ControlPacket(type: .relay, payload8: state).getPacket()
+     func getRelaySwitchPacket(_ state: UInt8) -> [UInt8] {
+        if controlVersion == .v2 { return ControlPacketV2(type: .relay, payload8: state).getPacket()}
+        else                     { return ControlPacket(  type: .relay, payload8: state).getPacket()}
     }
     
-    public static func getPwmSwitchPacket(_ state: Float) -> [UInt8] {
-        let switchState = min(1,max(0,state))*100
-        return ControlPacket(type: .pwm, payload8: NSNumber(value: switchState as Float).uint8Value).getPacket()
+     func getPwmSwitchPacket(_ state: Float) -> [UInt8] {
+        let switchState : UInt8 = NSNumber(value: min(1,max(0,state))*100).uint8Value
+        
+        if controlVersion == .v2 { return ControlPacketV2(type: .pwm, payload8: switchState).getPacket()}
+        else                     { return ControlPacket(  type: .pwm, payload8: switchState).getPacket()}
     }
     
-    public static func getKeepAliveStatePacket(changeState: Bool, state: Float, timeout: UInt16) -> [UInt8] {
+    /** LEGACY **/
+     func getKeepAliveStatePacket(changeState: Bool, state: Float, timeout: UInt16) -> [UInt8] {
         let switchState = min(1,max(0,state))*100
         
         // make sure we do not
@@ -65,53 +82,61 @@ public class ControlPacketsGenerator {
             actionState = 1
         }
         
-        return keepAliveStatePacket(action: actionState, state: NSNumber(value: switchState as Float).uint8Value, timeout: timeout).getPacket()
+        return KeepAliveStatePacket(action: actionState, state: NSNumber(value: switchState as Float).uint8Value, timeout: timeout).getPacket()
     }
     
-    public static func getKeepAliveRepeatPacket() -> [UInt8] {
+    /** LEGACY **/
+     func getKeepAliveRepeatPacket() -> [UInt8] {
         return ControlPacket(type: .keepAliveRepeat).getPacket()
     }
     
-    public static func getResetErrorPacket(errorMask: UInt32) -> [UInt8] {
-        return ControlPacket(type: .reset_ERRORS, payload32: errorMask).getPacket()
+     func getResetErrorPacket(errorMask: UInt32) -> [UInt8] {
+        if controlVersion == .v2 { return ControlPacketV2(type: .reset_ERRORS, payload32: errorMask).getPacket()}
+        else                     { return ControlPacket(  type: .reset_ERRORS, payload32: errorMask).getPacket()}
     }
     
-    public static func getSetTimePacket(_ time: UInt32) -> [UInt8] {
-        return ControlPacket(type: .set_TIME, payload32: time).getPacket()
+     func getSetTimePacket(_ time: UInt32) -> [UInt8] {
+        if controlVersion == .v2 { return ControlPacketV2(type: .set_TIME, payload32: time).getPacket()}
+        else                     { return ControlPacket(  type: .set_TIME, payload32: time).getPacket()}
     }
     
-    public static func getNoOpPacket() -> [UInt8] {
-        return ControlPacket(type: .no_OPERATION).getPacket()
+     func getNoOpPacket() -> [UInt8] {
+        if controlVersion == .v2 { return ControlPacketV2(type: .no_OPERATION).getPacket()}
+        else                     { return ControlPacket(  type: .no_OPERATION).getPacket()}
     }
     
-    public static func getAllowDimmingPacket(_ allow: Bool) -> [UInt8] {
+     func getAllowDimmingPacket(_ allow: Bool) -> [UInt8] {
         var allowValue : UInt8 = 0
         if (allow) {
             allowValue = 1
         }
-        
-        return ControlPacket(type: .allow_dimming, payload8: allowValue).getPacket()
+        if controlVersion == .v2 { return ControlPacketV2(type: .allow_dimming, payload8: allowValue).getPacket()}
+        else                     { return ControlPacket(  type: .allow_dimming, payload8: allowValue).getPacket()}
     }
     
-    public static func getLockSwitchPacket(_ lock: Bool) -> [UInt8] {
+     func getLockSwitchPacket(_ lock: Bool) -> [UInt8] {
         var lockValue : UInt8 = 0
         if (lock) {
             lockValue = 1
         }
         
-        return ControlPacket(type: .lock_switch, payload8: lockValue).getPacket()
+        if controlVersion == .v2 { return ControlPacketV2(type: .lock_switch, payload8: lockValue).getPacket()}
+        else                     { return ControlPacket(  type: .lock_switch, payload8: lockValue).getPacket()}
     }
     
-    public static func getSwitchCraftPacket(_ enabled: Bool) -> [UInt8] {
+     func getSwitchCraftPacket(_ enabled: Bool) -> [UInt8] {
         var enabledValue : UInt8 = 0
         if (enabled) {
             enabledValue = 1
         }
         
-        return ControlPacket(type: .enable_switchcraft, payload8: enabledValue).getPacket()
+        if controlVersion == .v2 { return ControlPacketV2(type: .enable_switchcraft, payload8: enabledValue).getPacket()}
+        else                     { return ControlPacket(  type: .enable_switchcraft, payload8: enabledValue).getPacket()}
     }
     
-    public static func getSetupPacket(type: UInt8, crownstoneId: UInt8, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> [UInt8] {
+    
+    /** LEGACY **/
+     func getSetupPacket(type: UInt8, crownstoneId: UInt8, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> [UInt8] {
         var data : [UInt8] = []
         data.append(type)
         data.append(crownstoneId)
@@ -129,7 +154,7 @@ public class ControlPacketsGenerator {
         return ControlPacket(type: .setup, payloadArray: data).getPacket()
     }
     
-    public static func getSetupPacketV2(
+    func getSetupPacketV2(
         crownstoneId: UInt8, sphereId: UInt8,
         adminKey: String, memberKey: String, basicKey: String, localizationKey: String, serviceDataKey: String, meshNetworkKey: String, meshApplicationKey: String, meshDeviceKey: String,
         ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16
@@ -152,8 +177,11 @@ public class ControlPacketsGenerator {
         data += Conversion.uint16_to_uint8_array(ibeaconMajor)
         data += Conversion.uint16_to_uint8_array(ibeaconMinor)
         
-        return ControlPacket(type: .setup, payloadArray: data).getPacket()
+        
+       if controlVersion == .v2 { return ControlPacketV2(type: .setup, payloadArray: data).getPacket()}
+       else                     { return ControlPacket(  type: .setup, payloadArray: data).getPacket()}
     }
 
 }
 
+ let ControlPacketsGenerator = ControlPacketsGeneratorClass()

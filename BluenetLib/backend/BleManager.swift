@@ -39,7 +39,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     public var centralManager : CBCentralManager!
     var connectedPeripheral: CBPeripheral?
     var connectingPeripheral: CBPeripheral?
-    
+    var connectionState : ConnectionState!
     
     #if os(iOS)
     var BleState : CBCentralManagerState = .unknown
@@ -72,6 +72,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     public init(eventBus: EventBus, settings: BluenetSettings, backgroundEnabled: Bool = true) {
         super.init();
         
+        self.connectionState = ConnectionState()
         self.notificationEventBus = EventBus()
         self.settings = settings
         self.eventBus = eventBus

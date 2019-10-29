@@ -50,7 +50,6 @@ public class Behaviour {
     var type         : BehaviourType
     var activeDays   : ActiveDays
     var intensity    : UInt8
-    var options      : BehaviourOptions
     var from         : BehaviourTime
     var until        : BehaviourTime
     var presence     : BehaviourPresence? = nil
@@ -62,11 +61,10 @@ public class Behaviour {
     /**
      This contains all required information for at least a Twlight behaviour.
      */
-    init(profileIndex: UInt8, type: BehaviourType, intensity: Double, options: BehaviourOptions, activeDays: ActiveDays, time: BehaviourTimeContainer) {
+    init(profileIndex: UInt8, type: BehaviourType, intensity: Double, activeDays: ActiveDays, time: BehaviourTimeContainer) {
         self.profileIndex = profileIndex
         self.type = type
         self.intensity = UInt8(max(0,min(100, 100*intensity)))
-        self.options = options
         self.activeDays = activeDays
         self.from = time.from
         self.until = time.until
@@ -75,24 +73,24 @@ public class Behaviour {
     /**
      Adding presence for a normal behaviour
      */
-    convenience init(profileIndex: UInt8, type: BehaviourType, intensity: Double, options: BehaviourOptions, activeDays: ActiveDays, time: BehaviourTimeContainer, presence: BehaviourPresence) {
-        self.init(profileIndex: profileIndex, type: type, intensity: intensity, options: options, activeDays: activeDays, time: time)
+    convenience init(profileIndex: UInt8, type: BehaviourType, intensity: Double, activeDays: ActiveDays, time: BehaviourTimeContainer, presence: BehaviourPresence) {
+        self.init(profileIndex: profileIndex, type: type, intensity: intensity, activeDays: activeDays, time: time)
         self.presence = presence
     }
 
     /**
      Add an end condition for a smart timer
      */
-    convenience init(profileIndex: UInt8, type: BehaviourType, intensity: Double, options: BehaviourOptions, activeDays: ActiveDays, time: BehaviourTimeContainer, endCondition: BehaviourEndCondition) {
-        self.init(profileIndex: profileIndex, type: type, intensity: intensity, options: options, activeDays: activeDays, time: time)
+    convenience init(profileIndex: UInt8, type: BehaviourType, intensity: Double, activeDays: ActiveDays, time: BehaviourTimeContainer, endCondition: BehaviourEndCondition) {
+        self.init(profileIndex: profileIndex, type: type, intensity: intensity, activeDays: activeDays, time: time)
         self.endCondition = endCondition
     }
 
     /**
      Add presence AND an endcondition
      */
-    convenience init(profileIndex: UInt8, type: BehaviourType, intensity: Double, options: BehaviourOptions, activeDays: ActiveDays, time: BehaviourTimeContainer, presence: BehaviourPresence, endCondition: BehaviourEndCondition) {
-        self.init(profileIndex: profileIndex, type: type, intensity: intensity, options: options, activeDays: activeDays, time:time, presence: presence)
+    convenience init(profileIndex: UInt8, type: BehaviourType, intensity: Double, activeDays: ActiveDays, time: BehaviourTimeContainer, presence: BehaviourPresence, endCondition: BehaviourEndCondition) {
+        self.init(profileIndex: profileIndex, type: type, intensity: intensity, activeDays: activeDays, time:time, presence: presence)
         self.endCondition = endCondition
     }
     
@@ -103,7 +101,6 @@ public class Behaviour {
         arr.append(self.profileIndex)
         arr.append(self.type.rawValue)
         arr.append(self.intensity)
-        arr.append(self.options.getMask())
         arr.append(self.activeDays.getMask())
         
         arr += self.from.getPacket()
@@ -123,17 +120,6 @@ public class Behaviour {
     
     func getHash() -> UInt32 {
         return fletcher32(self.getPacket())
-    }
-}
-
-public class BehaviourOptions {
-    
-    init() {
-        
-    }
-    
-    func getMask() -> UInt8 {
-        return 0
     }
 }
 
@@ -334,7 +320,6 @@ public func BehaviourDictionaryParser(_ dict: NSDictionary, dayStartTimeSecondsS
         profileIndex: profileIndex.uint8Value,
         type: behaviourType,
         intensity: intensity.doubleValue,
-        options: BehaviourOptions(),
         activeDays: activeDayObject,
         time: timeObject
     )

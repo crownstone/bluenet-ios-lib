@@ -15,7 +15,7 @@ struct validationSet {
 }
 
 
-enum ResultType : UInt8 {
+enum ValidationResultType : UInt8 {
     case FAILED = 0
     case DUPLICATE
     case SUCCESS
@@ -185,7 +185,7 @@ public class AdvertismentValidator {
     *   It will only be called on operation mode Crownstones.
     *   This method is the owner of the validationMap objects and is the only one that changes them.
     **/
-    func validate(_ advertisement: Advertisement, referenceId: String) -> ResultType {
+    func validate(_ advertisement: Advertisement, referenceId: String) -> ValidationResultType {
         let scanResponse = advertisement.scanResponse!
         if (!scanResponse.validData) {
             return .INVALID_DATA

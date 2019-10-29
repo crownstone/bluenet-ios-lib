@@ -22,7 +22,7 @@ public class ConfigHandler {
     }
     
     public func setIBeaconUUID(_ uuid: String) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.ibeacon_UUID, payload: uuid)
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.ibeacon_UUID).load(uuid)
         return self._writeToConfig(packet: data.getPacket())
     }
     
@@ -31,22 +31,22 @@ public class ConfigHandler {
     }
     
     public func setDimmerTempUp(_ voltage: Float) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.DIMMER_TEMP_UP_VOLTAGE, payloadFloat: voltage)
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.DIMMER_TEMP_UP_VOLTAGE).load(voltage)
         return self._writeToConfig(packet: data.getPacket())
     }
     
     public func setIBeaconMajor(_ major: UInt16) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.ibeacon_MAJOR, payload16: major)
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.ibeacon_MAJOR).load(major)
         return self._writeToConfig(packet: data.getPacket())
     }
     
     public func setIBeaconMinor(_ minor: UInt16) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.ibeacon_MINOR, payload16: minor)
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.ibeacon_MINOR).load(minor)
         return self._writeToConfig(packet: data.getPacket())
     }
     
     public func setPWMPeriod(_ pwmPeriod: NSNumber) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.pwm_PERIOD, payload32: pwmPeriod.uint32Value)
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.pwm_PERIOD).load(pwmPeriod.uint32Value)
         return self._writeToConfig(packet: data.getPacket())
     }
 
@@ -61,27 +61,27 @@ public class ConfigHandler {
     }
     
     public func setScanDuration(_ scanDurationsMs: NSNumber) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.scan_DURATION, payload16: scanDurationsMs.uint16Value)
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.scan_DURATION).load(scanDurationsMs.uint16Value)
         return self._writeToConfig(packet: data.getPacket())
     }
     
     public func setScanSendDelay(_ scanSendDelay: NSNumber) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.scan_SEND_DELAY, payload16: scanSendDelay.uint16Value)
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.scan_SEND_DELAY).load(scanSendDelay.uint16Value)
         return self._writeToConfig(packet: data.getPacket())
     }
     
     public func setScanBreakDuration(_ scanBreakDuration: NSNumber) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.scan_BREAK_DURATION, payload16: scanBreakDuration.uint16Value)
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.scan_BREAK_DURATION).load(scanBreakDuration.uint16Value)
         return self._writeToConfig(packet: data.getPacket())
     }
     
     public func setScanFilter(_ scanFilter: NSNumber) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.scan_BREAK_DURATION, payload8: scanFilter.uint8Value)
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.scan_BREAK_DURATION).load(scanFilter.uint8Value)
         return self._writeToConfig(packet: data.getPacket())
     }
     
     public func setScanFilterFraction(_ scanFilterFraction: NSNumber) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.scan_FILTER_FRACTION, payload16: scanFilterFraction.uint16Value)
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.scan_FILTER_FRACTION).load(scanFilterFraction.uint16Value)
         return self._writeToConfig(packet: data.getPacket())
     }
     
@@ -90,7 +90,7 @@ public class ConfigHandler {
     }
     
     public func setSwitchcraftThreshold(value: Float) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.SWITCHCRAFT_THRESHOLD, payloadFloat: value)
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.SWITCHCRAFT_THRESHOLD).load(value)
         return self._writeToConfig(packet: data.getPacket())
     }
     
@@ -99,7 +99,7 @@ public class ConfigHandler {
     }
     
     public func setMaxChipTemp(value: Int8) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.max_CHIP_TEMP, payload8: Conversion.int8_to_uint8(value))
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.max_CHIP_TEMP).load(value)
         return self._writeToConfig(packet: data.getPacket())
     }
     
@@ -108,7 +108,7 @@ public class ConfigHandler {
     }
     
     public func setDimmerCurrentThreshold(value: UInt16) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.CURRENT_CONSUMPTION_THRESHOLD_DIMMER, payload16: value)
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.CURRENT_CONSUMPTION_THRESHOLD_DIMMER).load(value)
         return self._writeToConfig(packet: data.getPacket())
     }
     
@@ -117,7 +117,7 @@ public class ConfigHandler {
     }
     
     public func setDimmerTempUpThreshold(value: Float) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.DIMMER_TEMP_UP_VOLTAGE, payloadFloat: value)
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.DIMMER_TEMP_UP_VOLTAGE).load(value)
         return self._writeToConfig(packet: data.getPacket())
     }
     
@@ -126,7 +126,7 @@ public class ConfigHandler {
     }
     
     public func setDimmerTempDownThreshold(value: Float) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.DIMMER_TEMP_DOWN_VOLTAGE, payloadFloat: value)
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.DIMMER_TEMP_DOWN_VOLTAGE).load(value)
         return self._writeToConfig(packet: data.getPacket())
     }
     
@@ -135,7 +135,7 @@ public class ConfigHandler {
     }
     
     public func setVoltageZero(value: Int32) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.voltage_ZERO, payload32: Conversion.int32_to_uint32(value))
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.voltage_ZERO).load(Conversion.int32_to_uint32(value))
         return self._writeToConfig(packet: data.getPacket())
     }
     
@@ -144,7 +144,7 @@ public class ConfigHandler {
     }
     
     public func setCurrentZero(value: Int32) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.current_ZERO, payload32: Conversion.int32_to_uint32(value))
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.current_ZERO).load(Conversion.int32_to_uint32(value))
         return self._writeToConfig(packet: data.getPacket())
     }
     
@@ -153,7 +153,7 @@ public class ConfigHandler {
     }
     
     public func setPowerZero(value: Int32) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.power_ZERO, payload32: Conversion.int32_to_uint32(value))
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.power_ZERO).load(Conversion.int32_to_uint32(value))
         return self._writeToConfig(packet: data.getPacket())
     }
     
@@ -162,7 +162,7 @@ public class ConfigHandler {
     }
     
     public func setVoltageMultiplier(value: Float) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.voltage_MULTIPLIER, payloadFloat: value)
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.voltage_MULTIPLIER).load(value)
         return self._writeToConfig(packet: data.getPacket())
     }
     
@@ -171,7 +171,7 @@ public class ConfigHandler {
     }
     
     public func setCurrentMultiplier(value: Float) -> Promise<Void> {
-        let data = WriteConfigPacket(type: ConfigurationType.current_MULITPLIER, payloadFloat: value)
+        let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.current_MULITPLIER).load(value)
         return self._writeToConfig(packet: data.getPacket())
     }
     
@@ -179,7 +179,7 @@ public class ConfigHandler {
     public func setUartState(_ state: NSNumber) -> Promise<Void> {
         return Promise<Void> { seal in
             if (state == 3 || state == 1 || state == 0) {
-                let data = WriteConfigPacket(type: ConfigurationType.UART_ENABLED, payload8: state.uint8Value)
+                let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.UART_ENABLED).load(state.uint8Value)
                 self._writeToConfig(packet: data.getPacket())
                     .done{ _ in seal.fulfill(()) }
                     .catch{err in seal.reject(err)}
@@ -194,7 +194,7 @@ public class ConfigHandler {
     public func setMeshChannel(_ channel: NSNumber) -> Promise<Void> {
         return Promise<Void> { seal in
             if (channel == 37 || channel == 38 || channel == 39) {
-                let data = WriteConfigPacket(type: ConfigurationType.MESH_CHANNEL, payload8: channel.uint8Value)
+                let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.MESH_CHANNEL).load(channel.uint8Value)
                 self._writeToConfig(packet: data.getPacket())
                     .done{ _ in seal.fulfill(()) }
                     .catch{err in seal.reject(err)}
@@ -218,7 +218,7 @@ public class ConfigHandler {
     public func setTxPower (_ txPower: NSNumber) -> Promise<Void> {
         return Promise<Void> { seal in
             if (txPower == -40 || txPower == -30 || txPower == -20 || txPower == -16 || txPower == -12 || txPower == -8 || txPower == -4 || txPower == 0 || txPower == 4) {
-                let data = WriteConfigPacket(type: ConfigurationType.tx_POWER, payload8: txPower.int8Value)
+                let data = StatePacketsGenerator.getWritePacket(type: ConfigurationType.tx_POWER).load(txPower.int8Value)
                 self._writeToConfig(packet: data.getPacket())
                     .done{ _ in seal.fulfill(()) }
                     .catch{ err in seal.reject(err) }
@@ -230,68 +230,104 @@ public class ConfigHandler {
     }
     
     func _writeToConfig(packet: [UInt8]) -> Promise<Void> {
-        return self.bleManager.getServicesFromDevice()
-            .then{ services -> Promise<Void> in
-                if getServiceFromList(services, CSServices.SetupService) != nil {
-                    return self.bleManager.writeToCharacteristic(
-                        CSServices.SetupService,
-                        characteristicId: SetupCharacteristics.ConfigControl,
-                        data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-                        type: CBCharacteristicWriteType.withResponse
-                    )
-                }
-                else {
-                    return self.bleManager.writeToCharacteristic(
-                        CSServices.CrownstoneService,
-                        characteristicId: CrownstoneCharacteristics.ConfigControl,
-                        data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-                        type: CBCharacteristicWriteType.withResponse
-                    )
-                }
-        }        
+        if self.bleManager.connectionState.operationMode == .setup {
+            if self.bleManager.connectionState.controlVersion == .v2 {
+                return self.bleManager.writeToCharacteristic(
+                    CSServices.SetupService,
+                    characteristicId: SetupCharacteristics.SetupControlV3,
+                    data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                    type: CBCharacteristicWriteType.withResponse
+                )
+            }
+            else {
+                return self.bleManager.writeToCharacteristic(
+                   CSServices.SetupService,
+                   characteristicId: SetupCharacteristics.ConfigControl,
+                   data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                   type: CBCharacteristicWriteType.withResponse
+               )
+            }
+            
+        }
+        else {
+            if self.bleManager.connectionState.controlVersion == .v2 {                
+                return self.bleManager.writeToCharacteristic(
+                    CSServices.CrownstoneService,
+                    characteristicId: CrownstoneCharacteristics.ControlV2,
+                    data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                    type: CBCharacteristicWriteType.withResponse
+                )
+            }
+            else {
+                return self.bleManager.writeToCharacteristic(
+                    CSServices.CrownstoneService,
+                    characteristicId: CrownstoneCharacteristics.ConfigControl,
+                    data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                    type: CBCharacteristicWriteType.withResponse
+                )
+            }
+        }
     }
     
     
     public func _getConfig<T>(_ config : ConfigurationType) -> Promise<T> {
-        return self.bleManager.getServicesFromDevice()
-            .then{ services -> Promise<T> in
-                var service = CSServices.CrownstoneService;
-                var characteristic = CrownstoneCharacteristics.ConfigRead
-                if getServiceFromList(services, CSServices.SetupService) != nil {
-                    service = CSServices.SetupService;
-                    characteristic = SetupCharacteristics.ConfigRead
-                }
+        return self._getConfig(StateTypeV2(rawValue: UInt16(config.rawValue))!)
+    }
+    
+    public func _getConfig<T>(_ config : StateTypeV2) -> Promise<T> {
+        let readParams = _getConfigReadParameters()
             
-                return Promise<T> { seal in
-                    let writeCommand : voidPromiseCallback = {
-                        return self._writeToConfig(packet: ReadConfigPacket(type: config).getPacket())
+        return Promise<T> { seal in
+            let writeCommand : voidPromiseCallback = {
+                return self._writeToConfig(packet: StatePacketsGenerator.getReadPacket(type: config).getPacket())
+            }
+            self.bleManager.setupSingleNotification(readParams.service, characteristicId: readParams.characteristicToReadFrom, writeCommand: writeCommand)
+                .done{ data -> Void in
+                    let resultPacket = StatePacketsGenerator.getReturnPacket()
+                    resultPacket.load(data)
+                    
+                    if (resultPacket.valid == false) {
+                        return seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
                     }
-                    self.bleManager.setupSingleNotification(service, characteristicId: characteristic, writeCommand: writeCommand)
-                        .done{ data -> Void in
-                            var validData = [UInt8]()
-                            if (data.count > 3) {
-                                for i in (4...data.count - 1) {
-                                    validData.append(data[i])
-                                }
-                                
-                                do {
-                                    let result : T = try Convert(validData)
-                                    seal.fulfill(result)
-                                }
-                                catch let err {
-                                    seal.reject(err)
-                                }
-                            }
-                            else {
-                                seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
-                            }
-                        }
-                        .catch{ err in seal.reject(err) }
+                                        
+                    do {
+                        let result : T = try Convert(resultPacket.payload)
+                        seal.fulfill(result)
+                    }
+                    catch let err {
+                        seal.reject(err)
+                    }
+                
                 }
+                .catch{ err in seal.reject(err) }
         }
+       
     }
 
+    
+    func _getConfigReadParameters() -> ReadParamaters {
+        var service                  = CSServices.CrownstoneService;
+        var characteristicToReadFrom = CrownstoneCharacteristics.ConfigRead
+        
+        //determine where to write
+        if self.bleManager.connectionState.controlVersion == .v2 {
+            characteristicToReadFrom = CrownstoneCharacteristics.ResultV2
+        }
+        if self.bleManager.connectionState.operationMode == .setup {
+            service = CSServices.SetupService;
+            if self.bleManager.connectionState.controlVersion == .v2 {
+                characteristicToReadFrom = SetupCharacteristics.ResultV2
+            }
+            else {
+                characteristicToReadFrom = SetupCharacteristics.ConfigRead
+            }
+        }
+        return ReadParamaters(service: service, characteristicToReadFrom: characteristicToReadFrom)
+    }
+}
 
-    
-    
+
+struct ReadParamaters {
+    var service: String
+    var characteristicToReadFrom: String
 }

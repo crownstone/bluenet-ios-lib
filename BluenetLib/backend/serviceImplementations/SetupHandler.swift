@@ -75,6 +75,25 @@ public class SetupHandler {
         // if the crownstone has the new setupControl characteristic, we can do the quick setup.
         return self.bleManager.getCharacteristicsFromDevice(CSServices.SetupService)
                 .then{(characteristics) -> Promise<Void> in
+                    if getCharacteristicFromList(characteristics, SetupCharacteristics.SetupControlV3) != nil {
+                        // here we can do fastSetup
+                        LOG.info("BLUENET_LIB: Fast Setup V2 is supported. Performing on V3..")
+                        return self.fastSetupV2_controlV2(
+                            crownstoneId: crownstoneId,
+                            sphereId: sphereId,
+                            adminKey: adminKey,
+                            memberKey: memberKey,
+                            basicKey: basicKey,
+                            localizationKey: localizationKey,
+                            serviceDataKey: serviceDataKey,
+                            meshNetworkKey: meshNetworkKey,
+                            meshApplicationKey: meshApplicationKey,
+                            meshDeviceKey: meshDeviceKey,
+                            ibeaconUUID: ibeaconUUID,
+                            ibeaconMajor: ibeaconMajor,
+                            ibeaconMinor: ibeaconMinor
+                        )
+                    }
                     if getCharacteristicFromList(characteristics, SetupCharacteristics.SetupControlV2) != nil {
                         // here we can do fastSetup
                         LOG.info("BLUENET_LIB: Fast Setup V2 is supported. Performing..")
@@ -160,6 +179,46 @@ public class SetupHandler {
     }
     
     /**
+        * This will handle the complete setup. We expect bonding has already been done by now.
+        */
+       public func fastSetupV2_controlV2(
+           crownstoneId: UInt16,
+           sphereId: UInt8,
+           adminKey: String,
+           memberKey: String,
+           basicKey: String,
+           localizationKey: String,
+           serviceDataKey: String,
+           meshNetworkKey: String,
+           meshApplicationKey: String,
+           meshDeviceKey: String,
+           ibeaconUUID: String,
+           ibeaconMajor: UInt16,
+           ibeaconMinor: UInt16
+       ) -> Promise<Void> {
+           let writeCommand = { () -> Promise<Void> in
+               self.eventBus.emit("setupProgress", 6)
+               return self.commandSetupV2(
+                   crownstoneId: crownstoneId,
+                   sphereId: sphereId,
+                   adminKey: adminKey,
+                   memberKey: memberKey,
+                   basicKey: basicKey,
+                   localizationKey: localizationKey,
+                   serviceDataKey: serviceDataKey,
+                   meshNetworkKey: meshNetworkKey,
+                   meshApplicationKey:meshApplicationKey,
+                   meshDeviceKey:meshDeviceKey,
+                   ibeaconUUID: ibeaconUUID,
+                   ibeaconMajor: ibeaconMajor,
+                   ibeaconMinor: ibeaconMinor,
+                   characteristicToWriteTo: SetupCharacteristics.SetupControlV3
+               )
+           }
+           return self._fastSetup(characteristicId: SetupCharacteristics.ResultV2, writeCommand: writeCommand)
+       }
+    
+    /**
      * This will handle the complete setup. We expect bonding has already been done by now.
      */
     public func fastSetupV2(
@@ -192,7 +251,8 @@ public class SetupHandler {
                 meshDeviceKey:meshDeviceKey,
                 ibeaconUUID: ibeaconUUID,
                 ibeaconMajor: ibeaconMajor,
-                ibeaconMinor: ibeaconMinor
+                ibeaconMinor: ibeaconMinor,
+                characteristicToWriteTo: SetupCharacteristics.SetupControlV2
             )
         }
         return self._fastSetup(characteristicId: SetupCharacteristics.SetupControlV2, writeCommand: writeCommand)
@@ -232,15 +292,15 @@ public class SetupHandler {
                 writeCommand: writeCommand,
                 resultHandler: {(returnData) -> ProcessType in
                     if let data = returnData as? [UInt8] {
-                        let packet = ResultPacket(data)
-                        if (packet.valid) {
-                            let payload = packet.getUInt16Payload()
-                            if (payload == ResultValue.WAIT_FOR_SUCCESS.rawValue) {
+                        let result = StatePacketsGenerator.getReturnPacket()
+                        result.load(data)
+                        if (result.valid) {
+                            if (result.resultCode == ResultValue.WAIT_FOR_SUCCESS) {
                                 // thats ok
                                 self.eventBus.emit("setupProgress", 7)
                                 return .CONTINUE
                             }
-                            else if (payload == ResultValue.SUCCESS.rawValue) {
+                            else if (result.resultCode == ResultValue.SUCCESS) {
                                 return .FINISHED
                             }
                             else {
@@ -292,7 +352,8 @@ public class SetupHandler {
         meshDeviceKey: String,
         ibeaconUUID: String,
         ibeaconMajor: UInt16,
-        ibeaconMinor: UInt16
+        ibeaconMinor: UInt16,
+        characteristicToWriteTo: String
         ) -> Promise<Void> {
         let packet = ControlPacketsGenerator.getSetupPacketV2(
             crownstoneId: NSNumber(value: crownstoneId).uint8Value,
@@ -311,7 +372,7 @@ public class SetupHandler {
         )
         return self.bleManager.writeToCharacteristic(
             CSServices.SetupService,
-            characteristicId: SetupCharacteristics.SetupControlV2,
+            characteristicId: characteristicToWriteTo,
             data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
             type: CBCharacteristicWriteType.withResponse
         )

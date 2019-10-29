@@ -94,9 +94,9 @@ public class ControlHandler {
                 return Promise<Void> { seal in
                     // new response types
                     if (response[0] == ControlType.factory_RESET.rawValue) {
-                        let packet = ResultPacket(response)
-                        let payload = packet.getUInt16Payload()
-                        if (payload == ResultValue.SUCCESS.rawValue) {
+                        let result = StatePacketsGenerator.getReturnPacket()
+                        result.load(response)
+                        if (result.resultCode == ResultValue.SUCCESS) {
                             seal.fulfill(())
                         }
                         else {
@@ -319,20 +319,12 @@ public class ControlHandler {
     }
 
     func _writeControlPacket(_ packet: [UInt8]) -> Promise<Void> {
-        return self.bleManager.getServicesFromDevice()
-            .then{ services -> Promise<Void> in
-                if getServiceFromList(services, CSServices.SetupService) != nil {
-                    return _writeSetupControlPacket(bleManager: self.bleManager, packet)
-                }
-                else {
-                    return self.bleManager.writeToCharacteristic(
-                        CSServices.CrownstoneService,
-                        characteristicId: CrownstoneCharacteristics.Control,
-                        data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-                        type: CBCharacteristicWriteType.withResponse
-                    )
-                }
-            }
+        if self.bleManager.connectionState.operationMode == .setup {
+            return _writeSetupControlPacket(bleManager: self.bleManager, packet)
+        }
+        else {
+            return _writeGenericControlPacket(bleManager: self.bleManager, packet)
+        }
     }
     
     

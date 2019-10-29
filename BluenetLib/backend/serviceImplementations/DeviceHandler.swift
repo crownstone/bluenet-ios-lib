@@ -78,22 +78,10 @@ public class DeviceHandler {
     
     
     public func getBootloaderRevision() -> Promise<String> {
-        return self.bleManager.getServicesFromDevice()
-            .then{ services -> Promise<String> in
-                var isInDfuMode = false
-                for service in services {
-                    if service.uuid == DFUServiceUUID || service.uuid == DFUSecureServiceUUID {
-                        isInDfuMode = true
-                        break
-                    }
-                }
-                
-                if (isInDfuMode == false) {
-                    return self.getBootloaderRevisionInAppMode()
-                }
-                
-                return self.getSoftwareRevision()
-            }
+        if self.bleManager.connectionState.operationMode == .dfu {
+            return self.getBootloaderRevisionInAppMode()
+        }
+        return self.getSoftwareRevision()
     }
 
     

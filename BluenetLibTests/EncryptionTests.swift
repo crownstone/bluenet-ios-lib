@@ -67,7 +67,7 @@ class EncryptionTests: XCTestCase {
         let exp = expectation(description: "Example")
         var elements : [BroadcastElement] = []
 
-        let promise = Promise<Void> { seal in
+        _ = Promise<Void> { seal in
         
             elements.append(
                 BroadcastElement(
@@ -136,7 +136,7 @@ class EncryptionTests: XCTestCase {
             }
             
             let referenceIdOfBuffer = bufferToBroadcast.referenceId
-            var time = 0
+//            var time = 0
             if (settings.setSessionId(referenceId: referenceIdOfBuffer) == false) {
                 print("Error in _broadcastBuffer Invalid referenceId")
                 return

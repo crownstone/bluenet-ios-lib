@@ -137,42 +137,65 @@ public class StateHandler {
     }
     
     func _writeToState(packet: [UInt8]) -> Promise<Void> {
-        return self.bleManager.writeToCharacteristic(
-            CSServices.CrownstoneService,
-            characteristicId: CrownstoneCharacteristics.StateControl,
-            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-            type: CBCharacteristicWriteType.withResponse
-        )
+        if self.bleManager.connectionState.controlVersion == .v2 {
+            return self.bleManager.writeToCharacteristic(
+                CSServices.CrownstoneService,
+                characteristicId: CrownstoneCharacteristics.ControlV2,
+                data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                type: CBCharacteristicWriteType.withResponse
+            )
+        }
+        else {
+            return self.bleManager.writeToCharacteristic(
+                CSServices.CrownstoneService,
+                characteristicId: CrownstoneCharacteristics.StateControl,
+                data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+                type: CBCharacteristicWriteType.withResponse
+            )
+        }
+    }
+   
+    public func _getState<T>(_ state : StateType) -> Promise<T> {
+        return self._getState(StateTypeV2(rawValue: UInt16(state.rawValue))!)
     }
     
-    public func _getState<T>(_ state : StateType) -> Promise<T> {
+    public func _getState<T>(_ state : StateTypeV2) -> Promise<T> {
         return Promise<T> { seal in
+            let stateParams = _getStateReadParameters()
+            
             let writeCommand : voidPromiseCallback = { 
-                return self._writeToState(packet: ReadStatePacket(type: state).getPacket())
+                return self._writeToState(packet: StatePacketsGenerator.getReadPacket(type: state).getPacket())
             }
-            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.StateRead, writeCommand: writeCommand)
+            self.bleManager.setupSingleNotification(stateParams.service, characteristicId: stateParams.characteristicToReadFrom, writeCommand: writeCommand)
                 .done{ data -> Void in
-                    var validData = [UInt8]()
-                    // remove the state preamble
-                    if (data.count > 3) {
-                        for i in (4...data.count - 1) {
-                            validData.append(data[i])
-                        }
-                        
-                        do {
-                            let result : T = try Convert(validData)
-                            seal.fulfill(result)
-                        }
-                        catch let err {
-                            seal.reject(err)
-                        }
+                    let resultPacket = StatePacketsGenerator.getReturnPacket()
+                    resultPacket.load(data)
+                    if (resultPacket.valid == false) {
+                        return seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
                     }
-                    else {
-                        seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
+                                        
+                    do {
+                        let result : T = try Convert(resultPacket.payload)
+                        seal.fulfill(result)
+                    }
+                    catch let err {
+                        seal.reject(err)
                     }
                 }
                 .catch{ err in seal.reject(err) }
         }
+    }
+    
+    func _getStateReadParameters() -> ReadParamaters {
+        let service                  = CSServices.CrownstoneService;
+        var characteristicToReadFrom = CrownstoneCharacteristics.StateRead
+        
+        //determine where to write
+        if self.bleManager.connectionState.controlVersion == .v2 {
+            characteristicToReadFrom = CrownstoneCharacteristics.ResultV2
+        }
+        
+        return ReadParamaters(service: service, characteristicToReadFrom: characteristicToReadFrom)
     }
     
 }

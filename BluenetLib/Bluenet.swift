@@ -79,7 +79,6 @@ public class Bluenet {
     public let config     : ConfigHandler!
     public let setup      : SetupHandler!
     public let control    : ControlHandler!
-    public let power      : PowerHandler!
     public let mesh       : MeshHandler!
     public let device     : DeviceHandler!
     public let state      : StateHandler!
@@ -113,7 +112,6 @@ public class Bluenet {
         self.config    = ConfigHandler(   bleManager:bleManager,  eventBus: eventBus, settings: settings)
         self.setup     = SetupHandler(    bleManager:bleManager,  eventBus: eventBus, settings: settings)
         self.control   = ControlHandler(  bleManager:bleManager,  eventBus: eventBus, settings: settings)
-        self.power     = PowerHandler(    bleManager:bleManager,  eventBus: eventBus, settings: settings)
         self.mesh      = MeshHandler(     bleManager:bleManager,  eventBus: eventBus, settings: settings)
         self.device    = DeviceHandler(   bleManager:bleManager,  eventBus: eventBus, settings: settings)
         self.state     = StateHandler(    bleManager:bleManager,  eventBus: eventBus, settings: settings)
@@ -344,45 +342,53 @@ public class Bluenet {
         let connectionCommand : voidPromiseCallback = {
             LOG.info("BLUENET_LIB: Connecting to \(handle) now.")
             return self.bleManager.connect(handle)
-                .then{_ -> Promise<[CBService]> in
+                .then{_ -> Promise<ModeInformation> in
                     LOG.info("BLUENET_LIB: connected!")
-                    return self.bleManager.getServicesFromDevice()
+                    return _getCrownstoneModeInformation(bleManager: self.bleManager)
                 }
-                .then{ services -> Promise<Void> in
-                    if getServiceFromList(services, CSServices.SetupService) != nil {
+                .then{modeInfo -> Promise<Void> in
+                    self.bleManager.connectionState.setControlVersion(modeInfo.controlMode)
+                    self.bleManager.connectionState.setOperationMode(modeInfo.operationMode)
+        
+                    if modeInfo.operationMode == .setup {
                         // setup mode, handle the setup encryption.
                         return self.setup.handleSetupPhaseEncryption()
                     }
                     else {
-                        // operation mode (or dfu mode), setup the session nonce.
                         return Promise<Void> {seal in
-                            if (self.settings.isEncryptionEnabled()) {
-                                // we have to validate if the referenceId is valid here, otherwise we cannot do encryption
-                                var activeReferenceId = referenceId
-                                
-                                if (referenceId == nil) {
-                                    activeReferenceId = self.getReferenceId(handle: handle)
-                                    if (activeReferenceId == nil) {
+                            // operation mode (or dfu mode), setup the session nonce.
+                            if modeInfo.operationMode == .operation {
+                                if (self.settings.isEncryptionEnabled()) {
+                                    // we have to validate if the referenceId is valid here, otherwise we cannot do encryption
+                                    var activeReferenceId = referenceId
+                                    
+                                    if (referenceId == nil) {
+                                        activeReferenceId = self.getReferenceId(handle: handle)
+                                        if (activeReferenceId == nil) {
+                                            return seal.reject(BluenetError.INVALID_SESSION_REFERENCE_ID)
+                                        }
+                                    }
+                                    
+                                    if (self.settings.setSessionId(referenceId: activeReferenceId!) == false) {
                                         return seal.reject(BluenetError.INVALID_SESSION_REFERENCE_ID)
                                     }
+                                    
+                                    self.control.getAndSetSessionNonce()
+                                        .done{_ -> Void in
+                                            seal.fulfill(())
+                                        }
+                                        .catch{err in seal.reject(err)}
                                 }
-                                
-                                if (self.settings.setSessionId(referenceId: activeReferenceId!) == false) {
-                                    return seal.reject(BluenetError.INVALID_SESSION_REFERENCE_ID)
+                                else {
+                                    seal.fulfill(())
                                 }
-                                
-                                self.control.getAndSetSessionNonce()
-                                    .done{_ -> Void in
-                                        seal.fulfill(())
-                                    }
-                                    .catch{err in seal.reject(err)}
                             }
                             else {
                                 seal.fulfill(())
                             }
                         }
                     }
-                };
+            }
         }
         
         if (delayTime != 0) {

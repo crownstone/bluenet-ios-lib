@@ -89,7 +89,7 @@ func RC5Decrypt(input: UInt32, key: [UInt8]) -> UInt32 {
 func RC5Encrypt(input: UInt32, S: [UInt16]) -> UInt32 {
     let rounds = 12
     
-    var inputBytes = Conversion.uint32_to_uint16_reversed_array(input)
+    let inputBytes = Conversion.uint32_to_uint16_reversed_array(input)
     var A : UInt16 = inputBytes[0] &+ S[0]
     var B : UInt16 = inputBytes[1] &+ S[1]
     for i in 1...rounds {
@@ -102,7 +102,7 @@ func RC5Encrypt(input: UInt32, S: [UInt16]) -> UInt32 {
 
 func RC5Decrypt(input: UInt32, S: [UInt16]) -> UInt32 {
     let rounds = 12
-    var inputBytes = Conversion.uint32_to_uint16_reversed_array(input)
+    let inputBytes = Conversion.uint32_to_uint16_reversed_array(input)
     var A : UInt16 = inputBytes[0]
     var B : UInt16 = inputBytes[1]
  
