@@ -59,7 +59,7 @@ public class Behaviour {
     
     var valid = true
     
-    var indexOnCrownstone : UInt8?
+    public var indexOnCrownstone : UInt8?
     
    
     init() {
