@@ -12,7 +12,7 @@ import CoreBluetooth
 
 
 
- class ControlPacketsGeneratorClass {
+ public class ControlPacketsGeneratorClass {
     var controlVersion : ControlVersionType = .v1
     
     init() {}
