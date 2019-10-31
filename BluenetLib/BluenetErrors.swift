@@ -108,6 +108,12 @@ public enum BluenetError : Error {
     
     
     // behaviour errors
+    case BEHAVIOUR_INDEX_OUT_OF_RANGE
+    
+    case BEHAVIOUR_INVALID
+    case BEHAVIOUR_INVALID_RESPONSE
+    case BEHAVIOUR_NOT_FOUND_AT_INDEX
+    
     case PROFILE_INDEX_MISSING
     case TYPE_MISSING
     case DATA_MISSING

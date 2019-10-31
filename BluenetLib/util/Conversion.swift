@@ -168,6 +168,19 @@ public class Conversion {
         return p1 + p2 + p3 + p4
     }
     
+    public static func uint8_array_to_uint64(_ arr8: [UInt8]) -> UInt64 {
+        let p1 = UInt64(arr8[7]) << 56
+        let p2 = UInt64(arr8[6]) << 48
+        let p3 = UInt64(arr8[5]) << 40
+        let p4 = UInt64(arr8[4]) << 32
+        let p5 = UInt64(arr8[3]) << 24
+        let p6 = UInt64(arr8[2]) << 16
+        let p7 = UInt64(arr8[1]) << 8
+        let p8 = UInt64(arr8[0])
+        return p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8
+        
+    }
+    
     public static func uint32_to_int32(_ val: UInt32) -> Int32 {
         let ns = NSNumber(value: val as UInt32)
         return ns.int32Value

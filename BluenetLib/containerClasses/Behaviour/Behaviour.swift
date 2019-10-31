@@ -46,28 +46,36 @@ struct BehaviourEndCondition {
 
 
 public class Behaviour {
-    var profileIndex : UInt8
-    var type         : BehaviourType
-    var activeDays   : ActiveDays
-    var intensity    : UInt8
-    var from         : BehaviourTime
-    var until        : BehaviourTime
+    var profileIndex : UInt8!
+    var type         : BehaviourType!
+    var activeDays   : ActiveDays!
+    var intensity    : UInt8!
+    var from         : BehaviourTime!
+    var until        : BehaviourTime!
     var presence     : BehaviourPresence? = nil
     var endCondition : BehaviourEndCondition? = nil
     
-    var IdOnCrownstone : UInt8?
+    
+    var valid = true
+    
+    var indexOnCrownstone : UInt8?
     
    
+    init() {
+        self.valid = false
+    }
     /**
      This contains all required information for at least a Twlight behaviour.
      */
-    init(profileIndex: UInt8, type: BehaviourType, intensity: Double, activeDays: ActiveDays, time: BehaviourTimeContainer) {
+    convenience init(profileIndex: UInt8, type: BehaviourType, intensity: Double, activeDays: ActiveDays, time: BehaviourTimeContainer) {
+        self.init()
         self.profileIndex = profileIndex
         self.type = type
         self.intensity = UInt8(max(0,min(100, 100*intensity)))
         self.activeDays = activeDays
         self.from = time.from
         self.until = time.until
+        self.valid = true
     }
     
     /**
@@ -94,13 +102,79 @@ public class Behaviour {
         self.endCondition = endCondition
     }
     
+    /**
+            The payload is made up from
+     - BehaviourType            1B
+     - Intensity                       1B
+     - profileIndex                  1B
+     - ActiveDays                   1B
+     - From                             5B
+     - Until                              5B
+     
+     - Presence                       13B      --> for Switch Behaviour and Smart Timer
+     - End Condition                17B      --> for Smart Timer
+     */
+    init(data: [UInt8]) {
+        if data.count >= 14 {
+            let type = BehaviourType.init(rawValue: data[0])
+            if type == nil {
+                self.valid = false
+                return
+            }
+            
+            self.type = type
+            self.intensity = data[1]
+            self.profileIndex = data[2]
+            self.activeDays = ActiveDays(data: data[3])
+            self.from = BehaviourTime(data: Array(data[4...8]))   // 4 5 6 7 8
+            self.until = BehaviourTime(data: Array(data[9...13])) // 9 10 11 12 13
+            
+            if self.from.valid == false || self.until.valid == false {
+                self.valid = false
+                return
+            }
+        }
+        
+        if self.type == .behaviour {
+            if data.count >= 14+13 {
+                self.presence = BehaviourPresence(data: Array(data[14...26])) // 14 15 16 17 18 19 20 21 22 23 24 25 26
+                if self.presence!.valid == false {
+                    self.valid = false
+                    return
+                }
+            }
+            else {
+                self.valid = false
+                return
+            }
+        }
+        
+        if self.type == .smartTimer {
+            if data.count >= 14+13+17 {
+                let presence = BehaviourPresence(data: Array(data[27...39]))
+                if presence.valid == false {
+                    self.valid = false
+                    return
+                }
+                let offset = Conversion.uint8_array_to_uint32(Array(data[40...43]))
+                self.endCondition = BehaviourEndCondition(presence: presence, presenceBehaviourDurationInSeconds: offset)
+            }
+            else {
+                self.valid = false
+                return
+            }
+        }
+    }
+    
     
     func getPacket() -> [UInt8] {
         var arr = [UInt8]()
         
-        arr.append(self.profileIndex)
+        
         arr.append(self.type.rawValue)
         arr.append(self.intensity)
+        arr.append(self.profileIndex)
+        
         arr.append(self.activeDays.getMask())
         
         arr += self.from.getPacket()
@@ -124,8 +198,9 @@ public class Behaviour {
 }
 
 public class BehaviourTime {
-    var type : BehaviourTimeType
-    var offset : Int32
+    var type : BehaviourTimeType!
+    var offset : Int32!
+    var valid = true
     
     init(hours: NSNumber, minutes: NSNumber) {
         self.type = .afterMidnight
@@ -142,6 +217,23 @@ public class BehaviourTime {
         self.offset = offset
     }
     
+    init(data : [UInt8]) {
+        if (data.count != 5) {
+            self.valid = false
+            return
+        }
+        
+        let type = BehaviourTimeType(rawValue: data[0])
+        if type == nil {
+            self.valid = false
+            return
+        }
+        
+        self.type = type!
+        self.offset = Conversion.uint32_to_int32(Conversion.uint8_array_to_uint32(Array(data[1...4]))) // 1 2 3 4
+        self.valid = true
+    }
+    
     func getPacket() -> [UInt8] {
         var arr = [UInt8]()
         
@@ -153,9 +245,10 @@ public class BehaviourTime {
 }
 
 public class BehaviourPresence {
-    var type : BehaviourPresenceType
-    var locationIds : [UInt8]
-    var delayInSeconds : UInt16 // seconds
+    var type : BehaviourPresenceType!
+    var locationIds : [UInt8]!
+    var delayInSeconds : UInt32! // seconds
+    var valid = true
     
     init() {
         self.type = .ignorePresence
@@ -164,19 +257,19 @@ public class BehaviourPresence {
     }
     
     
-    init(type: BehaviourPresenceType, delayInSeconds: UInt16 = 300) {
+    init(type: BehaviourPresenceType, delayInSeconds: UInt32 = 300) {
         self.type = type
         self.locationIds = []
         self.delayInSeconds = delayInSeconds
     }
     
-    init(type: BehaviourPresenceType, locationIds: [UInt8], delayInSeconds: UInt16 = 300) {
+    init(type: BehaviourPresenceType, locationIds: [UInt8], delayInSeconds: UInt32 = 300) {
         self.type = type
         self.locationIds = locationIds
         self.delayInSeconds = delayInSeconds
     }
 
-    init(type: BehaviourPresenceType, locationIds: [NSNumber], delayInSeconds: UInt16 = 300) {
+    init(type: BehaviourPresenceType, locationIds: [NSNumber], delayInSeconds: UInt32 = 300) {
         self.type = type
         self.locationIds = []
         for locationId in locationIds {
@@ -184,11 +277,28 @@ public class BehaviourPresence {
         }
         self.delayInSeconds = delayInSeconds
     }
-
-    func getMask() ->  UInt64 {
+    
+    init(data: [UInt8]) {
+        if (data.count != 13) {
+            self.valid = false
+            return
+        }
+        
+        let type = BehaviourPresenceType(rawValue: data[0])
+        if type == nil {
+            self.valid = false
+            return
+        }
+        
+        self.type = type!
+        self.locationIds = self.unpackMask(Conversion.uint8_array_to_uint64(Array(data[1...8])))
+        self.delayInSeconds = Conversion.uint8_array_to_uint32(Array(data[9...12]))
+    }
+    
+    func getMask(_ locationIds : [UInt8]) ->  UInt64 {
         var result : UInt64 = 0
         let bit : UInt64 = 1
-        for locationId in self.locationIds {
+        for locationId in locationIds {
             if (locationId < 64) {
                 result = result | bit << locationId
             }
@@ -196,12 +306,24 @@ public class BehaviourPresence {
         return result
     }
     
+    func unpackMask(_ mask: UInt64) -> [UInt8] {
+        var result = [UInt8]()
+        let bit : UInt64 = 1
+        for i in 0...63 {
+            if (mask >> i & bit) == 1 {
+                result.append(UInt8(i))
+            }
+        }
+        return result
+    }
+    
+    
     func getPacket() -> [UInt8] {
         var arr = [UInt8]()
         
         arr.append(self.type.rawValue)
-        arr += Conversion.uint16_to_uint8_array(self.delayInSeconds)
-        arr += Conversion.uint64_to_uint8_array(self.getMask())
+        arr += Conversion.uint64_to_uint8_array(self.getMask(self.locationIds))
+        arr += Conversion.uint32_to_uint8_array(self.delayInSeconds)
         
         return arr
     }
@@ -507,10 +629,10 @@ func PresenceParser(_ dict: NSDictionary, delayRequired: Bool) throws -> Behavio
         
         if (dataType == "SPHERE") {
             if (type == "SOMEBODY") {
-                return BehaviourPresence(type: .someoneInSphere, delayInSeconds: delay.uint16Value)
+                return BehaviourPresence(type: .someoneInSphere, delayInSeconds: delay.uint32Value)
             }
             else {
-                return BehaviourPresence(type: .nobodyInSphere, delayInSeconds: delay.uint16Value)
+                return BehaviourPresence(type: .nobodyInSphere, delayInSeconds: delay.uint32Value)
             }
         }
         else if (dataType == "LOCATION") {
@@ -519,10 +641,10 @@ func PresenceParser(_ dict: NSDictionary, delayRequired: Bool) throws -> Behavio
             guard let locationIdArray = oLocationIdArray else { throw BluenetError.NO_PRESENCE_LOCATION_IDS }
                    
             if (type == "SOMEBODY") {
-                return BehaviourPresence(type: .somoneInLocation, locationIds: locationIdArray, delayInSeconds: delay.uint16Value)
+                return BehaviourPresence(type: .somoneInLocation, locationIds: locationIdArray, delayInSeconds: delay.uint32Value)
             }
             else {
-                return BehaviourPresence(type: .nobodyInLocation, locationIds: locationIdArray, delayInSeconds: delay.uint16Value)
+                return BehaviourPresence(type: .nobodyInLocation, locationIds: locationIdArray, delayInSeconds: delay.uint32Value)
             }
         }
         else {

@@ -65,9 +65,10 @@ public enum ControlTypeV2 : UInt16 {
     case lock_switch            = 41
     case enable_switchcraft     = 42
     case UART_message           = 50
-    
-    
-    
+    case saveBehaviour          = 60
+    case replaceBehaviour       = 61
+    case removeBehaviour        = 62
+    case getBehaviour           = 63
     
     case UNSPECIFIED = 65535
 }

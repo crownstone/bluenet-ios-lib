@@ -50,24 +50,21 @@ func _writeSetupControlPacket(bleManager: BleManager, _ packet: [UInt8]) -> Prom
 
 
 func _writeGenericControlPacket(bleManager: BleManager, _ packet: [UInt8]) -> Promise<Void> {
-    return bleManager.getCharacteristicsFromDevice(CSServices.CrownstoneService)
-        .then{(characteristics) -> Promise<Void> in
-            if getCharacteristicFromList(characteristics, CrownstoneCharacteristics.ControlV2) != nil {
-                return bleManager.writeToCharacteristic(
-                    CSServices.CrownstoneService,
-                    characteristicId: CrownstoneCharacteristics.ControlV2,
-                    data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-                    type: CBCharacteristicWriteType.withResponse
-                )
-            }
-            else {
-                return bleManager.writeToCharacteristic(
-                    CSServices.CrownstoneService,
-                    characteristicId: CrownstoneCharacteristics.Control,
-                    data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-                    type: CBCharacteristicWriteType.withResponse
-                )
-            }
+    if bleManager.connectionState.controlVersion == .v2 {
+        return bleManager.writeToCharacteristic(
+            CSServices.CrownstoneService,
+            characteristicId: CrownstoneCharacteristics.ControlV2,
+            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+            type: CBCharacteristicWriteType.withResponse
+        )
+    }
+    else {
+        return bleManager.writeToCharacteristic(
+            CSServices.CrownstoneService,
+            characteristicId: CrownstoneCharacteristics.Control,
+            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+            type: CBCharacteristicWriteType.withResponse
+        )
     }
 }
 
