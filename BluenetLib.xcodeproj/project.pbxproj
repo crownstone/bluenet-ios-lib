@@ -59,6 +59,10 @@
 		FA5882E41E38C2E800913AE6 /* BluenetLibTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882B51E38C0F100913AE6 /* BluenetLibTests.swift */; };
 		FA5882E51E38C2EA00913AE6 /* EncryptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882B61E38C0F100913AE6 /* EncryptionTests.swift */; };
 		FA5908AE1E363E4E0035E658 /* Zip.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA5908AD1E363E4E0035E658 /* Zip.framework */; };
+		FA5ECB12236B3B710054170C /* ConnectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA44DC4423685E99001CA4B8 /* ConnectionState.swift */; };
+		FA5ECB13236B3B7D0054170C /* StatePackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA44DC4623688C64001CA4B8 /* StatePackets.swift */; };
+		FA5ECB14236B3B960054170C /* BehaviourHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA829309235F21DC0072D9FE /* BehaviourHandler.swift */; };
+		FA5ECB15236B3BC00054170C /* Behaviour.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA82930C235F2D8A0072D9FE /* Behaviour.swift */; };
 		FA6106B5207D079B007969BB /* BlePeripheralManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6106B4207D079B007969BB /* BlePeripheralManager.swift */; };
 		FA6E8F8D2015FAE7004C3E8A /* PacketTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6E8F8C2015FAE7004C3E8A /* PacketTests.swift */; };
 		FA7065D92003AE4600C833FE /* ScanResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065D82003AE4600C833FE /* ScanResponse.swift */; };
@@ -829,6 +833,7 @@
 				FA94D02221A6E62F00AB8331 /* ConfigHandler.swift in Sources */,
 				FA94D02321A6E62F00AB8331 /* ControlHandler.swift in Sources */,
 				FA94D02421A6E62F00AB8331 /* DeviceHandler.swift in Sources */,
+				FA5ECB15236B3BC00054170C /* Behaviour.swift in Sources */,
 				FA94D02621A6E62F00AB8331 /* MeshHandler.swift in Sources */,
 				FAAB603221CBCE1B00183587 /* BroadcastElement.swift in Sources */,
 				FA94D02821A6E62F00AB8331 /* SetupHandler.swift in Sources */,
@@ -840,12 +845,14 @@
 				FA94D02D21A6E62F00AB8331 /* opCode3_type2.swift in Sources */,
 				FA94D02E21A6E62F00AB8331 /* opCode3_type3.swift in Sources */,
 				FAAB603021CBCE0200183587 /* BroadcastProtocol.swift in Sources */,
+				FA5ECB14236B3B960054170C /* BehaviourHandler.swift in Sources */,
 				FA94D02F21A6E62F00AB8331 /* opCode1.swift in Sources */,
 				FA94D03021A6E62F00AB8331 /* opCode2.swift in Sources */,
 				FA94D03121A6E62F00AB8331 /* opCode3.swift in Sources */,
 				FAAB603321CBCE3800183587 /* BroadcastHandler.swift in Sources */,
 				FA94D03221A6E62F00AB8331 /* opCode4.swift in Sources */,
 				FA94D03321A6E62F00AB8331 /* opCode5.swift in Sources */,
+				FA5ECB13236B3B7D0054170C /* StatePackets.swift in Sources */,
 				FA94D03421A6E62F00AB8331 /* opCode6.swift in Sources */,
 				FAAB603121CBCE1800183587 /* BroadcastBuffer.swift in Sources */,
 				FA94D03521A6E62F00AB8331 /* Advertisement.swift in Sources */,
@@ -869,6 +876,7 @@
 				FADB742122D3798100DCB92B /* BleUtil.swift in Sources */,
 				FA94D04721A6E63000AB8331 /* MeshPackets.swift in Sources */,
 				FA94D04821A6E63000AB8331 /* BluenetTypes.swift in Sources */,
+				FA5ECB12236B3B710054170C /* ConnectionState.swift in Sources */,
 				FA94D04921A6E63000AB8331 /* Characteristics.swift in Sources */,
 				FA94D04A21A6E63000AB8331 /* Services.swift in Sources */,
 				FAAB602A21CBCD9700183587 /* BluenetErrors.swift in Sources */,

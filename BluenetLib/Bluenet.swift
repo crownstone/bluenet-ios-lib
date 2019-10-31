@@ -83,6 +83,8 @@ public class Bluenet {
     public let device     : DeviceHandler!
     public let state      : StateHandler!
     public let broadcast  : BroadcastHandler!
+    
+    public let behaviour  : BehaviourHandler!
 
     
     // MARK: API
@@ -115,6 +117,8 @@ public class Bluenet {
         self.mesh      = MeshHandler(     bleManager:bleManager,  eventBus: eventBus, settings: settings)
         self.device    = DeviceHandler(   bleManager:bleManager,  eventBus: eventBus, settings: settings)
         self.state     = StateHandler(    bleManager:bleManager,  eventBus: eventBus, settings: settings)
+        self.behaviour = BehaviourHandler(bleManager:bleManager,  eventBus: eventBus, settings: settings)
+        
         self.broadcast = BroadcastHandler(peripheralStateManager: self.peripheralStateManager, eventBus: eventBus, settings: settings)
         
         _ = eventBus.on("disconnectCommandWritten", self._storeDisconnectCommandList)
