@@ -109,6 +109,15 @@ public class MeshHandler {
         return self._writeControlPacket(commandPayload)
     }
     
+    public func setTIme( time: UInt32 ) -> Promise<Void> {
+        let packet = ControlPacketsGenerator.getSetTimePacket(time)
+        return _writeGenericControlPacket(bleManager: self.bleManager, packet)
+    }
+    
+    public func sendNoOp( ) -> Promise<Void> {
+        let packet = ControlPacketsGenerator.getNoOpPacket()
+        return _writeGenericControlPacket(bleManager: self.bleManager, packet)
+    }
     
     
     // MARK: UTILS
