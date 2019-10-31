@@ -27,17 +27,9 @@ public class BehaviourHandler {
         
     }
     
-    public func saveBehaviour(behaviour: NSDictionary, dayStartTimeSecondsSinceMidnight: NSNumber = NSNumber(value: 4*3600)) -> Promise<BehaviourResultPacket> {
+    public func saveBehaviour(behaviour: Behaviour) -> Promise<BehaviourResultPacket> {
         return Promise<BehaviourResultPacket> { seal in
-            var data : Behaviour? = nil
-            do {
-                data = try BehaviourDictionaryParser(behaviour, dayStartTimeSecondsSinceMidnight: dayStartTimeSecondsSinceMidnight.uint32Value)
-            }
-            catch {
-                return seal.reject(error)
-            }
-            
-            let packet = data!.getPacket()
+            let packet = behaviour.getPacket()
             
             let writeCommand : voidPromiseCallback = {
                return _writeGenericControlPacket(bleManager: self.bleManager, packet)
@@ -72,19 +64,12 @@ public class BehaviourHandler {
             }
     }
     
-    public func replaceBehaviour(index: UInt8, behaviour: NSDictionary, dayStartTimeSecondsSinceMidnight: NSNumber = NSNumber(value: 4*3600)) -> Promise<UInt32> {
+    public func replaceBehaviour(index: UInt8, behaviour: Behaviour) -> Promise<UInt32> {
         return Promise<UInt32> { seal in
-            var data : Behaviour? = nil
-            do {
-                data = try BehaviourDictionaryParser(behaviour, dayStartTimeSecondsSinceMidnight: dayStartTimeSecondsSinceMidnight.uint32Value)
-            }
-            catch {
-                return seal.reject(error)
-            }
             
             var dataPacket = [UInt8]()
             dataPacket.append(index)
-            dataPacket += data!.getPacket()
+            dataPacket += behaviour.getPacket()
             
             let writeCommand : voidPromiseCallback = {
                return _writeGenericControlPacket(bleManager: self.bleManager, dataPacket)
