@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyJSON
 
 
 public enum BehaviourType : UInt8 {
@@ -195,7 +196,73 @@ public class Behaviour {
     func getHash() -> UInt32 {
         return fletcher32(self.getPacket())
     }
+    
+    public func getJSON(dayStartTimeSecondsSinceMidnight: UInt32 ) -> JSON {
+        return JSON(self.getDictionary(dayStartTimeSecondsSinceMidnight: dayStartTimeSecondsSinceMidnight))
+   }
+    
+    public func getDictionary(dayStartTimeSecondsSinceMidnight : UInt32) -> NSDictionary {
+        var typeString = "BEHAVIOUR";
+        if self.type == .twilight {
+            typeString = "TWILIGHT"
+        }
+        
+        
+        var dataDictionary = [String: Any]()
+        if self.type == .twilight {
+            dataDictionary["action"] = ["type": "DIM_WHEN_TURNED_ON", "data": Double(self.intensity)*0.01]
+            dataDictionary["time"] = self.getTimeDictionary(dayStartTimeSecondsSinceMidnight: dayStartTimeSecondsSinceMidnight)
+        }
+        else {
+            // behaviour and smart timer have the same format
+            dataDictionary["action"] = ["type": "BE_ON", "data": Double(self.intensity)*0.01]
+            dataDictionary["time"] = self.getTimeDictionary(dayStartTimeSecondsSinceMidnight: dayStartTimeSecondsSinceMidnight)
+            
+            if let presence = self.presence {
+                dataDictionary["presence"] = presence.getDictionary()
+            }
+            
+            if let endCondition = self.endCondition {
+                var endConditionDictionary = [String: Any]()
+                endConditionDictionary["type"] = "PRESENCE_AFTER"
+                endConditionDictionary["presenceBehaviourDurationInSeconds"] = endCondition.presenceBehaviourDurationInSeconds
+                endConditionDictionary["presence"] = endCondition.presence.getDictionary(includeDelay: false)
+                
+                dataDictionary["endCondition"] = endConditionDictionary
+            }
+        }
+    
+        var returnDict : [String: Any] = [
+            "type"           : typeString,
+            "data"           : dataDictionary,
+            "activeDays"     : self.activeDays.getDictionary()
+        ]
+        
+        if let index = self.indexOnCrownstone {
+            returnDict["idOnCrownstone"] = index
+        }
+        
+        return returnDict as NSDictionary
+    }
+    
+    func getTimeDictionary(dayStartTimeSecondsSinceMidnight : UInt32) -> NSDictionary {
+        var returnDict = [String: Any]()
+        
+        // check if always
+        if self.from.type == .afterMidnight && self.from.offset == dayStartTimeSecondsSinceMidnight && self.until.type == .afterMidnight && self.until.offset == dayStartTimeSecondsSinceMidnight {
+            returnDict["type"] = "ALL_DAY"
+            return returnDict as NSDictionary
+        }
+        
+        // its not always! construct the from and to parts.
+        returnDict["type"] = "RANGE"
+        returnDict["from"] = self.from.getDictionary()
+        returnDict["to"] = self.until.getDictionary()
+        
+        return returnDict as NSDictionary
+    }
 }
+
 
 public class BehaviourTime {
     var type : BehaviourTimeType!
@@ -242,7 +309,27 @@ public class BehaviourTime {
         
         return arr
     }
+    
+    func getDictionary() -> NSDictionary {
+        var returnDict = [String: Any]()
+        
+        if (self.type == .afterSunset) {
+            returnDict["type"] = "SUNSET"
+            returnDict["offsetMinutes"] = self.offset/60
+        }
+        else if (self.type == .afterSunrise) {
+            returnDict["type"] = "SUNRISE"
+            returnDict["offsetMinutes"] = self.offset/60
+        }
+        else {
+            returnDict["type"] = "CLOCK"
+            returnDict["data"] = ["hours": (self.offset - self.offset % 3600)/3600, "minutes": (self.offset % 3600) / 60]
+        }
+        
+        return returnDict as NSDictionary
+    }
 }
+
 
 public class BehaviourPresence {
     var type : BehaviourPresenceType!
@@ -327,6 +414,39 @@ public class BehaviourPresence {
         
         return arr
     }
+    
+    
+    func getDictionary(includeDelay: Bool = true) -> NSDictionary {
+        var returnDict = [String: Any]()
+        
+        
+        if (self.type == .ignorePresence) {
+            returnDict["type"] = "IGNORE"
+        }
+        else if (self.type == .somoneInLocation) {
+            returnDict["type"] = "SOMEBODY"
+            returnDict["data"] = ["type":"LOCATION", "locationIds": self.locationIds]
+        }
+        else if (self.type == .someoneInSphere) {
+            returnDict["type"] = "SOMEBODY"
+            returnDict["data"] = ["type":"SPHERE"]
+        }
+        else if (self.type == .nobodyInLocation) {
+            returnDict["type"] = "NOBODY"
+            returnDict["data"] = ["type":"LOCATION", "locationIds": self.locationIds]
+        }
+        else if (self.type == .nobodyInSphere) {
+            returnDict["type"] = "NOBODY"
+            returnDict["data"] = ["type":"SPHERE"]
+        }
+        
+        if (includeDelay && self.type != .ignorePresence) {
+            returnDict["delay"] = self.delayInSeconds
+        }
+       
+
+        return returnDict as NSDictionary
+    }
 }
 
 public class ActiveDays {
@@ -374,6 +494,20 @@ public class ActiveDays {
         
         return mask
     }
+    
+    public func getDictionary() -> NSDictionary {
+        let returnDict : [String: Any] = [
+            "Sunday"    : self.Sunday,
+            "Monday"    : self.Monday,
+            "Tuesday"   : self.Tuesday,
+            "Wednesday" : self.Wednesday,
+            "Thursday"  : self.Thursday,
+            "Friday"    : self.Friday,
+            "Saturday"  : self.Saturday,
+        ]
+
+        return returnDict as NSDictionary
+    }
 }
 
 
@@ -408,6 +542,7 @@ public func BehaviourDictionaryParser(_ dict: NSDictionary, dayStartTimeSecondsS
     let oType           = dict["nextTime"]       as? String
     let oData           = dict["data"]           as? NSDictionary
     let oActiveDays     = dict["activeDays"]     as? NSDictionary
+    let oIdOnCrownstone = dict["idOnCrownstone"] as? NSNumber
     
     guard let profileIndex = oProfileIndex else { throw BluenetError.PROFILE_INDEX_MISSING }
     guard let type         = oType         else { throw BluenetError.TYPE_MISSING }
@@ -445,6 +580,10 @@ public func BehaviourDictionaryParser(_ dict: NSDictionary, dayStartTimeSecondsS
         activeDays: activeDayObject,
         time: timeObject
     )
+    
+    if let index = oIdOnCrownstone {
+        behaviour.indexOnCrownstone = index.uint8Value
+    }
     
     if let presence = oPresence {
         if behaviourType == .twilight {
