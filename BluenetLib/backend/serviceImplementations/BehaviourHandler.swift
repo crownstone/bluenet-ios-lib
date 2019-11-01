@@ -178,6 +178,6 @@ public class BehaviourHandler {
 
 
 public struct BehaviourResultPacket {
-    var index: UInt8
-    var masterHash: UInt32
+    public var index: UInt8
+    public var masterHash: UInt32
 }
