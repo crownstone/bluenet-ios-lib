@@ -657,7 +657,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         
                         // the fulfil and reject are handled in the peripheral delegate
                         if (self.settings.isEncryptionEnabled()) {
-                             LOG.debug("BLUENET_LIB: writing \(data.bytes) which will be encrypted.")
+                             LOG.debug("BLUENET_LIB: writing service \(serviceId) characteristic \(characteristic) data: \(data.bytes) which will be encrypted.")
                             do {
                                 let encryptedData = try EncryptionHandler.encrypt(data, settings: self.settings)
                                 self.connectedPeripheral!.writeValue(encryptedData, for: characteristic, type: type)
@@ -825,14 +825,13 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             let merger = NotificationMerger(callback: { data -> Void in
                 var collectedData : [UInt8]? = nil
                 if (streamFinished == true) { return }
-                
                 if (self.settings.isEncryptionEnabled()) {
                     do {
                         // attempt to decrypt it
                         let decryptedData = try EncryptionHandler.decrypt(Data(data), settings: self.settings)
                         collectedData = decryptedData.bytes;
                     }
-                    catch _ {
+                    catch {
                         LOG.error("Error decrypting notifcation in stream!")
                         seal.reject(BluenetError.COULD_NOT_DECRYPT)
                         return
@@ -902,6 +901,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             
             self.enableNotifications(serviceId, characteristicId: characteristicId, callback: notificationCallback)
                 .then{ unsub -> Promise<Void> in
+                    print("IN HERE")
                     unsubscribe = unsub
                     return writeCommand()
                 }

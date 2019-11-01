@@ -252,7 +252,6 @@ class EncryptionHandler {
         let IV = try generateIV(package.nonce, sessionData: sessionData.sessionNonce)
 
         let decrypted = try AES(key: key, blockMode: CryptoSwift.CTR(iv: IV)).decrypt(package.getPayload())
-        
         return decrypted
     }
     

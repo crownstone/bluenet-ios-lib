@@ -285,7 +285,7 @@ public class SetupHandler {
     func _fastSetup(characteristicId: String, writeCommand: @escaping voidPromiseCallback) -> Promise<Void> {
         self.step = 0
         return Promise<Void> { seal in
-            self.eventBus.emit("setupProgress", 4);
+            self.eventBus.emit("setupProgress", 4)
             self.bleManager.setupNotificationStream(
                 CSServices.SetupService,
                 characteristicId: characteristicId,

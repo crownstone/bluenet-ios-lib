@@ -13,8 +13,8 @@ import SwiftyJSON
 public class ResultBasePacket {
     public var payload : [UInt8] = []
     public var valid = false
-    public var resultCode  : ResultValue   = .UNSPECIFIED
-    
+    public var resultCode        : ResultValue   = .UNSPECIFIED
+    public var commandTypeUInt16 : UInt16 = 65535
     
     func load(_ data : [UInt8]) {}
 }
@@ -43,6 +43,8 @@ public class ResultPacket : ResultBasePacket {
             self.opCode = data[1]
             self.length = Conversion.uint8_array_to_uint16([data[2], data[3]])
             let totalSize : Int = 4 + NSNumber(value: self.length).intValue
+            
+            self.commandTypeUInt16 = UInt16(data[0])
             
             if (data.count >= totalSize) {
                 for i in [Int](4...totalSize) {
@@ -94,10 +96,12 @@ public class ResultPacketV2 : ResultBasePacket {
             }
             
             self.commandType = commandType!
+            self.commandTypeUInt16 = Conversion.uint8_array_to_uint16([data[0], data[1]])
             self.resultCode  = resultCode!
             self.size        = Conversion.uint8_array_to_uint16([data[4], data[5]])
                         
             let totalSize : Int = minSize + NSNumber(value: self.size).intValue
+            
             if (data.count >= totalSize) {
                 for i in [Int](minSize...totalSize) {
                     self.payload.append(data[i])

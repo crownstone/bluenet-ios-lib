@@ -93,9 +93,19 @@ public class ControlHandler {
             .then{(response: [UInt8]) -> Promise<Void> in
                 return Promise<Void> { seal in
                     // new response types
-                    if (response[0] == ControlType.factory_RESET.rawValue) {
-                        let result = StatePacketsGenerator.getReturnPacket()
-                        result.load(response)
+                    let result = StatePacketsGenerator.getReturnPacket()
+                    result.load(response)
+                    
+                    var passed = false
+                    
+                    if self.bleManager.connectionState.controlVersion == .v2 {
+                        passed = result.commandTypeUInt16 == ControlTypeV2.factory_RESET.rawValue
+                    }
+                    else {
+                        passed = result.commandTypeUInt16 == UInt16(ControlType.factory_RESET.rawValue)
+                    }
+                    
+                    if (passed) {
                         if (result.resultCode == ResultValue.SUCCESS) {
                             seal.fulfill(())
                         }
@@ -329,6 +339,12 @@ public class ControlHandler {
     
     
     func _readControlPacket() -> Promise<[UInt8]> {
+        if self.bleManager.connectionState.controlVersion == .v2 {
+            return self.bleManager.readCharacteristic(
+                CSServices.CrownstoneService,
+                characteristicId: CrownstoneCharacteristics.ResultV2
+            )
+        }
         return self.bleManager.readCharacteristic(
             CSServices.CrownstoneService,
             characteristicId: CrownstoneCharacteristics.Control

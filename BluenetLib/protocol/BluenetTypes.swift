@@ -74,6 +74,8 @@ public enum ControlTypeV2 : UInt16 {
 }
 
 
+
+
 public enum ConfigurationType : UInt8 {
     case device_NAME = 0
     case device_TYPE = 1
