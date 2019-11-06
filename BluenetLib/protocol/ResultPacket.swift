@@ -12,7 +12,7 @@ import SwiftyJSON
 
 public class ResultBasePacket {
     public var payload : [UInt8] = []
-    public var valid = false
+    public var valid = true
     public var resultCode        : ResultValue   = .UNSPECIFIED
     public var commandTypeUInt16 : UInt16 = 65535
     

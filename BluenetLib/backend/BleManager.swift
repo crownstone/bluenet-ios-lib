@@ -825,6 +825,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             let merger = NotificationMerger(callback: { data -> Void in
                 var collectedData : [UInt8]? = nil
                 if (streamFinished == true) { return }
+                
                 if (self.settings.isEncryptionEnabled()) {
                     do {
                         // attempt to decrypt it
@@ -832,7 +833,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         collectedData = decryptedData.bytes;
                     }
                     catch {
-                        LOG.error("Error decrypting notifcation in stream!")
+                        LOG.error("Error decrypting notifcation in stream! \(error)")
                         seal.reject(BluenetError.COULD_NOT_DECRYPT)
                         return
                     }
@@ -901,7 +902,6 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             
             self.enableNotifications(serviceId, characteristicId: characteristicId, callback: notificationCallback)
                 .then{ unsub -> Promise<Void> in
-                    print("IN HERE")
                     unsubscribe = unsub
                     return writeCommand()
                 }

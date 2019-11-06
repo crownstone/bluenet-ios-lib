@@ -539,7 +539,7 @@ public class ActiveDays {
 public func BehaviourDictionaryParser(_ dict: NSDictionary, dayStartTimeSecondsSinceMidnight: UInt32) throws -> Behaviour {
     // optional variables
     let oProfileIndex   = dict["profileIndex"]   as? NSNumber
-    let oType           = dict["nextTime"]       as? String
+    let oType           = dict["type"]           as? String
     let oData           = dict["data"]           as? NSDictionary
     let oActiveDays     = dict["activeDays"]     as? NSDictionary
     let oIdOnCrownstone = dict["idOnCrownstone"] as? NSNumber
