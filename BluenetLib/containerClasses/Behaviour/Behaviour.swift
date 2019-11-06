@@ -171,7 +171,6 @@ public class Behaviour {
     func getPacket() -> [UInt8] {
         var arr = [UInt8]()
         
-        
         arr.append(self.type.rawValue)
         arr.append(self.intensity)
         arr.append(self.profileIndex)
@@ -189,7 +188,7 @@ public class Behaviour {
             arr += self.endCondition!.presence.getPacket()
             arr += Conversion.uint32_to_uint8_array(self.endCondition!.presenceBehaviourDurationInSeconds)
         }
-        
+
         return arr
     }
     
@@ -666,16 +665,16 @@ func TimeParser(_ dict: NSDictionary, dayStartTimeSecondsSinceMidnight : UInt32)
         guard let fromType = oFromType else { throw BluenetError.MISSING_FROM_TIME_TYPE }
         guard let toType   = oToType   else { throw BluenetError.MISSING_TO_TIME_TYPE   }
         
-        let oFromData = from["data"] as? NSDictionary
-        let oToData   = to["data"]   as? NSDictionary
-        
-        guard let fromData = oFromData else { throw BluenetError.MISSING_FROM_TIME_DATA }
-        guard let toData   = oToData   else { throw BluenetError.MISSING_TO_TIME_DATA   }
+       
         
         var fromResult : BehaviourTime
         var toResult : BehaviourTime
         
         if (fromType == "CLOCK") {
+            let oFromData = from["data"] as? NSDictionary
+        
+            guard let fromData = oFromData else { throw BluenetError.MISSING_FROM_TIME_DATA }
+            
             let oHours   = fromData["hours"]   as? NSNumber
             let oMinutes = fromData["minutes"] as? NSNumber
             
@@ -686,14 +685,14 @@ func TimeParser(_ dict: NSDictionary, dayStartTimeSecondsSinceMidnight : UInt32)
         }
         else if (fromType == "SUNSET") {
             var offsetSeconds : Int32 = 0
-            if let offsetMinutes = fromData["offsetMinutes"] as? NSNumber {
+            if let offsetMinutes = from["offsetMinutes"] as? NSNumber {
                 offsetSeconds = 60*offsetMinutes.int32Value
             }
             fromResult = BehaviourTime(type: .afterSunset, offset: offsetSeconds)
         }
         else if (fromType == "SUNRISE") {
             var offsetSeconds : Int32 = 0
-            if let offsetMinutes = fromData["offsetMinutes"] as? NSNumber {
+            if let offsetMinutes = from["offsetMinutes"] as? NSNumber {
                 offsetSeconds = 60*offsetMinutes.int32Value
             }
             fromResult = BehaviourTime(type: .afterSunrise, offset: offsetSeconds)
@@ -704,6 +703,10 @@ func TimeParser(_ dict: NSDictionary, dayStartTimeSecondsSinceMidnight : UInt32)
         
         
         if (toType == "CLOCK") {
+            let oToData   = to["data"]   as? NSDictionary
+            
+            guard let toData   = oToData   else { throw BluenetError.MISSING_TO_TIME_DATA   }
+            
             let oHours   = toData["hours"]   as? NSNumber
             let oMinutes = toData["minutes"] as? NSNumber
             
@@ -714,14 +717,14 @@ func TimeParser(_ dict: NSDictionary, dayStartTimeSecondsSinceMidnight : UInt32)
         }
         else if (toType == "SUNSET") {
             var offsetSeconds : Int32 = 0
-            if let offsetMinutes = toData["offsetMinutes"] as? NSNumber {
+            if let offsetMinutes = to["offsetMinutes"] as? NSNumber {
                 offsetSeconds = 60*offsetMinutes.int32Value
             }
             toResult = BehaviourTime(type: .afterSunset, offset: offsetSeconds)
         }
         else if (toType == "SUNRISE") {
             var offsetSeconds : Int32 = 0
-            if let offsetMinutes = toData["offsetMinutes"] as? NSNumber {
+            if let offsetMinutes = to["offsetMinutes"] as? NSNumber {
                 offsetSeconds = 60*offsetMinutes.int32Value
             }
             toResult = BehaviourTime(type: .afterSunrise, offset: offsetSeconds)

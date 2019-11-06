@@ -85,7 +85,7 @@ public class ResultPacketV2 : ResultBasePacket {
         
     override func load(_ data : [UInt8]) {
         let minSize = 6
-        
+
         if (data.count >= minSize) {
             let commandType = ControlTypeV2(rawValue: Conversion.uint8_array_to_uint16([data[0], data[1]]))
             let resultCode  = ResultValue(rawValue: Conversion.uint8_array_to_uint16([data[2], data[3]]))
@@ -101,7 +101,6 @@ public class ResultPacketV2 : ResultBasePacket {
             self.size        = Conversion.uint8_array_to_uint16([data[4], data[5]])
                         
             let totalSize : Int = minSize + NSNumber(value: self.size).intValue
-            
             if (data.count >= totalSize) {
                 for i in [Int](minSize...totalSize) {
                     self.payload.append(data[i])

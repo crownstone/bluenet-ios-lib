@@ -29,12 +29,13 @@ public class BehaviourHandler {
     
     public func saveBehaviour(behaviour: Behaviour) -> Promise<BehaviourResultPacket> {
         return Promise<BehaviourResultPacket> { seal in
-            let packet = behaviour.getPacket()
+            let behaviourDataPacket = behaviour.getPacket()
+            let packet = ControlPacketV2(type: .saveBehaviour, payloadArray: behaviourDataPacket).getPacket()
             
             let writeCommand : voidPromiseCallback = {
                return _writeGenericControlPacket(bleManager: self.bleManager, packet)
             }
-            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ControlV2, writeCommand: writeCommand)
+            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV2, writeCommand: writeCommand)
                 .done{ data -> Void in
                     let resultPacket = ResultPacketV2(data)
                     if resultPacket.valid == false {
@@ -71,10 +72,12 @@ public class BehaviourHandler {
             dataPacket.append(index)
             dataPacket += behaviour.getPacket()
             
+            let packet = ControlPacketV2(type: .replaceBehaviour, payloadArray: dataPacket).getPacket()
+            
             let writeCommand : voidPromiseCallback = {
-               return _writeGenericControlPacket(bleManager: self.bleManager, dataPacket)
+               return _writeGenericControlPacket(bleManager: self.bleManager, packet)
             }
-            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ControlV2, writeCommand: writeCommand)
+            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV2, writeCommand: writeCommand)
                 .done{ data -> Void in
                     let resultPacket = ResultPacketV2(data)
                     if resultPacket.valid == false {
@@ -111,7 +114,7 @@ public class BehaviourHandler {
             let writeCommand : voidPromiseCallback = {
                return _writeGenericControlPacket(bleManager: self.bleManager, deletePacket)
             }
-            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ControlV2, writeCommand: writeCommand)
+            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV2, writeCommand: writeCommand)
                 .done{ data -> Void in
                     let resultPacket = ResultPacketV2(data)
                     if resultPacket.valid == false {
@@ -148,7 +151,7 @@ public class BehaviourHandler {
             let writeCommand : voidPromiseCallback = {
                return _writeGenericControlPacket(bleManager: self.bleManager, getBehaviourPacket)
             }
-            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ControlV2, writeCommand: writeCommand)
+            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV2, writeCommand: writeCommand)
                 .done{ data -> Void in
                     let resultPacket = ResultPacketV2(data)
                     if resultPacket.valid == false {
