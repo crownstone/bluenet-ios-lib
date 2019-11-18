@@ -130,7 +130,7 @@ import CoreBluetooth
             enabledValue = 1
         }
         
-        if controlVersion == .v2 { return ControlPacketV2(type: .enable_switchcraft, payload8: enabledValue).getPacket()}
+        if controlVersion == .v2 { return ControlStateSetPacket(type: .SWITCHCRAFT_ENABLED, payload8: enabledValue).getPacket()}
         else                     { return ControlPacket(  type: .enable_switchcraft, payload8: enabledValue).getPacket()}
     }
     

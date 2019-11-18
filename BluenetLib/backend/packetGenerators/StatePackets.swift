@@ -46,6 +46,8 @@ public class StatePacketsGeneratorClass {
         if self.controlVersion == .v2 { return ResultPacketV2() }
         else                          { return ResultPacket() }
     }
+    
+    
 }
 
 public let StatePacketsGenerator = StatePacketsGeneratorClass()

@@ -63,7 +63,6 @@ public enum ControlTypeV2 : UInt16 {
     case mesh_command           = 33 // ?
     case allow_dimming          = 40
     case lock_switch            = 41
-    case enable_switchcraft     = 42
     case UART_message           = 50
     case saveBehaviour          = 60
     case replaceBehaviour       = 61
@@ -310,6 +309,9 @@ public enum StateTypeV2 : UInt16 {
     case MESH_APPLICATION_KEY = 63
     case MESH_NETWORK_KEY = 64
     case LOCALIZATION_KEY = 65
+    case START_DIMMER_ON_ZERO_CROSSING = 66
+    case TAP_TO_TOGGLE_ENABLED = 67
+    case TAP_TO_TOGGLE_RSSI_THRESHOLD = 68
     case reset_COUNTER = 128
     case switch_STATE = 129
     case accumulated_ENERGY = 130

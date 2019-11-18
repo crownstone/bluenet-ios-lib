@@ -215,6 +215,25 @@ public class ConfigHandler {
         }
     }
     
+    public func setSwitchcraft(enabled: Bool) -> Promise<Void> {
+        LOG.info("BLUENET_LIB: setSwitchcraft")
+        return _writeGenericControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getSwitchCraftPacket(enabled))
+    }
+    
+    public func setTapToToggle(enabled: Bool) -> Promise<Void> {
+        var enabledValue : UInt8 = 1
+        if enabled == false {
+            enabledValue = 0
+        }
+        let packet = ControlStateSetPacket.init(type: .TAP_TO_TOGGLE_ENABLED, payload8: enabledValue).getPacket()
+        return _writeGenericControlPacket(bleManager: self.bleManager, packet)
+    }
+    
+    public func setTapToToggleThreshold(threshold: Int8) -> Promise<Void> {
+        let packet = ControlStateSetPacket.init(type: .TAP_TO_TOGGLE_ENABLED, payload8: Conversion.int8_to_uint8(threshold)).getPacket()
+        return _writeGenericControlPacket(bleManager: self.bleManager, packet)
+    }
+    
     public func setTxPower (_ txPower: NSNumber) -> Promise<Void> {
         return Promise<Void> { seal in
             if (txPower == -40 || txPower == -30 || txPower == -20 || txPower == -16 || txPower == -12 || txPower == -8 || txPower == -4 || txPower == 0 || txPower == 4) {
