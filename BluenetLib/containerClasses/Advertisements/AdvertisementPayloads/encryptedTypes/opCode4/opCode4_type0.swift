@@ -59,6 +59,8 @@ func parseOpcode4_type0(serviceData : ScanResponsePacket, data : [UInt8], litePa
         serviceData.hasError         = bitmaskArray[2]
         serviceData.switchLocked     = bitmaskArray[3]
         serviceData.timeSet          = bitmaskArray[4]
-        serviceData.switchCraftEnabled = bitmaskArray[5]
+        serviceData.switchCraftEnabled  = bitmaskArray[5]
+        serviceData.tapToToggleEnabled  = bitmaskArray[6]
+        serviceData.behaviourOverridden = bitmaskArray[7]
     }
 }

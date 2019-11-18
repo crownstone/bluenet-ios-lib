@@ -51,6 +51,8 @@ public class ScanResponsePacket {
     public var errorMode           :   Bool     = false
     public var timeSet             :   Bool     = false
     public var switchCraftEnabled  :   Bool     = false
+    public var tapToToggleEnabled  :   Bool     = false
+    public var behaviourOverridden :   Bool     = false
     
     public var uniqueIdentifier    :   NSNumber = 0
     
@@ -205,6 +207,8 @@ public class ScanResponsePacket {
             "dimmingAllowed"       : self.dimmingAllowed,
             "switchLocked"         : self.switchLocked,
             "switchCraftEnabled"   : self.switchCraftEnabled,
+            "tapToToggleEnabled"   : self.tapToToggleEnabled,
+            "behaviourOverridden"  : self.behaviourOverridden,
             
             "errorMode"            : self.errorMode,
             "errors"               : errorsDictionary,
