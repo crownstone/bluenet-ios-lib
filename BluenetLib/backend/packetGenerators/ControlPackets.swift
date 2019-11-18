@@ -140,6 +140,49 @@ import CoreBluetooth
     }
     
     
+    func getMultiSwitchPacket(stones:[[String: NSNumber]]) -> [UInt8] {
+        if controlVersion == .v2 {
+            var innerPacket = [UInt8]()
+            var count : UInt8 = 0
+            for stone in stones {
+                let crownstoneId = stone["crownstoneId"]
+                let state        = stone["state"]
+                
+                if (crownstoneId != nil && state != nil) {
+                    innerPacket.append(crownstoneId!.uint8Value)
+                    innerPacket.append(state!.uint8Value)
+                    count += 1
+                }
+            }
+            
+            var packet = [UInt8]()
+            packet.append(count)
+            packet += innerPacket
+            
+            return ControlPacketV2(type: .multiSwitch, payloadArray: packet).getPacket()
+        }
+        else {
+            var packets = [StoneMultiSwitchPacket]()
+            for stone in stones {
+                let crownstoneId = stone["crownstoneId"]
+                let timeout      = stone["timeout"]
+                let state        = stone["state"]
+                let intent       = stone["intent"]
+                
+                if (crownstoneId != nil && timeout != nil && state != nil && intent != nil) {
+                    packets.append(StoneMultiSwitchPacket(crownstoneId: crownstoneId!.uint8Value, state: state!.floatValue, timeout: timeout!.uint16Value, intent: intent!.uint8Value))
+                }
+            }
+            
+            if (packets.count > 0) {
+                let meshPayload = MeshMultiSwitchPacket(type: .simpleList, packets: packets).getPacket()
+                let commandPayload = ControlPacket(type: .mesh_multiSwitch, payloadArray: meshPayload).getPacket()
+                return commandPayload
+            }
+            return [UInt8]()
+        }
+    }
+    
     /** LEGACY **/
      func getSetupPacket(type: UInt8, crownstoneId: UInt8, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> [UInt8] {
         var data : [UInt8] = []

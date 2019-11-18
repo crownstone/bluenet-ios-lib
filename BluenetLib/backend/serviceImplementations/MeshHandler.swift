@@ -63,26 +63,7 @@ public class MeshHandler {
      * This channel is used to send different switch commands with individual timeouts, switch states and intents to different crownstones in one message
      */
     public func multiSwitch(stones:[[String: NSNumber]]) -> Promise<Void> {
-        var packets = [StoneMultiSwitchPacket]()
-        for stone in stones {
-            let crownstoneId = stone["crownstoneId"]
-            let timeout      = stone["timeout"]
-            let state        = stone["state"]
-            let intent       = stone["intent"]
-            
-            if (crownstoneId != nil && timeout != nil && state != nil && intent != nil) {
-                packets.append(StoneMultiSwitchPacket(crownstoneId: crownstoneId!.uint8Value, state: state!.floatValue, timeout: timeout!.uint16Value, intent: intent!.uint8Value))
-            }
-        }
-        
-        if (packets.count > 0) {
-            let meshPayload = MeshMultiSwitchPacket(type: .simpleList, packets: packets).getPacket()
-            let commandPayload = ControlPacket(type: .mesh_multiSwitch, payloadArray: meshPayload).getPacket()
-            return self._writeControlPacket(commandPayload)
-        }
-        else {
-            return Promise<Void> { seal in seal.reject(BluenetError.NO_SWITCH_STATE_ITEMS)}
-        }
+        return _writeGenericControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getMultiSwitchPacket(stones: stones))
     }
     
     public func batchCommand(crownstoneIds: [UInt8], commandPacket: [UInt8]) -> Promise<Void> {

@@ -55,8 +55,9 @@ public enum ControlTypeV2 : UInt16 {
     case no_OPERATION           = 12
     case disconnect             = 13
     case `switch`               = 20
-    case pwm                    = 21
-    case relay                  = 22
+    case multiSwitch            = 21
+    case pwm                    = 22
+    case relay                  = 23
     case set_TIME               = 30
     case setTX                  = 31
     case reset_ERRORS           = 32
