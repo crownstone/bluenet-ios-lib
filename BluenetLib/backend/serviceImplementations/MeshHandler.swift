@@ -110,12 +110,18 @@ public class MeshHandler {
     }
     
     public func setTime( time: UInt32 ) -> Promise<Void> {
-        let packet = ControlPacketsGenerator.getSetTimePacket(time)
+        let commandPayload = ControlPacketsGenerator.getSetTimePacket(time)
+        let meshPayload = MeshCommandPacket(type: .control, crownstoneIds: [], payload: commandPayload).getPacket()
+        
+        let packet = ControlPacketsGenerator.getMeshCommandPacket(commandPacket: meshPayload)
         return _writeGenericControlPacket(bleManager: self.bleManager, packet)
     }
     
     public func sendNoOp( ) -> Promise<Void> {
-        let packet = ControlPacketsGenerator.getNoOpPacket()
+        let commandPayload = ControlPacketsGenerator.getNoOpPacket()
+        let meshPayload = MeshCommandPacket(type: .control, crownstoneIds: [], payload: commandPayload).getPacket()
+      
+        let packet = ControlPacketsGenerator.getMeshCommandPacket(commandPacket: meshPayload)
         return _writeGenericControlPacket(bleManager: self.bleManager, packet)
     }
     

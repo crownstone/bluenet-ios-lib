@@ -67,7 +67,6 @@ class MeshKeepAlivePacket {
 
 class MeshCommandPacket {
     var type          : UInt8 = 0
-    var bitmask       : UInt8 = 0
     var idCounter     : UInt8 = 0
     var crownstoneIds : [UInt8]!
     var payload       : [UInt8]!
@@ -82,7 +81,7 @@ class MeshCommandPacket {
     func getPacket() -> [UInt8] {
         var arr = [UInt8]()
         arr.append(self.type)
-        arr.append(self.bitmask)
+        arr.append(0) // reserved
         arr.append(self.idCounter)
         arr += (self.crownstoneIds)
         arr += self.payload

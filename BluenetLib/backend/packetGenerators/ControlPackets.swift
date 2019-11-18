@@ -134,6 +134,11 @@ import CoreBluetooth
         else                     { return ControlPacket(  type: .enable_switchcraft, payload8: enabledValue).getPacket()}
     }
     
+    func getMeshCommandPacket(commandPacket: [UInt8]) -> [UInt8] {
+        if controlVersion == .v2 { return ControlPacketV2(type: .mesh_command, payloadArray: commandPacket).getPacket()}
+        else                     { return ControlPacket(  type: .mesh_command, payloadArray: commandPacket).getPacket()}
+    }
+    
     
     /** LEGACY **/
      func getSetupPacket(type: UInt8, crownstoneId: UInt8, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> [UInt8] {
