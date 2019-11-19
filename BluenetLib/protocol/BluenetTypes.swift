@@ -312,7 +312,7 @@ public enum StateTypeV2 : UInt16 {
     case LOCALIZATION_KEY = 65
     case START_DIMMER_ON_ZERO_CROSSING = 66
     case TAP_TO_TOGGLE_ENABLED = 67
-    case TAP_TO_TOGGLE_RSSI_THRESHOLD = 68
+    case TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET = 68
     case reset_COUNTER = 128
     case switch_STATE = 129
     case accumulated_ENERGY = 130

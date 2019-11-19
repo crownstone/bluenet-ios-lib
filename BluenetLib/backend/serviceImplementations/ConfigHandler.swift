@@ -229,8 +229,8 @@ public class ConfigHandler {
         return _writeGenericControlPacket(bleManager: self.bleManager, packet)
     }
     
-    public func setTapToToggleThreshold(threshold: Int8) -> Promise<Void> {
-        let packet = ControlStateSetPacket.init(type: .TAP_TO_TOGGLE_ENABLED, payload8: Conversion.int8_to_uint8(threshold)).getPacket()
+    public func setTapToToggleThresholdOffset(threshold: Int8) -> Promise<Void> {
+        let packet = ControlStateSetPacket.init(type: .TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET, payload8: Conversion.int8_to_uint8(threshold)).getPacket()
         return _writeGenericControlPacket(bleManager: self.bleManager, packet)
     }
     
