@@ -47,7 +47,7 @@ public class ResultPacket : ResultBasePacket {
             self.commandTypeUInt16 = UInt16(data[0])
             
             if (data.count >= totalSize) {
-                for i in [Int](4...totalSize) {
+                for i in [Int](4...totalSize-1) {
                     self.payload.append(data[i])
                 }
                 
@@ -99,10 +99,10 @@ public class ResultPacketV2 : ResultBasePacket {
             self.commandTypeUInt16 = Conversion.uint8_array_to_uint16([data[0], data[1]])
             self.resultCode  = resultCode!
             self.size        = Conversion.uint8_array_to_uint16([data[4], data[5]])
-                        
+                     
             let totalSize : Int = minSize + NSNumber(value: self.size).intValue
             if (data.count >= totalSize) {
-                for i in [Int](minSize...totalSize) {
+                for i in [Int](minSize...totalSize-1) {
                     self.payload.append(data[i])
                 }
             }
