@@ -18,9 +18,9 @@ public enum BehaviourType : UInt8 {
 
 
 public enum BehaviourTimeType : UInt8 {
-    case afterMidnight     = 0
-    case afterSunset       = 1
-    case afterSunrise      = 2
+    case afterMidnight   = 0
+    case afterSunrise    = 1
+    case afterSunset     = 2
 }
 
 
@@ -123,11 +123,11 @@ public class Behaviour {
                 return
             }
             
-            self.type = type
-            self.intensity = data[1]
+            self.type         = type
+            self.intensity    = data[1]
             self.profileIndex = data[2]
             self.activeDays = ActiveDays(data: data[3])
-            self.from = BehaviourTime(data: Array(data[4...8]))   // 4 5 6 7 8
+            self.from  = BehaviourTime(data: Array(data[4...8]))   // 4 5 6 7 8
             self.until = BehaviourTime(data: Array(data[9...13])) // 9 10 11 12 13
             
             if self.from.valid == false || self.until.valid == false {
@@ -532,6 +532,7 @@ public class ActiveDays {
       Sun: boolean
     },
     idOnCrownstone: NSNumber,
+    profileIndex: NSNumber
  }
  
  */
@@ -588,7 +589,7 @@ public func BehaviourDictionaryParser(_ dict: NSDictionary, dayStartTimeSecondsS
         if behaviourType == .twilight {
             throw BluenetError.TWILIGHT_CANT_HAVE_PRESENCE
         }
-        let presenceObject = try PresenceParser(presence, delayRequired: true)
+        let presenceObject = try PresenceParser(presence)
         behaviour.presence = presenceObject
     }
     
@@ -744,7 +745,7 @@ func TimeParser(_ dict: NSDictionary, dayStartTimeSecondsSinceMidnight : UInt32)
 /**
  There are a few possible formats. We will parse and validate
  */
-func PresenceParser(_ dict: NSDictionary, delayRequired: Bool) throws -> BehaviourPresence {
+func PresenceParser(_ dict: NSDictionary) throws -> BehaviourPresence {
     let oType = dict["type"] as? String
     
     guard let type = oType else { throw BluenetError.NO_PRESENCE_TYPE }
@@ -758,13 +759,10 @@ func PresenceParser(_ dict: NSDictionary, delayRequired: Bool) throws -> Behavio
         
         guard let data  = oData  else { throw BluenetError.NO_PRESENCE_DATA }
         
-        // we make this optional so we can reuse this for the endcondition
-        var delay : NSNumber = 0
-        if (delayRequired) {
-            let oDelay = dict["delay"] as? NSNumber
-            guard let delayResult = oDelay else { throw BluenetError.NO_PRESENCE_DELAY }
-            delay = delayResult
-        }
+        let oDelay = dict["delay"] as? NSNumber
+        guard let delayResult = oDelay else { throw BluenetError.NO_PRESENCE_DELAY }
+        let delay = delayResult
+    
         let oDataType = data["type"] as? String
         
         guard let dataType = oDataType else { throw BluenetError.NO_PRESENCE_DATA }
@@ -812,7 +810,7 @@ func EndConditionParser(_ dict: NSDictionary) throws -> BehaviourEndCondition {
     guard let presence = oPresence else { throw BluenetError.NO_END_CONDITION_PRESENCE }
     guard let duration = oDuration else { throw BluenetError.NO_END_CONDITION_DURATION }
     
-    let presenceObject = try PresenceParser(presence, delayRequired: false)
+    let presenceObject = try PresenceParser(presence)
     
     return BehaviourEndCondition(presence:presenceObject, presenceBehaviourDurationInSeconds: duration.uint32Value)
 }

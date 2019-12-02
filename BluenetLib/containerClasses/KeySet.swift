@@ -52,7 +52,7 @@ public class KeySet {
         else {
             self.serviceDataKey = nil;
         }
-        
+
         self.initializedKeys = true
         
         detemineUserLevel()

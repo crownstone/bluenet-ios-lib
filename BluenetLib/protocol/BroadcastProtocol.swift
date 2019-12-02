@@ -106,6 +106,10 @@ public class BroadcastProtocol {
             rc5Payload += UInt32(1) << 2
         }
         
+        if (devicePreferences.ignoreForBehaviour) {
+            rc5Payload += UInt32(1) << 1
+        }
+        
         return RC5Encrypt(input: rc5Payload, key: key)
     }
     

@@ -102,6 +102,8 @@ public class ResultPacketV2 : ResultBasePacket {
                      
             let totalSize : Int = minSize + NSNumber(value: self.size).intValue
             if (data.count >= totalSize) {
+                if (self.size == 0) { return }
+                
                 for i in [Int](minSize...totalSize-1) {
                     self.payload.append(data[i])
                 }

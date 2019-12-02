@@ -31,14 +31,16 @@ public struct LocationState {
 public struct DevicePreferences {
     public var rssiOffset   : Int8 = 0
     public var tapToToggle  : Bool = false
+    public var ignoreForBehaviour: Bool = false
     public var useBackgroundBroadcasts: Bool = false
     public var useBaseBroadcasts: Bool = false
     
-    public init(rssiOffset:Int8? = nil, tapToToggle:Bool? = nil, useBackgroundBroadcasts:Bool? = nil, useBaseBroadcasts:Bool? = nil) {
-        if let rssiOffsetValue  = rssiOffset    { self.rssiOffset  = rssiOffsetValue  }
-        if let tapToToggleValue = tapToToggle   { self.tapToToggle = tapToToggleValue }
-        if let useBackgroundBroadcastsValue = useBackgroundBroadcasts   {   self.useBackgroundBroadcasts = useBackgroundBroadcastsValue }
-        if let useBaseBroadcastsValue       = useBaseBroadcasts         {   self.useBaseBroadcasts = useBaseBroadcastsValue }
+    public init(rssiOffset:Int8? = nil, tapToToggle:Bool? = nil, ignoreForBehaviour:Bool? = nil, useBackgroundBroadcasts:Bool? = nil, useBaseBroadcasts:Bool? = nil) {
+        if let rssiOffsetValue  = rssiOffset                            { self.rssiOffset              = rssiOffsetValue  }
+        if let tapToToggleValue = tapToToggle                           { self.tapToToggle             = tapToToggleValue }
+        if let ignoreForBehaviourValue = ignoreForBehaviour             { self.ignoreForBehaviour      = ignoreForBehaviourValue }
+        if let useBackgroundBroadcastsValue = useBackgroundBroadcasts   { self.useBackgroundBroadcasts = useBackgroundBroadcastsValue }
+        if let useBaseBroadcastsValue       = useBaseBroadcasts         { self.useBaseBroadcasts       = useBaseBroadcastsValue }
     }
 }
 
@@ -82,9 +84,10 @@ public class BluenetSettings {
         self.locationState.referenceId = referenceId
     }
     
-    public func setDevicePreferences(rssiOffset: Int8, tapToToggle: Bool, useBackgroundBroadcasts: Bool, useBaseBroadcasts: Bool) {
+    public func setDevicePreferences(rssiOffset: Int8, tapToToggle: Bool, ignoreForBehaviour: Bool, useBackgroundBroadcasts: Bool, useBaseBroadcasts: Bool) {
         self.devicePreferences.rssiOffset = rssiOffset
         self.devicePreferences.tapToToggle = tapToToggle
+        self.devicePreferences.ignoreForBehaviour = ignoreForBehaviour
         self.devicePreferences.useBackgroundBroadcasts = useBackgroundBroadcasts
         self.devicePreferences.useBaseBroadcasts = useBaseBroadcasts
     }

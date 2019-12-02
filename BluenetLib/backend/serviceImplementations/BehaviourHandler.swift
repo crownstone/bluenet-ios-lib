@@ -44,12 +44,12 @@ public class BehaviourHandler {
                     if resultPacket.resultCode == .SUCCESS {
                         if resultPacket.payload.count >= 5 {
                             let result = BehaviourResultPacket.init(
-                                index: resultPacket.payload[4],
+                                index: resultPacket.payload[0],
                                 masterHash: Conversion.uint8_array_to_uint32([
-                                    resultPacket.payload[0],
                                     resultPacket.payload[1],
                                     resultPacket.payload[2],
-                                    resultPacket.payload[3]
+                                    resultPacket.payload[3],
+                                    resultPacket.payload[4]
                             ]))
                             seal.fulfill(result)
                         }
@@ -65,8 +65,8 @@ public class BehaviourHandler {
             }
     }
     
-    public func replaceBehaviour(index: UInt8, behaviour: Behaviour) -> Promise<UInt32> {
-        return Promise<UInt32> { seal in
+    public func replaceBehaviour(index: UInt8, behaviour: Behaviour) -> Promise<BehaviourResultPacket> {
+        return Promise<BehaviourResultPacket> { seal in
             
             var dataPacket = [UInt8]()
             dataPacket.append(index)
@@ -84,14 +84,16 @@ public class BehaviourHandler {
                         seal.reject(BluenetError.BEHAVIOUR_INVALID_RESPONSE)
                     }
                     if resultPacket.resultCode == .SUCCESS {
-                        if resultPacket.payload.count >= 4 {
-                            let masterHash = Conversion.uint8_array_to_uint32([
-                                resultPacket.payload[0],
-                                resultPacket.payload[1],
-                                resultPacket.payload[2],
-                                resultPacket.payload[3]
-                            ])
-                            seal.fulfill(masterHash)
+                        if resultPacket.payload.count >= 5 {
+                            let result = BehaviourResultPacket.init(
+                                index: resultPacket.payload[0],
+                                masterHash: Conversion.uint8_array_to_uint32([
+                                    resultPacket.payload[1],
+                                    resultPacket.payload[2],
+                                    resultPacket.payload[3],
+                                    resultPacket.payload[4]
+                            ]))
+                            seal.fulfill(result)
                         }
                         else {
                             seal.reject(BluenetError.BEHAVIOUR_INVALID_RESPONSE)
@@ -108,8 +110,8 @@ public class BehaviourHandler {
         }
     }
     
-    public func removeBehaviour(index: UInt8) -> Promise<UInt32> {
-        return Promise<UInt32> { seal in
+    public func removeBehaviour(index: UInt8) -> Promise<BehaviourResultPacket> {
+        return Promise<BehaviourResultPacket> { seal in
             let deletePacket = ControlPacketV2(type: .removeBehaviour, payload8: index).getPacket()
             let writeCommand : voidPromiseCallback = {
                return _writeGenericControlPacket(bleManager: self.bleManager, deletePacket)
@@ -120,15 +122,17 @@ public class BehaviourHandler {
                     if resultPacket.valid == false {
                         seal.reject(BluenetError.BEHAVIOUR_INVALID_RESPONSE)
                     }
-                    if resultPacket.resultCode == .SUCCESS || resultPacket.resultCode == .NOT_FOUND {
-                        if resultPacket.payload.count >= 4 {
-                            let masterHash = Conversion.uint8_array_to_uint32([
-                                resultPacket.payload[0],
-                                resultPacket.payload[1],
-                                resultPacket.payload[2],
-                                resultPacket.payload[3]
-                            ])
-                            seal.fulfill(masterHash)
+                    if resultPacket.resultCode == .SUCCESS {
+                        if resultPacket.payload.count >= 5 {
+                            let result = BehaviourResultPacket.init(
+                                index: resultPacket.payload[0],
+                                masterHash: Conversion.uint8_array_to_uint32([
+                                    resultPacket.payload[1],
+                                    resultPacket.payload[2],
+                                    resultPacket.payload[3],
+                                    resultPacket.payload[4]
+                            ]))
+                            seal.fulfill(result)
                         }
                         else {
                             seal.reject(BluenetError.BEHAVIOUR_INVALID_RESPONSE)
