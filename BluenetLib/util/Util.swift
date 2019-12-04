@@ -112,3 +112,19 @@ public func fletcher32( _ data: [UInt16]) -> UInt32 {
         
     return (c1 << 16 | c0);
 }
+
+import PromiseKit
+
+public func promiseBatchPerformer(arr: [voidPromiseCallback], index: Int) -> Promise<Void> {
+    return Promise<Void> { seal in
+        if (index < arr.count) {
+            arr[index]()
+                .then{  () in return promiseBatchPerformer(arr: arr, index: index+1)}
+                .done{  () in seal.fulfill(()) }
+                .catch{ err in seal.reject(err) }
+        }
+        else {
+            seal.fulfill(())
+        }
+    }
+}

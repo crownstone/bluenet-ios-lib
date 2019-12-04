@@ -69,6 +69,7 @@ public enum ControlTypeV2 : UInt16 {
     case replaceBehaviour       = 61
     case removeBehaviour        = 62
     case getBehaviour           = 63
+    case getBehaviourIndices    = 64
     
     case UNSPECIFIED = 65535
 }

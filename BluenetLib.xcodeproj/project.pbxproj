@@ -77,6 +77,9 @@
 		FA7065EE2003C9DC00C833FE /* AdvertisementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065ED2003C9DC00C833FE /* AdvertisementTests.swift */; };
 		FA7065F32003DEC100C833FE /* opCode4_type0.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7065F22003DEC100C833FE /* opCode4_type0.swift */; };
 		FA747B161E4B0FBA00255820 /* ControlPackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA747B151E4B0FBA00255820 /* ControlPackets.swift */; };
+		FA761AB72397B84F003FEF41 /* BehaviourSyncing.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA761AB62397B84F003FEF41 /* BehaviourSyncing.swift */; };
+		FA761AB92397B86B003FEF41 /* BehaviourParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA761AB82397B86B003FEF41 /* BehaviourParsing.swift */; };
+		FA761ABB2397CFDC003FEF41 /* BehaviourHasher.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA761ABA2397CFDC003FEF41 /* BehaviourHasher.swift */; };
 		FA76EF2120976EDB0046DCDE /* ResultPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA76EF2020976EDB0046DCDE /* ResultPacket.swift */; };
 		FA7BE69A1E4487B8009E633D /* MeshHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7BE6991E4487B8009E633D /* MeshHandler.swift */; };
 		FA7BE69E1E449287009E633D /* MeshPackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7BE69D1E449287009E633D /* MeshPackets.swift */; };
@@ -247,6 +250,9 @@
 		FA7065ED2003C9DC00C833FE /* AdvertisementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvertisementTests.swift; sourceTree = "<group>"; };
 		FA7065F22003DEC100C833FE /* opCode4_type0.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode4_type0.swift; sourceTree = "<group>"; };
 		FA747B151E4B0FBA00255820 /* ControlPackets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ControlPackets.swift; sourceTree = "<group>"; };
+		FA761AB62397B84F003FEF41 /* BehaviourSyncing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviourSyncing.swift; sourceTree = "<group>"; };
+		FA761AB82397B86B003FEF41 /* BehaviourParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviourParsing.swift; sourceTree = "<group>"; };
+		FA761ABA2397CFDC003FEF41 /* BehaviourHasher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviourHasher.swift; sourceTree = "<group>"; };
 		FA76EF2020976EDB0046DCDE /* ResultPacket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultPacket.swift; sourceTree = "<group>"; };
 		FA79874E1DF6B3380005EB86 /* BluenetLib.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BluenetLib.md; sourceTree = "<group>"; };
 		FA79874F1DF6B3380005EB86 /* BluenetLocalizationLib.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BluenetLocalizationLib.md; sourceTree = "<group>"; };
@@ -363,6 +369,7 @@
 				FA5882951E38C0F000913AE6 /* BluenetMotion.swift */,
 				FA8AC2C721C939C5000C35C1 /* BluenetTimekeeper.swift */,
 				FA843F1D21B6E47800F633A3 /* BluenetErrors.swift */,
+				FA761AB52397B82F003FEF41 /* utilModules */,
 				FA5882891E38C0F000913AE6 /* backend */,
 				FA5882971E38C0F000913AE6 /* containerClasses */,
 				FA5882A31E38C0F100913AE6 /* encryption */,
@@ -542,6 +549,16 @@
 				FA44DC4623688C64001CA4B8 /* StatePackets.swift */,
 			);
 			path = packetGenerators;
+			sourceTree = "<group>";
+		};
+		FA761AB52397B82F003FEF41 /* utilModules */ = {
+			isa = PBXGroup;
+			children = (
+				FA761AB62397B84F003FEF41 /* BehaviourSyncing.swift */,
+				FA761AB82397B86B003FEF41 /* BehaviourParsing.swift */,
+				FA761ABA2397CFDC003FEF41 /* BehaviourHasher.swift */,
+			);
+			path = utilModules;
 			sourceTree = "<group>";
 		};
 		FA82930B235F2D7B0072D9FE /* Behaviour */ = {
@@ -744,6 +761,7 @@
 				FA5882C31E38C0F100913AE6 /* BluenetMotion.swift in Sources */,
 				FA5882D71E38C0F100913AE6 /* TrainingHelper.swift in Sources */,
 				FA5882CF1E38C0F100913AE6 /* EncryptionHandler.swift in Sources */,
+				FA761ABB2397CFDC003FEF41 /* BehaviourHasher.swift in Sources */,
 				FAA023F121C2A4D30059A64D /* BroadcastElement.swift in Sources */,
 				FA2261C11E55A7B9001D0262 /* DeviceHandler.swift in Sources */,
 				FA8A9E061F15007E002028F6 /* SchedulerPackets.swift in Sources */,
@@ -781,8 +799,10 @@
 				FA5882DC1E38C0F100913AE6 /* Util.swift in Sources */,
 				FA3FC25B1ED3499C00DD2F76 /* StateHandler.swift in Sources */,
 				FA82930A235F21DC0072D9FE /* BehaviourHandler.swift in Sources */,
+				FA761AB92397B86B003FEF41 /* BehaviourParsing.swift in Sources */,
 				FA5882D81E38C0F100913AE6 /* Conversion.swift in Sources */,
 				FA29280522C110BD004ABB5E /* BleUtil.swift in Sources */,
+				FA761AB72397B84F003FEF41 /* BehaviourSyncing.swift in Sources */,
 				FA5882D91E38C0F100913AE6 /* Eventbus.swift in Sources */,
 				FA44DC4723688C64001CA4B8 /* StatePackets.swift in Sources */,
 				FA82930D235F2D8A0072D9FE /* Behaviour.swift in Sources */,
