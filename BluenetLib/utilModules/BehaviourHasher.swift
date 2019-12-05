@@ -41,8 +41,10 @@ public class BehaviourHasher {
             }
         }
         
+        if hashPacket.count > 0 {
+            return fletcher32(hashPacket)
+        }
         
-        
-        return fletcher32(hashPacket)
+        return 0
     }    
 }
