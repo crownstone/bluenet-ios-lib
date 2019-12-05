@@ -24,7 +24,7 @@ class EncryptedPackage {
         }
         
         nonce = [UInt8](repeating: 0, count: PACKET_NONCE_LENGTH);
-        var dataArray = Array(UnsafeBufferPointer(start: (data as NSData).bytes.bindMemory(to: UInt8.self, capacity: data.count), count: data.count))
+        let dataArray = Array(UnsafeBufferPointer(start: (data as NSData).bytes.bindMemory(to: UInt8.self, capacity: data.count), count: data.count))
         var payloadData = [UInt8](repeating: 0, count: dataArray.count - prefixLength)
         
         // 20 is the minimal size of a packet (3+1+16)
@@ -36,7 +36,6 @@ class EncryptedPackage {
         for i in [Int](0...nonce.count-1) {
             nonce[i] = dataArray[i]
         }
-        
         
         // only allow 0, 1, 2 for Admin, User, Basic and 100 for Setup
         if (dataArray[PACKET_NONCE_LENGTH] > 2 && dataArray[PACKET_NONCE_LENGTH] != UInt8(UserLevel.setup.rawValue)) {

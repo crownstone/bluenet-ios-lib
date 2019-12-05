@@ -41,7 +41,6 @@ struct BehaviourTimeContainer {
 
 struct BehaviourEndCondition {
     var presence: BehaviourPresence
-    var presenceBehaviourDurationInSeconds: UInt32
 }
 
 
@@ -156,8 +155,8 @@ public class Behaviour {
                     self.valid = false
                     return
                 }
-                let offset = Conversion.uint8_array_to_uint32(Array(data[40...43]))
-                self.endCondition = BehaviourEndCondition(presence: presence, presenceBehaviourDurationInSeconds: offset)
+        
+                self.endCondition = BehaviourEndCondition(presence: presence)
             }
             else {
                 self.valid = false
@@ -185,7 +184,6 @@ public class Behaviour {
         
         if self.endCondition != nil {
             arr += self.endCondition!.presence.getPacket()
-            arr += Conversion.uint32_to_uint8_array(self.endCondition!.presenceBehaviourDurationInSeconds)
         }
 
         return arr
@@ -231,7 +229,6 @@ public class Behaviour {
             if let endCondition = self.endCondition {
                 var endConditionDictionary = [String: Any]()
                 endConditionDictionary["type"] = "PRESENCE_AFTER"
-                endConditionDictionary["presenceBehaviourDurationInSeconds"] = endCondition.presenceBehaviourDurationInSeconds
                 endConditionDictionary["presence"] = endCondition.presence.getDictionary(includeDelay: false)
                 
                 dataDictionary["endCondition"] = endConditionDictionary

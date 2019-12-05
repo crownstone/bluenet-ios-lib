@@ -302,13 +302,11 @@ func PresenceParser(_ dict: NSDictionary) throws -> BehaviourPresence {
 func EndConditionParser(_ dict: NSDictionary) throws -> BehaviourEndCondition {
     let oType     = dict["type"] as? String
     let oPresence = dict["presence"] as? NSDictionary
-    let oDuration = dict["presenceBehaviourDurationInSeconds"] as? NSNumber
     
     guard let type = oType         else { throw BluenetError.NO_END_CONDITION_TYPE }
     guard let presence = oPresence else { throw BluenetError.NO_END_CONDITION_PRESENCE }
-    guard let duration = oDuration else { throw BluenetError.NO_END_CONDITION_DURATION }
     
     let presenceObject = try PresenceParser(presence)
     
-    return BehaviourEndCondition(presence:presenceObject, presenceBehaviourDurationInSeconds: duration.uint32Value)
+    return BehaviourEndCondition(presence:presenceObject)
 }

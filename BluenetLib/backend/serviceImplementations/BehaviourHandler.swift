@@ -22,13 +22,13 @@ public class BehaviourHandler {
         self.eventBus   = eventBus
     }
     
-    func _handleResponse(data: [UInt8], seal: Resolver<BehaviourResultPacket>) {
+    func _handleResponse(data: [UInt8], seal: Resolver<BehaviourResultPacket>, notFoundIsSuccess: Bool = false) {
         let resultPacket = ResultPacketV2(data)
         if resultPacket.valid == false {
             seal.reject(BluenetError.BEHAVIOUR_INVALID_RESPONSE)
             return
         }
-        if resultPacket.resultCode == .SUCCESS {
+        if resultPacket.resultCode == .SUCCESS || (notFoundIsSuccess == true && resultPacket.resultCode == .NOT_FOUND) {
             if resultPacket.payload.count >= 5 {
                 let result = BehaviourResultPacket.init(
                     index: resultPacket.payload[0],
@@ -94,7 +94,7 @@ public class BehaviourHandler {
             }
             self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV2, writeCommand: writeCommand)
                 .done{ data -> Void in
-                    self._handleResponse(data: data, seal: seal)
+                    self._handleResponse(data: data, seal: seal, notFoundIsSuccess: true)
                }
                .catch{ err in seal.reject(err) }
         }
