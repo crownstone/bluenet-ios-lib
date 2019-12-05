@@ -12,7 +12,7 @@ import Foundation
 public class BehaviourHasher {
     var behaviours : [Behaviour]!
     
-    init(_ dictArray: [NSDictionary], dayStartTimeSecondsSinceMidnight: UInt32) {
+    public init(_ dictArray: [NSDictionary], dayStartTimeSecondsSinceMidnight: UInt32) {
         behaviours = [Behaviour]()
         for dict in dictArray {
             let behaviour = try? BehaviourDictionaryParser(dict, dayStartTimeSecondsSinceMidnight: dayStartTimeSecondsSinceMidnight)

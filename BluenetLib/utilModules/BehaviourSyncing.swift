@@ -24,7 +24,7 @@ public class BehaviourSyncer {
     var dayStartTimeSecondsSinceMidnight : UInt32
     var finalBehaviourList :[Behaviour]!
     
-    init(bluenet: Bluenet, behaviourDictionaryArray: [NSDictionary], dayStartTimeSecondsSinceMidnight: UInt32) {
+    public init(bluenet: Bluenet, behaviourDictionaryArray: [NSDictionary], dayStartTimeSecondsSinceMidnight: UInt32) {
         self.dayStartTimeSecondsSinceMidnight = dayStartTimeSecondsSinceMidnight
         self.bluenet = bluenet
         self.existingIndices = [IndexResultPacket]()
