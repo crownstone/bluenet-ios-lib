@@ -9,7 +9,7 @@
 import Foundation
 
 
-class BehaviourHasher {
+public class BehaviourHasher {
     var behaviours : [Behaviour]!
     
     init(_ dictArray: [NSDictionary], dayStartTimeSecondsSinceMidnight: UInt32) {
@@ -29,7 +29,7 @@ class BehaviourHasher {
         })
     }
     
-    func getMasterHash() -> UInt32 {
+    public func getMasterHash() -> UInt32 {
         var hashPacket = [UInt8]()
         
         for behaviour in behaviours {
@@ -44,11 +44,5 @@ class BehaviourHasher {
         
         
         return fletcher32(hashPacket)
-    }
-    
-    func compareWithIndexHashes(data: [UInt8]) {
-        
-    }
-    
-    
+    }    
 }

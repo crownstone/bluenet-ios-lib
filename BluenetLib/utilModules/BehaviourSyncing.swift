@@ -17,7 +17,7 @@ import PromiseKit
 // - We assume the user is already connected to the Crownstone
 // - Any mismatches mean that our local understanding of the behaviours is incomplete. The data on the Crownstone is leading (assuming all our expected mutations have already been done)
 
-class BehaviourSyncer {
+public class BehaviourSyncer {
     let bluenet : Bluenet!
     let hasher : BehaviourHasher!
     var existingIndices: [IndexResultPacket]!
@@ -35,7 +35,7 @@ class BehaviourSyncer {
         )
     }
     
-    func sync() -> Promise<[Behaviour]> {
+    public func sync() -> Promise<[Behaviour]> {
        return self._getIndices()
            .then{ () in return self._sync() }
     }
