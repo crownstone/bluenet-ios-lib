@@ -37,52 +37,24 @@ public class BroadcastHandler {
     
     
     /**
-     * Method for setting the time on a crownstone that has lost the time.
-     * This is a targeted message with a validation nonce that is most likely only valid for one specific crownstone.
-     * It therefore cannot be mixed with other messages of the same type.
+     * Method for setting the time on a crownstone
      */
-    public func setTime(referenceId: String, stoneId: UInt8, time: UInt32? = nil, customValidationNonce: UInt32? = nil) -> Promise<Void> {
+    public func setTime(referenceId: String, time: UInt32? = nil, sunriseSecondsSinceMidnight: UInt32, sunsetSecondsSinceMidnight: UInt32) -> Promise<Void> {
         return Promise<Void> { seal in
             
-            // allow for a custom time to be set.
-            var timeToUse = NSNumber(value:getCurrentTimestampForCrownstone()).uint32Value
+            var packet : [UInt8]!
             if let customTime = time {
-                timeToUse = customTime
+                packet = Broadcast_SetTimePacket(time: customTime, sunrisetSecondsSinceMidnight: sunriseSecondsSinceMidnight, sunsetSecondsSinceMidnight: sunsetSecondsSinceMidnight).getPacket()
+            }
+            else {
+                packet = Broadcast_SetTimePacket(sunrisetSecondsSinceMidnight: sunriseSecondsSinceMidnight, sunsetSecondsSinceMidnight: sunsetSecondsSinceMidnight).getPacket()
             }
             
-            let packet  = BroadcastStone_SetTimePacket(crownstoneId: stoneId, time: timeToUse).getPacket()
+            
             let element = BroadcastElement(
                 referenceId: referenceId,
                 type: .setTime,
                 packet: packet,
-                seal: seal,
-                target: stoneId,
-                singular: true,
-                customValidationNonce: customValidationNonce
-            )
-            
-            self.peripheralStateManager.loadElement(element: element)
-        }
-    }
-    
-    
-    
-    /**
-     * Method for updating the time for all crownstones that roughly have this time already. This can be used for syncing the time.
-     **/
-    public func updateTime(referenceId: String, time: UInt32? = nil) -> Promise<Void> {
-        return Promise<Void> { seal in
-            
-            // allow for a custom time to be set.
-            var timeToUse = NSNumber(value:getCurrentTimestampForCrownstone()).uint32Value
-            if let customTime = time {
-                timeToUse = customTime
-            }
-            
-            let element = BroadcastElement(
-                referenceId: referenceId,
-                type: .updateTime,
-                packet: Conversion.uint32_to_uint8_array(timeToUse),
                 seal: seal,
                 singular: true
             )
@@ -90,6 +62,8 @@ public class BroadcastHandler {
             self.peripheralStateManager.loadElement(element: element)
         }
     }
+    
+    
     
     
     

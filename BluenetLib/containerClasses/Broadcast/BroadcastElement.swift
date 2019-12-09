@@ -14,7 +14,7 @@ let DEFAULT_BROADCAST_DURATION : Double = 1.5
 class BroadcastElement {
     var type : BroadcastType
     var singular = false
-    var seal : Resolver<Void>
+    var seal : Resolver<Void>?
     var packet : [UInt8]
     var requiredDuration : Double = DEFAULT_BROADCAST_DURATION
     var completed = false
@@ -44,6 +44,17 @@ class BroadcastElement {
         self.customValidationNonce = customValidationNonce
     }
     
+    init (referenceId: String, type: BroadcastType, packet: [UInt8], target: UInt8? = nil, singular: Bool = false, duration: Double = DEFAULT_BROADCAST_DURATION, customValidationNonce: UInt32? = nil) {
+        self.referenceId = referenceId
+        self.type = type
+        self.packet = packet
+        self.seal = nil
+        self.singular = singular
+        self.target = target
+        self.requiredDuration = duration
+        self.customValidationNonce = customValidationNonce
+    }
+    
     func getSize() -> Int {
         return packet.count
     }
@@ -58,7 +69,9 @@ class BroadcastElement {
     }
     
     func fail() {
-        self.seal.reject(BluenetError.BROADCAST_ABORTED)
+        if let activeSeal = self.seal {
+            activeSeal.reject(BluenetError.BROADCAST_ABORTED)
+        }
         self.completed = true
     }
     
@@ -70,7 +83,9 @@ class BroadcastElement {
             let broadcastTime = self.endTime - self.startTime
             self.totalTimeBroadcasted += broadcastTime
             if (self.totalTimeBroadcasted >= self.requiredDuration) {
-                self.seal.fulfill(())
+                if let activeSeal = self.seal {
+                    activeSeal.fulfill(())
+                }
                 self.completed = true
             }
         }

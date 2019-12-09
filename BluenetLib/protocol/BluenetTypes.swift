@@ -65,7 +65,7 @@ public enum ControlTypeV2 : UInt16 {
     case allow_dimming          = 40
     case lock_switch            = 41
     case UART_message           = 50
-    case saveBehaviour          = 60
+    case addBehaviour           = 60
     case replaceBehaviour       = 61
     case removeBehaviour        = 62
     case getBehaviour           = 63
@@ -324,4 +324,5 @@ public enum StateTypeV2 : UInt16 {
     case temperature = 135
     case time = 136
     case error_BITMASK = 139
+    case sunTimes = 149
 }

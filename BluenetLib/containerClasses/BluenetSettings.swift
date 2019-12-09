@@ -64,6 +64,10 @@ public class BluenetSettings {
     
     var backgroundState = false
     
+    public var sunriseSecondsSinceMidnight : UInt32? = nil
+    public var sunsetSecondsSinceMidnight  : UInt32? = nil
+    
+    
     init() {
         self._checkBackgroundState()
     }
@@ -90,6 +94,12 @@ public class BluenetSettings {
         self.devicePreferences.ignoreForBehaviour = ignoreForBehaviour
         self.devicePreferences.useBackgroundBroadcasts = useBackgroundBroadcasts
         self.devicePreferences.useBaseBroadcasts = useBaseBroadcasts
+    }
+    
+    
+    public func setSunTimes(sunriseSecondsSinceMidnight: UInt32, sunsetSecondsSinceMidnight: UInt32) {
+        self.sunriseSecondsSinceMidnight = sunriseSecondsSinceMidnight
+        self.sunsetSecondsSinceMidnight  = sunsetSecondsSinceMidnight
     }
   
     

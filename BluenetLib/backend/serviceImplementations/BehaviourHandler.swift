@@ -50,10 +50,10 @@ public class BehaviourHandler {
     }
     
     
-    public func saveBehaviour(behaviour: Behaviour) -> Promise<BehaviourResultPacket> {
+    public func addBehaviour(behaviour: Behaviour) -> Promise<BehaviourResultPacket> {
         return Promise<BehaviourResultPacket> { seal in
             let behaviourDataPacket = behaviour.getPacket()
-            let packet = ControlPacketV2(type: .saveBehaviour, payloadArray: behaviourDataPacket).getPacket()
+            let packet = ControlPacketV2(type: .addBehaviour, payloadArray: behaviourDataPacket).getPacket()
             
             let writeCommand : voidPromiseCallback = {
                return _writeGenericControlPacket(bleManager: self.bleManager, packet)

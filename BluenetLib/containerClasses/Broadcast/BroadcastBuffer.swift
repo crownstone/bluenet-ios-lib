@@ -13,7 +13,7 @@ public enum BroadcastType : UInt8 {
     case noOp = 0
     case multiSwitch = 1
     case setTime = 2
-    case updateTime = 3
+    case sunTime = 3
     
     
     case foregroundBase = 100
@@ -64,6 +64,15 @@ class BroadcastBuffer {
         return false
     }
     
+    func countRequired() -> Bool {
+        switch self.type {
+            case .foregroundBase, .noOp, .other, .setTime, .sunTime:
+                return false
+            case .multiSwitch:
+                return true
+        }
+    }
+    
     func getPacket(validationNonce: UInt32) -> [UInt8] {
         var data = [UInt8]()
         
@@ -85,7 +94,10 @@ class BroadcastBuffer {
         
         data += Conversion.uint32_to_uint8_array(nonceToUse)
         data.append(self.type.rawValue)
-        data.append(NSNumber(value: self.elements.count).uint8Value)
+        
+        if (self.countRequired()) {
+            data.append(NSNumber(value: self.elements.count).uint8Value)
+        }
         for element in self.elements {
 //            print("ElementPacket \(element.getPacket())")
             data += element.getPacket()

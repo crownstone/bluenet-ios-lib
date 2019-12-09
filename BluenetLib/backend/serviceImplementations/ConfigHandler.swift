@@ -248,6 +248,20 @@ public class ConfigHandler {
         }
     }
     
+    
+    
+    public func setSunTimes(sunriseSecondsSinceMidnight: UInt32, sunsetSecondsSinceMidnight: UInt32) -> Promise<Void> {
+        LOG.info("BLUENET_LIB: setSunTimes")
+        var data = [UInt8]()
+        
+        data += Conversion.uint32_to_uint8_array(sunriseSecondsSinceMidnight)
+        data += Conversion.uint32_to_uint8_array( sunsetSecondsSinceMidnight)
+        
+        
+        let packet = ControlStateSetPacket.init(type: .sunTimes, payloadArray: data).getPacket()
+        return _writeGenericControlPacket(bleManager: self.bleManager, packet)
+    }
+    
     func _writeToConfig(packet: [UInt8]) -> Promise<Void> {
         if self.bleManager.connectionState.operationMode == .setup {
             if self.bleManager.connectionState.controlVersion == .v2 {

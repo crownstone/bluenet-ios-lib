@@ -138,6 +138,12 @@ public class Bluenet {
     }
     #endif
     
+    
+    public func setSunTimes(sunriseSecondsSinceMidnight: UInt32, sunsetSecondsSinceMidnight: UInt32) {
+        self.settings.setSunTimes(sunriseSecondsSinceMidnight: sunriseSecondsSinceMidnight, sunsetSecondsSinceMidnight: sunsetSecondsSinceMidnight)
+        self.peripheralStateManager.updateAdvertisements()
+    }
+    
     public func enableBatterySaving() {
         self.bleManager.enableBatterySaving()
     }
