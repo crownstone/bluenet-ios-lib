@@ -36,6 +36,18 @@ public class BroadcastHandler {
     }
     
     
+    public func turnOn(referenceId: String, stoneId: UInt8) -> Promise<Void> {
+        return Promise<Void> { seal in
+            
+            let switchState : UInt8 = 255
+            let packet  = BroadcastStone_SwitchPacket(crownstoneId: stoneId, state: switchState).getPacket()
+            let element = BroadcastElement(referenceId: referenceId, type: .multiSwitch, packet: packet, seal: seal, target: stoneId)
+            
+            self.peripheralStateManager.loadElement(element: element)
+        }
+    }
+    
+    
     /**
      * Method for setting the time on a crownstone
      */

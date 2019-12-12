@@ -140,6 +140,32 @@ import CoreBluetooth
     }
     
     
+    func getTurnOnPacket(stones:[[String: NSNumber]]) -> [UInt8] {
+        if controlVersion == .v2 {
+            var innerPacket = [UInt8]()
+            var count : UInt8 = 0
+            for stone in stones {
+                let crownstoneId  = stone["crownstoneId"]
+                let state : UInt8 = 255
+                
+                if (crownstoneId != nil) {
+                    innerPacket.append(crownstoneId!.uint8Value)
+                    innerPacket.append(state)
+                    count += 1
+                }
+            }
+            
+            var packet = [UInt8]()
+            packet.append(count)
+            packet += innerPacket
+            
+            return ControlPacketV2(type: .multiSwitch, payloadArray: packet).getPacket()
+        }
+        else {
+            return ControlPacketsGenerator.getMultiSwitchPacket(stones: stones)
+        }
+    }
+    
     func getMultiSwitchPacket(stones:[[String: NSNumber]]) -> [UInt8] {
         if controlVersion == .v2 {
             var innerPacket = [UInt8]()

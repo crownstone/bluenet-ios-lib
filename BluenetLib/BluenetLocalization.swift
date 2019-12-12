@@ -10,7 +10,7 @@ import UIKit
 import CoreLocation
 import SwiftyJSON
 import BluenetShared
-
+import PromiseKit
 
 struct LocationSummary {
     var present: Bool = false
@@ -114,7 +114,7 @@ public class BluenetLocalization {
     /**
      * This provides a very rough estimate of the users location. The location is cached for battery saving. This is accurate up to 3km radius (kCLLocationAccuracyThreeKilometers).
      */
-    public func requestLocation() -> CLLocationCoordinate2D {
+    public func requestLocation() -> Promise<CLLocationCoordinate2D> {
         return self.locationManager.requestLocation()
     }
     

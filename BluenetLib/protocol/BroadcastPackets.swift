@@ -43,7 +43,6 @@ class Broadcast_SetTimePacket {
         self.suntimes = Broadcast_SunTimePacket(sunriseSecondsSinceMidnight: sunrisetSecondsSinceMidnight, sunsetSecondsSinceMidnight: sunsetSecondsSinceMidnight)
     }
     
-    
     func getPacket() -> [UInt8] {
         var arr = [UInt8]()
         if let time = self.time {

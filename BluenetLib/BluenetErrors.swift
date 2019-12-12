@@ -40,6 +40,8 @@ public enum BluenetError : Error {
     case INCORRECT_RESPONSE_LENGTH
     case UNKNOWN_TYPE
     
+    case COULD_NOT_GET_LOCATION
+    
     // encryption errors
     case INVALID_SESSION_REFERENCE_ID
     case INVALID_SESSION_DATA

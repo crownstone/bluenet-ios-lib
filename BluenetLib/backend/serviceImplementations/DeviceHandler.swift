@@ -78,7 +78,7 @@ public class DeviceHandler {
     
     
     public func getBootloaderRevision() -> Promise<String> {
-        if self.bleManager.connectionState.operationMode == .dfu {
+        if self.bleManager.connectionState.operationMode != .dfu {
             return self.getBootloaderRevisionInAppMode()
         }
         return self.getSoftwareRevision()

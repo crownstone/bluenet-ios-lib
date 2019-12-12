@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreLocation
+import PromiseKit
 import SwiftyJSON
 import UIKit
 
@@ -76,14 +77,41 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     /**
      * Request the GPS coordinates within 3KM radius (least accurate)
      */
-    public func requestLocation() -> CLLocationCoordinate2D {
-        // ask for permission if the manager does not exist and create the manager
-        if (self.coordinatesSet) {
-            return coordinates
+    public func requestLocation() -> Promise<CLLocationCoordinate2D> {
+        print("LocationRequestes")
+        if self.manager != nil {
+            self.manager!.requestLocation()
+            print("HERE location has been requested")
+            return self._getLocation(attempt: 0)
         }
         else {
-            LOG.error("BLUENET_LIB_NAV: Requesting location while it has not been obtained yet.")
-            return coordinates
+            return Promise<CLLocationCoordinate2D> { seal in seal.reject(BluenetError.COULD_NOT_GET_LOCATION) }
+        }
+    }
+    
+    func _getLocation(attempt: Int) -> Promise<CLLocationCoordinate2D>  {
+        print("Stat get location", attempt)
+        return Promise<CLLocationCoordinate2D> { seal in
+            if (attempt == 20) {
+                print("Reject the get location due to timeout \(attempt)")
+                seal.reject(BluenetError.COULD_NOT_GET_LOCATION)
+                return
+            }
+            
+            if (self.coordinatesSet != true) {
+                delay(0.50, { _ =
+                    self._getLocation(attempt: attempt+1)
+                        .done{_ -> Void in seal.fulfill(self.coordinates)}
+                        .catch{ err in
+                            print("Reject the get location due to timeout \(attempt)")
+                            seal.reject(err)
+                            
+                    }
+                })
+            }
+            else {
+                seal.fulfill(self.coordinates)
+            }
         }
     }
     
@@ -314,7 +342,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         
         self.manager!.desiredAccuracy = kCLLocationAccuracyThreeKilometers
         self.manager!.pausesLocationUpdatesAutomatically = true
-        self.manager!.startUpdatingLocation()
+//        self.manager!.startUpdatingLocation()
         if (self.manager!.responds(to: #selector(getter: CLLocationManager.allowsBackgroundLocationUpdates))) {
             LOG.info("BLUENET_LIB_NAV: Manager allows background location updates. We enable it.")
             self.manager!.allowsBackgroundLocationUpdates = true
@@ -342,7 +370,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         }
         
         self.manager!.pausesLocationUpdatesAutomatically = true
-        self.manager!.startUpdatingLocation()
+//        self.manager!.startUpdatingLocation()
         if (self.manager!.responds(to: #selector(getter: CLLocationManager.allowsBackgroundLocationUpdates))) {
             LOG.info("BLUENET_LIB_NAV: Manager allows background location updates. we disable it.")
             self.manager!.allowsBackgroundLocationUpdates = false
@@ -463,6 +491,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
      */
   
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error){
+        print("BLUENET_LIB_NAV: did didFailWithError withError: \(error) \n");
         LOG.error("BLUENET_LIB_NAV: did didFailWithError withError: \(error) \n");
     }
     
@@ -478,6 +507,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     
 
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        print("HERE", locations)
         if let location = locations.first {
             LOG.verbose("BLUENET_LIB_NAV: update user's location: \(location.coordinate)")
             self.coordinates = location.coordinate
