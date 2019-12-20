@@ -48,7 +48,7 @@ public class BroadcastHandler {
     }
     
     
-    public func castBehaviourSettings(referenceId: String, enabled: Bool) -> Promise<Void> {
+    public func setBehaviourSettings(referenceId: String, enabled: Bool) -> Promise<Void> {
        return Promise<Void> { seal in
            
            var enabledState : UInt8 = 0
