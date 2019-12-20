@@ -78,10 +78,9 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
      * Request the GPS coordinates within 3KM radius (least accurate)
      */
     public func requestLocation() -> Promise<CLLocationCoordinate2D> {
-        print("LocationRequestes")
         if self.manager != nil {
             self.manager!.requestLocation()
-            print("HERE location has been requested")
+            self.coordinatesSet = false
             return self._getLocation(attempt: 0)
         }
         else {
@@ -90,10 +89,8 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     }
     
     func _getLocation(attempt: Int) -> Promise<CLLocationCoordinate2D>  {
-        print("Stat get location", attempt)
         return Promise<CLLocationCoordinate2D> { seal in
             if (attempt == 20) {
-                print("Reject the get location due to timeout \(attempt)")
                 seal.reject(BluenetError.COULD_NOT_GET_LOCATION)
                 return
             }
@@ -103,9 +100,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
                     self._getLocation(attempt: attempt+1)
                         .done{_ -> Void in seal.fulfill(self.coordinates)}
                         .catch{ err in
-                            print("Reject the get location due to timeout \(attempt)")
                             seal.reject(err)
-                            
                     }
                 })
             }
@@ -491,7 +486,6 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
      */
   
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error){
-        print("BLUENET_LIB_NAV: did didFailWithError withError: \(error) \n");
         LOG.error("BLUENET_LIB_NAV: did didFailWithError withError: \(error) \n");
     }
     
@@ -507,7 +501,6 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     
 
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        print("HERE", locations)
         if let location = locations.first {
             LOG.verbose("BLUENET_LIB_NAV: update user's location: \(location.coordinate)")
             self.coordinates = location.coordinate

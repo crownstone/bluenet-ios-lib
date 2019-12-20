@@ -245,6 +245,8 @@ public class Behaviour {
             returnDict["idOnCrownstone"] = index
         }
         
+        returnDict["profileIndex"] = self.profileIndex
+        
         return returnDict as NSDictionary
     }
     
@@ -500,13 +502,13 @@ public class ActiveDays {
     
     public func getDictionary() -> NSDictionary {
         let returnDict : [String: Any] = [
-            "Sunday"    : self.Sunday,
-            "Monday"    : self.Monday,
-            "Tuesday"   : self.Tuesday,
-            "Wednesday" : self.Wednesday,
-            "Thursday"  : self.Thursday,
-            "Friday"    : self.Friday,
-            "Saturday"  : self.Saturday,
+            "Sun" : self.Sunday,
+            "Mon" : self.Monday,
+            "Tue" : self.Tuesday,
+            "Wed" : self.Wednesday,
+            "Thu" : self.Thursday,
+            "Fri" : self.Friday,
+            "Sat" : self.Saturday,
         ]
 
         return returnDict as NSDictionary

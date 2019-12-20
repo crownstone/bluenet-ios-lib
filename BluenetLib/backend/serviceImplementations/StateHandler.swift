@@ -156,15 +156,22 @@ public class StateHandler {
     }
    
     public func _getState<T>(_ state : StateType) -> Promise<T> {
-        return self._getState(StateTypeV2(rawValue: UInt16(state.rawValue))!)
+        let mappedStateType = StateTypeV2(rawValue: UInt16(state.rawValue))!
+        let readpacket = StatePacketsGenerator.getReadPacket(type: mappedStateType).getPacket()
+        return self._getState(readpacket)
     }
     
-    public func _getState<T>(_ state : StateTypeV2) -> Promise<T> {
+    public func _getState<T>(_ state : StateTypeV2, id: UInt16 = 0) -> Promise<T> {
+        let readpacket = StatePacketsGenerator.getReadPacket(type: state, id: id).getPacket()
+        return self._getState(readpacket, id: 0)
+    }
+    
+    public func _getState<T>(_ requestPacket: [UInt8], id: UInt16 = 0) -> Promise<T> {
         return Promise<T> { seal in
             let stateParams = _getStateReadParameters()
             
             let writeCommand : voidPromiseCallback = { 
-                return self._writeToState(packet: StatePacketsGenerator.getReadPacket(type: state).getPacket())
+                return self._writeToState(packet: requestPacket)
             }
             self.bleManager.setupSingleNotification(stateParams.service, characteristicId: stateParams.characteristicToReadFrom, writeCommand: writeCommand)
                 .done{ data -> Void in
@@ -175,8 +182,16 @@ public class StateHandler {
                     }
                                         
                     do {
-                        let result : T = try Convert(resultPacket.payload)
-                        seal.fulfill(result)
+                        if self.bleManager.connectionState.controlVersion == .v2 {
+                            let packetSize = resultPacket.payload.count
+                            let resultPayload = Array(resultPacket.payload[4...packetSize-1]) // 4 is the 2 stateType and 2 ID, rest is data payload
+                            let result : T = try Convert(resultPayload)
+                            seal.fulfill(result)
+                        }
+                        else {
+                            let result : T = try Convert(resultPacket.payload)
+                            seal.fulfill(result)
+                        }
                     }
                     catch let err {
                         seal.reject(err)

@@ -79,7 +79,6 @@ public class BehaviourSyncer {
                             
                             // generate the todo task for the getting of the behaviour
                             todo.append({ () in
-                                print("Downloading behaviour \(indexPacket.index) because the hash is different.")
                                 return Promise<Void> { seal in
                                     self.bluenet.behaviour.getBehaviour(index: indexPacket.index)
                                         .done{ (behaviour: Behaviour) -> Void in
@@ -106,26 +105,26 @@ public class BehaviourSyncer {
         for indexPacket in self.existingIndices {
             var foundIndex = false
             for behaviour in hasher.behaviours {
-                if indexPacket.index == behaviour.indexOnCrownstone! {
+                if behaviour.indexOnCrownstone != nil && indexPacket.index == behaviour.indexOnCrownstone! {
                     // it's here! We do not have to do anything. The hash compare has been done above
                     foundIndex = true
                     break
                 }
+            }
                 
-                if foundIndex == false {
-                    // we want to download this behaviour!
-                    // generate the todo task for the getting of the behaviour
-                    todo.append({ () in
-                        return Promise<Void> { seal in
-                            self.bluenet.behaviour.getBehaviour(index: indexPacket.index)
-                                .done{ (behaviour: Behaviour) -> Void in
-                                    self.finalBehaviourList.append(behaviour)
-                                    seal.fulfill(())
-                                }
-                                .catch { err in seal.reject(err) }
-                        }
-                    })
-                }
+            if foundIndex == false {
+                // we want to download this behaviour!
+                // generate the todo task for the getting of the behaviour
+                todo.append({ () in
+                    return Promise<Void> { seal in
+                        self.bluenet.behaviour.getBehaviour(index: indexPacket.index)
+                            .done{ (behaviour: Behaviour) -> Void in
+                                self.finalBehaviourList.append(behaviour)
+                                seal.fulfill(())
+                            }
+                            .catch { err in seal.reject(err) }
+                    }
+                })
             }
         }
         

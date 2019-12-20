@@ -17,7 +17,6 @@ public class StatePacketsGeneratorClass {
     
     init() {}
     
-  
     func getWritePacket(type: ConfigurationType) -> BLEPacketBase {
         if self.controlVersion == .v2 { return ControlStateSetPacket(type: StateTypeV2(rawValue: UInt16(type.rawValue))!) }
         else                          { return WriteConfigPacket(type: type) }
@@ -38,10 +37,11 @@ public class StatePacketsGeneratorClass {
         if self.controlVersion == .v2 { return ControlStateGetPacket(type: StateTypeV2(rawValue: UInt16(type.rawValue))!) }
         else                          { return ReadStatePacket(type: type) }
     }
-    func getReadPacket(type: StateTypeV2) -> BLEPacketBase {
-        return ControlStateGetPacket(type: type)
+    func getReadPacket(type: StateTypeV2, id: UInt16 = 0) -> BLEPacketBase {
+        if self.controlVersion == .v2 { return ControlStateGetPacketV2(type: type, id: id) }
+        else                          { return ControlStateGetPacket(type: type) }
+        
     }
-    
     func getReturnPacket() -> ResultBasePacket {
         if self.controlVersion == .v2 { return ResultPacketV2() }
         else                          { return ResultPacket() }

@@ -126,13 +126,11 @@ class PeripheralStateManager {
 
     /**   BACKGROUND STATE HANDLING METHODS **/
     func applicationWillEnterForeground() {
-        print("Peripheral received application will enter foreground")
         self.stopBackgroundBroadcasts()
         self.startForegroundBroadcasts()
     }
     
     func applicationDidEnterBackground() {
-        print("Peripheral received application did enter background")
         self.stopForegroundBroadcasts()
         self.startBackgroundBroadcasts()
     }

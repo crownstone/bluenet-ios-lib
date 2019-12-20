@@ -22,7 +22,7 @@ public class BehaviourHandler {
         self.eventBus   = eventBus
     }
     
-    func _handleResponse(data: [UInt8], seal: Resolver<BehaviourResultPacket>, notFoundIsSuccess: Bool = false) {
+    func _handleResponseIndexHash(data: [UInt8], seal: Resolver<BehaviourResultPacket>, notFoundIsSuccess: Bool = false) {
         let resultPacket = ResultPacketV2(data)
         if resultPacket.valid == false {
             seal.reject(BluenetError.BEHAVIOUR_INVALID_RESPONSE)
@@ -60,7 +60,7 @@ public class BehaviourHandler {
             }
             self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV2, writeCommand: writeCommand)
                 .done{ data -> Void in
-                    self._handleResponse(data: data, seal: seal)
+                    self._handleResponseIndexHash(data: data, seal: seal)
                }
                .catch{ err in seal.reject(err) }
             }
@@ -80,7 +80,7 @@ public class BehaviourHandler {
             }
             self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV2, writeCommand: writeCommand)
                 .done{ data -> Void in
-                    self._handleResponse(data: data, seal: seal)
+                    self._handleResponseIndexHash(data: data, seal: seal)
                }
                .catch{ err in seal.reject(err) }
         }
@@ -94,7 +94,7 @@ public class BehaviourHandler {
             }
             self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV2, writeCommand: writeCommand)
                 .done{ data -> Void in
-                    self._handleResponse(data: data, seal: seal, notFoundIsSuccess: true)
+                    self._handleResponseIndexHash(data: data, seal: seal, notFoundIsSuccess: true)
                }
                .catch{ err in seal.reject(err) }
         }
@@ -108,15 +108,21 @@ public class BehaviourHandler {
             }
             self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV2, writeCommand: writeCommand)
                 .done{ data -> Void in
+                    //print("Got the date from GetBehaviour at index", index, data)
                     let resultPacket = ResultPacketV2(data)
+                    //print("after parsing:", resultPacket.valid, resultPacket.resultCode, resultPacket.commandType, resultPacket.size, resultPacket.payload)
                     if resultPacket.valid == false {
                         seal.reject(BluenetError.BEHAVIOUR_INVALID_RESPONSE)
                     }
                     if resultPacket.resultCode == .SUCCESS {
-                        let behaviour = Behaviour(data: resultPacket.payload)
+                        let indexStored = resultPacket.payload[0]
+                        let behaviourData = Array(resultPacket.payload[1...resultPacket.payload.count-1])
+                        let behaviour = Behaviour(data: behaviourData)
                         
                         // store the index into the behaviour
-                        behaviour.indexOnCrownstone = index
+                        behaviour.indexOnCrownstone = indexStored
+                        
+                        print(behaviour,behaviour.valid)
                         
                         if (behaviour.valid) {
                             seal.fulfill(behaviour)
@@ -150,20 +156,21 @@ public class BehaviourHandler {
                         return
                     }
                     if resultPacket.resultCode == .SUCCESS {
-                        let amountOfPackets = resultPacket.payload.count/5
-                        
                         var result = [IndexResultPacket]()
-                        for i in 0...amountOfPackets-1 {
-                            let baseIndex = i*5
-                            let packet = IndexResultPacket.init(
-                                index: resultPacket.payload[baseIndex],
-                                behaviourHash: Conversion.uint8_array_to_uint32([
-                                    resultPacket.payload[baseIndex]+1,
-                                    resultPacket.payload[baseIndex]+2,
-                                    resultPacket.payload[baseIndex]+3,
-                                    resultPacket.payload[baseIndex]+4
-                                ]))
-                            result.append(packet)
+                        let amountOfPackets = resultPacket.payload.count/5
+                        if (amountOfPackets > 0) {
+                            for i in 0...amountOfPackets-1 {
+                                let baseIndex = i*5
+                                let packet = IndexResultPacket.init(
+                                    index: resultPacket.payload[baseIndex],
+                                    behaviourHash: Conversion.uint8_array_to_uint32([
+                                        resultPacket.payload[baseIndex+1],
+                                        resultPacket.payload[baseIndex+2],
+                                        resultPacket.payload[baseIndex+3],
+                                        resultPacket.payload[baseIndex+4]
+                                    ]))
+                                result.append(packet)
+                            }
                         }
                         seal.fulfill(result)
                     }

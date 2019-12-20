@@ -272,6 +272,24 @@ class ControlStateGetPacket : ControlPacketV2 {
     init(type: StateTypeV2) { super.init(type: ControlTypeV2.getState, payload16: type.rawValue)  }
 }
 
+class ControlStateGetPacketV2 : ControlPacketV2 {
+    var id : UInt16 = 0
+    
+    init(type: StateTypeV2, id: UInt16) {
+        super.init(type: ControlTypeV2.getState, payload16: type.rawValue)
+        self.id = id
+    }
+    
+    override func getPacket() -> [UInt8] {
+        var arr = [UInt8]()
+        arr += Conversion.uint16_to_uint8_array(self.type)
+        arr += Conversion.uint16_to_uint8_array(self.length + 2) // 2 for the ID size
+        arr += self.payload
+        arr += Conversion.uint16_to_uint8_array(self.id)
+        return arr
+    }
+}
+
 class KeepAliveStatePacket : ControlPacket {
 
     init(action: UInt8, state: UInt8, timeout: UInt16) {

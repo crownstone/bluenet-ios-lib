@@ -34,7 +34,6 @@ public class BehaviourHasher {
         
         for behaviour in behaviours {
             if behaviour.indexOnCrownstone != nil {
-                print("Behaviour index \(behaviour.indexOnCrownstone)")
                 hashPacket.append(behaviour.indexOnCrownstone!)
                 hashPacket.append(0)
                 hashPacket += behaviour.getPaddedPacket()
