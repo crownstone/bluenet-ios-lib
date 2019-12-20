@@ -48,6 +48,20 @@ public class BroadcastHandler {
     }
     
     
+    public func castBehaviourSettings(referenceId: String, enabled: Bool) -> Promise<Void> {
+       return Promise<Void> { seal in
+           
+           var enabledState : UInt8 = 0
+           if (enabled) {
+              enabledState = 1
+           }
+           let element = BroadcastElement(referenceId: referenceId, type: .behaviourSettings, packet: [enabledState], seal: seal, singular: true, duration: 5)
+           
+           self.peripheralStateManager.loadElement(element: element)
+       }
+    }
+
+    
     /**
      * Method for setting the time on a crownstone
      */

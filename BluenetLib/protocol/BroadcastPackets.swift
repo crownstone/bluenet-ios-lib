@@ -104,8 +104,3 @@ class Broadcast_ForegroundBasePacket {
         return arr
     }
 }
-
-
-
-
-

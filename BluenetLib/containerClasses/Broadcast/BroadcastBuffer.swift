@@ -10,10 +10,11 @@ import Foundation
 import CoreBluetooth
 
 public enum BroadcastType : UInt8 {
-    case noOp = 0
-    case multiSwitch = 1
-    case setTime = 2
-    case sunTime = 3
+    case noOp               = 0
+    case multiSwitch        = 1
+    case setTime            = 2
+    case sunTime            = 3
+    case behaviourSettings  = 4
     
     
     case foregroundBase = 100
@@ -66,10 +67,10 @@ class BroadcastBuffer {
     
     func countRequired() -> Bool {
         switch self.type {
-            case .foregroundBase, .noOp, .other, .setTime, .sunTime:
-                return false
             case .multiSwitch:
                 return true
+            default:
+                return false
         }
     }
     
