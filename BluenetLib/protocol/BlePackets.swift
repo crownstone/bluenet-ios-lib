@@ -248,26 +248,28 @@ class ControlPacketV2 : BLEPacketV2 {
 class ControlStateSetPacket : ControlPacketV2 {
     
     var stateType : UInt16
-   
-    init(type: StateTypeV2)                        { self.stateType = type.rawValue; super.init(type: ControlTypeV2.setState)  }
-    init(type: StateTypeV2, payload:   String)     { self.stateType = type.rawValue; super.init(type: ControlTypeV2.setState, payload: payload)   }
-    init(type: StateTypeV2, payload8:  UInt8)      { self.stateType = type.rawValue; super.init(type: ControlTypeV2.setState, payload8: payload8)  }
-    init(type: StateTypeV2, payload16: UInt16)     { self.stateType = type.rawValue; super.init(type: ControlTypeV2.setState, payload16: payload16) }
-    init(type: StateTypeV2, payload32: UInt32)     { self.stateType = type.rawValue; super.init(type: ControlTypeV2.setState, payload32: payload32) }
-    init(type: StateTypeV2, payloadArray: [UInt8]) { self.stateType = type.rawValue; super.init(type: ControlTypeV2.setState, payloadArray: payloadArray) }
-    init(type: StateTypeV2, payloadFloat: Float)   { self.stateType = type.rawValue; super.init(type: ControlTypeV2.setState, payloadFloat: payloadFloat) }
+    var id : UInt16
+    
+    init(type: StateTypeV2, id: UInt16 = 0)                        { self.id = id; self.stateType = type.rawValue; super.init(type: ControlTypeV2.setState)  }
+    init(type: StateTypeV2, payload:   String,     id: UInt16 = 0) { self.id = id; self.stateType = type.rawValue; super.init(type: ControlTypeV2.setState, payload: payload)   }
+    init(type: StateTypeV2, payload8:  UInt8,      id: UInt16 = 0) { self.id = id; self.stateType = type.rawValue; super.init(type: ControlTypeV2.setState, payload8: payload8)  }
+    init(type: StateTypeV2, payload16: UInt16,     id: UInt16 = 0) { self.id = id; self.stateType = type.rawValue; super.init(type: ControlTypeV2.setState, payload16: payload16) }
+    init(type: StateTypeV2, payload32: UInt32,     id: UInt16 = 0) { self.id = id; self.stateType = type.rawValue; super.init(type: ControlTypeV2.setState, payload32: payload32) }
+    init(type: StateTypeV2, payloadArray: [UInt8], id: UInt16 = 0) { self.id = id; self.stateType = type.rawValue; super.init(type: ControlTypeV2.setState, payloadArray: payloadArray) }
+    init(type: StateTypeV2, payloadFloat: Float,   id: UInt16 = 0) { self.id = id; self.stateType = type.rawValue; super.init(type: ControlTypeV2.setState, payloadFloat: payloadFloat) }
     
     override func getPacket() -> [UInt8] {
         var arr = [UInt8]()
         arr += Conversion.uint16_to_uint8_array(self.type)
-        arr += Conversion.uint16_to_uint8_array(self.length + 2) // the + 2 is for the stateType uint16
+        arr += Conversion.uint16_to_uint8_array(self.length + 4) // the + 2 is for the stateType uint16 and +2 for the ID, this makes +4
         arr += Conversion.uint16_to_uint8_array(self.stateType)
+        arr += Conversion.uint16_to_uint8_array(self.id)
         arr += self.payload
         return arr
     }
 }
 
-
+// this class is meant as backwards compatibility and has no id field. The old state enums have the same value as the new ones.
 class ControlStateGetPacket : ControlPacketV2 {
     init(type: StateTypeV2) { super.init(type: ControlTypeV2.getState, payload16: type.rawValue)  }
 }

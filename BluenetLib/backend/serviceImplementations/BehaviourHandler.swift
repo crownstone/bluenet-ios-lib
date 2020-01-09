@@ -108,9 +108,8 @@ public class BehaviourHandler {
             }
             self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV2, writeCommand: writeCommand)
                 .done{ data -> Void in
-                    //print("Got the date from GetBehaviour at index", index, data)
                     let resultPacket = ResultPacketV2(data)
-                    //print("after parsing:", resultPacket.valid, resultPacket.resultCode, resultPacket.commandType, resultPacket.size, resultPacket.payload)
+
                     if resultPacket.valid == false {
                         seal.reject(BluenetError.BEHAVIOUR_INVALID_RESPONSE)
                     }
@@ -121,8 +120,6 @@ public class BehaviourHandler {
                         
                         // store the index into the behaviour
                         behaviour.indexOnCrownstone = indexStored
-                        
-                        print(behaviour,behaviour.valid)
                         
                         if (behaviour.valid) {
                             seal.fulfill(behaviour)

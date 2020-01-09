@@ -77,7 +77,10 @@ func parseOpcode3_type0(serviceData : ScanResponsePacket, data : [UInt8], litePa
             serviceData.timestamp = NSNumber(value: serviceData.partialTimestamp).doubleValue // this is now a counter
         }
         
-        // 14 is reserved
+        // bitmask states
+        let globalBitmaskArray = Conversion.uint8_to_bit_array(data[14])
+        serviceData.behaviourEnabled = globalBitmaskArray[0]
+        // rest of the bitmask is reserved for now
         
         serviceData.validation = data[15]
     }

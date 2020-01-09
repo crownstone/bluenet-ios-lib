@@ -51,11 +51,11 @@ public class BroadcastHandler {
     public func setBehaviourSettings(referenceId: String, enabled: Bool) -> Promise<Void> {
        return Promise<Void> { seal in
            
-           var enabledState : UInt8 = 0
+           var enabledState : UInt32 = 0
            if (enabled) {
               enabledState = 1
            }
-           let element = BroadcastElement(referenceId: referenceId, type: .behaviourSettings, packet: [enabledState], seal: seal, singular: true, duration: 5)
+           let element = BroadcastElement(referenceId: referenceId, type: .behaviourSettings, packet: Conversion.uint32_to_uint8_array(enabledState), seal: seal, singular: true, duration: 5)
            
            self.peripheralStateManager.loadElement(element: element)
        }

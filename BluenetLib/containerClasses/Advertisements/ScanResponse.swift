@@ -56,6 +56,8 @@ public class ScanResponsePacket {
     
     public var uniqueIdentifier    :   NSNumber = 0
     
+    public var behaviourEnabled    :   Bool     = true
+    
     public var deviceType          :   DeviceType = .undefined
     public var rssiOfExternalCrownstone : Int8  = 0
     
@@ -135,6 +137,7 @@ public class ScanResponsePacket {
                 self.getDeviceTypeFromPublicData()
                 parseOpcode5(serviceData: self, data: decryptedData)
             case 6:
+                // this is the setup mode
                 self.getDeviceTypeFromPublicData()
                 parseOpcode6(serviceData: self, data: decryptedData)
             default:
@@ -209,6 +212,8 @@ public class ScanResponsePacket {
             "switchCraftEnabled"   : self.switchCraftEnabled,
             "tapToToggleEnabled"   : self.tapToToggleEnabled,
             "behaviourOverridden"  : self.behaviourOverridden,
+            
+            "behaviourEnabled"     : self.behaviourEnabled,
             
             "errorMode"            : self.errorMode,
             "errors"               : errorsDictionary,
