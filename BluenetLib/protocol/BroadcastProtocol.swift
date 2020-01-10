@@ -142,8 +142,8 @@ public class BroadcastProtocol {
      * TThe first chunk of RC5 data and reserved chunk of public bits
      *
      * | Index |  Reserved  |  Device Token     |  First chunk of RC5Data  |
-     * | 0 1   |  0 0       |  0 0 0 0 0 0 0 0  |  0 0 0 0                 |
-     * | 2b    |  2b        |  8b               |  4b                      |
+     * | 0 1   |  0 0       |  0 0 0 0 0 0 0 0  |  0 0 0 0   |
+     * | 2b    |  2b        |  8b                     |  4b          |
      *
      **/
     static func _getFirstRC5Block(deviceToken: UInt8, RC5: UInt32) -> UInt16 {

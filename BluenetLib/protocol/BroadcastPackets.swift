@@ -44,7 +44,15 @@ class Broadcast_SetTimePacket {
     }
     
     func getPacket() -> [UInt8] {
+        var optionBitmask : UInt8 = 0
+        
+        // tell the packet how to interpret the data
+        optionBitmask += 1 << 0 // time is valid
+        optionBitmask += 1 << 1 // sun times are valid
+        
         var arr = [UInt8]()
+        arr.append(optionBitmask)
+        
         if let time = self.time {
             arr += Conversion.uint32_to_uint8_array(time)
         }
@@ -52,8 +60,7 @@ class Broadcast_SetTimePacket {
             arr += Conversion.uint32_to_uint8_array(NSNumber(value: getCurrentTimestampForCrownstone()).uint32Value)
         }
         
-        arr += self.suntimes.getPacket()
-        arr.append(0)
+        arr += self.suntimes.getSunTimeData()
         
         return arr
     }
@@ -69,7 +76,7 @@ class Broadcast_SunTimePacket {
         self.sunsetSecondsSinceMidnight  = sunsetSecondsSinceMidnight
     }
    
-    func getPacket() -> [UInt8] {
+    func getSunTimeData() -> [UInt8] {
         let sunriseArray = Conversion.uint32_to_uint8_array(self.sunriseSecondsSinceMidnight)
         let sunsetArray  = Conversion.uint32_to_uint8_array(self.sunsetSecondsSinceMidnight)
 
@@ -83,6 +90,22 @@ class Broadcast_SunTimePacket {
         ]
 
         return suntimePacket
+    }
+    
+    func getPacket() -> [UInt8] {
+        var optionBitmask : UInt8 = 0
+        
+        optionBitmask += 0 << 0 // time is NOT valid
+        optionBitmask += 1 << 1 // sun times are valid
+        
+        var arr = [UInt8]()
+    
+        arr.append(optionBitmask)
+        arr += [0,0,0,0] // this is padding where the time should normally live. This packet should not have time.
+        
+        arr += self.getSunTimeData()
+        
+        return arr
     }
 }
 
