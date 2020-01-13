@@ -146,6 +146,7 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
                     return Promise <Void> { innerSeal in
                         // we only want to pass this to the main promise of connect if we successfully received the nonce, but cant decrypt it.
                         if let bleErr = err as? BluenetError {
+                            // if we are not in DFU mode, this is a success by definition. 
                             if bleErr != BluenetError.NOT_IN_DFU_MODE {
                                 innerSeal.reject(err)
                                 return

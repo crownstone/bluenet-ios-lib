@@ -122,7 +122,6 @@ class Broadcast_ForegroundBasePacket {
         var arr = [UInt8]()
         
         arr += self.suntimes.getPacket()
-        arr += [0,0,0,0,0]
         
         return arr
     }
