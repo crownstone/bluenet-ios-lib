@@ -12,11 +12,8 @@ import CoreBluetooth
 public enum BroadcastType : UInt8 {
     case noOp               = 0
     case multiSwitch        = 1
-    case setTime            = 2
+    case timeData           = 2
     case behaviourSettings  = 3
-    
-    
-    case foregroundBase = 100
     
     case other = 255
 }

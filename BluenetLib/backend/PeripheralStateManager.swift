@@ -210,15 +210,15 @@ class PeripheralStateManager {
         if let referenceId = self.settings.locationState.referenceId {
             if self.settings.sunsetSecondsSinceMidnight != nil {
                 let packet = Broadcast_ForegroundBasePacket(sunriseSecondsSinceMidnight: self.settings.sunriseSecondsSinceMidnight!, sunsetSecondsSinceMidnight: self.settings.sunsetSecondsSinceMidnight!).getPacket()
-                let suntimeElement = BroadcastElement(referenceId: referenceId, type: .sunTime, packet: packet, singular: true, duration: 100)
+                let suntimeElement = BroadcastElement(referenceId: referenceId, type: .timeData, packet: packet, singular: true, duration: 100)
                
-                let bufferToBroadcast = BroadcastBuffer(referenceId: referenceId, type: .sunTime)
+                let bufferToBroadcast = BroadcastBuffer(referenceId: referenceId, type: .timeData)
                 bufferToBroadcast.loadElement(suntimeElement)
                 
                 self._broadcastBuffer(bufferToBroadcast)
             }
             else {
-                let bufferToBroadcast = BroadcastBuffer(referenceId: referenceId, type: .foregroundBase)
+                let bufferToBroadcast = BroadcastBuffer(referenceId: referenceId, type: .noOp)
                 self._broadcastBuffer(bufferToBroadcast)
             }
         }

@@ -80,7 +80,7 @@ public class BroadcastHandler {
             
             let element = BroadcastElement(
                 referenceId: referenceId,
-                type: .setTime,
+                type: .timeData,
                 packet: packet,
                 seal: seal,
                 singular: true
