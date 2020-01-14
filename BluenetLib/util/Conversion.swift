@@ -213,6 +213,26 @@ public class Conversion {
         return UInt32(uint16Array[0]) + UInt32(uint16Array[1]) << 16
     }
     
+    public static func uint16_to_bit_array(_ val: UInt16) -> [Bool] {
+        var result = [Bool](repeating: false, count: 16)
+        let one : UInt16 = 1
+        for i in 0...15 {
+            result[i] = (val & one << i) != 0
+        }
+        return result
+    }
+    
+    public static func bit_array_to_010_array(_ bitArray: [Bool]) -> [UInt8] {
+        var result = [UInt8](repeating: 0, count: bitArray.count)
+       
+        for i in 0...(bitArray.count - 1) {
+            if (bitArray[i]) {
+                result[bitArray.count - 1 - i] = 1
+            }
+        }
+        
+        return result
+    }
     
     public static func uint8_to_bit_array(_ val: UInt8) -> [Bool] {
         var result = [Bool](repeating: false, count: 8)

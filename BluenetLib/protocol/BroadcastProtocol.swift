@@ -27,6 +27,7 @@ public class BroadcastProtocol {
                 
                 // HACK TO HAVE A STATIC NONCE
                 let encryptedData = try EncryptionHandler.encryptBroadcast(Data(bytes:data), settings: settings, nonce: nonce)
+
                 return CBUUID(data: encryptedData)
             }
             catch let err {

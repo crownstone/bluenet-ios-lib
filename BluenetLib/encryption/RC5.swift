@@ -85,17 +85,19 @@ func RC5Decrypt(input: UInt32, key: [UInt8]) -> UInt32 {
 }
 
 
-
 func RC5Encrypt(input: UInt32, S: [UInt16]) -> UInt32 {
     let rounds = 12
     
     let inputBytes = Conversion.uint32_to_uint16_reversed_array(input)
+    
     var A : UInt16 = inputBytes[0] &+ S[0]
     var B : UInt16 = inputBytes[1] &+ S[1]
+
     for i in 1...rounds {
         A = ROTL(input: A ^ B, shift: B%16) &+ S[2*i]
         B = ROTL(input: B ^ A, shift: A%16) &+ S[2*i + 1]
     }
+
     return Conversion.uint16_reversed_array_to_uint32([A,B])
 }
 

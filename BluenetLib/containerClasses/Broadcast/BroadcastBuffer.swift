@@ -13,8 +13,7 @@ public enum BroadcastType : UInt8 {
     case noOp               = 0
     case multiSwitch        = 1
     case setTime            = 2
-    case sunTime            = 3
-    case behaviourSettings  = 4
+    case behaviourSettings  = 3
     
     
     case foregroundBase = 100

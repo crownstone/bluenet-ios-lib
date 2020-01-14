@@ -40,6 +40,7 @@ class EncryptionTests: XCTestCase {
         settings.setDevicePreferences(
             rssiOffset: -10,
             tapToToggle: true,
+            ignoreForBehaviour: false,
             useBackgroundBroadcasts:true,
             useBaseBroadcasts: true
         )
@@ -48,143 +49,143 @@ class EncryptionTests: XCTestCase {
         BLUENET_ENCRYPTION_TESTING = true
         
     }
-    
-    
-    
-    
-    func testBackground() {
-        if let referenceId = self.settings.locationState.referenceId {
-            if let key = self.settings.getLocalizationKey(referenceId: referenceId) {
-                let uuids = BroadcastProtocol.getServicesForBackgroundBroadcast(locationState: self.settings.locationState, devicePreferences: self.settings.devicePreferences, key: key)
-                
-                print("UUIDs", uuids)
-            }
-        }
-        
-    }
-    
-    func testBart() {
-        let exp = expectation(description: "Example")
-        var elements : [BroadcastElement] = []
-
-        _ = Promise<Void> { seal in
-        
-            elements.append(
-                BroadcastElement(
-                    referenceId:"test",
-                    type: .multiSwitch,
-                    packet: BroadcastStone_SwitchPacket(crownstoneId: 7, state: 100).getPacket(),
-                    seal: seal,
-                    target: 7
-                )
-            )
-            elements.append(
-                BroadcastElement(
-                    referenceId:"test",
-                    type: .multiSwitch,
-                    packet: BroadcastStone_SwitchPacket(crownstoneId: 6, state: 100).getPacket(),
-                    seal: seal,
-                    target: 6
-                )
-            )
-            elements.append(
-                BroadcastElement(
-                    referenceId:"test",
-                    type: .multiSwitch,
-                    packet: BroadcastStone_SwitchPacket(crownstoneId: 5, state: 100).getPacket(),
-                    seal: seal,
-                    target: 5
-                )
-            )
-            elements.append(
-                BroadcastElement(
-                    referenceId:"test",
-                    type: .multiSwitch,
-                    packet: BroadcastStone_SwitchPacket(crownstoneId: 4, state: 100).getPacket(),
-                    seal: seal,
-                    target: 4
-                )
-            )
-            elements.append(
-                BroadcastElement(
-                    referenceId:"test",
-                    type: .multiSwitch,
-                    packet: BroadcastStone_SwitchPacket(crownstoneId: 3, state: 100).getPacket(),
-                    seal: seal,
-                    target: 3
-                )
-            )
-            
-            
-            print("elements", elements)
-            
-            let broadcastType = elements[0].type
-            let broadcastReferenceId = elements[0].referenceId
-            
-            // create a buffer that will be broadcast
-            let bufferToBroadcast = BroadcastBuffer(referenceId: broadcastReferenceId, type: broadcastType)
-            
-            // singular elements will immediately mark the buffer as full.
-            for element in elements {
-                if (bufferToBroadcast.accepts(element)) {
-                    bufferToBroadcast.loadElement(element)
-                    // if the buffer is now full, stop the loop.
-                    if (bufferToBroadcast.isFull()) {
-                        break
-                    }
-                }
-            }
-            
-            let referenceIdOfBuffer = bufferToBroadcast.referenceId
-//            var time = 0
-            if (settings.setSessionId(referenceId: referenceIdOfBuffer) == false) {
-                print("Error in _broadcastBuffer Invalid referenceId")
-                return
-            }
-            
-            if let localizationKey = self.settings.getLocalizationKey(referenceId: referenceIdOfBuffer) {
-                let packet = bufferToBroadcast.getPacket(validationNonce: NSNumber(value:time).uint32Value)
-                do {
-                    print("generating short uuids")
-                    let otherUUIDs = try BroadcastProtocol.getUInt16ServiceNumbers(
-                        broadcastCounter: 4,
-                        locationState: self.settings.locationState,
-                        devicePreferences: self.settings.devicePreferences,
-                        protocolVersion: 0,
-                        accessLevel: self.settings.userLevel,
-                        key: localizationKey
-                    )
-                    
-                    var nonce = [UInt8]()
-                    for uuidNum in otherUUIDs {
-                        nonce += Conversion.uint16_to_uint8_array(uuidNum)
-                    }
-                    
-                    do {
-                        print("unencyptedUUID", packet, "nonce",nonce)
-                        let encryptedUUID = try BroadcastProtocol.getEncryptedServiceUUID(referenceId: referenceIdOfBuffer, settings: self.settings, data: packet, nonce: nonce)
-                        print("encryptedUUID", encryptedUUID)
-                        var broadcastUUIDs = BroadcastProtocol.convertUInt16ListToUUID(otherUUIDs)
-                        broadcastUUIDs.append(encryptedUUID)
-                        print(broadcastUUIDs)
-                    }
-                    catch let err {
-                        print("Could not get uint16 ids", err)
-                    }
-                }
-                catch let err {
-                    print("Could not get encrypted service uuid", err)
-                }
-            }
-            
-            seal.fulfill(())
-            exp.fulfill()
-        }
-        
-        waitForExpectations(timeout: 1, handler: nil)
-        
-    }
-    
+//
+//
+//
+//
+//    func testBackground() {
+//        if let referenceId = self.settings.locationState.referenceId {
+//            if let key = self.settings.getLocalizationKey(referenceId: referenceId) {
+//                let uuids = BroadcastProtocol.getServicesForBackgroundBroadcast(locationState: self.settings.locationState, devicePreferences: self.settings.devicePreferences, key: key)
+//
+//                print("UUIDs", uuids)
+//            }
+//        }
+//
+//    }
+//
+//    func testBart() {
+//        let exp = expectation(description: "Example")
+//        var elements : [BroadcastElement] = []
+//
+//        _ = Promise<Void> { seal in
+//
+//            elements.append(
+//                BroadcastElement(
+//                    referenceId:"test",
+//                    type: .multiSwitch,
+//                    packet: BroadcastStone_SwitchPacket(crownstoneId: 7, state: 100).getPacket(),
+//                    seal: seal,
+//                    target: 7
+//                )
+//            )
+//            elements.append(
+//                BroadcastElement(
+//                    referenceId:"test",
+//                    type: .multiSwitch,
+//                    packet: BroadcastStone_SwitchPacket(crownstoneId: 6, state: 100).getPacket(),
+//                    seal: seal,
+//                    target: 6
+//                )
+//            )
+//            elements.append(
+//                BroadcastElement(
+//                    referenceId:"test",
+//                    type: .multiSwitch,
+//                    packet: BroadcastStone_SwitchPacket(crownstoneId: 5, state: 100).getPacket(),
+//                    seal: seal,
+//                    target: 5
+//                )
+//            )
+//            elements.append(
+//                BroadcastElement(
+//                    referenceId:"test",
+//                    type: .multiSwitch,
+//                    packet: BroadcastStone_SwitchPacket(crownstoneId: 4, state: 100).getPacket(),
+//                    seal: seal,
+//                    target: 4
+//                )
+//            )
+//            elements.append(
+//                BroadcastElement(
+//                    referenceId:"test",
+//                    type: .multiSwitch,
+//                    packet: BroadcastStone_SwitchPacket(crownstoneId: 3, state: 100).getPacket(),
+//                    seal: seal,
+//                    target: 3
+//                )
+//            )
+//
+//
+//            print("elements", elements)
+//
+//            let broadcastType = elements[0].type
+//            let broadcastReferenceId = elements[0].referenceId
+//
+//            // create a buffer that will be broadcast
+//            let bufferToBroadcast = BroadcastBuffer(referenceId: broadcastReferenceId, type: broadcastType)
+//
+//            // singular elements will immediately mark the buffer as full.
+//            for element in elements {
+//                if (bufferToBroadcast.accepts(element)) {
+//                    bufferToBroadcast.loadElement(element)
+//                    // if the buffer is now full, stop the loop.
+//                    if (bufferToBroadcast.isFull()) {
+//                        break
+//                    }
+//                }
+//            }
+//
+//            let referenceIdOfBuffer = bufferToBroadcast.referenceId
+////            var time = 0
+//            if (settings.setSessionId(referenceId: referenceIdOfBuffer) == false) {
+//                print("Error in _broadcastBuffer Invalid referenceId")
+//                return
+//            }
+//
+//            if let localizationKey = self.settings.getLocalizationKey(referenceId: referenceIdOfBuffer) {
+//                let packet = bufferToBroadcast.getPacket(validationNonce: NSNumber(value:time).uint32Value)
+//                do {
+//                    print("generating short uuids")
+//                    let otherUUIDs = try BroadcastProtocol.getUInt16ServiceNumbers(
+//                        broadcastCounter: 4,
+//                        locationState: self.settings.locationState,
+//                        devicePreferences: self.settings.devicePreferences,
+//                        protocolVersion: 0,
+//                        accessLevel: self.settings.userLevel,
+//                        key: localizationKey
+//                    )
+//
+//                    var nonce = [UInt8]()
+//                    for uuidNum in otherUUIDs {
+//                        nonce += Conversion.uint16_to_uint8_array(uuidNum)
+//                    }
+//
+//                    do {
+//                        print("unencyptedUUID", packet, "nonce",nonce)
+//                        let encryptedUUID = try BroadcastProtocol.getEncryptedServiceUUID(referenceId: referenceIdOfBuffer, settings: self.settings, data: packet, nonce: nonce)
+//                        print("encryptedUUID", encryptedUUID)
+//                        var broadcastUUIDs = BroadcastProtocol.convertUInt16ListToUUID(otherUUIDs)
+//                        broadcastUUIDs.append(encryptedUUID)
+//                        print(broadcastUUIDs)
+//                    }
+//                    catch let err {
+//                        print("Could not get uint16 ids", err)
+//                    }
+//                }
+//                catch let err {
+//                    print("Could not get encrypted service uuid", err)
+//                }
+//            }
+//
+//            seal.fulfill(())
+//            exp.fulfill()
+//        }
+//
+//        waitForExpectations(timeout: 1, handler: nil)
+//
+//    }
+//
     
     
     
@@ -201,6 +202,39 @@ class EncryptionTests: XCTestCase {
         
         
         
+    }
+    
+    func testBroadcastEncryption() {
+        let devicePreferences = DevicePreferences(rssiOffset: 0, tapToToggle: false, ignoreForBehaviour: true, useBackgroundBroadcasts: false, useBaseBroadcasts: false)
+        let locationState     = LocationState(sphereUID: 4, locationId: 0, profileIndex: 0, deviceToken: 0xf0, referenceId: "test")
+        
+        let otherUUIDs = try? BroadcastProtocol.getUInt16ServiceNumbers(
+            broadcastCounter: 0,
+            locationState: locationState,
+            devicePreferences: devicePreferences,
+            protocolVersion: 0,
+            accessLevel: .basic,
+            key: Conversion.string_to_uint8_array("aLocalizationKey")
+        )
+        
+        var settings = BluenetSettings()
+        settings.userLevel = .basic
+        let keyset = KeySet(adminKey: nil, memberKey: nil, basicKey: "basicKeyForOther", localizationKey: "MyServiceDataKey", serviceDataKey: "aLocalizationKey", referenceId: "test")
+        settings.loadKeySets(encryptionEnabled: true, keySets: [keyset])
+        
+        for uu in otherUUIDs! {
+            print(Conversion.bit_array_to_010_array(Conversion.uint16_to_bit_array(uu)))
+        }
+        
+        
+       var nonce = [UInt8]()
+       for uuidNum in otherUUIDs! {
+           nonce += Conversion.uint16_to_uint8_array(uuidNum)
+       }
+        print(otherUUIDs)
+        
+        let serviceUUID = try? BroadcastProtocol.getEncryptedServiceUUID(referenceId: "test", settings: settings, data: [190, 186, 254, 202,1,2,3], nonce: nonce)
+        print(serviceUUID)
     }
     
     
