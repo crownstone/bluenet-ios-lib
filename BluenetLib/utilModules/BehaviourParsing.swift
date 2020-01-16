@@ -74,7 +74,7 @@ public func BehaviourDictionaryParser(_ dict: NSDictionary, dayStartTimeSecondsS
     let behaviour = Behaviour(
         profileIndex: profileIndex.uint8Value,
         type: behaviourType,
-        intensity: intensity.doubleValue,
+        intensity: intensity.uint8Value,
         activeDays: activeDayObject,
         time: timeObject
     )

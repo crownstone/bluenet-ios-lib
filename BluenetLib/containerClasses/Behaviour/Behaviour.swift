@@ -66,11 +66,11 @@ public class Behaviour {
     /**
      This contains all required information for at least a Twlight behaviour.
      */
-    convenience init(profileIndex: UInt8, type: BehaviourType, intensity: Double, activeDays: ActiveDays, time: BehaviourTimeContainer) {
+    convenience init(profileIndex: UInt8, type: BehaviourType, intensity: UInt8, activeDays: ActiveDays, time: BehaviourTimeContainer) {
         self.init()
         self.profileIndex = profileIndex
         self.type = type
-        self.intensity = UInt8(max(0,min(100, 100*intensity)))
+        self.intensity = max(0,min(100, intensity))
         self.activeDays = activeDays
         self.from = time.from
         self.until = time.until
@@ -80,7 +80,7 @@ public class Behaviour {
     /**
      Adding presence for a normal behaviour
      */
-    convenience init(profileIndex: UInt8, type: BehaviourType, intensity: Double, activeDays: ActiveDays, time: BehaviourTimeContainer, presence: BehaviourPresence) {
+    convenience init(profileIndex: UInt8, type: BehaviourType, intensity: UInt8, activeDays: ActiveDays, time: BehaviourTimeContainer, presence: BehaviourPresence) {
         self.init(profileIndex: profileIndex, type: type, intensity: intensity, activeDays: activeDays, time: time)
         self.presence = presence
     }
@@ -88,7 +88,7 @@ public class Behaviour {
     /**
      Add an end condition for a smart timer
      */
-    convenience init(profileIndex: UInt8, type: BehaviourType, intensity: Double, activeDays: ActiveDays, time: BehaviourTimeContainer, endCondition: BehaviourEndCondition) {
+    convenience init(profileIndex: UInt8, type: BehaviourType, intensity: UInt8, activeDays: ActiveDays, time: BehaviourTimeContainer, endCondition: BehaviourEndCondition) {
         self.init(profileIndex: profileIndex, type: type, intensity: intensity, activeDays: activeDays, time: time)
         self.endCondition = endCondition
     }
@@ -96,7 +96,7 @@ public class Behaviour {
     /**
      Add presence AND an endcondition
      */
-    convenience init(profileIndex: UInt8, type: BehaviourType, intensity: Double, activeDays: ActiveDays, time: BehaviourTimeContainer, presence: BehaviourPresence, endCondition: BehaviourEndCondition) {
+    convenience init(profileIndex: UInt8, type: BehaviourType, intensity: UInt8, activeDays: ActiveDays, time: BehaviourTimeContainer, presence: BehaviourPresence, endCondition: BehaviourEndCondition) {
         self.init(profileIndex: profileIndex, type: type, intensity: intensity, activeDays: activeDays, time:time, presence: presence)
         self.endCondition = endCondition
     }
@@ -125,7 +125,7 @@ public class Behaviour {
             self.intensity    = data[1]
             self.profileIndex = data[2]
             self.activeDays = ActiveDays(data: data[3])
-            self.from  = BehaviourTime(data: Array(data[4...8]))   // 4 5 6 7 8
+            self.from  = BehaviourTime(data: Array(data[4...8]))  // 4 5 6 7 8
             self.until = BehaviourTime(data: Array(data[9...13])) // 9 10 11 12 13
             
             if self.from.valid == false || self.until.valid == false {
@@ -214,12 +214,12 @@ public class Behaviour {
         
         var dataDictionary = [String: Any]()
         if self.type == .twilight {
-            dataDictionary["action"] = ["type": "DIM_WHEN_TURNED_ON", "data": Double(self.intensity)*0.01]
+            dataDictionary["action"] = ["type": "DIM_WHEN_TURNED_ON", "data": self.intensity]
             dataDictionary["time"] = self.getTimeDictionary(dayStartTimeSecondsSinceMidnight: dayStartTimeSecondsSinceMidnight)
         }
         else {
             // behaviour and smart timer have the same format
-            dataDictionary["action"] = ["type": "BE_ON", "data": Double(self.intensity)*0.01]
+            dataDictionary["action"] = ["type": "BE_ON", "data": self.intensity]
             dataDictionary["time"] = self.getTimeDictionary(dayStartTimeSecondsSinceMidnight: dayStartTimeSecondsSinceMidnight)
             
             if let presence = self.presence {
