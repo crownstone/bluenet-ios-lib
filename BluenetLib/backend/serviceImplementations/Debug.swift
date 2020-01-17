@@ -27,7 +27,7 @@ public class DebugHandler {
             let writeCommand : voidPromiseCallback = {
                 return self._writeControlPacket(ControlPacketV2(type: .getBehaviourDebug).getPacket())
             }
-            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ControlV2, writeCommand: writeCommand)
+            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV2, writeCommand: writeCommand)
                 .done{ data -> Void in
                     var result = Dictionary<String,Any>()
                     let resultPacket = ResultPacketV2()
