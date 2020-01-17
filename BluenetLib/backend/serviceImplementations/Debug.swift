@@ -46,18 +46,17 @@ public class DebugHandler {
                     result["dimmerPowered"]       = data[15]
                     result["behaviourEnabled"]    = data[16]
 
-                    result["activeBehaviours"]    = Conversion.uint8_array_to_uint64(Array(data[17..<25]))
-                    result["activeEndConditions"] = Conversion.uint8_array_to_uint64(Array(data[25..<33]))
+                    result["activeBehaviours"]    = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[17..<25])))
+                    result["activeEndConditions"] = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[25..<33])))
                     
-                    result["presenceProfile_0"]   = Conversion.uint8_array_to_uint64(Array(data[33..<41]))
-                    result["presenceProfile_1"]   = Conversion.uint8_array_to_uint64(Array(data[41..<49]))
-                    result["presenceProfile_2"]   = Conversion.uint8_array_to_uint64(Array(data[49..<57]))
-                    result["presenceProfile_3"]   = Conversion.uint8_array_to_uint64(Array(data[57..<65]))
-                    result["presenceProfile_4"]   = Conversion.uint8_array_to_uint64(Array(data[65..<73]))
-                    result["presenceProfile_5"]   = Conversion.uint8_array_to_uint64(Array(data[73..<81]))
-                    result["presenceProfile_6"]   = Conversion.uint8_array_to_uint64(Array(data[81..<89]))
-                    result["presenceProfile_7"]   = Conversion.uint8_array_to_uint64(Array(data[89..<97]))
-                    result["presenceProfile_8"]   = Conversion.uint8_array_to_uint64(Array(data[97..<105]))
+                    result["presenceProfile_0"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[33..<41])))
+                    result["presenceProfile_1"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[41..<49])))
+                    result["presenceProfile_2"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[49..<57])))
+                    result["presenceProfile_3"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[57..<65])))
+                    result["presenceProfile_4"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[65..<73])))
+                    result["presenceProfile_5"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[73..<81])))
+                    result["presenceProfile_6"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[81..<89])))
+                    result["presenceProfile_7"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[89..<97])))
                     
                     seal.fulfill(result)
                 }

@@ -234,6 +234,18 @@ public class Conversion {
         return result
     }
     
+    public static func uint64_to_bit_array(_ val: UInt64) -> [Bool] {
+        var result = [Bool](repeating: false, count: 64)
+        let one : UInt64 = 1
+        
+        
+        for i in 0..<64 {
+            result[i] = (val & (one << i)) != 0
+        }
+       
+        return result
+    }
+    
     public static func uint8_to_bit_array(_ val: UInt8) -> [Bool] {
         var result = [Bool](repeating: false, count: 8)
         let one : UInt8 = 1
