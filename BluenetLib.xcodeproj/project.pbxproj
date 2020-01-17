@@ -23,6 +23,7 @@
 		FA4B678F213839B60050CE9D /* KeySet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4B678E213839B60050CE9D /* KeySet.swift */; };
 		FA4B67912138414D0050CE9D /* AdvertisementValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4B67902138414D0050CE9D /* AdvertisementValidator.swift */; };
 		FA51E65F23D1F053005ED6D9 /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA51E65E23D1F053005ED6D9 /* Debug.swift */; };
+		FA51E66023D1F894005ED6D9 /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA51E65E23D1F053005ED6D9 /* Debug.swift */; };
 		FA535A752076855000B6B793 /* opCode5.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA535A742076855000B6B793 /* opCode5.swift */; };
 		FA535A772076856400B6B793 /* opCode6.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA535A762076856400B6B793 /* opCode6.swift */; };
 		FA5882B91E38C0F100913AE6 /* BleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58828A1E38C0F000913AE6 /* BleManager.swift */; };
@@ -861,6 +862,7 @@
 				FA94D02621A6E62F00AB8331 /* MeshHandler.swift in Sources */,
 				FAAB603221CBCE1B00183587 /* BroadcastElement.swift in Sources */,
 				FA94D02821A6E62F00AB8331 /* SetupHandler.swift in Sources */,
+				FA51E66023D1F894005ED6D9 /* Debug.swift in Sources */,
 				FA94D02921A6E62F00AB8331 /* StateHandler.swift in Sources */,
 				FAAB602B21CBCD9F00183587 /* TimeUtil.swift in Sources */,
 				FA94D02A21A6E62F00AB8331 /* opCode4_type0.swift in Sources */,
