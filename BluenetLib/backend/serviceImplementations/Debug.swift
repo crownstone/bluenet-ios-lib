@@ -36,27 +36,29 @@ public class DebugHandler {
                         return seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
                     }
                     
-                    result["time"]                = Conversion.uint8_array_to_uint32(Array(data[0..<4]))
-                    result["sunrise"]             = Conversion.uint8_array_to_uint32(Array(data[4..<8]))
-                    result["sunset"]              = Conversion.uint8_array_to_uint32(Array(data[8..<12]))
-
-                    result["overrideState"]       = data[12]
-                    result["behaviourState"]      = data[13]
-                    result["aggregatedState"]     = data[14]
-                    result["dimmerPowered"]       = data[15]
-                    result["behaviourEnabled"]    = data[16]
-
-                    result["activeBehaviours"]    = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[17..<25])))
-                    result["activeEndConditions"] = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[25..<33])))
+                    let payload = resultPacket.payload
                     
-                    result["presenceProfile_0"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[33..<41])))
-                    result["presenceProfile_1"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[41..<49])))
-                    result["presenceProfile_2"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[49..<57])))
-                    result["presenceProfile_3"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[57..<65])))
-                    result["presenceProfile_4"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[65..<73])))
-                    result["presenceProfile_5"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[73..<81])))
-                    result["presenceProfile_6"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[81..<89])))
-                    result["presenceProfile_7"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(data[89..<97])))
+                    result["time"]                = Conversion.uint8_array_to_uint32(Array(payload[0..<4]))
+                    result["sunrise"]             = Conversion.uint8_array_to_uint32(Array(payload[4..<8]))
+                    result["sunset"]              = Conversion.uint8_array_to_uint32(Array(payload[8..<12]))
+
+                    result["overrideState"]       = payload[12]
+                    result["behaviourState"]      = payload[13]
+                    result["aggregatedState"]     = payload[14]
+                    result["dimmerPowered"]       = payload[15]
+                    result["behaviourEnabled"]    = payload[16]
+
+                    result["activeBehaviours"]    = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[17..<25])))
+                    result["activeEndConditions"] = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[25..<33])))
+                    
+                    result["presenceProfile_0"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[33..<41])))
+                    result["presenceProfile_1"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[41..<49])))
+                    result["presenceProfile_2"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[49..<57])))
+                    result["presenceProfile_3"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[57..<65])))
+                    result["presenceProfile_4"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[65..<73])))
+                    result["presenceProfile_5"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[73..<81])))
+                    result["presenceProfile_6"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[81..<89])))
+                    result["presenceProfile_7"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[89..<97])))
                     
                     seal.fulfill(result)
                 }
