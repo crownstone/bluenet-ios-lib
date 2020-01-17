@@ -262,7 +262,6 @@ public class ControlHandler {
         LOG.info("BLUENET_LIB: lockSwitch")
         return self._writeControlPacket(ControlPacketsGenerator.getLockSwitchPacket(lock))
     }
-    
      
     
     /**
@@ -324,6 +323,29 @@ public class ControlHandler {
         
         return _writeControlPacket(ControlPacketsGenerator.getScheduleRemovePacket(timerIndex: scheduleEntryIndex))
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // MARK: Util
 
     func _writeControlPacket(_ packet: [UInt8]) -> Promise<Void> {
         if self.bleManager.connectionState.operationMode == .setup {

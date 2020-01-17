@@ -80,6 +80,7 @@ public class Bluenet {
     public let setup      : SetupHandler!
     public let control    : ControlHandler!
     public let mesh       : MeshHandler!
+    public let debug      : DebugHandler!
     public let device     : DeviceHandler!
     public let state      : StateHandler!
     public let broadcast  : BroadcastHandler!
@@ -114,6 +115,7 @@ public class Bluenet {
         self.config    = ConfigHandler(   bleManager:bleManager,  eventBus: eventBus, settings: settings)
         self.setup     = SetupHandler(    bleManager:bleManager,  eventBus: eventBus, settings: settings)
         self.control   = ControlHandler(  bleManager:bleManager,  eventBus: eventBus, settings: settings)
+        self.debug     = DebugHandler(    bleManager:bleManager,  eventBus: eventBus, settings: settings)
         self.mesh      = MeshHandler(     bleManager:bleManager,  eventBus: eventBus, settings: settings)
         self.device    = DeviceHandler(   bleManager:bleManager,  eventBus: eventBus, settings: settings)
         self.state     = StateHandler(    bleManager:bleManager,  eventBus: eventBus, settings: settings)

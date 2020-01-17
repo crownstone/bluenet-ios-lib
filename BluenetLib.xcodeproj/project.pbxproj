@@ -22,6 +22,7 @@
 		FA44DC4723688C64001CA4B8 /* StatePackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA44DC4623688C64001CA4B8 /* StatePackets.swift */; };
 		FA4B678F213839B60050CE9D /* KeySet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4B678E213839B60050CE9D /* KeySet.swift */; };
 		FA4B67912138414D0050CE9D /* AdvertisementValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4B67902138414D0050CE9D /* AdvertisementValidator.swift */; };
+		FA51E65F23D1F053005ED6D9 /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA51E65E23D1F053005ED6D9 /* Debug.swift */; };
 		FA535A752076855000B6B793 /* opCode5.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA535A742076855000B6B793 /* opCode5.swift */; };
 		FA535A772076856400B6B793 /* opCode6.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA535A762076856400B6B793 /* opCode6.swift */; };
 		FA5882B91E38C0F100913AE6 /* BleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA58828A1E38C0F000913AE6 /* BleManager.swift */; };
@@ -197,6 +198,7 @@
 		FA44DC4623688C64001CA4B8 /* StatePackets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatePackets.swift; sourceTree = "<group>"; };
 		FA4B678E213839B60050CE9D /* KeySet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySet.swift; sourceTree = "<group>"; };
 		FA4B67902138414D0050CE9D /* AdvertisementValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvertisementValidator.swift; sourceTree = "<group>"; };
+		FA51E65E23D1F053005ED6D9 /* Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debug.swift; sourceTree = "<group>"; };
 		FA535A742076855000B6B793 /* opCode5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode5.swift; sourceTree = "<group>"; };
 		FA535A762076856400B6B793 /* opCode6.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode6.swift; sourceTree = "<group>"; };
 		FA58828A1E38C0F000913AE6 /* BleManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BleManager.swift; sourceTree = "<group>"; };
@@ -404,6 +406,7 @@
 				FA843EFD21B6D3A600F633A3 /* BroadcastHandler.swift */,
 				FA58828D1E38C0F000913AE6 /* ConfigHandler.swift */,
 				FA58828E1E38C0F000913AE6 /* ControlHandler.swift */,
+				FA51E65E23D1F053005ED6D9 /* Debug.swift */,
 				FA2261C01E55A7B9001D0262 /* DeviceHandler.swift */,
 				FA58828F1E38C0F000913AE6 /* DfuHandler.swift */,
 				FA7BE6991E4487B8009E633D /* MeshHandler.swift */,
@@ -815,6 +818,7 @@
 				FAA40BD92199D20A00ACF053 /* WatchLogger.swift in Sources */,
 				FA5882D51E38C0F100913AE6 /* Characteristics.swift in Sources */,
 				FA5882C41E38C0F100913AE6 /* Advertisement.swift in Sources */,
+				FA51E65F23D1F053005ED6D9 /* Debug.swift in Sources */,
 				FA0B813B1F94BB510090168B /* BluenetCBDelegate.swift in Sources */,
 				FA5882C01E38C0F100913AE6 /* Bluenet.swift in Sources */,
 				FA843F0021B6D51800F633A3 /* BroadcastProtocol.swift in Sources */,
