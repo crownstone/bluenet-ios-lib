@@ -36,29 +36,37 @@ public class DebugHandler {
                         return seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
                     }
                     
-                    let payload = resultPacket.payload
+                    let payload = DataStepper(resultPacket.payload)
                     
-                    result["time"]                = Conversion.uint8_array_to_uint32(Array(payload[0..<4]))
-                    result["sunrise"]             = Conversion.uint8_array_to_uint32(Array(payload[4..<8]))
-                    result["sunset"]              = Conversion.uint8_array_to_uint32(Array(payload[8..<12]))
+                    do {
+                        result["time"]                = try payload.getUInt32()
+                        result["sunrise"]             = try payload.getUInt32()
+                        result["sunset"]              = try payload.getUInt32()
 
-                    result["overrideState"]       = payload[12]
-                    result["behaviourState"]      = payload[13]
-                    result["aggregatedState"]     = payload[14]
-                    result["dimmerPowered"]       = payload[15]
-                    result["behaviourEnabled"]    = payload[16]
+                        result["overrideState"]       = try payload.getUInt8()
+                        result["behaviourState"]      = try payload.getUInt8()
+                        result["aggregatedState"]     = try payload.getUInt8()
+                        result["dimmerPowered"]       = try payload.getUInt8()
+                        result["behaviourEnabled"]    = try payload.getUInt8()
 
-                    result["activeBehaviours"]    = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[17..<25])))
-                    result["activeEndConditions"] = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[25..<33])))
-                    
-                    result["presenceProfile_0"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[33..<41])))
-                    result["presenceProfile_1"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[41..<49])))
-                    result["presenceProfile_2"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[49..<57])))
-                    result["presenceProfile_3"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[57..<65])))
-                    result["presenceProfile_4"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[65..<73])))
-                    result["presenceProfile_5"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[73..<81])))
-                    result["presenceProfile_6"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[81..<89])))
-                    result["presenceProfile_7"]   = Conversion.uint64_to_bit_array(Conversion.uint8_array_to_uint64(Array(payload[89..<97])))
+                        result["activeBehaviours"]    = Conversion.uint64_to_bit_array(try payload.getUInt64())
+                        result["activeEndConditions"] = Conversion.uint64_to_bit_array(try payload.getUInt64())
+                        
+                        result["behavioursInTimeoutPeriod"] = Conversion.uint64_to_bit_array(try payload.getUInt64())
+                        
+                        result["presenceProfile_0"]   = Conversion.uint64_to_bit_array(try payload.getUInt64())
+                        result["presenceProfile_1"]   = Conversion.uint64_to_bit_array(try payload.getUInt64())
+                        result["presenceProfile_2"]   = Conversion.uint64_to_bit_array(try payload.getUInt64())
+                        result["presenceProfile_3"]   = Conversion.uint64_to_bit_array(try payload.getUInt64())
+                        result["presenceProfile_4"]   = Conversion.uint64_to_bit_array(try payload.getUInt64())
+                        result["presenceProfile_5"]   = Conversion.uint64_to_bit_array(try payload.getUInt64())
+                        result["presenceProfile_6"]   = Conversion.uint64_to_bit_array(try payload.getUInt64())
+                        result["presenceProfile_7"]   = Conversion.uint64_to_bit_array(try payload.getUInt64())
+                    }
+                    catch {
+                        seal.reject(BluenetError.INVALID_DATA_LENGTH)
+                        return
+                    }
                     
                     seal.fulfill(result)
                 }
