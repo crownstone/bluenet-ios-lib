@@ -241,9 +241,8 @@ public class Behaviour {
             "activeDays"     : self.activeDays.getDictionary()
         ]
         
-        if let index = self.indexOnCrownstone {
-            returnDict["idOnCrownstone"] = index
-        }
+        returnDict["idOnCrownstone"] = index
+        
         
         returnDict["profileIndex"] = self.profileIndex
         

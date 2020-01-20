@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-public var LOG = LogClass()
+public var LOG = LogClass(daysToStoreLogs: 7)
 
 #if os(iOS)
 import BluenetShared
