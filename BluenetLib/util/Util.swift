@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreBluetooth
+import PromiseKit
 
 /**
  * Delay a callback
@@ -97,7 +98,7 @@ public func fletcher32( _ data: [UInt16]) -> UInt32 {
     var c1 : UInt32 = 0
     let iterations : Int = data.count / 360
     var length : Int = data.count
-    var index = 0;
+    var index = 0
     for _ in 0...iterations {
         let blockLength = min(360, length)
         for _ in 0...blockLength - 1 {
@@ -105,15 +106,15 @@ public func fletcher32( _ data: [UInt16]) -> UInt32 {
             c1 = c1 + c0;
             index += 1
         }
-        c0 = c0 % 65535;
-        c1 = c1 % 65535;
+        c0 = c0 % 65535
+        c1 = c1 % 65535
         length -= 360
     }
-        
-    return (c1 << 16 | c0);
+    
+    return (c1 << 16 | c0)
 }
 
-import PromiseKit
+
 
 public func promiseBatchPerformer(arr: [voidPromiseCallback], index: Int) -> Promise<Void> {
     return Promise<Void> { seal in

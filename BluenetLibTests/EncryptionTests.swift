@@ -237,7 +237,20 @@ class EncryptionTests: XCTestCase {
         print(serviceUUID)
     }
     
-    
+    func testFletcher32() {
+//        "abcde" -> 4031760169 (0xF04FC729)
+//        "abcdef" -> 1448095018 (0x56502D2A)
+//        "abcdefgh" -> 3957429649 (0xEBE19591)
+        let abcde    : [UInt8] = [97,98,99,100,101]
+        let abcdef   : [UInt8] = [97,98,99,100,101,102]
+        let abcdefgh : [UInt8] = [97,98,99,100,101,102,103,104]
+
+        XCTAssertEqual(fletcher32(abcde), 4031760169)
+        XCTAssertEqual(fletcher32(abcdef), 1448095018)
+        XCTAssertEqual(fletcher32(abcdefgh), 3957429649)
+        
+        
+    }
 //    func testBroadcastPayload() {
 //        let exp = expectation(description: "Example")
 //        let a = Promise<Void> { seal in

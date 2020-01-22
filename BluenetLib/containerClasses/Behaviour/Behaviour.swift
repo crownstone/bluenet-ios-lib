@@ -241,7 +241,7 @@ public class Behaviour {
             "activeDays"     : self.activeDays.getDictionary()
         ]
         
-        returnDict["idOnCrownstone"] = index
+        returnDict["idOnCrownstone"] = self.indexOnCrownstone
         
         
         returnDict["profileIndex"] = self.profileIndex
