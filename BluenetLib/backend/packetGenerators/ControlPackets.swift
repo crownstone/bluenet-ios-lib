@@ -191,12 +191,13 @@ import CoreBluetooth
             var packets = [StoneMultiSwitchPacket]()
             for stone in stones {
                 let crownstoneId = stone["crownstoneId"]
-                let timeout      = stone["timeout"]
+                let timeout      = NSNumber(value: 0)
                 let state        = stone["state"]
-                let intent       = stone["intent"]
+                let intent       = NSNumber(value: 4)
                 
-                if (crownstoneId != nil && timeout != nil && state != nil && intent != nil) {
-                    packets.append(StoneMultiSwitchPacket(crownstoneId: crownstoneId!.uint8Value, state: state!.floatValue, timeout: timeout!.uint16Value, intent: intent!.uint8Value))
+                
+                if (crownstoneId != nil && state != nil) {
+                    packets.append(StoneMultiSwitchPacket(crownstoneId: crownstoneId!.uint8Value, state: state!.floatValue, timeout: timeout.uint16Value, intent: intent.uint8Value))
                 }
             }
             

@@ -182,10 +182,10 @@ public enum MeshCommandType : UInt8 {
 
 public enum IntentType : UInt8 {
     case regionEnter = 0
-    case regionExit
-    case enter
-    case exit
-    case manual
+    case regionExit  = 1
+    case enter       = 2
+    case exit        = 3
+    case manual      = 4
 }
 
 public enum MeshKeepAliveTypes : UInt8 {
@@ -247,11 +247,6 @@ public enum ProcessType: UInt16 {
 
 // NOTE: YOU CANNOT DELETE FROM THIS LIST AS IT MUST SHARE THE VALUES WITH THE CONFIG AND STATE LEGACY ENUMS
 public enum StateTypeV2 : UInt16 {
-    case device_NAME = 0
-    case device_TYPE = 1
-    case room = 2
-    case floor = 3
-    case nearby_TIMEOUT = 4
     case pwm_PERIOD = 5
     case ibeacon_MAJOR = 6
     case ibeacon_MINOR = 7
