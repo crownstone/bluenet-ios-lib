@@ -28,7 +28,7 @@ func parseOpcode3_type0(serviceData : ScanResponsePacket, data : [UInt8], litePa
         // bitmask states
         let bitmaskArray = Conversion.uint8_to_bit_array(serviceData.flagsBitmask)
         
-        serviceData.dimmingAvailable = bitmaskArray[0]
+        serviceData.dimmerReady      = bitmaskArray[0]
         serviceData.dimmingAllowed   = bitmaskArray[1]
         serviceData.hasError         = bitmaskArray[2]
         serviceData.switchLocked     = bitmaskArray[3]

@@ -35,7 +35,7 @@ public class ScanResponsePacket {
     public var data                :   [UInt8]!
     public var encryptedDataStartIndex : Int = 1
     
-    public var dimmingAvailable    :   Bool     = false
+    public var dimmerReady         :   Bool     = false
     public var dimmingAllowed      :   Bool     = false
     public var hasError            :   Bool     = false
     public var switchLocked        :   Bool     = false
@@ -206,7 +206,7 @@ public class ScanResponsePacket {
             "accumulatedEnergy"    : NSNumber(value: self.accumulatedEnergy),
             "timestamp"            : NSNumber(value: self.timestamp),
             
-            "dimmingAvailable"     : self.dimmingAvailable,
+            "dimmerReady"          : self.dimmerReady,
             "dimmingAllowed"       : self.dimmingAllowed,
             "switchLocked"         : self.switchLocked,
             "switchCraftEnabled"   : self.switchCraftEnabled,
