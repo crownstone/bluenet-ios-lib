@@ -41,7 +41,7 @@ public class DataStepper {
     }
     
     func _request(_ size : Int) throws -> [UInt8] {
-        if self.position + size < self.length {
+        if self.position + size <= self.length {
             let start = self.position
             self.position += size
             return Array(data[start..<self.position])

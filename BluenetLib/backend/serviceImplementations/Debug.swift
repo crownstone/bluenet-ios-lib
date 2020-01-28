@@ -29,13 +29,13 @@ public class DebugHandler {
             }
             self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV2, writeCommand: writeCommand)
                 .done{ data -> Void in
+
                     var result = Dictionary<String,Any>()
                     let resultPacket = ResultPacketV2()
                     resultPacket.load(data)
                     if (resultPacket.valid == false) {
                         return seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
                     }
-                    
                     let payload = DataStepper(resultPacket.payload)
                     
                     do {
@@ -49,6 +49,9 @@ public class DebugHandler {
                         result["dimmerPowered"]       = try payload.getUInt8()
                         result["behaviourEnabled"]    = try payload.getUInt8()
 
+                        if (resultPacket.size > 105) {
+                            result["storedBehaviours"]    = Conversion.uint64_to_bit_array(try payload.getUInt64())
+                        }
                         result["activeBehaviours"]    = Conversion.uint64_to_bit_array(try payload.getUInt64())
                         result["activeEndConditions"] = Conversion.uint64_to_bit_array(try payload.getUInt64())
                         
