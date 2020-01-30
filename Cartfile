@@ -11,4 +11,4 @@ github "SwiftyJSON/SwiftyJSON" == 4.2.0
 github "NordicSemiconductor/IOS-Pods-DFU-Library" == 4.2.2
 
 # Bluenet Shared protocols
-github "crownstone/bluenet-ios-shared" == 0.6.1
+github "crownstone/bluenet-ios-shared" == 0.7.0
