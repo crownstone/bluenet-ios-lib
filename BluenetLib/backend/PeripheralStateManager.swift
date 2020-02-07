@@ -300,6 +300,13 @@ class PeripheralStateManager {
             return self.stopBackgroundBroadcasts()
         }
         
+        if BroadcastProtocol.useDynamicBackground() == false {
+            let uuids = BroadcastProtocol.getServicesForStaticBackgroundBroadcast(devicePreferences: self.settings.devicePreferences)
+            self.blePeripheralManager.startAdvertisingArray(uuids: uuids)
+            return
+        }
+        
+        
         if let referenceId = self.settings.locationState.referenceId {
             if let key = self.settings.getLocalizationKey(referenceId: referenceId) {
                 let uuids = BroadcastProtocol.getServicesForBackgroundBroadcast(locationState: self.settings.locationState, devicePreferences: self.settings.devicePreferences, key: key)

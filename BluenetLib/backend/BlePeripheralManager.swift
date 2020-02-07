@@ -33,7 +33,6 @@ class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
         }
     }
     
-    
     public func startAdvertisingArray(uuidStrings: [String]) {
         var serviceUUIDStrings : [CBUUID] = []
         for uuidString in uuidStrings {
@@ -75,12 +74,22 @@ class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
             self.startPeripheral()
         }
         
-        // throw event if we are not authorized
-        if (CBPeripheralManager.authorizationStatus() != .authorized) {
-            _ = self.checkBroadcastAuthorization()
+
+        var authorizationState : Int = 0
+        if #available(iOS 13.1, *) {
+            authorizationState = CBPeripheralManager.authorization.rawValue
+        } else {
+            // Fallback on earlier versions
+            authorizationState = CBPeripheralManager.authorizationStatus().rawValue
         }
         
-        self.peripheralManager!.startAdvertising([CBAdvertisementDataServiceUUIDsKey:uuids, CBAdvertisementDataLocalNameKey: APPNAME])
+        if (authorizationState != 3) {
+            _ = self.checkBroadcastAuthorization()
+        }
+   
+        
+        self.peripheralManager!.startAdvertising([CBAdvertisementDataServiceUUIDsKey:uuids])
+        
     }
     
     
@@ -119,6 +128,7 @@ class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
     public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         self.BleState = peripheral.state.rawValue
     }
+
 }
 
 #endif

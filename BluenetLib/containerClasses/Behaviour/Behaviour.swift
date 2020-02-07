@@ -229,7 +229,7 @@ public class Behaviour {
             if let endCondition = self.endCondition {
                 var endConditionDictionary = [String: Any]()
                 endConditionDictionary["type"] = "PRESENCE_AFTER"
-                endConditionDictionary["presence"] = endCondition.presence.getDictionary(includeDelay: false)
+                endConditionDictionary["presence"] = endCondition.presence.getDictionary()
                 
                 dataDictionary["endCondition"] = endConditionDictionary
             }

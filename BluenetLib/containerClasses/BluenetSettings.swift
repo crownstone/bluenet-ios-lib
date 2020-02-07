@@ -34,13 +34,15 @@ public struct DevicePreferences {
     public var ignoreForBehaviour: Bool = false
     public var useBackgroundBroadcasts: Bool = false
     public var useBaseBroadcasts: Bool = false
+    public var trackingNumber: UInt64 = 0
     
-    public init(rssiOffset:Int8? = nil, tapToToggle:Bool? = nil, ignoreForBehaviour:Bool? = nil, useBackgroundBroadcasts:Bool? = nil, useBaseBroadcasts:Bool? = nil) {
+    public init(rssiOffset:Int8? = nil, tapToToggle:Bool? = nil, ignoreForBehaviour:Bool? = nil, useBackgroundBroadcasts:Bool? = nil, useBaseBroadcasts:Bool? = nil, trackingNumber: UInt64? = nil) {
         if let rssiOffsetValue  = rssiOffset                            { self.rssiOffset              = rssiOffsetValue  }
         if let tapToToggleValue = tapToToggle                           { self.tapToToggle             = tapToToggleValue }
         if let ignoreForBehaviourValue = ignoreForBehaviour             { self.ignoreForBehaviour      = ignoreForBehaviourValue }
         if let useBackgroundBroadcastsValue = useBackgroundBroadcasts   { self.useBackgroundBroadcasts = useBackgroundBroadcastsValue }
         if let useBaseBroadcastsValue       = useBaseBroadcasts         { self.useBaseBroadcasts       = useBaseBroadcastsValue }
+        if let trackingNumberValue          = trackingNumber            { self.trackingNumber          = trackingNumberValue }
     }
 }
 
@@ -88,12 +90,13 @@ public class BluenetSettings {
         self.locationState.referenceId = referenceId
     }
     
-    public func setDevicePreferences(rssiOffset: Int8, tapToToggle: Bool, ignoreForBehaviour: Bool, useBackgroundBroadcasts: Bool, useBaseBroadcasts: Bool) {
+    public func setDevicePreferences(rssiOffset: Int8, tapToToggle: Bool, ignoreForBehaviour: Bool, useBackgroundBroadcasts: Bool, useBaseBroadcasts: Bool, trackingNumber: UInt64) {
         self.devicePreferences.rssiOffset = rssiOffset
         self.devicePreferences.tapToToggle = tapToToggle
         self.devicePreferences.ignoreForBehaviour = ignoreForBehaviour
         self.devicePreferences.useBackgroundBroadcasts = useBackgroundBroadcasts
         self.devicePreferences.useBaseBroadcasts = useBaseBroadcasts
+        self.devicePreferences.trackingNumber = trackingNumber
     }
     
     
