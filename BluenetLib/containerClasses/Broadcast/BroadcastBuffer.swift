@@ -14,6 +14,7 @@ public enum BroadcastType : UInt8 {
     case multiSwitch        = 1
     case timeData           = 2
     case behaviourSettings  = 3
+    case updateTrackedDevice = 4
     
     case other = 255
 }

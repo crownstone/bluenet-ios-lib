@@ -91,6 +91,41 @@ public class BroadcastHandler {
     }
     
     
+    public func updateTrackedDevice(
+        referenceId: String,
+        trackingNumber: UInt16,
+        locationUid: UInt8,
+        profileId: UInt8,
+        rssiOffset: UInt8,
+        ignoreForPresence: Bool,
+        tapToToggle: Bool,
+        deviceToken: UInt32,
+        ttlMinutes: UInt16
+        ) -> Promise<Void> {
+        return Promise<Void> { seal in
+            
+            let packet = ControlPacketsGenerator.getTrackedDeviceRegistrationPacket(
+                trackingNumber: trackingNumber,
+                locationUid: locationUid,
+                profileId: profileId,
+                rssiOffset: rssiOffset,
+                ignoreForPresence: ignoreForPresence,
+                tapToToggle: tapToToggle,
+                deviceToken: deviceToken,
+                ttlMinutes: ttlMinutes
+            )
+            
+            let element = BroadcastElement(
+                referenceId: referenceId,
+                type: .updateTrackedDevice,
+                packet: packet,
+                seal: seal,
+                singular: true
+            )
+            
+            self.peripheralStateManager.loadElement(element: element)
+        }
+    }
     
     
     

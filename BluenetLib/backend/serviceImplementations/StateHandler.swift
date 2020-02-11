@@ -167,31 +167,18 @@ public class StateHandler {
     }
     
     public func _getState<T>(_ requestPacket: [UInt8], id: UInt16 = 0) -> Promise<T> {
+        let stateParams = _getStateReadParameters()
+        
         return Promise<T> { seal in
-            let stateParams = _getStateReadParameters()
-            
             let writeCommand : voidPromiseCallback = { 
                 return self._writeToState(packet: requestPacket)
             }
-            self.bleManager.setupSingleNotification(stateParams.service, characteristicId: stateParams.characteristicToReadFrom, writeCommand: writeCommand)
-                .done{ data -> Void in
-                    let resultPacket = StatePacketsGenerator.getReturnPacket()
-                    resultPacket.load(data)
-                    if (resultPacket.valid == false) {
-                        return seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
-                    }
-                                        
+            
+            _writePacketWithReply(bleManager: self.bleManager, service: stateParams.service, readCharacteristic: stateParams.characteristic, writeCommand: writeCommand)
+                .done{ resultPacket -> Void in
                     do {
-                        if self.bleManager.connectionState.controlVersion == .v2 {
-                            let packetSize = resultPacket.payload.count
-                            let resultPayload = Array(resultPacket.payload[4...packetSize-1]) // 4 is the 2 stateType and 2 ID, rest is data payload
-                            let result : T = try Convert(resultPayload)
-                            seal.fulfill(result)
-                        }
-                        else {
-                            let result : T = try Convert(resultPacket.payload)
-                            seal.fulfill(result)
-                        }
+                        let result : T = try getConfigPayloadFromResultPacket(self.bleManager, resultPacket)
+                        seal.fulfill(result)
                     }
                     catch let err {
                         seal.reject(err)
@@ -201,7 +188,7 @@ public class StateHandler {
         }
     }
     
-    func _getStateReadParameters() -> ReadParamaters {
+    func _getStateReadParameters() -> BleParamaters {
         let service                  = CSServices.CrownstoneService;
         var characteristicToReadFrom = CrownstoneCharacteristics.StateRead
         
@@ -210,7 +197,7 @@ public class StateHandler {
             characteristicToReadFrom = CrownstoneCharacteristics.ResultV2
         }
         
-        return ReadParamaters(service: service, characteristicToReadFrom: characteristicToReadFrom)
+        return BleParamaters(service: service, characteristic: characteristicToReadFrom)
     }
     
 }

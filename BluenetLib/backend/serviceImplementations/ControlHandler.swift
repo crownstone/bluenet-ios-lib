@@ -325,24 +325,29 @@ public class ControlHandler {
     }
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    public func registerTrackedDevice(
+        trackingNumber: UInt16,
+        locationUid: UInt8,
+        profileId: UInt8,
+        rssiOffset: UInt8,
+        ignoreForPresence: Bool,
+        tapToToggle: Bool,
+        deviceToken: UInt32,
+        ttlMinutes: UInt16
+    ) -> Promise<Void> {
+        return self._writeControlPacketWithReply(ControlPacketsGenerator.getTrackedDeviceRegistrationPacket(
+            trackingNumber: trackingNumber,
+            locationUid: locationUid,
+            profileId: profileId,
+            rssiOffset: rssiOffset,
+            ignoreForPresence: ignoreForPresence,
+            tapToToggle: tapToToggle,
+            deviceToken: deviceToken,
+            ttlMinutes: ttlMinutes
+        ))
+        
+    }
+
     
     
     // MARK: Util
@@ -355,6 +360,27 @@ public class ControlHandler {
             return _writeGenericControlPacket(bleManager: self.bleManager, packet)
         }
     }
+    
+    public func _writeControlPacketWithReply(_ packet: [UInt8]) -> Promise<Void> {
+        let controlParams = getControlWriteParameters(bleManager: self.bleManager)
+        
+        return Promise { seal in
+            let writeCommand : voidPromiseCallback = { return self._writeControlPacket(packet) }
+            
+            _writePacketWithReply(bleManager: self.bleManager, service: controlParams.service, readCharacteristic: controlParams.characteristic, writeCommand: writeCommand)
+               .done{ resultPacket -> Void in
+                    if resultPacket.resultCode == .SUCCESS {
+                        seal.fulfill(())
+                    }
+                    else if resultPacket.resultCode == .ERR_ALREADY_EXISTS {
+                        seal.reject(BluenetError.ERR_ALREADY_EXISTS)
+                    }
+                }
+                .catch{ err in seal.reject(err) }
+        }
+       
+    }
+
     
     
     func _readControlPacket() -> Promise<[UInt8]> {

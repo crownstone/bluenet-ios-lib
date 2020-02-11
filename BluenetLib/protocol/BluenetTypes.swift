@@ -72,6 +72,7 @@ public enum ControlTypeV2 : UInt16 {
     case getBehaviourIndices    = 64
     
     case getBehaviourDebug      = 69
+    case registerTrackedDevice  = 70
     
     case UNSPECIFIED = 65535
 }
@@ -224,6 +225,7 @@ public enum ResultValue: UInt16 {
     case NOT_FOUND              = 37     // The thing you were looking for was not found.
     case NO_SPACE               = 38
     case BUSY                   = 39
+    case ERR_ALREADY_EXISTS     = 41
     case NO_ACCESS              = 48     // Invalid access for this command.
     case NOT_AVAILABLE          = 64     // Command currently not available.
     case NOT_IMPLEMENTED        = 65     // Command not implemented (not yet or not anymore).

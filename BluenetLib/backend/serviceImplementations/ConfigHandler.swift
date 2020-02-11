@@ -328,31 +328,16 @@ public class ConfigHandler {
             let writeCommand : voidPromiseCallback = {
                 return self._writeToConfig(packet: requestPacket)
             }
-            self.bleManager.setupSingleNotification(readParams.service, characteristicId: readParams.characteristicToReadFrom, writeCommand: writeCommand)
-                .done{ data -> Void in
-                    let resultPacket = StatePacketsGenerator.getReturnPacket()
-                    resultPacket.load(data)
-                    
-                    if (resultPacket.valid == false) {
-                        return seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
-                    }
-                                        
+            
+            _writePacketWithReply(bleManager: self.bleManager, service: readParams.service, readCharacteristic: readParams.characteristic, writeCommand: writeCommand)
+               .done{ resultPacket -> Void in
                     do {
-                        if self.bleManager.connectionState.controlVersion == .v2 {
-                            let packetSize = resultPacket.payload.count
-                            let resultPayload = Array(resultPacket.payload[4...packetSize-1]) // 4 is the 2 stateType and 2 ID, rest is data payload
-                            let result : T = try Convert(resultPayload)
-                            seal.fulfill(result)
-                        }
-                        else {
-                            let result : T = try Convert(resultPacket.payload)
-                            seal.fulfill(result)
-                        }
+                        let result : T = try getConfigPayloadFromResultPacket(self.bleManager, resultPacket)
+                        seal.fulfill(result)
                     }
                     catch let err {
                         seal.reject(err)
                     }
-                
                 }
                 .catch{ err in seal.reject(err) }
         }
@@ -360,7 +345,7 @@ public class ConfigHandler {
     }
 
     
-    func _getConfigReadParameters() -> ReadParamaters {
+    func _getConfigReadParameters() -> BleParamaters {
         var service                  = CSServices.CrownstoneService;
         var characteristicToReadFrom = CrownstoneCharacteristics.ConfigRead
         
@@ -377,12 +362,12 @@ public class ConfigHandler {
                 characteristicToReadFrom = SetupCharacteristics.ConfigRead
             }
         }
-        return ReadParamaters(service: service, characteristicToReadFrom: characteristicToReadFrom)
+        return BleParamaters(service: service, characteristic: characteristicToReadFrom)
     }
 }
 
 
-struct ReadParamaters {
+struct BleParamaters {
     var service: String
-    var characteristicToReadFrom: String
+    var characteristic: String
 }

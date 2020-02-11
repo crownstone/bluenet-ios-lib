@@ -210,6 +210,41 @@ import CoreBluetooth
         }
     }
     
+    
+    func getTrackedDeviceRegistrationPacket(
+        trackingNumber: UInt16,
+        locationUid:    UInt8,
+        profileId:      UInt8,
+        rssiOffset:     UInt8,
+        ignoreForPresence: Bool,
+        tapToToggle:    Bool,
+        deviceToken:    UInt32,
+        ttlMinutes:    UInt16) -> [UInt8] {
+        var data : [UInt8] = []
+        
+        data += Conversion.uint16_to_uint8_array(trackingNumber)
+        data.append(locationUid)
+        data.append(profileId)
+        data.append(rssiOffset)
+        
+        var flags : UInt8 = 0
+        if (ignoreForPresence) { flags += 1 << 1 }
+        if (tapToToggle)       { flags += 1 << 2 }
+        
+        data.append(flags)
+    
+        let token = Conversion.uint32_to_uint8_array(deviceToken)
+        data.append(token[0])
+        data.append(token[1])
+        data.append(token[2])
+        
+        data += Conversion.uint16_to_uint8_array(ttlMinutes)
+        
+        return ControlPacketV2(type: .registerTrackedDevice, payloadArray: data).getPacket()
+    }
+    
+    
+    
     /** LEGACY **/
      func getSetupPacket(type: UInt8, crownstoneId: UInt8, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> [UInt8] {
         var data : [UInt8] = []

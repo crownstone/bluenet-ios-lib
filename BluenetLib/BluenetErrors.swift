@@ -152,6 +152,8 @@ public enum BluenetError : Error {
     case NO_END_CONDITION_PRESENCE
     case NO_END_CONDITION_DURATION
     
+    case FIRMWARE_TOO_OLD
+    case ERR_ALREADY_EXISTS
 }
 
 
