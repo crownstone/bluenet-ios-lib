@@ -86,7 +86,6 @@ class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
         if (authorizationState != 3) {
             _ = self.checkBroadcastAuthorization()
         }
-   
         
         self.peripheralManager!.startAdvertising([CBAdvertisementDataServiceUUIDsKey:uuids])
         

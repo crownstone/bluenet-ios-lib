@@ -131,7 +131,6 @@ public class BroadcastProtocol {
     static func getRC5Payload(firstPart: UInt16, locationState: LocationState, devicePreferences: DevicePreferences, key: [UInt8]) -> UInt32 {
         var rc5Payload : UInt32 = 0
         
-       
         rc5Payload += UInt32(firstPart) << 16
         
         rc5Payload += (NSNumber(value: locationState.locationId).uint32Value & 0x0000003F) << 10
@@ -147,8 +146,6 @@ public class BroadcastProtocol {
         if (devicePreferences.ignoreForBehaviour) {
             rc5Payload += UInt32(1) << 1
         }
-        
-        print("Constructing RC5 validation:\(firstPart) locationId: \((NSNumber(value: locationState.locationId).uint32Value & 0x0000003F)) profile: \((NSNumber(value: locationState.profileIndex).uint32Value & 0x00000007)) rssiOffset \((NSNumber(value: (devicePreferences.rssiOffset / 2) + 8).uint32Value)) totalPayload = \(Conversion.uint32_to_uint16_array(rc5Payload))")
         
         return RC5Encrypt(input: rc5Payload, key: key)
     }
@@ -233,14 +230,38 @@ public class BroadcastProtocol {
     
     
     public static func getServicesForBackgroundBroadcast(locationState: LocationState, devicePreferences: DevicePreferences, key: [UInt8]) -> [CBUUID] {
-        var payload = s128Bits()
         let block = _constructBackgroundBlock(locationState: locationState, devicePreferences: devicePreferences, protocolVersion: 0, key: key)
+
+        return getServicesFromBlock(block: block)
+    }
+    
+    
+    /**
+    *
+    * | Protocol |  Device Token                                                   |  Zeros
+    * | 1 1         |  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0  |  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0  |
+    * | 2b          |  24b                                                                   | 38b
+    *
+    * Validation is the time we would send to the crownstone T >> 7 & 0x0000FFFF
+    *
+    * Will return 64 bits, zero padded at the back
+     **/
+    public static func getServicesForStaticBackgroundBroadcast(devicePreferences: DevicePreferences) -> [CBUUID] {
+        var block : UInt64 = 0
+        block += NSNumber(value: 1).uint64Value << 62
+        block += (devicePreferences.trackingNumber & (0xffffff)) << 38
+        
+        return getServicesFromBlock(block: block)
+    }
+    
+    
+    public static func getServicesFromBlock(block: UInt64) -> [CBUUID] {
+        var payload = s128Bits()
         payload.a = block
         payload.a += block >> 42
         payload.b += block << 22
         payload.b += block >> 20
-        
-        
+
         // print the entire sequence as bits
 //        var str = ""
 //        for i in (0..<64).reversed() {
@@ -272,10 +293,10 @@ public class BroadcastProtocol {
 //
 //        print("part3", str)
 //
-//
-//
-//
-////         printing the entire payload as a hex string
+
+
+
+        // printing the entire payload as a hex string
 //        var uint8Buf = [Bool]()
 //        str = "0x01"
 //        for i in (0..<64).reversed() {
@@ -295,36 +316,7 @@ public class BroadcastProtocol {
 //            }
 //        }
 //        print("Payload as HEX string", str)
-        return getServicesFromBlock(block: block)
-    }
-    
-    
-    /**
-    *
-    * | Protocol |  Device Token                                                   |  Zeros
-    * | 1 1         |  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0  |  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0  |
-    * | 2b          |  24b                                                                   | 38b
-    *
-    * Validation is the time we would send to the crownstone T >> 7 & 0x0000FFFF
-    *
-    * Will return 64 bits, zero padded at the back
-     **/
-    public static func getServicesForStaticBackgroundBroadcast(devicePreferences: DevicePreferences) -> [CBUUID] {
-        var block : UInt64 = 0
-        block += NSNumber(value: 1).uint64Value << 62
-        block += (devicePreferences.trackingNumber & 0x1000000) << 38
-        
-        return getServicesFromBlock(block: block)
-    }
-    
-    
-    public static func getServicesFromBlock(block: UInt64) -> [CBUUID] {
-        var payload = s128Bits()
-        payload.a = block
-        payload.a += block >> 42
-        payload.b += block << 22
-        payload.b += block >> 20
-
+//
         var services = [CBUUID]()
 
         for i in (0..<64).reversed() {
@@ -343,8 +335,7 @@ public class BroadcastProtocol {
                 services.append(CBUUID(string: serviceMap[idx]))
             }
         }
-
-
+        
         return services
     }
 
