@@ -220,6 +220,29 @@ import CoreBluetooth
         tapToToggle:    Bool,
         deviceToken:    UInt32,
         ttlMinutes:    UInt16) -> [UInt8] {
+       
+        let payload = ControlPacketsGenerator.getTrackedDeviceRegistrationPayload(
+            trackingNumber: trackingNumber,
+            locationUid:    locationUid,
+            profileId:      profileId,
+            rssiOffset:     rssiOffset,
+            ignoreForPresence: ignoreForPresence,
+            tapToToggle:    tapToToggle,
+            deviceToken:    deviceToken,
+            ttlMinutes:     ttlMinutes
+        )
+        return ControlPacketV2(type: .registerTrackedDevice, payloadArray: payload).getPacket()
+    }
+    
+    func getTrackedDeviceRegistrationPayload(
+        trackingNumber: UInt16,
+        locationUid:    UInt8,
+        profileId:      UInt8,
+        rssiOffset:     UInt8,
+        ignoreForPresence: Bool,
+        tapToToggle:    Bool,
+        deviceToken:    UInt32,
+        ttlMinutes:    UInt16) -> [UInt8] {
         var data : [UInt8] = []
         
         data += Conversion.uint16_to_uint8_array(trackingNumber)
@@ -240,10 +263,8 @@ import CoreBluetooth
         
         data += Conversion.uint16_to_uint8_array(ttlMinutes)
         
-        return ControlPacketV2(type: .registerTrackedDevice, payloadArray: data).getPacket()
+        return data
     }
-    
-    
     
     /** LEGACY **/
      func getSetupPacket(type: UInt8, crownstoneId: UInt8, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> [UInt8] {

@@ -103,22 +103,20 @@ public class BroadcastHandler {
         ttlMinutes: UInt16
         ) -> Promise<Void> {
         return Promise<Void> { seal in
-            
-            let packet = ControlPacketsGenerator.getTrackedDeviceRegistrationPacket(
+            let payload = ControlPacketsGenerator.getTrackedDeviceRegistrationPayload(
                 trackingNumber: trackingNumber,
-                locationUid: locationUid,
-                profileId: profileId,
-                rssiOffset: rssiOffset,
+                locationUid:    locationUid,
+                profileId:      profileId,
+                rssiOffset:     rssiOffset,
                 ignoreForPresence: ignoreForPresence,
-                tapToToggle: tapToToggle,
-                deviceToken: deviceToken,
-                ttlMinutes: ttlMinutes
+                tapToToggle:    tapToToggle,
+                deviceToken:    deviceToken,
+                ttlMinutes:     ttlMinutes
             )
-            
             let element = BroadcastElement(
                 referenceId: referenceId,
                 type: .updateTrackedDevice,
-                packet: packet,
+                packet: payload,
                 seal: seal,
                 singular: true
             )
