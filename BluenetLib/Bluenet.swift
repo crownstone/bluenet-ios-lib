@@ -164,7 +164,7 @@ public class Bluenet {
         self.eventBus.emit("newLocationState", true)
     }
     
-    public func setDevicePreferences(rssiOffset: Int8, tapToToggle: Bool, ignoreForBehaviour: Bool, useBackgroundBroadcasts: Bool, useBaseBroadcasts: Bool, trackingNumber: UInt64 = 0) {
+    public func setDevicePreferences(rssiOffset: Int8, tapToToggle: Bool, ignoreForBehaviour: Bool, useBackgroundBroadcasts: Bool, useBaseBroadcasts: Bool, trackingNumber: UInt32 = 0) {
         self.settings.setDevicePreferences(rssiOffset: rssiOffset, tapToToggle: tapToToggle, ignoreForBehaviour: ignoreForBehaviour, useBackgroundBroadcasts: useBackgroundBroadcasts, useBaseBroadcasts: useBaseBroadcasts, trackingNumber: trackingNumber)
         self.eventBus.emit("newDevicePreferences", true)
     }

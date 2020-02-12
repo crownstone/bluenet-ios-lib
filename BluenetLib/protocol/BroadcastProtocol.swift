@@ -248,8 +248,18 @@ public class BroadcastProtocol {
      **/
     public static func getServicesForStaticBackgroundBroadcast(devicePreferences: DevicePreferences) -> [CBUUID] {
         var block : UInt64 = 0
+        // add the protocol
         block += NSNumber(value: 1).uint64Value << 62
-        block += (devicePreferences.trackingNumber & (0xffffff)) << 38
+        
+        // inverse the endian-ness of the tracking number
+        let trackingNumberBytes = Conversion.uint32_to_uint8_array(devicePreferences.trackingNumber)
+        var trackingNumberUint64 : UInt64 = 0
+        
+        trackingNumberUint64 += NSNumber(value: trackingNumberBytes[2]).uint64Value
+        trackingNumberUint64 += NSNumber(value: trackingNumberBytes[1]).uint64Value << 8
+        trackingNumberUint64 += NSNumber(value: trackingNumberBytes[0]).uint64Value << 16
+        
+        block += trackingNumberUint64 << 38
         
         return getServicesFromBlock(block: block)
     }
