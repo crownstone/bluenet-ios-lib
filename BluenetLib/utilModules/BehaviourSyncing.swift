@@ -58,45 +58,13 @@ public class BehaviourSyncer {
         var todo = [voidPromiseCallback]()
         
         self.finalBehaviourList = [Behaviour]()
-        
+
         // loop over all behaviours and check if the indices we expect them to have exist on the Crownstone
         // if they exist, check if we need to update our behaviour (if hashes do not match)
         // if they do not exist, remove behaviour from our store
         for behaviour in hasher.behaviours {
             if behaviour.indexOnCrownstone == nil {
                 self.finalBehaviourList.append(behaviour)
-            }
-            else {
-                var foundIndex = false
-                for indexPacket in self.existingIndices {
-                    if indexPacket.index == behaviour.indexOnCrownstone! {
-                        if indexPacket.behaviourHash == behaviour.getHash() {
-                            // match! Jey! Do nothing!
-                            self.finalBehaviourList.append(behaviour)
-                        }
-                        else {
-                            // sync required. Download the behaviour and add that one to the list instead
-                            
-                            // generate the todo task for the getting of the behaviour
-                            todo.append({ () in
-                                return Promise<Void> { seal in
-                                    self.bluenet.behaviour.getBehaviour(index: indexPacket.index)
-                                        .done{ (behaviour: Behaviour) -> Void in
-                                            self.finalBehaviourList.append(behaviour)
-                                            seal.fulfill(())
-                                        }
-                                        .catch { err in seal.reject(err) }
-                                }
-                            })
-                        }
-                        foundIndex = true
-                        break
-                    }
-                }
-                
-                if foundIndex == false {
-                    // delete the behaviour from our list. We do this by simply not adding this into the self.finalBehaviourList
-                }
             }
         }
         
@@ -105,8 +73,9 @@ public class BehaviourSyncer {
         for indexPacket in self.existingIndices {
             var foundIndex = false
             for behaviour in hasher.behaviours {
-                if behaviour.indexOnCrownstone != nil && indexPacket.index == behaviour.indexOnCrownstone! {
-                    // it's here! We do not have to do anything. The hash compare has been done above
+                if indexPacket.behaviourHash == behaviour.getHash() {
+                    // match! Jey! Do nothing!
+                    self.finalBehaviourList.append(behaviour)
                     foundIndex = true
                     break
                 }
