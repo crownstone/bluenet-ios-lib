@@ -362,7 +362,7 @@ public class ControlHandler {
     }
     
     public func _writeControlPacketWithReply(_ packet: [UInt8]) -> Promise<Void> {
-        let controlParams = getControlWriteParameters(bleManager: self.bleManager)
+        let controlParams = getControlReadParameters(bleManager: self.bleManager)
         
         return Promise { seal in
             let writeCommand : voidPromiseCallback = { return self._writeControlPacket(packet) }
