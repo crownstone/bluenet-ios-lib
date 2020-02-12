@@ -435,16 +435,26 @@ class PeripheralStateManager {
     func _handleDuplicates(incomingElement: BroadcastElement) {
         switch (incomingElement.type) {
         case .multiSwitch:
-            self._removeSimilarElements(incomingElement)
+            self._removeSimilarTargetedElements(incomingElement)
         default:
-            return
+            self._removeSimilarElements(incomingElement)
+        }
+    }
+    
+    func _removeSimilarTargetedElements(_ incomingElement: BroadcastElement) {
+        // check if blocks are finished
+        for (i, element) in self.elements.enumerated().reversed() {
+            if element.referenceId == incomingElement.referenceId && element.type == incomingElement.type && element.target == incomingElement.target {
+                element.fail()
+                self.elements.remove(at: i)
+            }
         }
     }
     
     func _removeSimilarElements(_ incomingElement: BroadcastElement) {
         // check if blocks are finished
         for (i, element) in self.elements.enumerated().reversed() {
-            if element.referenceId == incomingElement.referenceId && element.type == incomingElement.type && element.target == incomingElement.target {
+            if element.referenceId == incomingElement.referenceId && element.type == incomingElement.type {
                 element.fail()
                 self.elements.remove(at: i)
             }
