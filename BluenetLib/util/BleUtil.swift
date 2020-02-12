@@ -95,7 +95,6 @@ func _writePacketWithReply(bleManager: BleManager, service: String, readCharacte
                     return seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
                 }
                 seal.fulfill(resultPacket)
-                                    
             }
             .catch{ err in seal.reject(err) }
     }

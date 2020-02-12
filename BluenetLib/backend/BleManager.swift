@@ -770,10 +770,11 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      * This will just subscribe for a single notification and clean up after itself. 
      * The merged, finalized reply to the write command will be in the fulfill of this promise.
      */
-    public func setupSingleNotification(_ serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback) -> Promise<[UInt8]> {
+    public func setupSingleNotification(_ serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback, timeoutSeconds: Double = 2) -> Promise<[UInt8]> {
         return Promise<[UInt8]> { seal in
             var unsubscribe : voidPromiseCallback? = nil
             var collectedData = [UInt8]();
+            var resolved = false
             
             // use the notification merger to handle the full packet once we have received it.
             let merger = NotificationMerger(callback: { data -> Void in
@@ -790,6 +791,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 else {
                     collectedData = data
                 }
+                resolved = true
                 unsubscribe!()
                     .done{ _  in seal.fulfill(collectedData) }
                     .catch{ err in seal.reject(err) }
@@ -805,6 +807,12 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             self.enableNotifications(serviceId, characteristicId: characteristicId, callback: notificationCallback)
                 .then{ unsub -> Promise<Void> in
                     unsubscribe = unsub
+                    delay(timeoutSeconds, {
+                        if (resolved == false) {
+                            seal.reject(BluenetError.TIMEOUT)
+                            _ = unsubscribe!()
+                        }
+                    })
                     return writeCommand()
                 }
                 .catch{ err in seal.reject(err) }
