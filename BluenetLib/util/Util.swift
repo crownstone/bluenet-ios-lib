@@ -28,22 +28,24 @@ public func delay(_ delay: Double, _ closure: @escaping ()->(Void)) {
  * This will show an alert about location and forward the user to the settings page
  **/
 public func showLocationAlert() {
-    let alertController = UIAlertController(title: "Allow \(APPNAME) to use your location",
-                                            message: "The location permission was not authorized. Please set it to \"Always\" in Settings to continue. You can choose to use the continuous background events in the app, but the permission is required in order to use the Crownstones.",
-                                            preferredStyle: .alert)
-    
-    let settingsAction = UIAlertAction(title: "Settings", style: .default) { (alertAction) in
-        // THIS IS WHERE THE MAGIC HAPPENS!!!! It triggers the settings page to change the permissions
-        if let appSettings = URL(string: UIApplication.openSettingsURLString) {
-            UIApplication.shared.openURL(appSettings)
+    if let viewController = VIEWCONTROLLER {
+        let alertController = UIAlertController(title: "Allow \(APPNAME) to use your location",
+                                                message: "The location permission was not authorized. Please set it to \"Always\" in Settings to continue. You can choose to use the continuous background events in the app, but the permission is required in order to use the Crownstones.",
+                                                preferredStyle: .alert)
+        
+        let settingsAction = UIAlertAction(title: "Settings", style: .default) { (alertAction) in
+            // THIS IS WHERE THE MAGIC HAPPENS!!!! It triggers the settings page to change the permissions
+            if let appSettings = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.openURL(appSettings)
+            }
         }
+        alertController.addAction(settingsAction)
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        alertController.addAction(cancelAction)
+        
+        viewController.present(alertController, animated: true, completion: nil)
     }
-    alertController.addAction(settingsAction)
-    
-    let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-    alertController.addAction(cancelAction)
-    
-    VIEWCONTROLLER!.present(alertController, animated: true, completion: nil)
 }
 
 #endif

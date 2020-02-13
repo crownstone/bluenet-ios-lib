@@ -15,7 +15,7 @@ public var LOG = LogClass(daysToStoreLogs: 7)
 import BluenetShared
 var VIEWCONTROLLER : UIViewController?
 
-public func setBluenetGlobals(viewController: UIViewController, appName: String) {
+public func setBluenetGlobals(viewController: UIViewController?, appName: String) {
     VIEWCONTROLLER = viewController
     APPNAME        = appName
 }

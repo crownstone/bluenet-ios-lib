@@ -379,6 +379,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     // MARK: delegate methods
     
     public func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        print("IN HERE")
         LOG.info("BLUENET_LIB_NAV: Changed Authorization \(status)")
         switch (CLLocationManager.authorizationStatus()) {
             case .notDetermined:
@@ -394,9 +395,12 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
             case .restricted:
                 LOG.info("BLUENET_LIB_NAV: location Restricted")
                 self.eventBus.emit("locationStatus", "off");
+                manager.requestAlwaysAuthorization()
+                showLocationAlert()
             case .denied:
                 LOG.info("BLUENET_LIB_NAV: location Denied")
                 self.eventBus.emit("locationStatus", "off");
+                manager.requestAlwaysAuthorization()
                 showLocationAlert()
             case .authorizedAlways:
                 LOG.info("BLUENET_LIB_NAV: location AuthorizedAlways")
