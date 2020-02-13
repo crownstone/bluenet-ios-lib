@@ -122,15 +122,17 @@ public class ScanResponsePacket {
         if (self.validData) {
             switch (self.opCode) {
             case 1:
-                parseOpcode1(serviceData: self, data: decryptedData)
                 self._getLegacyDeviceType()
+                parseOpcode1(serviceData: self, data: decryptedData)
             case 2:
+                self._getLegacyDeviceType()
                 // this is not used and has never been released
                 parseOpcode2(serviceData: self, data: decryptedData)
-                self._getLegacyDeviceType()
             case 3:
+                self._getLegacyDeviceType()
                 parseOpcode3(serviceData: self, data: decryptedData)
             case 4:
+                self._getLegacyDeviceType()
                 parseOpcode4(serviceData: self, data: decryptedData)
             case 5, 7:
                 // 5 and 7 have the same payload, but they use a different key.

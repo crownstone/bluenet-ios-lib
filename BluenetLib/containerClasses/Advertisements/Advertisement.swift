@@ -61,8 +61,6 @@ public class Advertisement {
             }
         }
         
-        
-        
         self.operationMode = self.getOperationMode()
     }
     
