@@ -92,6 +92,7 @@ func _writePacketWithReply(bleManager: BleManager, service: String, readCharacte
                 let resultPacket = StatePacketsGenerator.getReturnPacket()
                 resultPacket.load(data)
                 if (resultPacket.valid == false) {
+                    LOG.error("BluenetLib: Error Invalid response dat \(data)")
                     return seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
                 }
                 seal.fulfill(resultPacket)
