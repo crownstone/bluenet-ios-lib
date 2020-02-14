@@ -270,7 +270,7 @@ public class BluenetLocalization {
                                     var exitLocationDict = [String: String?]()
                                     exitLocationDict["region"] = referenceId
                                     exitLocationDict["location"] = self.locationState[referenceId]!.locationId!
-                                    self.eventBus.emit("enterLocation", exitLocationDict)
+                                    self.eventBus.emit("exitLocation", exitLocationDict)
                                 }
                                 
                                 // store the new location as my current location in this region
