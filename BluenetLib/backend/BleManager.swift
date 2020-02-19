@@ -784,8 +784,8 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         let decryptedData = try EncryptionHandler.decrypt(Data(data), settings: self.settings)
                         collectedData = decryptedData.bytes;
                     }
-                    catch _ {
-                        LOG.error("Error decrypting single notification!")
+                    catch let err  {
+                        LOG.error("Error decrypting single notification! Original data: \(data) err: \(err)")
                     }
                 }
                 else {
