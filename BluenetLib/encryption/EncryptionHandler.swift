@@ -76,17 +76,17 @@ class EncryptionHandler {
     /** 
      * This method is used to encrypt data with the CTR method and wrap the envelope around it according to protocol V5
      */
-    static func encrypt(_ payload: Data, settings: BluenetSettings) throws -> Data {
-        if (settings.sessionNonce == nil) {
+    static func encrypt(_ payload: Data, connectionState: ConnectionState) throws -> Data {
+        if connectionState.sessionNonce == nil {
             throw BluenetError.NO_SESSION_NONCE_SET
         }
         
-        if (settings.userLevel == .unknown) {
+        if connectionState.userLevel == .unknown || connectionState.keySet == nil {
             throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY
         }
         
         // unpack the session data
-        let sessionData = try SessionData(settings.sessionNonce!)
+        let sessionData = try SessionData(connectionState.sessionNonce!)
         
         // get byte array from data
         let payloadArray = payload.bytes
@@ -101,7 +101,7 @@ class EncryptionHandler {
         
         let IV = try generateIV(nonce, sessionData: sessionData.sessionNonce)
         // get key
-        let key = try _getKey(settings)
+        let key = try _getKey(connectionState)
         
         // pad payload with sessionId
         var paddedPayload = [UInt8](repeating: 0, count: payloadArray.count + SESSION_KEY_LENGTH)
@@ -127,7 +127,7 @@ class EncryptionHandler {
         }
         
         // put level into result
-        result[PACKET_NONCE_LENGTH] = UInt8(settings.userLevel.rawValue)
+        result[PACKET_NONCE_LENGTH] = UInt8(connectionState.userLevel.rawValue)
         
         // copy encrypted payload into the result
         for i in [Int](0...encryptedPayload.count-1) {
@@ -142,18 +142,11 @@ class EncryptionHandler {
     /**
      * This method is used to encrypt data with the CTR method and wrap the envelope around it according to protocol V5
      */
-    static func encryptBroadcast(_ payload: Data, settings: BluenetSettings, nonce: [UInt8]) throws -> Data {
-        if (settings.userLevel == .unknown) {
-            throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY
-        }
-        
+    static func encryptBroadcast(_ payload: Data, key: [UInt8], nonce: [UInt8]) throws -> Data {        
         // get byte array from data
         let payloadArray = payload.bytes
         
         let IV = nonce + [UInt8](repeating: 0, count: NONCE_LENGTH - nonce.count)
-        
-        // get key
-        let key = try _getKey(settings)
         
         // manually padd the payload since the CryptoSwift version is not working for CTR.
         let finalPayloadForEncryption = zeroPadding.add(to: payloadArray, blockSize: 16);
@@ -166,25 +159,25 @@ class EncryptionHandler {
     
     
     
-    /**
-     * This method is used to encrypt data with the ECB method and wrap the envelope around it according to protocol V5
-     */
-    static func encryptECB(_ payload: [UInt8], settings: BluenetSettings) throws -> Data {
-        if (settings.userLevel == .unknown) {
-            throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY
-        }
-        
-        // get key
-        let key = try _getKey(settings)
-        
-        // manually padd the payload since the CryptoSwift version is not working for CTR.
-        let finalPayloadForEncryption = zeroPadding.add(to: payload, blockSize: 16);
-        
-        // do the actual encryption
-        let encryptedPayload = try AES(key: key, blockMode: CryptoSwift.ECB(), padding: .noPadding).encrypt(finalPayloadForEncryption)
-
-        return Data(bytes:encryptedPayload)
-    }
+//    /**
+//     * This method is used to encrypt data with the ECB method and wrap the envelope around it according to protocol V5
+//     */
+//    static func encryptECB(_ payload: [UInt8], key: [UInt8]) throws -> Data {
+//        if (settings.userLevel == .unknown) {
+//            throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY
+//        }
+//
+//        // get key
+//        let key = try _getKey(settings)
+//
+//        // manually padd the payload since the CryptoSwift version is not working for CTR.
+//        let finalPayloadForEncryption = zeroPadding.add(to: payload, blockSize: 16);
+//
+//        // do the actual encryption
+//        let encryptedPayload = try AES(key: key, blockMode: CryptoSwift.ECB(), padding: .noPadding).encrypt(finalPayloadForEncryption)
+//
+//        return Data(bytes:encryptedPayload)
+//    }
     
     static func decryptAdvertisementSlice(_ input: ArraySlice<UInt8>, key: [UInt8]) throws -> [UInt8] {
         guard key.count   == 16 else { throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY }
@@ -215,16 +208,21 @@ class EncryptionHandler {
         }
     }
     
-    static func decrypt(_ input: Data, settings: BluenetSettings) throws -> Data {
-        if (settings.sessionNonce == nil) {
+    static func decrypt(_ input: Data, connectionState: ConnectionState) throws -> Data {
+        if connectionState.sessionNonce == nil {
             throw BluenetError.NO_SESSION_NONCE_SET
         }
         
         // unpack the session data
-        let sessionData = try SessionData(settings.sessionNonce!)
+        let sessionData = try SessionData(connectionState.sessionNonce!)
 
         // decrypt data
-        let decrypted = try _decrypt(input, sessionData, settings)
+        let package = try EncryptedPackage(data: input)
+        let key = try _getKey(package.userLevel, connectionState)
+        let IV = try generateIV(package.nonce, sessionData: sessionData.sessionNonce)
+
+        let decrypted = try AES(key: key, blockMode: CryptoSwift.CTR(iv: IV)).decrypt(package.getPayload())
+        
         // verify decryption success and strip checksum
         let result = try _verifyDecryption(decrypted, sessionData)
         
@@ -246,34 +244,29 @@ class EncryptionHandler {
         }
     }
     
-    static func _decrypt(_ input: Data, _ sessionData: SessionData, _ settings: BluenetSettings) throws -> [UInt8] {
-        let package = try EncryptedPackage(data: input)
-        let key = try _getKey(package.userLevel, settings)
-        let IV = try generateIV(package.nonce, sessionData: sessionData.sessionNonce)
 
-        let decrypted = try AES(key: key, blockMode: CryptoSwift.CTR(iv: IV)).decrypt(package.getPayload())
-        return decrypted
+    
+    static func _getKey(_ connectionState: ConnectionState) throws -> [UInt8] {
+        return try _getKey(connectionState.userLevel, connectionState);
     }
     
-    static func _getKey(_ settings: BluenetSettings) throws -> [UInt8] {
-        return try _getKey(settings.userLevel, settings);
-    }
     
-    static func _getKey(_ userLevel: UserLevel, _ settings: BluenetSettings) throws -> [UInt8] {
-        if (userLevel == .unknown) {
+    
+    static func _getKey(_ userLevel: UserLevel, _ connectionState: ConnectionState ) throws -> [UInt8] {
+        if userLevel == .unknown || connectionState.keySet == nil {
             throw BluenetError.COULD_NOT_ENCRYPT_KEYS_NOT_SET
         }
         
         var key : [UInt8]?
         switch (userLevel) {
         case .admin:
-            key = settings.getAdminKey()
+            key = connectionState.keySet!.adminKey
         case .member:
-            key = settings.getMemberKey()
+            key = connectionState.keySet!.memberKey
         case .basic:
-            key = settings.getBasicKey()
+            key = connectionState.keySet!.basicKey
         case .setup:
-            key = settings.setupKey
+            key = connectionState.setupKey
         default:
             throw BluenetError.INVALID_KEY_FOR_ENCRYPTION
         }

@@ -50,17 +50,10 @@ public struct DevicePreferences {
 
 public class BluenetSettings {
     public var encryptionEnabled = false
-    public var temporaryDisable = false
-    
-    public var sessionReferenceId : String? = nil
 
-    public var keySets = [String: KeySet]()
+    public var keySets    = [String: KeySet]()
     public var keySetList = [KeySet]()
     
-    public var setupKey     : [UInt8]? = nil
-    public var sessionNonce : [UInt8]? = nil
-    
-    public var userLevel : UserLevel = .unknown
     var locationState = LocationState()
     var devicePreferences = DevicePreferences()
     
@@ -106,17 +99,12 @@ public class BluenetSettings {
     }
   
     
-    public func setSessionId(referenceId: String) -> Bool {
-        self.setupKey = nil
-        self.sessionNonce = nil
-        self.userLevel = .unknown
-        
+    public func keysAvailable(referenceId: String) -> Bool {
+        LOG.info("BLUENET_LIB: keysAvailable for \(referenceId)");
+       
         if keySets[referenceId] == nil {
             return false
         }
-        
-        self.sessionReferenceId = referenceId
-        self.detemineUserLevel()
         
         return true
     }
@@ -125,44 +113,40 @@ public class BluenetSettings {
     /**
      * This gets the admin key of the session reference keySet
      **/
-    func getAdminKey() -> [UInt8]? {
-        if self._checkSessionId() {
-            return keySets[self.sessionReferenceId!]!.adminKey
+    func getAdminKey(referenceId: String) -> [UInt8]? {
+        if self.keySets[referenceId] != nil {
+            return self.keySets[referenceId]!.adminKey
         }
-        return nil
+        else {
+            return nil
+        }
     }
-    
+
     /**
      * This gets the member key of the session reference keySet
      **/
-    func getMemberKey() -> [UInt8]? {
-        if self._checkSessionId() {
-            return keySets[self.sessionReferenceId!]!.memberKey
+    func getMemberKey(referenceId: String) -> [UInt8]? {
+        if self.keySets[referenceId] != nil {
+            return self.keySets[referenceId]!.memberKey
         }
-        return nil
+        else {
+            return nil
+        }
     }
-    
+
     /**
      * This gets the basic key of the session reference keySet
      **/
-    func getBasicKey() -> [UInt8]? {
-        if self._checkSessionId() {
-            return keySets[self.sessionReferenceId!]!.basicKey
+    func getBasicKey(referenceId: String) -> [UInt8]? {
+        if self.keySets[referenceId] != nil {
+            return self.keySets[referenceId]!.basicKey
         }
-        return nil
-    }
-    
-    
-    /**
-     * This gets the basic key of the session reference keySet
-     **/
-    func getServiceDataKey() -> [UInt8]? {
-        if self._checkSessionId() {
-            return keySets[self.sessionReferenceId!]!.serviceDataKey
+        else {
+            return nil
         }
-        return nil
     }
-    
+
+
     /**
      * This gets the basic key of the session reference keySet
      **/
@@ -174,17 +158,9 @@ public class BluenetSettings {
             return nil
         }
     }
-    
-    func getBasicKey(referenceId: String) -> [UInt8]? {
-        if self.keySets[referenceId] != nil {
-            return self.keySets[referenceId]!.basicKey
-        }
-        else {
-            return nil
-        }
-    }
-    
-    
+
+
+
     func getLocalizationKey(referenceId: String) -> [UInt8]? {
         if self.keySets[referenceId] != nil {
             return self.keySets[referenceId]!.localizationKey
@@ -193,82 +169,62 @@ public class BluenetSettings {
             return nil
         }
     }
-    
-    
-    func _checkSessionId() -> Bool {
-        if self.sessionReferenceId == nil {
-            return false
+
+
+    func getUserLevel(referenceId: String) -> UserLevel {
+        if self.keySets[referenceId] == nil {
+            return .unknown
         }
-        
-        if keySets[self.sessionReferenceId!] == nil {
-            return false
-        }
-        
-        return true
-    }
-    
-    func detemineUserLevel() {
-        if (self.setupKey != nil) {
-            userLevel = .setup
-            return
-        }
-        
-        let adminKey = self.getAdminKey()
-        let memberKey = self.getMemberKey()
-        let basicKey = self.getBasicKey()
-        
+
+        let adminKey  = self.keySets[referenceId]?.adminKey
+        let memberKey = self.keySets[referenceId]?.memberKey
+        let basicKey  = self.keySets[referenceId]?.basicKey
+
         if (adminKey != nil && adminKey!.count == 16) {
-            userLevel = .admin
+            return .admin
         }
         else if (memberKey != nil && memberKey!.count == 16) {
-            userLevel = .member
+            return .member
         }
         else if (basicKey != nil && basicKey!.count == 16) {
-            userLevel = .basic
+            return .basic
         }
         else {
-            userLevel = .unknown
+            return .unknown
         }
     }
     
-    public func invalidateSessionNonce() {
-        self.sessionNonce = nil
-    }
-    
-    public func setSessionNonce(_ sessionNonce: [UInt8]) {
-        self.sessionNonce = sessionNonce
-    }
-    
-    public func loadSetupKey(_ setupKey: [UInt8]) {
-        self.setupKey = setupKey
-        self.detemineUserLevel()
-    }
-    
-    public func exitSetup() {
-        self.setupKey = nil
-        self.detemineUserLevel()
-    }
-    
-    public func disableEncryptionTemporarily() {
-        self.temporaryDisable = true
-        self.detemineUserLevel()
-    }
-    
-    public func restoreEncryption() {
-        self.temporaryDisable = false
-        self.detemineUserLevel()
-    }
-    
-    public func isTemporarilyDisabled() -> Bool {
-        return temporaryDisable
-    }
-    
-    public func isEncryptionEnabled() -> Bool {
-        if (temporaryDisable == true) {
-            return false
+    func getKey(referenceId: String, userLevel: UserLevel) throws -> [UInt8]  {
+        if userLevel == .unknown {
+            throw BluenetError.COULD_NOT_ENCRYPT_KEYS_NOT_SET
         }
-        return encryptionEnabled
+        if self.keySets[referenceId] == nil {
+            throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY
+        }
+        
+        var key : [UInt8]?
+        switch (userLevel) {
+        case .admin:
+            key = self.keySets[referenceId]!.adminKey
+        case .member:
+            key = self.keySets[referenceId]!.memberKey
+        case .basic:
+            key = self.keySets[referenceId]!.basicKey
+        default:
+            throw BluenetError.INVALID_KEY_FOR_ENCRYPTION
+        }
+        
+        if (key == nil) {
+            throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY
+        }
+        
+        if (key!.count != 16) {
+            throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY
+        }
+        
+        return key!
     }
+    
     
     func _checkBackgroundState() {
         #if os(iOS)

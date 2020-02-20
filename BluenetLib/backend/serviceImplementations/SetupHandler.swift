@@ -32,21 +32,21 @@ public class SetupHandler {
     
     func handleSetupPhaseEncryption() -> Promise<Void> {
         return Promise<Void> { seal in
-            self.bleManager.settings.disableEncryptionTemporarily()
+            self.bleManager.connectionState.disableEncryptionTemporarily()
             self.getSessionKey()
                 .then{(key: [UInt8]) -> Promise<[UInt8]> in
                     self.eventBus.emit("setupProgress", 1);
-                    self.bleManager.settings.loadSetupKey(key)
+                    self.bleManager.connectionState.loadSetupKey(key)
                     return self.getSessionNonce()
                 }
                 .done{(nonce: [UInt8]) -> Void in
                     self.eventBus.emit("setupProgress", 2)
-                    self.bleManager.settings.setSessionNonce(nonce)
-                    self.bleManager.settings.restoreEncryption()
+                    self.bleManager.connectionState.setSessionNonce(nonce)
+                    self.bleManager.connectionState.restoreEncryption()
                     seal.fulfill(())
                 }
                 .catch{(err: Error) -> Void in
-                    self.bleManager.settings.restoreEncryption()
+                    self.bleManager.connectionState.restoreEncryption()
                     seal.reject(err)
             }
         }
@@ -164,14 +164,15 @@ public class SetupHandler {
                 .done{(_) -> Void in
                     LOG.info("BLUENET_LIB: Setup Finished")
                     self.eventBus.emit("setupProgress", 13);
-                    self.bleManager.settings.exitSetup()
+                    self.bleManager.connectionState.exitSetup()
+                    self.bleManager.connectionState.restoreEncryption()
                     seal.fulfill(())
                 }
                 .catch{(err: Error) -> Void in
                     self.eventBus.emit("setupProgress", 0);
                     _ = self.clearNotifications()
-                    self.bleManager.settings.exitSetup()
-                    self.bleManager.settings.restoreEncryption()
+                    self.bleManager.connectionState.exitSetup()
+                    self.bleManager.connectionState.restoreEncryption()
                     _ = self.bleManager.errorDisconnect()
                     seal.reject(err)
             }
@@ -326,13 +327,14 @@ public class SetupHandler {
                 .done{(_) -> Void in
                     LOG.info("BLUENET_LIB: Setup Finished")
                     self.eventBus.emit("setupProgress", 13)
-                    self.bleManager.settings.exitSetup()
+                    self.bleManager.connectionState.exitSetup()
+                    self.bleManager.connectionState.restoreEncryption()
                     seal.fulfill(())
                 }
                 .catch{(err: Error) -> Void in
                     self.eventBus.emit("setupProgress", 0)
-                    self.bleManager.settings.exitSetup()
-                    self.bleManager.settings.restoreEncryption()
+                    self.bleManager.connectionState.exitSetup()
+                    self.bleManager.connectionState.restoreEncryption()
                     _ = self.bleManager.errorDisconnect()
                     seal.reject(err)
             }
@@ -419,7 +421,7 @@ public class SetupHandler {
         LOG.info("put in DFU during setup.")
         
         let packet : [UInt8] = [66]
-        self.bleManager.settings.disableEncryptionTemporarily()
+        self.bleManager.connectionState.disableEncryptionTemporarily()
         return Promise<Void> { seal in
             self.bleManager.writeToCharacteristic(
                 CSServices.SetupService,
@@ -428,11 +430,11 @@ public class SetupHandler {
                 type: CBCharacteristicWriteType.withResponse
             )
             .done{_ -> Void in
-                self.bleManager.settings.restoreEncryption()
+                self.bleManager.connectionState.restoreEncryption()
                 seal.fulfill(())
             }
             .catch{(err: Error) -> Void in
-                self.bleManager.settings.restoreEncryption()
+                self.bleManager.connectionState.restoreEncryption()
                 seal.reject(err)
             }
         }
@@ -458,12 +460,12 @@ public class SetupHandler {
                 .then{ _writeSetupControlPacket(bleManager: self.bleManager, switchOff) }
                 .done{
                     _ = self.bleManager.disconnect();
-                    self.bleManager.settings.exitSetup();
+                    self.bleManager.connectionState.exitSetup();
                     seal.fulfill(())
                 }
                 .catch{(err: Error) -> Void in
-                    self.bleManager.settings.exitSetup()
-                    self.bleManager.settings.restoreEncryption()
+                    self.bleManager.connectionState.exitSetup()
+                    self.bleManager.connectionState.restoreEncryption()
                     _ = self.bleManager.errorDisconnect()
                     seal.reject(err)
                 }
@@ -534,7 +536,8 @@ public class SetupHandler {
         let merger = NotificationMerger(callback: { data -> Void in
             do {
                 // attempt to decrypt it
-                let decryptedData = try EncryptionHandler.decrypt(Data(data), settings: self.bleManager.settings)
+                let decryptedData = try EncryptionHandler.decrypt(Data(data), connectionState: self.bleManager.connectionState)
+                
                 if (self._checkMatch(input: decryptedData.bytes, target: self.matchPacket)) {
                     self.matchPacket = []
                     self.validationComplete = true

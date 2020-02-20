@@ -353,6 +353,7 @@ public class Bluenet {
         
         let connectionCommand : voidPromiseCallback = {
             LOG.info("BLUENET_LIB: Connecting to \(handle) now.")
+            self.bleManager.connectionState.start(settings: self.settings)
             return self.bleManager.connect(handle)
                 .then{_ -> Promise<ModeInformation> in
                     LOG.info("BLUENET_LIB: connected!")
@@ -371,7 +372,7 @@ public class Bluenet {
                         return Promise<Void> {seal in
                             // operation mode (or dfu mode), setup the session nonce.
                             if modeInfo.operationMode == .operation {
-                                if (self.settings.isEncryptionEnabled()) {
+                                if (self.bleManager.connectionState.isEncryptionEnabled()) {
                                     // we have to validate if the referenceId is valid here, otherwise we cannot do encryption
                                     var activeReferenceId = referenceId
                                     
@@ -382,7 +383,7 @@ public class Bluenet {
                                         }
                                     }
                                     
-                                    if (self.settings.setSessionId(referenceId: activeReferenceId!) == false) {
+                                    if (self.settings.keysAvailable(referenceId: activeReferenceId!) == false) {
                                         return seal.reject(BluenetError.INVALID_SESSION_REFERENCE_ID)
                                     }
                                     

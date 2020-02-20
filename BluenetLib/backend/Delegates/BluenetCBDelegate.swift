@@ -83,12 +83,6 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
     
     
     public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        // in some processes, the encryption can be disabled temporarily. Advertisements CAN come in in this period and be misfigured by the lack of decryption.
-        // to avoid this, we do not listen to advertisements while the encryption is TEMPORARILY disabled.
-        if (BleManager.settings.isTemporarilyDisabled()) {
-            return
-        }
-        
         // battery saving means we do not decrypt everything nor do we emit the data into the app. All incoming advertisements are ignored
         if (BleManager.batterySaving == true) {
             return
@@ -129,7 +123,7 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         // since we disconnected, we must set the connected peripherals to nil.
         BleManager.connectingPeripheral = nil;
         BleManager.connectedPeripheral = nil;
-        BleManager.settings.invalidateSessionNonce()
+        BleManager.connectionState.clear()
         BleManager.notificationEventBus.reset()
         
         LOG.info("BLUENET_LIB: in didDisconnectPeripheral.")

@@ -23,7 +23,7 @@ public class ControlHandler {
     }
     
     public func recoverByFactoryReset(_ uuid: String) -> Promise<Void> {
-        self.bleManager.settings.disableEncryptionTemporarily()
+        self.bleManager.connectionState.disableEncryptionTemporarily()
         return Promise<Void> { seal in
             self.bleManager.isReady() // first check if the bluenet lib is ready before using it for BLE things.
                 .then {(_) -> Promise<Void> in return self.bleManager.connect(uuid)}
@@ -35,12 +35,12 @@ public class ControlHandler {
                 .then {(_) -> Promise<Void> in return self._recoverByFactoryReset()}
                 .then {(_) -> Promise<Void> in return self._checkRecoveryProcess()}
                 .then {(_) -> Promise<Void> in
-                    self.bleManager.settings.restoreEncryption()
+                    self.bleManager.connectionState.restoreEncryption()
                     return self.bleManager.disconnect()
                 }
                 .done {(_) -> Void in seal.fulfill(())}
                 .catch {(err) -> Void in
-                    self.bleManager.settings.restoreEncryption()
+                    self.bleManager.connectionState.restoreEncryption()
                     self.bleManager.disconnect().done{_ in seal.reject(err)}.catch{_ in seal.reject(err)}
                 }
         }
@@ -272,9 +272,10 @@ public class ControlHandler {
             .then{(sessionNonce : [UInt8]) -> Promise<Void> in
                 return Promise <Void> { seal in
                     do {
-                        if let basicKey = self.bleManager.settings.getBasicKey() {
+                        if let basicKey = self.bleManager.connectionState.getBasicKey() {
                             let sessionNonce = try EncryptionHandler.decryptSessionNonce(sessionNonce, key: basicKey)
-                            self.bleManager.settings.setSessionNonce(sessionNonce)
+                            LOG.info("BLUENET_LIB: SetSessionNonce \(sessionNonce)");
+                            self.bleManager.connectionState.setSessionNonce(sessionNonce)
                             seal.fulfill(())
                         }
                         else {

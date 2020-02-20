@@ -57,12 +57,18 @@ public class BroadcastProtocol {
      * Payload is 12 bytes, this method will add the validation and encrypt the thing
      **/
     static func getEncryptedServiceUUID(referenceId: String, settings: BluenetSettings, data: [UInt8], nonce: [UInt8]) throws -> CBUUID {
-        if (settings.setSessionId(referenceId: referenceId)) {
+        if settings.keysAvailable(referenceId: referenceId) {
             do {                
-                // we reverse the input here to save time on the Crownstones.
+                
+                let userLevel = settings.getUserLevel(referenceId: referenceId)
+                if (userLevel == .unknown) {
+                    throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY
+                }
+                
+                let key = try settings.getKey(referenceId: referenceId, userLevel: userLevel)
                 
                 // HACK TO HAVE A STATIC NONCE
-                let encryptedData = try EncryptionHandler.encryptBroadcast(Data(bytes:data), settings: settings, nonce: nonce)
+                let encryptedData = try EncryptionHandler.encryptBroadcast(Data(bytes:data), key: key, nonce: nonce)
 
                 return CBUUID(data: encryptedData)
             }

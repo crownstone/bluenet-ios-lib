@@ -608,14 +608,14 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     
     public func readCharacteristicWithoutEncryption(_ service: String, characteristic: String) -> Promise<[UInt8]> {
         return Promise<[UInt8]> { seal in
-            self.settings.disableEncryptionTemporarily()
+            self.connectionState.disableEncryptionTemporarily()
             self.readCharacteristic(service, characteristicId: characteristic)
                 .done{data -> Void in
-                    self.settings.restoreEncryption()
+                    self.connectionState.restoreEncryption()
                     seal.fulfill(data)
                 }
                 .catch{(error: Error) -> Void in
-                    self.settings.restoreEncryption()
+                    self.connectionState.restoreEncryption()
                     seal.reject(error)
                 }
         }
@@ -656,10 +656,10 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         }
                         
                         // the fulfil and reject are handled in the peripheral delegate
-                        if (self.settings.isEncryptionEnabled()) {
+                        if (self.connectionState.isEncryptionEnabled()) {
                              LOG.debug("BLUENET_LIB: writing service \(serviceId) characteristic \(characteristic) data: \(data.bytes) which will be encrypted.")
                             do {
-                                let encryptedData = try EncryptionHandler.encrypt(data, settings: self.settings)
+                                let encryptedData = try EncryptionHandler.encrypt(data, connectionState: self.connectionState)
                                 self.connectedPeripheral!.writeValue(encryptedData, for: characteristic, type: type)
                             }
                             catch let err {
@@ -778,14 +778,18 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             
             // use the notification merger to handle the full packet once we have received it.
             let merger = NotificationMerger(callback: { data -> Void in
-                if (self.settings.isEncryptionEnabled()) {
+                if (self.connectionState.isEncryptionEnabled()) {
                     do {
                         // attempt to decrypt it
-                        let decryptedData = try EncryptionHandler.decrypt(Data(data), settings: self.settings)
+                        let decryptedData = try EncryptionHandler.decrypt(Data(data), connectionState: self.connectionState)
                         collectedData = decryptedData.bytes;
+                        LOG.info("Successfully decrypted data: \(collectedData)")
                     }
                     catch let err  {
                         LOG.error("Error decrypting single notification! Original data: \(data) err: \(err)")
+                    }
+                    catch {
+                        LOG.error("Error decrypting single notification! Original data: \(data)")
                     }
                 }
                 else {
@@ -834,10 +838,10 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 var collectedData : [UInt8]? = nil
                 if (streamFinished == true) { return }
                 
-                if (self.settings.isEncryptionEnabled()) {
+                if (self.connectionState.isEncryptionEnabled()) {
                     do {
                         // attempt to decrypt it
-                        let decryptedData = try EncryptionHandler.decrypt(Data(data), settings: self.settings)
+                        let decryptedData = try EncryptionHandler.decrypt(Data(data), connectionState: self.connectionState)
                         collectedData = decryptedData.bytes;
                     }
                     catch {
@@ -1087,9 +1091,9 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             else {
                 if (characteristic.value != nil) {
                     let data = characteristic.value!
-                    if (self.settings.isEncryptionEnabled()) {
+                    if (self.connectionState.isEncryptionEnabled()) {
                         do {
-                            let decryptedData = try EncryptionHandler.decrypt(data, settings: self.settings)
+                            let decryptedData = try EncryptionHandler.decrypt(data, connectionState: self.connectionState)
                             pendingPromise.fulfill(decryptedData.bytes)
                         }
                         catch let err {

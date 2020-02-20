@@ -109,12 +109,12 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
     
     public func bootloaderToNormalMode(handle: String) -> Promise<Void> {
         var cleanup : voidPromiseCallback?
-        self.bleManager.settings.disableEncryptionTemporarily()
         var success = false
         return Promise<Void> { seal in
             self.bleManager.isReady() // first check if the bluenet lib is ready before using it for BLE things.
                 .then {(_) -> Promise<Void> in return self.bleManager.connect(handle)}
                 .then {(_) -> Promise<Void> in
+                    self.bleManager.connectionState.disableEncryptionTemporarily()
                     return Promise<Void> { innerSeal in
                         self.bleManager.getServicesFromDevice()
                             .done{ services -> Void in
@@ -156,7 +156,7 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
                     }
                 }
                 .then {(_) -> Promise<Void> in
-                    self.bleManager.settings.restoreEncryption()
+                    self.bleManager.connectionState.restoreEncryption()
                     if (cleanup != nil) {
                         return cleanup!()
                     }
@@ -170,7 +170,7 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
                 }
                 .done {(_) -> Void in seal.fulfill(())}
                 .catch {(err) -> Void in
-                    self.bleManager.settings.restoreEncryption()
+                    self.bleManager.connectionState.restoreEncryption()
                     if (cleanup != nil) {
                         _ = cleanup!()
                     }

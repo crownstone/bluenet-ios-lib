@@ -508,7 +508,10 @@ class PeripheralStateManager {
         if let offset = self.timeOffsetMap[referenceIdOfBuffer] {
             time -= offset
         }
-        if (settings.setSessionId(referenceId: referenceIdOfBuffer) == false) {
+        
+        let userLevelForReferenceId = self.settings.getUserLevel(referenceId: referenceIdOfBuffer)
+        
+        if (userLevelForReferenceId == .unknown) {
             print("Error in _broadcastBuffer Invalid referenceId")
             return
         }
@@ -522,7 +525,7 @@ class PeripheralStateManager {
                     locationState: self.settings.locationState,
                     devicePreferences: self.settings.devicePreferences,
                     protocolVersion: 0,
-                    accessLevel: self.settings.userLevel,
+                    accessLevel: userLevelForReferenceId,
                     key: localizationKey
                 )
                 
