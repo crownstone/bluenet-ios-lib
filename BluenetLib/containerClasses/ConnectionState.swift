@@ -76,7 +76,7 @@ class ConnectionState {
     }
     
     func disableEncryptionTemporarily() {
-        self.temporaryEncryptionDisabled = false
+        self.temporaryEncryptionDisabled = true
     }
     
     func loadSetupKey(_ key: [UInt8]) {

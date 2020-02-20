@@ -99,9 +99,7 @@ public class BluenetSettings {
     }
   
     
-    public func keysAvailable(referenceId: String) -> Bool {
-        LOG.info("BLUENET_LIB: keysAvailable for \(referenceId)");
-       
+    public func keysAvailable(referenceId: String) -> Bool {      
         if keySets[referenceId] == nil {
             return false
         }

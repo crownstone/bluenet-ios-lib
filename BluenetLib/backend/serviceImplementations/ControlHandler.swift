@@ -23,6 +23,7 @@ public class ControlHandler {
     }
     
     public func recoverByFactoryReset(_ uuid: String) -> Promise<Void> {
+        LOG.info("BLUENET_LIB: recoverByFactoryReset \(uuid)")
         self.bleManager.connectionState.disableEncryptionTemporarily()
         return Promise<Void> { seal in
             self.bleManager.isReady() // first check if the bluenet lib is ready before using it for BLE things.
@@ -268,6 +269,7 @@ public class ControlHandler {
      * The session nonce is the only char that is ECB encrypted. We therefore read it without the libraries decryption (AES CTR) and decrypt it ourselves.
      **/
     public func getAndSetSessionNonce() -> Promise<Void> {
+        LOG.info("BLUENET_LIB: getAndSetSessionNonce")
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.CrownstoneService, characteristic: CrownstoneCharacteristics.SessionNonce)
             .then{(sessionNonce : [UInt8]) -> Promise<Void> in
                 return Promise <Void> { seal in
