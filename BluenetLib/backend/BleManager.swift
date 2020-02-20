@@ -657,7 +657,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         
                         // the fulfil and reject are handled in the peripheral delegate
                         if (self.connectionState.isEncryptionEnabled()) {
-                             LOG.debug("BLUENET_LIB: writing service \(serviceId) characteristic \(characteristic) data: \(data.bytes) which will be encrypted.")
+                            LOG.debug("BLUENET_LIB: writing service \(serviceId) characteristic \(characteristic) data: \(data.bytes) which will be encrypted.")
                             do {
                                 let encryptedData = try EncryptionHandler.encrypt(data, connectionState: self.connectionState)
                                 self.connectedPeripheral!.writeValue(encryptedData, for: characteristic, type: type)

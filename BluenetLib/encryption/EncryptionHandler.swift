@@ -81,7 +81,8 @@ class EncryptionHandler {
             throw BluenetError.NO_SESSION_NONCE_SET
         }
         
-        if connectionState.userLevel == .unknown || connectionState.keySet == nil {
+        
+        if connectionState.userLevel == .unknown {
             throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY
         }
         
@@ -253,7 +254,7 @@ class EncryptionHandler {
     
     
     static func _getKey(_ userLevel: UserLevel, _ connectionState: ConnectionState ) throws -> [UInt8] {
-        if userLevel == .unknown || connectionState.keySet == nil {
+        if userLevel == .unknown || userLevel != .setup && connectionState.keySet == nil {
             throw BluenetError.COULD_NOT_ENCRYPT_KEYS_NOT_SET
         }
         
