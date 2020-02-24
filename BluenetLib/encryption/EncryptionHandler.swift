@@ -222,7 +222,7 @@ class EncryptionHandler {
         let key = try _getKey(package.userLevel, connectionState)
         let IV = try generateIV(package.nonce, sessionData: sessionData.sessionNonce)
 
-        let decrypted = try AES(key: key, blockMode: CryptoSwift.CTR(iv: IV)).decrypt(package.getPayload())
+        let decrypted = try AES(key: key, blockMode: CryptoSwift.CTR(iv: IV), padding: .noPadding).decrypt(package.getPayload())
         
         // verify decryption success and strip checksum
         let result = try _verifyDecryption(decrypted, sessionData)
@@ -244,7 +244,6 @@ class EncryptionHandler {
             throw BluenetError.COULD_NOT_DECRYPT
         }
     }
-    
 
     
     static func _getKey(_ connectionState: ConnectionState) throws -> [UInt8] {

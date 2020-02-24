@@ -71,7 +71,6 @@ public class ResultPacket : ResultBasePacket {
 
 public class ResultPacketV2 : ResultBasePacket {
     public var commandType : ControlTypeV2 = .UNSPECIFIED
-    
     public var size        : UInt16 = 0
     
     override init() {
