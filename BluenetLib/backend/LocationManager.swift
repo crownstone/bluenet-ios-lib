@@ -199,7 +199,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
      * Stop monitoring and ranging all regions we know of in our class (ie. the ones we added)
      */
     public func clearTrackedBeacons() {
-        self.pauseTrackingRegions()
+        self.pauseMonitoringRegions()
         self.trackingBeacons.removeAll()
     }
     
@@ -257,6 +257,10 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         return self.monitoringState
     }
     
+    public func resetRegionMonitoring() {
+        
+    }
+    
     
     /**
      * Start monitoring all regions we have in our trackingBeacons list.
@@ -282,14 +286,25 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     /**
      * Pause monitoring and ranging (= tracking) all regions. This is different from clear since we keep them in the trackingBeacons list. With this list, we can resume tracking later on.
      */
-    public func pauseTrackingRegions() {
+    public func pauseMonitoringRegions() {
         // we need a CL location manager for this.
         if (self.manager != nil) {
-            // stop monitoring all becons
+            // stop monitoring all our beacons
             for beacon in self.trackingBeacons {
                 self.manager!.stopRangingBeacons(in: beacon.region)
                 self.manager!.stopMonitoring(for: beacon.region)
             }
+            
+            
+            for region in self.manager!.monitoredRegions {
+                LOG.info("BLUENET_LIB_NAV: INITIALIZATION: Pause monitoring old region: \(region)")
+                self.manager!.stopMonitoring(for: region)
+                if let beaconRegion = region as? CLBeaconRegion {
+                    self.manager!.stopRangingBeacons(in: beaconRegion)
+                }
+            }
+            
+            
             self.monitoringState = false
             self.rangingState = false
         }
@@ -301,9 +316,9 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     /**
      * Basically turning it off and on again. Useful for reinitializing the list when a new CL location manager is initialized.
      */
-    func resetBeaconRanging() {
+    func resetBeaconMonitoring() {
         LOG.info("BLUENET_LIB_NAV: Resetting ibeacon tracking")
-        self.pauseTrackingRegions()
+        self.pauseMonitoringRegions()
         self.startMonitoringRegions()
     }
     
@@ -343,7 +358,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
             self.manager!.allowsBackgroundLocationUpdates = true
         }
         
-        self.resetBeaconRanging();
+        self.resetBeaconMonitoring();
         self.started = true
         self.startedStateBackground = false
     }
@@ -371,7 +386,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
             self.manager!.allowsBackgroundLocationUpdates = false
         }
         
-        self.resetBeaconRanging();
+        self.resetBeaconMonitoring();
         self.started = true
     }
     
@@ -476,7 +491,9 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
      *    Invoked when an error has occurred ranging beacons in a region. Error types are defined in "CLError.h".
      */
     public func locationManager(_ manager: CLLocationManager, rangingBeaconsDidFailFor region: CLBeaconRegion, withError error: Error) {
-         LOG.error("BLUENET_LIB_NAV: did rangingBeaconsDidFailForRegion \(region)  withError: \(error) \n");
+        LOG.error("BLUENET_LIB_NAV: did rangingBeaconsDidFailForRegion \(region)  withError: \(error) \n");
+        
+        delay(2, { self.resetBeaconMonitoring() })
     }
     
     
@@ -490,6 +507,8 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
   
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error){
         LOG.error("BLUENET_LIB_NAV: did didFailWithError withError: \(error) \n");
+        
+        delay(2, { self.resetBeaconMonitoring() })
     }
     
     /*
@@ -500,6 +519,8 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
      */
     public func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error){
         LOG.error("BLUENET_LIB_NAV: did monitoringDidFailForRegion \(String(describing: region))  withError: \(error)\n");
+        
+        delay(2, { self.resetBeaconMonitoring() })
     }
     
 

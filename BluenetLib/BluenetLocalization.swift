@@ -181,7 +181,7 @@ public class BluenetLocalization {
      *  the resumeTracking method.
      */
     public func pauseTracking() {
-        self.locationManager.pauseTrackingRegions()
+        self.locationManager.pauseMonitoringRegions()
     }
     
     /**
