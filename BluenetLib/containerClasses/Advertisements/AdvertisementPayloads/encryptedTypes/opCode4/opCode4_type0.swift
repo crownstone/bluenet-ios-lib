@@ -8,17 +8,13 @@
 
 import Foundation
 
-func parseOpcode4_type0(serviceData : ScanResponsePacket, data : [UInt8], liteParse: Bool) {
+func parseOpcode4_type0(serviceData : ScanResponsePacket, data : [UInt8]) {
     if (data.count == 16) {
         // opCode   = data[0]
         // dataType = data[1]
         
-        serviceData.uniqueIdentifier = NSNumber(value: data[11])
-        
-        if (liteParse) {
-            return
-        }
-        
+      
+
         serviceData.switchState  = data[1]
         serviceData.flagsBitmask = data[2]
         serviceData.temperature  = Conversion.uint8_to_int8(data[3])
@@ -62,5 +58,7 @@ func parseOpcode4_type0(serviceData : ScanResponsePacket, data : [UInt8], litePa
         serviceData.switchCraftEnabled  = bitmaskArray[5]
         serviceData.tapToToggleEnabled  = bitmaskArray[6]
         serviceData.behaviourOverridden = bitmaskArray[7]
+        
+        serviceData.uniqueIdentifier = NSNumber(value: data[11])
     }
 }

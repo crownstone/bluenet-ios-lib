@@ -90,6 +90,49 @@ class MeshCommandPacket {
     }
 }
 
+
+class MeshCommandPacketV5 {
+    var type          : UInt8 = 0
+    var idCounter     : UInt8 = 0
+    var crownstoneIds : [UInt8]!
+    var payload       : [UInt8]!
+    var optionFlag    : UInt8 = 0
+    var transmissions : UInt8 = 0
+    
+    
+    init(type: MeshCommandType, crownstoneIds: [UInt8], payload: [UInt8], broadcast: Bool = false, ackAllIds : Bool = true, useKnownIds : Bool = false, transmissions: UInt8 = 0) {
+        self.type          = type.rawValue
+        self.crownstoneIds = crownstoneIds
+        self.payload       = payload
+        self.idCounter     = NSNumber(value: crownstoneIds.count).uint8Value
+        
+        var optionFlag : UInt8 = 0
+        if broadcast   { optionFlag += 1 << 0; }
+        if ackAllIds   { optionFlag += 1 << 1; }
+        if useKnownIds { optionFlag += 1 << 2; }
+        
+        self.optionFlag    = optionFlag
+        self.transmissions = transmissions
+    }
+    
+    convenience init(type: MeshCommandType, payload: [UInt8], transmissions: UInt8 = 0) {
+        self.init(type: type, crownstoneIds: [], payload: payload, broadcast: true, ackAllIds: false, useKnownIds: false, transmissions: transmissions)
+    }
+    
+    
+    func getPacket() -> [UInt8] {
+        var arr = [UInt8]()
+        arr.append(self.type)
+        arr.append(self.optionFlag)
+        arr.append(self.transmissions)
+        arr.append(self.idCounter)
+        arr += (self.crownstoneIds)
+        arr += self.payload
+        
+        return arr
+    }
+}
+
 class StoneMultiSwitchPacket {
     var timeout : UInt16 = 0
     var crownstoneId : UInt8

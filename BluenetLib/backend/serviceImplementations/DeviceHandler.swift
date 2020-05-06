@@ -77,9 +77,59 @@ public class DeviceHandler {
     
     
     
+    
+    
+    public func getUICRData() -> Promise<[String: Any]> {
+        let writeCommand : voidPromiseCallback = {
+            return _writeControlPacket(bleManager: self.bleManager, ControlPacketV3(type: .GET_UICR_DATA).getPacket())
+        }
+        return _writePacketWithReply(bleManager: self.bleManager, service: CSServices.CrownstoneService, readCharacteristic: CrownstoneCharacteristics.ControlV5, writeCommand: writeCommand)
+            .then{ resultPacket -> Promise<[String: Any]> in
+                return Promise<[String: Any]> { seal in
+                    do {
+                        let payload = DataStepper(resultPacket.payload)
+                        let returnDict : [String: Any] = [
+                            "board"          : try payload.getUInt32(),
+                            "productType"    : try payload.getUInt8(),
+                            "region"         : try payload.getUInt8(),
+                            "productFamily"  : try payload.getUInt8(),
+                            "reserved1"      : try payload.getUInt8(),
+                             
+                            "hardwarePatch"  : try payload.getUInt8(),
+                            "hardwareMinor"  : try payload.getUInt8(),
+                            "hardwareMajor"  : try payload.getUInt8(),
+                            "reserved2"      : try payload.getUInt8(),
+                             
+                            "productHousing" : try payload.getUInt8(),
+                            "productionWeek" : try payload.getUInt8(),
+                            "producitonYear" : try payload.getUInt8(),
+                            "reserved3"      : try payload.getUInt8(),
+                        ]
+                                                        
+                        seal.fulfill(returnDict)
+                    }
+                    catch {
+                        seal.reject(BluenetError.INVALID_DATA)
+                    }
+                }
+            }
+    }
+    
+    
     public func getBootloaderRevision() -> Promise<String> {
         if self.bleManager.connectionState.operationMode != .dfu {
-            return self.getBootloaderRevisionInAppMode()
+            if self.bleManager.connectionState.connectionProtocolVersion == .v5 {
+                let writeCommand : voidPromiseCallback = {
+                    return _writeControlPacket(bleManager: self.bleManager, ControlPacketV3(type: .GET_BOOTLOADER_VERSION).getPacket())
+                }
+                return _writePacketWithReply(bleManager: self.bleManager, service: CSServices.CrownstoneService, readCharacteristic: CrownstoneCharacteristics.ControlV5, writeCommand: writeCommand)
+                    .then{ resultPacket -> Promise<String> in
+                        return Promise<String> { seal in seal.fulfill(Conversion.uint8_array_to_string(resultPacket.payload)) }
+                    }
+            }
+            else {
+                 return self.getBootloaderRevisionInAppMode()
+            }           
         }
         return self.getSoftwareRevision()
     }

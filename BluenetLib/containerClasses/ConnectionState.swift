@@ -8,10 +8,14 @@
 
 import Foundation
 
-public enum ControlVersionType: UInt8 {
-    case unknown = 0
+public enum ConnectionProtocolVersion: UInt8 {
+    case legacy = 0
     case v1 = 1
     case v2 = 2
+    case v3 = 3
+    case v5 = 5 // PROTOCOL V5, versioning based on protocol version starts here.
+    
+    case unknown = 255
 }
 
 
@@ -19,10 +23,12 @@ public enum ControlVersionType: UInt8 {
 
 class ConnectionState {
     
-    var controlVersion : ControlVersionType = .unknown
+    var connectionProtocolVersion : ConnectionProtocolVersion = .unknown
     var operationMode : CrownstoneMode = .unknown
     var keySet : KeySet?
+    var protocolVersion : UInt8 = 0
     var sessionNonce : [UInt8]?
+    var validationKey : [UInt8]?
     var encryptionEnabled: Bool = true
     var temporaryEncryptionDisabled : Bool = false
     
@@ -40,7 +46,7 @@ class ConnectionState {
         self.sessionNonce = nil
         self.keySet = nil
         self.operationMode = .unknown
-        self.controlVersion = .unknown
+        self.connectionProtocolVersion = .unknown
     }
 
     func start(settings: BluenetSettings) {
@@ -61,10 +67,18 @@ class ConnectionState {
         self.sessionNonce = sessionNonce
     }
     
-    func setControlVersion(_ version: ControlVersionType) {
-        ControlPacketsGenerator.controlVersion = version
-        StatePacketsGenerator.controlVersion = version
-        self.controlVersion = version
+    func validationKey(_ validationKey: [UInt8]) {
+        self.validationKey = validationKey
+    }
+    
+    func setProtocolVersion(_ protocolVersion: UInt8) {
+        self.protocolVersion = protocolVersion
+    }
+    
+    func setConnectionProtocolVersion(_ version: ConnectionProtocolVersion) {
+        ControlPacketsGenerator.connectionProtocolVersion = version
+        StatePacketsGenerator.connectionProtocolVersion = version
+        self.connectionProtocolVersion = version
     }
     
     func setOperationMode(_ mode: CrownstoneMode) {

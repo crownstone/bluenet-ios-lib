@@ -41,6 +41,8 @@ public enum BluenetError : Error {
     case UNKNOWN_TYPE
     
     case INVALID_DATA_LENGTH
+    case INVALID_DATA
+    case INVALID_STARTING_POSITION
     
     case COULD_NOT_GET_LOCATION
     

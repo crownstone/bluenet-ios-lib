@@ -30,19 +30,17 @@ public class SessionData {
     var sessionNonce : [UInt8]!
     var validationKey : [UInt8]!
     
-    init(_ sessionData: [UInt8]) throws {
-        if (sessionData.count != SESSION_DATA_LENGTH) {
+    init(_ connectionState: ConnectionState) throws {
+        if (connectionState.sessionNonce != nil && connectionState.sessionNonce!.count != SESSION_DATA_LENGTH) {
             throw BluenetError.INVALID_SESSION_DATA
         }
         
-        sessionNonce  = [UInt8](repeating: 0, count: SESSION_DATA_LENGTH)
-        validationKey = [UInt8](repeating: 0, count: SESSION_KEY_LENGTH)
-
-        for i in [Int](0...SESSION_KEY_LENGTH-1) {
-            sessionNonce[i] = sessionData[i]
-            validationKey[i] = sessionData[i]
+        if (connectionState.validationKey != nil && connectionState.validationKey!.count != SESSION_KEY_LENGTH) {
+            throw BluenetError.INVALID_SESSION_DATA
         }
-        sessionNonce[SESSION_DATA_LENGTH-1] = sessionData[SESSION_DATA_LENGTH-1]
+        
+        sessionNonce  = connectionState.sessionNonce!
+        validationKey = connectionState.validationKey!
     }
 }
 
@@ -87,7 +85,7 @@ class EncryptionHandler {
         }
         
         // unpack the session data
-        let sessionData = try SessionData(connectionState.sessionNonce!)
+        let sessionData = try SessionData(connectionState)
         
         // get byte array from data
         let payloadArray = payload.bytes
@@ -192,13 +190,38 @@ class EncryptionHandler {
         return try AES(key: key, blockMode: CryptoSwift.ECB(), padding: .noPadding).decrypt(input)
     }
     
-    static func decryptSessionNonce(_ input: [UInt8], key: [UInt8]) throws -> [UInt8] {
+    static func processSessionData(_ input: [UInt8], key: [UInt8], connectionState: ConnectionState) throws {
         if (input.count == 16) {
             guard key.count == 16 else { throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY }
             let result = try AES(key: key, blockMode: CryptoSwift.ECB(), padding: .noPadding).decrypt(input)
-            let checksum = Conversion.uint8_array_to_uint32(result)
+            let payload = DataStepper(result)
+
+            let checksum = try payload.getUInt32();
             if (checksum == CHECKSUM) {
-                return [result[4], result[5], result[6], result[7], result[8]]
+                var protocolVersion : UInt8 = 0
+                var sessionNonce : [UInt8]
+                var validationKey: [UInt8]
+                if (connectionState.connectionProtocolVersion == .v5) {
+                    protocolVersion = try payload.getUInt8()
+                    sessionNonce    = try payload.getBytes(5)
+                    validationKey   = try payload.getBytes(4)
+                    
+                    let protocolEnum = ConnectionProtocolVersion.init(rawValue: protocolVersion)
+                    
+                    if protocolVersion != 5 && protocolEnum != nil {
+                        connectionState.setConnectionProtocolVersion(protocolEnum!)
+                    }
+                }
+                else {
+                    payload.mark()
+                    sessionNonce = try payload.getBytes(5)
+                    payload.reset()
+                    validationKey = try payload.getBytes(4)
+                }
+                LOG.info("BLUENET_LIB: SetSessionNonce \(sessionNonce)");
+                connectionState.setSessionNonce(sessionNonce)
+                connectionState.setProtocolVersion(protocolVersion)
+                connectionState.validationKey(validationKey)
             }
             else {
                 throw BluenetError.COULD_NOT_VALIDATE_SESSION_NONCE
@@ -215,7 +238,7 @@ class EncryptionHandler {
         }
         
         // unpack the session data
-        let sessionData = try SessionData(connectionState.sessionNonce!)
+        let sessionData = try SessionData(connectionState)
 
         // decrypt data
         let package = try EncryptedPackage(data: input)

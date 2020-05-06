@@ -8,7 +8,7 @@
 
 import Foundation
 
-func parseOpcode3_type1(serviceData : ScanResponsePacket, data : [UInt8], liteParse: Bool) {
+func parseOpcode3_type1(serviceData : ScanResponsePacket, data : [UInt8]) {
     if (data.count == 16) {
         // opCode   = data[0]
         // dataType = data[1]
@@ -16,10 +16,7 @@ func parseOpcode3_type1(serviceData : ScanResponsePacket, data : [UInt8], litePa
         
         serviceData.partialTimestamp = Conversion.uint8_array_to_uint16([data[12],data[13]])
         serviceData.uniqueIdentifier = NSNumber(value: serviceData.partialTimestamp)
-        
-        if (liteParse) {
-            return
-        }
+    
         
         serviceData.crownstoneId  = data[1]
         serviceData.errorsBitmask = Conversion.uint8_array_to_uint32([

@@ -217,7 +217,7 @@ public class ConfigHandler {
     
     public func setSwitchcraft(enabled: Bool) -> Promise<Void> {
         LOG.info("BLUENET_LIB: setSwitchcraft")
-        return _writeGenericControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getSwitchCraftPacket(enabled))
+        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getSwitchCraftPacket(enabled))
     }
     
     public func setTapToToggle(enabled: Bool) -> Promise<Void> {
@@ -225,13 +225,14 @@ public class ConfigHandler {
         if enabled == false {
             enabledValue = 0
         }
-        let packet = ControlStateSetPacket.init(type: .TAP_TO_TOGGLE_ENABLED, payload8: enabledValue).getPacket()
-        return _writeGenericControlPacket(bleManager: self.bleManager, packet)
+        
+        let packet = StatePacketsGenerator.getWritePacket(type: .TAP_TO_TOGGLE_ENABLED).load(enabledValue).getPacket()
+        return _writeControlPacket(bleManager: self.bleManager, packet)
     }
     
     public func setTapToToggleThresholdOffset(threshold: Int8) -> Promise<Void> {
-        let packet = ControlStateSetPacket.init(type: .TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET, payload8: Conversion.int8_to_uint8(threshold)).getPacket()
-        return _writeGenericControlPacket(bleManager: self.bleManager, packet)
+        let packet = StatePacketsGenerator.getWritePacket(type: .TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET).load(Conversion.int8_to_uint8(threshold)).getPacket()
+        return _writeControlPacket(bleManager: self.bleManager, packet)
     }
     
     public func setTxPower (_ txPower: NSNumber) -> Promise<Void> {
@@ -251,16 +252,15 @@ public class ConfigHandler {
     
     
     public func setSunTimes(sunriseSecondsSinceMidnight: UInt32, sunsetSecondsSinceMidnight: UInt32) -> Promise<Void> {
-        if self.bleManager.connectionState.controlVersion == .v2 {
+        if self.bleManager.connectionState.connectionProtocolVersion != .v1 {
             LOG.info("BLUENET_LIB: setSunTimes")
             var data = [UInt8]()
             
             data += Conversion.uint32_to_uint8_array(sunriseSecondsSinceMidnight)
             data += Conversion.uint32_to_uint8_array( sunsetSecondsSinceMidnight)
             
-            
-            let packet = ControlStateSetPacket.init(type: .sunTimes, payloadArray: data).getPacket()
-            return _writeGenericControlPacket(bleManager: self.bleManager, packet)
+            let packet = StatePacketsGenerator.getWritePacket(type: .sunTimes).load(data).getPacket()
+            return _writeControlPacket(bleManager: self.bleManager, packet)
         }
         else {
             return Promise<Void> { seal in seal.fulfill(()) }
@@ -268,54 +268,24 @@ public class ConfigHandler {
     }
     
     func _writeToConfig(packet: [UInt8]) -> Promise<Void> {
-        if self.bleManager.connectionState.operationMode == .setup {
-            if self.bleManager.connectionState.controlVersion == .v2 {
-                return self.bleManager.writeToCharacteristic(
-                    CSServices.SetupService,
-                    characteristicId: SetupCharacteristics.SetupControlV3,
-                    data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-                    type: CBCharacteristicWriteType.withResponse
-                )
-            }
-            else {
-                return self.bleManager.writeToCharacteristic(
-                   CSServices.SetupService,
-                   characteristicId: SetupCharacteristics.ConfigControl,
-                   data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-                   type: CBCharacteristicWriteType.withResponse
-               )
-            }
-            
-        }
-        else {
-            if self.bleManager.connectionState.controlVersion == .v2 {                
-                return self.bleManager.writeToCharacteristic(
-                    CSServices.CrownstoneService,
-                    characteristicId: CrownstoneCharacteristics.ControlV2,
-                    data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-                    type: CBCharacteristicWriteType.withResponse
-                )
-            }
-            else {
-                return self.bleManager.writeToCharacteristic(
-                    CSServices.CrownstoneService,
-                    characteristicId: CrownstoneCharacteristics.ConfigControl,
-                    data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-                    type: CBCharacteristicWriteType.withResponse
-                )
-            }
-        }
+        let params = _getConfigWriteParameters()
+        return self.bleManager.writeToCharacteristic(
+            params.service,
+            characteristicId: params.characteristic,
+            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+            type: CBCharacteristicWriteType.withResponse
+        )
     }
     
     
 
     public func _getConfig<T>(_ config : ConfigurationType) -> Promise<T> {
-       let mappedStateType = StateTypeV2(rawValue: UInt16(config.rawValue))!
+       let mappedStateType = StateTypeV3(rawValue: UInt16(config.rawValue))!
        let readpacket = StatePacketsGenerator.getReadPacket(type: mappedStateType).getPacket()
        return self._getConfig(readpacket)
    }
        
-   public func _getConfig<T>(_ config : StateTypeV2, id: UInt16 = 0) -> Promise<T> {
+   public func _getConfig<T>(_ config : StateTypeV3, id: UInt16 = 0) -> Promise<T> {
        let readpacket = StatePacketsGenerator.getReadPacket(type: config, id: id).getPacket()
        return self._getConfig(readpacket, id: 0)
    }
@@ -349,20 +319,52 @@ public class ConfigHandler {
         var service                  = CSServices.CrownstoneService;
         var characteristicToReadFrom = CrownstoneCharacteristics.ConfigRead
         
-        //determine where to write
-        if self.bleManager.connectionState.controlVersion == .v2 {
-            characteristicToReadFrom = CrownstoneCharacteristics.ResultV2
+        //determine where to writeco
+        if self.bleManager.connectionState.connectionProtocolVersion == .v3 {
+            characteristicToReadFrom = CrownstoneCharacteristics.ResultV3
         }
         if self.bleManager.connectionState.operationMode == .setup {
             service = CSServices.SetupService;
-            if self.bleManager.connectionState.controlVersion == .v2 {
-                characteristicToReadFrom = SetupCharacteristics.ResultV2
+            if self.bleManager.connectionState.connectionProtocolVersion == .v3 {
+                characteristicToReadFrom = SetupCharacteristics.ResultV3
             }
             else {
                 characteristicToReadFrom = SetupCharacteristics.ConfigRead
             }
         }
         return BleParamaters(service: service, characteristic: characteristicToReadFrom)
+    }
+    
+    func _getConfigWriteParameters() -> BleParamaters {
+        let service : String
+        let characteristic : String
+        if self.bleManager.connectionState.operationMode == .setup {
+            service = CSServices.SetupService
+            if self.bleManager.connectionState.connectionProtocolVersion == .v5 {
+                characteristic = SetupCharacteristics.SetupControlV5
+            }
+            else if self.bleManager.connectionState.connectionProtocolVersion == .v3 {
+                characteristic = SetupCharacteristics.SetupControlV3
+            }
+            else {
+                characteristic = SetupCharacteristics.ConfigControl
+            }
+        }
+        else {
+            service = CSServices.CrownstoneService
+            if self.bleManager.connectionState.connectionProtocolVersion == .v5 {
+                characteristic = CrownstoneCharacteristics.ControlV5
+            }
+            else if self.bleManager.connectionState.connectionProtocolVersion == .v3 {
+                characteristic = CrownstoneCharacteristics.ControlV3
+            }
+            else {
+                characteristic = CrownstoneCharacteristics.ConfigControl
+            }
+        }
+        
+
+        return BleParamaters(service: service, characteristic: characteristic)
     }
 }
 

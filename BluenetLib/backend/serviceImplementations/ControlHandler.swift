@@ -80,12 +80,12 @@ public class ControlHandler {
     
     public func sendNoOp() -> Promise<Void> {
         let packet = ControlPacketsGenerator.getNoOpPacket()
-        return self._writeControlPacket(packet)
+        return _writeControlPacket(bleManager: self.bleManager, packet)
     }
     
     public func commandFactoryReset() -> Promise<Void> {
         var writeWasSuccessful = false
-        return self._writeControlPacket(ControlPacketsGenerator.getCommandFactoryResetPacket())
+        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getCommandFactoryResetPacket())
             .then{(_) -> Promise<Void> in
                 writeWasSuccessful = true
                 return self.bleManager.waitToWrite()
@@ -99,8 +99,8 @@ public class ControlHandler {
                     
                     var passed = false
                     
-                    if self.bleManager.connectionState.controlVersion == .v2 {
-                        passed = result.commandTypeUInt16 == ControlTypeV2.factory_RESET.rawValue
+                    if self.bleManager.connectionState.connectionProtocolVersion == .v3 {
+                        passed = result.commandTypeUInt16 == ControlTypeV3.factory_RESET.rawValue
                     }
                     else {
                         passed = result.commandTypeUInt16 == UInt16(ControlType.factory_RESET.rawValue)
@@ -143,12 +143,12 @@ public class ControlHandler {
      */
     public func setSwitchState(_ state: Float) -> Promise<Void> {
         let packet = ControlPacketsGenerator.getSwitchStatePacket(state)
-        return self._writeControlPacket(packet)
+        return _writeControlPacket(bleManager: self.bleManager, packet)
     }
     
     public func reset() -> Promise<Void> {
         LOG.info("BLUENET_LIB: requesting reset")
-        return self._writeControlPacket(ControlPacketsGenerator.getResetPacket())
+        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getResetPacket())
     }
     
     public func putInDFU() -> Promise<Void> {
@@ -168,7 +168,7 @@ public class ControlHandler {
                 }
                 
                 LOG.info("BLUENET_LIB: switching to DFU")
-                return self._writeControlPacket(ControlPacketsGenerator.getPutInDFUPacket())
+                return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getPutInDFUPacket())
         }
     }
     
@@ -178,7 +178,7 @@ public class ControlHandler {
             connectedHandle = self.bleManager.connectedPeripheral!.identifier.uuidString
         }
         LOG.info("BLUENET_LIB: REQUESTING IMMEDIATE DISCONNECT FROM \(String(describing: connectedHandle))")
-        return self._writeControlPacket(ControlPacketsGenerator.getDisconnectPacket())
+        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getDisconnectPacket())
             .then{_ -> Promise<Void> in
                 LOG.info("BLUENET_LIB: Written disconnect command, emitting event for... \(String(describing: connectedHandle))")
                 if (connectedHandle != nil) {
@@ -195,7 +195,7 @@ public class ControlHandler {
      */
     public func switchRelay(_ state: UInt8) -> Promise<Void> {
         LOG.info("BLUENET_LIB: switching relay to \(state)")
-        return self._writeControlPacket(ControlPacketsGenerator.getRelaySwitchPacket(state))
+        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getRelaySwitchPacket(state))
     }
     
     
@@ -227,17 +227,17 @@ public class ControlHandler {
     */
     public func switchPWM(_ state: Float) -> Promise<Void> {
         LOG.info("BLUENET_LIB: switching PWM to \(state)")
-        return self._writeControlPacket(ControlPacketsGenerator.getPwmSwitchPacket(state))
+        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getPwmSwitchPacket(state))
     }
     
     public func setTime(_ newTime: NSNumber) -> Promise<Void> {
         LOG.info("BLUENET_LIB: setting the TIME to \(newTime.uint32Value)")
-        return self._writeControlPacket(ControlPacketsGenerator.getSetTimePacket(newTime.uint32Value))
+        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getSetTimePacket(newTime.uint32Value))
     }
     
     public func clearError(errorDict: NSDictionary) -> Promise<Void> {
         let resetErrorMask = CrownstoneErrors(dictionary: errorDict).getResetMask()
-        return _writeControlPacket(ControlPacketsGenerator.getResetErrorPacket(errorMask: resetErrorMask))
+        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getResetErrorPacket(errorMask: resetErrorMask))
     }
     
     
@@ -246,22 +246,22 @@ public class ControlHandler {
      */
     public func keepAliveState(changeState: Bool, state: Float, timeout: UInt16) -> Promise<Void> {
         LOG.info("BLUENET_LIB: Keep alive State")
-        return self._writeControlPacket(ControlPacketsGenerator.getKeepAliveStatePacket(changeState: changeState, state: state, timeout: timeout))
+        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getKeepAliveStatePacket(changeState: changeState, state: state, timeout: timeout))
     }
     
     public func keepAliveRepeat() -> Promise<Void> {
         LOG.info("BLUENET_LIB: Keep alive")
-        return self._writeControlPacket(ControlPacketsGenerator.getKeepAliveRepeatPacket())
+        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getKeepAliveRepeatPacket())
     }
     
     public func allowDimming(allow: Bool) -> Promise<Void> {
         LOG.info("BLUENET_LIB: allowDimming")
-        return self._writeControlPacket(ControlPacketsGenerator.getAllowDimmingPacket(allow))
+        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getAllowDimmingPacket(allow))
     }
      
     public func lockSwitch(lock: Bool) -> Promise<Void> {
         LOG.info("BLUENET_LIB: lockSwitch")
-        return self._writeControlPacket(ControlPacketsGenerator.getLockSwitchPacket(lock))
+        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getLockSwitchPacket(lock))
     }
      
     
@@ -271,13 +271,11 @@ public class ControlHandler {
     public func getAndSetSessionNonce() -> Promise<Void> {
         LOG.info("BLUENET_LIB: getAndSetSessionNonce")
         return self.bleManager.readCharacteristicWithoutEncryption(CSServices.CrownstoneService, characteristic: CrownstoneCharacteristics.SessionNonce)
-            .then{(sessionNonce : [UInt8]) -> Promise<Void> in
+            .then{(sessionData : [UInt8]) -> Promise<Void> in
                 return Promise <Void> { seal in
                     do {
                         if let basicKey = self.bleManager.connectionState.getBasicKey() {
-                            let sessionNonce = try EncryptionHandler.decryptSessionNonce(sessionNonce, key: basicKey)
-                            LOG.info("BLUENET_LIB: SetSessionNonce \(sessionNonce)");
-                            self.bleManager.connectionState.setSessionNonce(sessionNonce)
+                            try EncryptionHandler.processSessionData(sessionData, key: basicKey, connectionState: self.bleManager.connectionState)
                             seal.fulfill(())
                         }
                         else {
@@ -312,7 +310,7 @@ public class ControlHandler {
         }
         let packet = ControlPacketsGenerator.getSetSchedulePacket(data: scheduleConfig.getPacket())
 
-        return _writeControlPacket(packet)
+        return _writeControlPacket(bleManager: self.bleManager, packet)
     }
     
     
@@ -324,7 +322,7 @@ public class ControlHandler {
             return Promise<Void> { seal in seal.reject(BluenetError.INCORRECT_SCHEDULE_ENTRY_INDEX) }
         }
         
-        return _writeControlPacket(ControlPacketsGenerator.getScheduleRemovePacket(timerIndex: scheduleEntryIndex))
+        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getScheduleRemovePacket(timerIndex: scheduleEntryIndex))
     }
     
     
@@ -354,21 +352,11 @@ public class ControlHandler {
     
     
     // MARK: Util
-
-    func _writeControlPacket(_ packet: [UInt8]) -> Promise<Void> {
-        if self.bleManager.connectionState.operationMode == .setup {
-            return _writeSetupControlPacket(bleManager: self.bleManager, packet)
-        }
-        else {
-            return _writeGenericControlPacket(bleManager: self.bleManager, packet)
-        }
-    }
-    
     public func _writeControlPacketWithReply(_ packet: [UInt8]) -> Promise<Void> {
         let controlParams = getControlReadParameters(bleManager: self.bleManager)
         
         return Promise { seal in
-            let writeCommand : voidPromiseCallback = { return self._writeControlPacket(packet) }
+            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packet) }
             
             _writePacketWithReply(bleManager: self.bleManager, service: controlParams.service, readCharacteristic: controlParams.characteristic, writeCommand: writeCommand)
                .done{ resultPacket -> Void in
@@ -387,10 +375,10 @@ public class ControlHandler {
     
     
     func _readControlPacket() -> Promise<[UInt8]> {
-        if self.bleManager.connectionState.controlVersion == .v2 {
+        if self.bleManager.connectionState.connectionProtocolVersion == .v3 {
             return self.bleManager.readCharacteristic(
                 CSServices.CrownstoneService,
-                characteristicId: CrownstoneCharacteristics.ResultV2
+                characteristicId: CrownstoneCharacteristics.ResultV3
             )
         }
         return self.bleManager.readCharacteristic(

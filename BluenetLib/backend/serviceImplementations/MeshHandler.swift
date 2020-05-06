@@ -28,7 +28,7 @@ public class MeshHandler {
      */
     public func keepAliveRepeat() -> Promise<Void> {
         let packet = ControlPacket(type: .mesh_keepAliveRepeat).getPacket()
-        return self._writeControlPacket(packet)
+        return _writeControlPacket(bleManager: self.bleManager, packet)
     }
     
     /**
@@ -51,7 +51,7 @@ public class MeshHandler {
         if (packets.count > 0) {
             let meshPayload = MeshKeepAlivePacket(type: .sharedTimeout, timeout: timeout, packets: packets).getPacket()
             let commandPayload = ControlPacket(type: .mesh_keepAliveState, payloadArray: meshPayload).getPacket()
-            return self._writeControlPacket(commandPayload)
+            return _writeControlPacket(bleManager: self.bleManager, commandPayload)
         }
         else {
             return Promise<Void> { seal in seal.reject(BluenetError.NO_KEEPALIVE_STATE_ITEMS)}
@@ -63,75 +63,45 @@ public class MeshHandler {
      * This channel is used to send different switch commands with individual timeouts, switch states and intents to different crownstones in one message
      */
     public func turnOn(stones:[[String: NSNumber]]) -> Promise<Void> {
-        return _writeGenericControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getTurnOnPacket(stones: stones))
+        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getTurnOnPacket(stones: stones))
     }
     
     /**
      * This channel is used to send different switch commands with individual timeouts, switch states and intents to different crownstones in one message
      */
     public func multiSwitch(stones:[[String: NSNumber]]) -> Promise<Void> {
-        return _writeGenericControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getMultiSwitchPacket(stones: stones))
+        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getMultiSwitchPacket(stones: stones))
     }
-    
-    public func batchCommand(crownstoneIds: [UInt8], commandPacket: [UInt8]) -> Promise<Void> {
-        let meshPayload = MeshCommandPacket(type: .control, crownstoneIds: crownstoneIds, payload: commandPacket).getPacket()
-        let commandPayload = ControlPacket(type: .mesh_command, payloadArray: meshPayload).getPacket()
-        return self._writeControlPacket(commandPayload)
-    }
-    
-    public func batchBeaconConfig(crownstoneIds: [UInt8], beaconPacket: [UInt8]) -> Promise<Void> {
-        let meshPayload = MeshCommandPacket(type: .beacon, crownstoneIds: crownstoneIds, payload: beaconPacket).getPacket()
-        let commandPayload = ControlPacket(type: .mesh_command, payloadArray: meshPayload).getPacket()
-        return self._writeControlPacket(commandPayload)
-    }
-    
-    public func batchConfig(crownstoneIds: [UInt8], configPacket: [UInt8]) -> Promise<Void> {
-        let meshPayload = MeshCommandPacket(type: .config, crownstoneIds: crownstoneIds, payload: configPacket).getPacket()
-        let commandPayload = ControlPacket(type: .mesh_command, payloadArray: meshPayload).getPacket()
-        return self._writeControlPacket(commandPayload)
-    }
-    
-    public func batchState(crownstoneIds: [UInt8], statePacket: [UInt8]) -> Promise<Void> {
-        let meshPayload = MeshCommandPacket(type: .state, crownstoneIds: crownstoneIds, payload: statePacket).getPacket()
-        let commandPayload = ControlPacket(type: .mesh_command, payloadArray: meshPayload).getPacket()
-        return self._writeControlPacket(commandPayload)
-    }
+
     
     public func setTime( time: UInt32 ) -> Promise<Void> {
         let commandPayload = ControlPacketsGenerator.getSetTimePacket(time)
-        let meshPayload = MeshCommandPacket(type: .control, crownstoneIds: [], payload: commandPayload).getPacket()
+
+        var meshPayload : [UInt8]
+        if self.bleManager.connectionState.connectionProtocolVersion == .v5 {
+            meshPayload = MeshCommandPacketV5(type: .control, payload: commandPayload).getPacket()
+        }
+        else {
+            meshPayload = MeshCommandPacket(type: .control, crownstoneIds: [], payload: commandPayload).getPacket()
+        }
         
         let packet = ControlPacketsGenerator.getMeshCommandPacket(commandPacket: meshPayload)
-        return _writeGenericControlPacket(bleManager: self.bleManager, packet)
+        return _writeControlPacket(bleManager: self.bleManager, packet)
     }
     
     public func sendNoOp( ) -> Promise<Void> {
         let commandPayload = ControlPacketsGenerator.getNoOpPacket()
-        let meshPayload = MeshCommandPacket(type: .control, crownstoneIds: [], payload: commandPayload).getPacket()
+        var meshPayload : [UInt8]
+        if self.bleManager.connectionState.connectionProtocolVersion == .v5 {
+            meshPayload = MeshCommandPacketV5(type: .control, payload: commandPayload).getPacket()
+        }
+        else {
+            meshPayload = MeshCommandPacket(type: .control, crownstoneIds: [], payload: commandPayload).getPacket()
+        }
       
         let packet = ControlPacketsGenerator.getMeshCommandPacket(commandPacket: meshPayload)
-        return _writeGenericControlPacket(bleManager: self.bleManager, packet)
+        return _writeControlPacket(bleManager: self.bleManager, packet)
     }
-    
-    
-    // MARK: UTILS
-    
-    func _writeControlPacket(_ packet: [UInt8]) -> Promise<Void> {
-        return self.bleManager.writeToCharacteristic(
-            CSServices.CrownstoneService,
-            characteristicId: CrownstoneCharacteristics.Control,
-            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-            type: CBCharacteristicWriteType.withResponse
-        )
-    }
-    
-    
-    func _readControlPacket() -> Promise<[UInt8]> {
-        return self.bleManager.readCharacteristic(
-            CSServices.CrownstoneService,
-            characteristicId: CrownstoneCharacteristics.Control
-        )
-    }
-    
+
 }
 

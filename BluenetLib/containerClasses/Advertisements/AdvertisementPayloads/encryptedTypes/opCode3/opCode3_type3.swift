@@ -8,9 +8,9 @@
 
 import Foundation
 
-func parseOpcode3_type3(serviceData : ScanResponsePacket, data : [UInt8], liteParse: Bool) {
+func parseOpcode3_type3(serviceData : ScanResponsePacket, data : [UInt8]) {
     if (data.count == 16) {
-        parseOpcode3_type1(serviceData: serviceData, data: data, liteParse: liteParse)
+        parseOpcode3_type1(serviceData: serviceData, data: data)
         
         // apply differences between type 1 and type 4
         serviceData.stateOfExternalCrownstone = true

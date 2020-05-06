@@ -13,7 +13,7 @@ import CoreBluetooth
 
 
  public class ControlPacketsGeneratorClass {
-    var controlVersion : ControlVersionType = .v1
+    var connectionProtocolVersion : ConnectionProtocolVersion = .v1
     
     init() {}
     
@@ -33,42 +33,42 @@ import CoreBluetooth
     }
     
      func getCommandFactoryResetPacket() -> [UInt8] {
-        if controlVersion == .v2 { return FactoryResetPacketV2().getPacket()}
+        if connectionProtocolVersion == .v3 { return FactoryResetPacketV3().getPacket()}
         else                     { return FactoryResetPacket().getPacket()}
     }
     
      func getSwitchStatePacket(_ state: Float) -> [UInt8] {
         let switchState = min(1,max(0,state))*100
         
-        if controlVersion == .v2 { return ControlPacketV2(type: .switch, payload8: NSNumber(value: switchState as Float).uint8Value).getPacket()}
+        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .switch, payload8: NSNumber(value: switchState as Float).uint8Value).getPacket()}
         else                     { return ControlPacket(  type: .switch, payload8: NSNumber(value: switchState as Float).uint8Value).getPacket() }
         
     }
     
      func getResetPacket() -> [UInt8] {
-        if controlVersion == .v2 { return ControlPacketV2(type: .reset).getPacket()}
+        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .reset).getPacket()}
         else                     { return ControlPacket(  type: .reset).getPacket()}
     }
     
      func getPutInDFUPacket() -> [UInt8] {
-        if controlVersion == .v2 { return ControlPacketV2(type: .goto_DFU).getPacket()}
+        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .goto_DFU).getPacket()}
         else                     { return ControlPacket(  type: .goto_DFU).getPacket()}
     }
     
      func getDisconnectPacket() -> [UInt8] {
-        if controlVersion == .v2 { return ControlPacketV2(type: .disconnect).getPacket()}
+        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .disconnect).getPacket()}
         else                     { return ControlPacket(  type: .disconnect).getPacket()}
     }
     
      func getRelaySwitchPacket(_ state: UInt8) -> [UInt8] {
-        if controlVersion == .v2 { return ControlPacketV2(type: .relay, payload8: state).getPacket()}
+        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .relay, payload8: state).getPacket()}
         else                     { return ControlPacket(  type: .relay, payload8: state).getPacket()}
     }
     
      func getPwmSwitchPacket(_ state: Float) -> [UInt8] {
         let switchState : UInt8 = NSNumber(value: min(1,max(0,state))*100).uint8Value
         
-        if controlVersion == .v2 { return ControlPacketV2(type: .pwm, payload8: switchState).getPacket()}
+        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .pwm, payload8: switchState).getPacket()}
         else                     { return ControlPacket(  type: .pwm, payload8: switchState).getPacket()}
     }
     
@@ -91,17 +91,17 @@ import CoreBluetooth
     }
     
      func getResetErrorPacket(errorMask: UInt32) -> [UInt8] {
-        if controlVersion == .v2 { return ControlPacketV2(type: .reset_ERRORS, payload32: errorMask).getPacket()}
+        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .reset_ERRORS, payload32: errorMask).getPacket()}
         else                     { return ControlPacket(  type: .reset_ERRORS, payload32: errorMask).getPacket()}
     }
     
      func getSetTimePacket(_ time: UInt32) -> [UInt8] {
-        if controlVersion == .v2 { return ControlPacketV2(type: .set_TIME, payload32: time).getPacket()}
+        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .set_TIME, payload32: time).getPacket()}
         else                     { return ControlPacket(  type: .set_TIME, payload32: time).getPacket()}
     }
     
      func getNoOpPacket() -> [UInt8] {
-        if controlVersion == .v2 { return ControlPacketV2(type: .no_OPERATION).getPacket()}
+        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .no_OPERATION).getPacket()}
         else                     { return ControlPacket(  type: .no_OPERATION).getPacket()}
     }
     
@@ -110,7 +110,7 @@ import CoreBluetooth
         if (allow) {
             allowValue = 1
         }
-        if controlVersion == .v2 { return ControlPacketV2(type: .allow_dimming, payload8: allowValue).getPacket()}
+        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .allow_dimming, payload8: allowValue).getPacket()}
         else                     { return ControlPacket(  type: .allow_dimming, payload8: allowValue).getPacket()}
     }
     
@@ -120,7 +120,7 @@ import CoreBluetooth
             lockValue = 1
         }
         
-        if controlVersion == .v2 { return ControlPacketV2(type: .lock_switch, payload8: lockValue).getPacket()}
+        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .lock_switch, payload8: lockValue).getPacket()}
         else                     { return ControlPacket(  type: .lock_switch, payload8: lockValue).getPacket()}
     }
     
@@ -130,18 +130,23 @@ import CoreBluetooth
             enabledValue = 1
         }
         
-        if controlVersion == .v2 { return ControlStateSetPacket(type: .SWITCHCRAFT_ENABLED, payload8: enabledValue).getPacket()}
-        else                     { return ControlPacket(  type: .enable_switchcraft, payload8: enabledValue).getPacket()}
+        if connectionProtocolVersion == .v3 || connectionProtocolVersion == .v5 {
+            let packet = StatePacketsGenerator.getWritePacket(type: .SWITCHCRAFT_ENABLED)
+            return packet.load(enabledValue).getPacket()
+        }
+        else {
+            return ControlPacket(  type: .enable_switchcraft, payload8: enabledValue).getPacket()
+        }
     }
     
     func getMeshCommandPacket(commandPacket: [UInt8]) -> [UInt8] {
-        if controlVersion == .v2 { return ControlPacketV2(type: .mesh_command, payloadArray: commandPacket).getPacket()}
+        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .mesh_command, payloadArray: commandPacket).getPacket()}
         else                     { return ControlPacket(  type: .mesh_command, payloadArray: commandPacket).getPacket()}
     }
     
     
     func getTurnOnPacket(stones:[[String: NSNumber]]) -> [UInt8] {
-        if controlVersion == .v2 {
+        if connectionProtocolVersion == .v3 {
             var innerPacket = [UInt8]()
             var count : UInt8 = 0
             for stone in stones {
@@ -159,7 +164,7 @@ import CoreBluetooth
             packet.append(count)
             packet += innerPacket
             
-            return ControlPacketV2(type: .multiSwitch, payloadArray: packet).getPacket()
+            return ControlPacketV3(type: .multiSwitch, payloadArray: packet).getPacket()
         }
         else {
             return ControlPacketsGenerator.getMultiSwitchPacket(stones: stones)
@@ -167,7 +172,7 @@ import CoreBluetooth
     }
     
     func getMultiSwitchPacket(stones:[[String: NSNumber]]) -> [UInt8] {
-        if controlVersion == .v2 {
+        if connectionProtocolVersion == .v3 {
             var innerPacket = [UInt8]()
             var count : UInt8 = 0
             for stone in stones {
@@ -185,7 +190,7 @@ import CoreBluetooth
             packet.append(count)
             packet += innerPacket
             
-            return ControlPacketV2(type: .multiSwitch, payloadArray: packet).getPacket()
+            return ControlPacketV3(type: .multiSwitch, payloadArray: packet).getPacket()
         }
         else {
             var packets = [StoneMultiSwitchPacket]()
@@ -231,7 +236,7 @@ import CoreBluetooth
             deviceToken:    deviceToken,
             ttlMinutes:     ttlMinutes
         )
-        return ControlPacketV2(type: .registerTrackedDevice, payloadArray: payload).getPacket()
+        return ControlPacketV3(type: .registerTrackedDevice, payloadArray: payload).getPacket()
     }
     
     func getTrackedDeviceRegistrationPayload(
@@ -285,7 +290,7 @@ import CoreBluetooth
         return ControlPacket(type: .setup, payloadArray: data).getPacket()
     }
     
-    func getSetupPacketV2(
+    func getSetupPacketV3(
         crownstoneId: UInt8, sphereId: UInt8,
         adminKey: String, memberKey: String, basicKey: String, localizationKey: String, serviceDataKey: String, meshNetworkKey: String, meshApplicationKey: String, meshDeviceKey: String,
         ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16
@@ -309,7 +314,7 @@ import CoreBluetooth
         data += Conversion.uint16_to_uint8_array(ibeaconMinor)
         
         
-       if controlVersion == .v2 { return ControlPacketV2(type: .setup, payloadArray: data).getPacket()}
+       if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .setup, payloadArray: data).getPacket()}
        else                     { return ControlPacket(  type: .setup, payloadArray: data).getPacket()}
     }
 

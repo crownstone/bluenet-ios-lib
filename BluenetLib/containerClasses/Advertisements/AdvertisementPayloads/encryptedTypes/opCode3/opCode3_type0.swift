@@ -8,17 +8,10 @@
 
 import Foundation
 
-func parseOpcode3_type0(serviceData : ScanResponsePacket, data : [UInt8], liteParse: Bool) {
+func parseOpcode3_type0(serviceData : ScanResponsePacket, data : [UInt8]) {
     if (data.count == 16) {
         // opCode   = first byte of payload, not the decrypted
         // dataType = data[0]
-        
-        serviceData.partialTimestamp = Conversion.uint8_array_to_uint16([data[12],data[13]])
-        serviceData.uniqueIdentifier = NSNumber(value: serviceData.partialTimestamp)
-        
-        if (liteParse) {
-            return
-        }
         
         serviceData.stateOfExternalCrownstone = false
         
@@ -69,6 +62,9 @@ func parseOpcode3_type0(serviceData : ScanResponsePacket, data : [UInt8], litePa
             ])
         );
         serviceData.accumulatedEnergy = NSNumber(value: accumulatedEnergy).int64Value * 64
+        
+        serviceData.partialTimestamp = Conversion.uint8_array_to_uint16([data[12],data[13]])
+        serviceData.uniqueIdentifier = NSNumber(value: serviceData.partialTimestamp)
         
         if (serviceData.timeSet) {
             serviceData.timestamp = NSNumber(value: reconstructTimestamp(currentTimestamp: NSDate().timeIntervalSince1970, LsbTimestamp: serviceData.partialTimestamp)).doubleValue

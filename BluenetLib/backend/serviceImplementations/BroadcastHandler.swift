@@ -24,29 +24,34 @@ public class BroadcastHandler {
     
 
     
-    public func multiSwitch(referenceId: String, stoneId: UInt8, switchState: Float) -> Promise<Void> {
+    
+    public func multiSwitch(referenceId: String, stoneId: UInt8, switchState: Float, autoExecute: Bool = true) -> Promise<Void> {
         return Promise<Void> { seal in
             
             let switchState = NSNumber(value: min(1,max(0,switchState))*100).uint8Value
             let packet  = BroadcastStone_SwitchPacket(crownstoneId: stoneId, state: switchState).getPacket()
             let element = BroadcastElement(referenceId: referenceId, type: .multiSwitch, packet: packet, seal: seal, target: stoneId)
             
-            self.peripheralStateManager.loadElement(element: element)
+            self.peripheralStateManager.loadElement(element: element, autoExecute: autoExecute)
         }
     }
     
     
-    public func turnOn(referenceId: String, stoneId: UInt8) -> Promise<Void> {
+    public func turnOn(referenceId: String, stoneId: UInt8, autoExecute: Bool = true) -> Promise<Void> {
         return Promise<Void> { seal in
             
             let switchState : UInt8 = 255
             let packet  = BroadcastStone_SwitchPacket(crownstoneId: stoneId, state: switchState).getPacket()
             let element = BroadcastElement(referenceId: referenceId, type: .multiSwitch, packet: packet, seal: seal, target: stoneId)
             
-            self.peripheralStateManager.loadElement(element: element)
+            self.peripheralStateManager.loadElement(element: element, autoExecute: autoExecute)
         }
     }
     
+    
+    public func execute() {
+        self.peripheralStateManager.broadcastCommand()
+    }
     
     public func setBehaviourSettings(referenceId: String, enabled: Bool) -> Promise<Void> {
        return Promise<Void> { seal in

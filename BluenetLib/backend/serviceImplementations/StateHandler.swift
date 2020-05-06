@@ -137,31 +137,22 @@ public class StateHandler {
     }
     
     func _writeToState(packet: [UInt8]) -> Promise<Void> {
-        if self.bleManager.connectionState.controlVersion == .v2 {
-            return self.bleManager.writeToCharacteristic(
-                CSServices.CrownstoneService,
-                characteristicId: CrownstoneCharacteristics.ControlV2,
-                data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-                type: CBCharacteristicWriteType.withResponse
-            )
-        }
-        else {
-            return self.bleManager.writeToCharacteristic(
-                CSServices.CrownstoneService,
-                characteristicId: CrownstoneCharacteristics.StateControl,
-                data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
-                type: CBCharacteristicWriteType.withResponse
-            )
-        }
+        let params = _getStateWriteParameters()
+        return self.bleManager.writeToCharacteristic(
+            params.service,
+            characteristicId: params.characteristic,
+            data: Data(bytes: UnsafePointer<UInt8>(packet), count: packet.count),
+            type: CBCharacteristicWriteType.withResponse
+       )
     }
    
     public func _getState<T>(_ state : StateType) -> Promise<T> {
-        let mappedStateType = StateTypeV2(rawValue: UInt16(state.rawValue))!
+        let mappedStateType = StateTypeV3(rawValue: UInt16(state.rawValue))!
         let readpacket = StatePacketsGenerator.getReadPacket(type: mappedStateType).getPacket()
         return self._getState(readpacket)
     }
     
-    public func _getState<T>(_ state : StateTypeV2, id: UInt16 = 0) -> Promise<T> {
+    public func _getState<T>(_ state : StateTypeV3, id: UInt16 = 0) -> Promise<T> {
         let readpacket = StatePacketsGenerator.getReadPacket(type: state, id: id).getPacket()
         return self._getState(readpacket, id: 0)
     }
@@ -189,15 +180,39 @@ public class StateHandler {
     }
     
     func _getStateReadParameters() -> BleParamaters {
-        let service                  = CSServices.CrownstoneService;
-        var characteristicToReadFrom = CrownstoneCharacteristics.StateRead
+        let service = CSServices.CrownstoneService;
         
-        //determine where to write
-        if self.bleManager.connectionState.controlVersion == .v2 {
-            characteristicToReadFrom = CrownstoneCharacteristics.ResultV2
+        //determine where to listen to
+        var characteristicToReadFrom : String
+        if self.bleManager.connectionState.connectionProtocolVersion == .v5 {
+            characteristicToReadFrom = CrownstoneCharacteristics.ResultV5
+        }
+        else if self.bleManager.connectionState.connectionProtocolVersion == .v3 {
+            characteristicToReadFrom = CrownstoneCharacteristics.ResultV3
+        }
+        else {
+            characteristicToReadFrom = CrownstoneCharacteristics.StateRead
         }
         
         return BleParamaters(service: service, characteristic: characteristicToReadFrom)
+    }
+    
+    func _getStateWriteParameters() -> BleParamaters {
+        let service = CSServices.CrownstoneService;
+        
+        //determine where to write
+        var characteristicToWriteTo : String
+        if self.bleManager.connectionState.connectionProtocolVersion == .v5 {
+            characteristicToWriteTo = CrownstoneCharacteristics.ControlV5
+        }
+        else if self.bleManager.connectionState.connectionProtocolVersion == .v3 {
+            characteristicToWriteTo = CrownstoneCharacteristics.ControlV3
+        }
+        else {
+            characteristicToWriteTo = CrownstoneCharacteristics.Control
+        }
+
+        return BleParamaters(service: service, characteristic: characteristicToWriteTo)
     }
     
 }

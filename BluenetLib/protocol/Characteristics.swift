@@ -29,9 +29,12 @@ public struct CrownstoneCharacteristics {
     public static let StateControl     = "24f00006-7d10-4805-bfc1-7663a01c3bff"
     public static let StateRead        = "24f00007-7d10-4805-bfc1-7663a01c3bff"
     public static let SessionNonce     = "24f00008-7d10-4805-bfc1-7663a01c3bff"
+    public static let SessionNonceV5   = "24f0000e-7d10-4805-bfc1-7663a01c3bff"
     public static let FactoryReset     = "24f00009-7d10-4805-bfc1-7663a01c3bff"
-    public static let ControlV2        = "24f0000a-7d10-4805-bfc1-7663a01c3bff"
-    public static let ResultV2         = "24f0000b-7d10-4805-bfc1-7663a01c3bff"
+    public static let ControlV3        = "24f0000a-7d10-4805-bfc1-7663a01c3bff"
+    public static let ResultV3         = "24f0000b-7d10-4805-bfc1-7663a01c3bff"
+    public static let ControlV5        = "24f0000c-7d10-4805-bfc1-7663a01c3bff" // V5 to match protocol v5
+    public static let ResultV5         = "24f0000d-7d10-4805-bfc1-7663a01c3bff" // V5 to match protocol v5
 }
 
 public struct SetupCharacteristics {
@@ -43,9 +46,12 @@ public struct SetupCharacteristics {
     public static let SetupControl     = "24f10007-7d10-4805-bfc1-7663a01c3bff"
     public static let GoToDFU          = "24f10006-7d10-4805-bfc1-7663a01c3bff"
     public static let SessionNonce     = "24f10008-7d10-4805-bfc1-7663a01c3bff"
+    public static let SessionNonceV5   = "24f0000e-7d10-4805-bfc1-7663a01c3bff"
     public static let SetupControlV2   = "24f10009-7d10-4805-bfc1-7663a01c3bff"
-    public static let SetupControlV3   = "24f1000a-7d10-4805-bfc1-7663a01c3bff" // setupControlV3 uses controlV2 protocols, and is paired with resultV2
-    public static let ResultV2         = "24f1000b-7d10-4805-bfc1-7663a01c3bff"
+    public static let SetupControlV3   = "24f1000a-7d10-4805-bfc1-7663a01c3bff"// setupControlV3 uses controlV2 protocols, and is paired with resultV3
+    public static let SetupControlV5   = "24f1000c-7d10-4805-bfc1-7663a01c3bff"// V5 to match protocol v5
+    public static let ResultV3         = "24f1000b-7d10-4805-bfc1-7663a01c3bff"
+    public static let ResultV5         = "24f1000d-7d10-4805-bfc1-7663a01c3bff"// V5 to match protocol v5
 }
 
 public struct GeneralCharacteristics {

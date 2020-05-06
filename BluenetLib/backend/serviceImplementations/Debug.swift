@@ -25,13 +25,13 @@ public class DebugHandler {
     public func getBehaviourDebugInformation() -> Promise<Dictionary<String,Any>> {
         return Promise<Dictionary<String,Any>> { seal in
             let writeCommand : voidPromiseCallback = {
-                return self._writeControlPacket(ControlPacketV2(type: .getBehaviourDebug).getPacket())
+                return _writeControlPacket(bleManager: self.bleManager, ControlPacketV3(type: .getBehaviourDebug).getPacket())
             }
-            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV2, writeCommand: writeCommand)
+            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV3, writeCommand: writeCommand)
                 .done{ data -> Void in
 
                     var result = Dictionary<String,Any>()
-                    let resultPacket = ResultPacketV2()
+                    let resultPacket = ResultPacketV3()
                     resultPacket.load(data)
                     if (resultPacket.valid == false) {
                         return seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
@@ -75,36 +75,6 @@ public class DebugHandler {
                 }
                 .catch{ err in seal.reject(err) }
         }
-    }
-    
-    
-    
-    
-    
-    // MARK: Util
-
-    func _writeControlPacket(_ packet: [UInt8]) -> Promise<Void> {
-        if self.bleManager.connectionState.operationMode == .setup {
-            return _writeSetupControlPacket(bleManager: self.bleManager, packet)
-        }
-        else {
-            return _writeGenericControlPacket(bleManager: self.bleManager, packet)
-        }
-    }
-    
-    
-    func _readControlPacket() -> Promise<[UInt8]> {
-        if self.bleManager.connectionState.controlVersion == .v2 {
-            return self.bleManager.readCharacteristic(
-                CSServices.CrownstoneService,
-                characteristicId: CrownstoneCharacteristics.ResultV2
-            )
-        }
-        return self.bleManager.readCharacteristic(
-            CSServices.CrownstoneService,
-            characteristicId: CrownstoneCharacteristics.Control
-        )
-    }
-    
+    }    
 }
 

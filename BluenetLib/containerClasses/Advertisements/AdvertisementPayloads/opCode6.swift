@@ -8,7 +8,7 @@
 
 import Foundation
 
-func parseOpcode6(serviceData : ScanResponsePacket, data : [UInt8], liteParse: Bool = false) {
+func parseOpcode6(serviceData : ScanResponsePacket, data : [UInt8]) {
     if (data.count == 16) {
         serviceData.dataType = data[0]
         
@@ -16,10 +16,10 @@ func parseOpcode6(serviceData : ScanResponsePacket, data : [UInt8], liteParse: B
         
         switch (serviceData.dataType) {
         case 0:
-            parseOpcode4_type0(serviceData: serviceData, data: data, liteParse: liteParse)
+            parseOpcode4_type0(serviceData: serviceData, data: data)
         default:
             // LOG.warn("Advertisement opCode 4: Got an unknown typeCode \(data[1])")
-            parseOpcode4_type0(serviceData: serviceData, data: data, liteParse: liteParse)
+            parseOpcode4_type0(serviceData: serviceData, data: data)
         }
     }
 }

@@ -45,11 +45,13 @@ public enum ControlType : UInt8 {
 }
 
 
-public enum ControlTypeV2 : UInt16 {
+public enum ControlTypeV3 : UInt16 {
     case setup                  = 0
     case factory_RESET          = 1
     case getState               = 2
     case setState               = 3
+    case GET_BOOTLOADER_VERSION = 4
+    case GET_UICR_DATA          = 5
     case reset                  = 10
     case goto_DFU               = 11
     case no_OPERATION           = 12
@@ -176,9 +178,6 @@ public enum OpCode : UInt8 {
 
 public enum MeshCommandType : UInt8 {
     case control = 0
-    case beacon
-    case config
-    case state
 }
 
 public enum IntentType : UInt8 {
@@ -248,7 +247,7 @@ public enum ProcessType: UInt16 {
 
 
 // NOTE: YOU CANNOT DELETE FROM THIS LIST AS IT MUST SHARE THE VALUES WITH THE CONFIG AND STATE LEGACY ENUMS
-public enum StateTypeV2 : UInt16 {
+public enum StateTypeV3 : UInt16 {
     case pwm_PERIOD = 5
     case ibeacon_MAJOR = 6
     case ibeacon_MINOR = 7
@@ -324,4 +323,15 @@ public enum StateTypeV2 : UInt16 {
     case time = 136
     case error_BITMASK = 139
     case sunTimes = 149
+}
+
+public enum GetPersistenceMode : UInt8 {
+    case CURRENT = 0
+    case STORED = 1
+    case FIRMWARE_DEFAULT = 2
+}
+
+public enum SetPersistenceMode : UInt8 {
+    case TEMPORARY = 0
+    case STORED = 1
 }

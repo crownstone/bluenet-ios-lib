@@ -11,10 +11,11 @@ import CoreBluetooth
 import SwiftyJSON
 
 public class ResultBasePacket {
-    public var payload : [UInt8] = []
-    public var valid = true
-    public var resultCode        : ResultValue   = .UNSPECIFIED
-    public var commandTypeUInt16 : UInt16 = 65535
+    public var protocolVersion   :  UInt8      = 0
+    public var payload           : [UInt8]     = []
+    public var valid             : Bool        = true
+    public var resultCode        : ResultValue = .UNSPECIFIED
+    public var commandTypeUInt16 : UInt16      = 65535
     
     func load(_ data : [UInt8]) {}
 }
@@ -69,8 +70,8 @@ public class ResultPacket : ResultBasePacket {
     }
 }
 
-public class ResultPacketV2 : ResultBasePacket {
-    public var commandType : ControlTypeV2 = .UNSPECIFIED
+public class ResultPacketV3 : ResultBasePacket {
+    public var commandType : ControlTypeV3 = .UNSPECIFIED
     public var size        : UInt16 = 0
     
     override init() {
@@ -86,7 +87,7 @@ public class ResultPacketV2 : ResultBasePacket {
         let minSize = 6
 
         if (data.count >= minSize) {
-            let commandType = ControlTypeV2(rawValue: Conversion.uint8_array_to_uint16([data[0], data[1]]))
+            let commandType = ControlTypeV3(rawValue: Conversion.uint8_array_to_uint16([data[0], data[1]]))
             let resultCode  = ResultValue(rawValue: Conversion.uint8_array_to_uint16([data[2], data[3]]))
             
             if (commandType == nil || resultCode == nil) {
@@ -108,6 +109,50 @@ public class ResultPacketV2 : ResultBasePacket {
                 }
             }
             else {
+                self.valid = false
+            }
+        }
+        else {
+            self.valid = false
+        }
+    }
+}
+
+
+public class ResultPacketV5 : ResultBasePacket {
+    public var commandType     : ControlTypeV3 = .UNSPECIFIED
+    public var size            : UInt16 = 0
+    
+    override init() {
+        super.init()
+    }
+    
+    init(_ data : [UInt8]) {
+        super.init()
+        self.load(data)
+    }
+        
+    override func load(_ data : [UInt8]) {
+        let minSize = 7
+
+        if (data.count >= minSize) {
+            let payload = DataStepper(data)
+            do {
+                self.protocolVersion = try payload.getUInt8()
+                self.commandTypeUInt16 = try payload.getUInt16()
+                let commandType = ControlTypeV3(rawValue: self.commandTypeUInt16)
+                let resultCode  = ResultValue(rawValue: try payload.getUInt16())
+                if (commandType == nil || resultCode == nil) {
+                    self.valid = false
+                    return
+                }
+                
+                self.commandType = commandType!
+                self.resultCode  = resultCode!
+                self.size = try payload.getUInt16()
+                self.payload = try payload.getBytes(self.size)
+            }
+            catch {
                 self.valid = false
             }
         }

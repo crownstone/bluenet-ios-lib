@@ -268,13 +268,15 @@ class PeripheralStateManager {
     
     /**   COMMAND METHODS **/
     
-    func loadElement(element: BroadcastElement) {
+    func loadElement(element: BroadcastElement, autoExecute: Bool = true) {
         // existing elements of the same type for the same stone will be overwritten (old switch 0, replaced by new switch 1)
         self._handleDuplicates(incomingElement: element)
         
         self.elements.append(element)
         self.broadcastCounter = self.broadcastCounter &+ 1
-        self.broadcastCommand()
+        if autoExecute {
+            self.broadcastCommand()
+        }
     }
     
     /** \ COMMAND METHODS **/

@@ -7,7 +7,6 @@ github "mxcl/PromiseKit" == 6.8.4
 # JSON Parser
 github "SwiftyJSON/SwiftyJSON" == 4.2.0
 
-# DFU code from Nordic
 github "NordicSemiconductor/IOS-Pods-DFU-Library" == 4.2.2
 
 # Bluenet Shared protocols

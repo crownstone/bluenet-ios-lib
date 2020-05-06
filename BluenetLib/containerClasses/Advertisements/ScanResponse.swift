@@ -57,6 +57,7 @@ public class ScanResponsePacket {
     public var uniqueIdentifier    :   NSNumber = 0
     
     public var behaviourEnabled    :   Bool     = true
+    public var behaviourMasterHash :   UInt16   = 0
     
     public var deviceType          :   DeviceType = .undefined
     public var rssiOfExternalCrownstone : Int8  = 0
@@ -214,6 +215,8 @@ public class ScanResponsePacket {
             "switchCraftEnabled"   : self.switchCraftEnabled,
             "tapToToggleEnabled"   : self.tapToToggleEnabled,
             "behaviourOverridden"  : self.behaviourOverridden,
+            
+            "behaviourMasterHash"  : self.behaviourMasterHash,
             
             "behaviourEnabled"     : self.behaviourEnabled,
             

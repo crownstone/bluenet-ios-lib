@@ -361,7 +361,7 @@ public class Bluenet {
                 }
                 .then{modeInfo -> Promise<Void> in
                     LOG.info("BLUENET_LIB: got mode info! \(modeInfo)")
-                    self.bleManager.connectionState.setControlVersion(modeInfo.controlMode)
+                    self.bleManager.connectionState.setConnectionProtocolVersion(modeInfo.controlMode)
                     self.bleManager.connectionState.setOperationMode(modeInfo.operationMode)
         
                     if modeInfo.operationMode == .setup {
