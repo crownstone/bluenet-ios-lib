@@ -163,6 +163,7 @@
 		FAAB603121CBCE1800183587 /* BroadcastBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA023ED21C2A3B10059A64D /* BroadcastBuffer.swift */; };
 		FAAB603221CBCE1B00183587 /* BroadcastElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA023F021C2A4D30059A64D /* BroadcastElement.swift */; };
 		FAAB603321CBCE3800183587 /* BroadcastHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA843EFD21B6D3A600F633A3 /* BroadcastHandler.swift */; };
+		FACF2AD924631E0500B88E0D /* opCode7_type4.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA588E3524334BF800343B8A /* opCode7_type4.swift */; };
 		FAD2AFD72189F85D00458520 /* BluenetWatch.h in Headers */ = {isa = PBXBuildFile; fileRef = FAD2AFD52189F85D00458520 /* BluenetWatch.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FADA183D21CA7E6C0066DF9F /* RC5.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADA183C21CA7E6C0066DF9F /* RC5.swift */; };
 		FADA183E21CA7E6C0066DF9F /* RC5.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADA183C21CA7E6C0066DF9F /* RC5.swift */; };
@@ -874,6 +875,7 @@
 				FA94D02E21A6E62F00AB8331 /* opCode3_type3.swift in Sources */,
 				FAAB603021CBCE0200183587 /* BroadcastProtocol.swift in Sources */,
 				FA5ECB14236B3B960054170C /* BehaviourHandler.swift in Sources */,
+				FACF2AD924631E0500B88E0D /* opCode7_type4.swift in Sources */,
 				FA94D02F21A6E62F00AB8331 /* opCode1.swift in Sources */,
 				FA94D03021A6E62F00AB8331 /* opCode2.swift in Sources */,
 				FA94D03121A6E62F00AB8331 /* opCode3.swift in Sources */,
