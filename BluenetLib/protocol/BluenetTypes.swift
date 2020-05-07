@@ -44,6 +44,41 @@ public enum ControlType : UInt8 {
     case enable_switchcraft     = 32
 }
 
+public func mapControlType_toV3(type: ControlType) -> ControlTypeV3 {
+    switch (type) {
+        case .`switch`:
+            return ControlTypeV3.`switch`
+        case .pwm:
+            return ControlTypeV3.pwm
+        case .set_TIME:
+            return ControlTypeV3.set_TIME
+        case .goto_DFU:
+            return ControlTypeV3.goto_DFU
+        case .reset:
+            return ControlTypeV3.reset
+        case .factory_RESET:
+            return ControlTypeV3.factory_RESET
+        case .relay:
+            return ControlTypeV3.relay
+        case .disconnect:
+            return ControlTypeV3.disconnect
+        case .no_OPERATION:
+            return ControlTypeV3.no_OPERATION
+        case .reset_ERRORS:
+            return ControlTypeV3.reset_ERRORS
+        case .mesh_command:
+            return ControlTypeV3.mesh_command
+        case .allow_dimming:
+            return ControlTypeV3.allow_dimming
+        case .lock_switch:
+            return ControlTypeV3.lock_switch
+        case .setup:
+            return ControlTypeV3.setup
+        default:
+            return ControlTypeV3.UNSPECIFIED
+
+    }
+}
 
 public enum ControlTypeV3 : UInt16 {
     case setup                  = 0

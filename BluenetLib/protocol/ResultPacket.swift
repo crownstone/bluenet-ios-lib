@@ -87,28 +87,22 @@ public class ResultPacketV3 : ResultBasePacket {
         let minSize = 6
 
         if (data.count >= minSize) {
-            let commandType = ControlTypeV3(rawValue: Conversion.uint8_array_to_uint16([data[0], data[1]]))
-            let resultCode  = ResultValue(rawValue: Conversion.uint8_array_to_uint16([data[2], data[3]]))
-            
-            if (commandType == nil || resultCode == nil) {
-                self.valid = false
-                return
-            }
-            
-            self.commandType = commandType!
-            self.commandTypeUInt16 = Conversion.uint8_array_to_uint16([data[0], data[1]])
-            self.resultCode  = resultCode!
-            self.size        = Conversion.uint8_array_to_uint16([data[4], data[5]])
-                     
-            let totalSize : Int = minSize + NSNumber(value: self.size).intValue
-            if (data.count >= totalSize) {
-                if (self.size == 0) { return }
-                
-                for i in [Int](minSize...totalSize-1) {
-                    self.payload.append(data[i])
+            let payload = DataStepper(data)
+            do {
+                self.commandTypeUInt16 = try payload.getUInt16()
+                let commandType = ControlTypeV3(rawValue: self.commandTypeUInt16)
+                let resultCode  = ResultValue(rawValue: try payload.getUInt16())
+                if (commandType == nil || resultCode == nil) {
+                    self.valid = false
+                    return
                 }
+                
+                self.commandType = commandType!
+                self.resultCode  = resultCode!
+                self.size = try payload.getUInt16()
+                self.payload = try payload.getBytes(self.size)
             }
-            else {
+            catch {
                 self.valid = false
             }
         }

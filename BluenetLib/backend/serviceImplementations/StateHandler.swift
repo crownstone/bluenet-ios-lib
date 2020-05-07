@@ -179,40 +179,39 @@ public class StateHandler {
         }
     }
     
-    func _getStateReadParameters() -> BleParamaters {
+    func _getStateReadParameters() -> BleParameters {
         let service = CSServices.CrownstoneService;
         
         //determine where to listen to
         var characteristicToReadFrom : String
-        if self.bleManager.connectionState.connectionProtocolVersion == .v5 {
-            characteristicToReadFrom = CrownstoneCharacteristics.ResultV5
-        }
-        else if self.bleManager.connectionState.connectionProtocolVersion == .v3 {
-            characteristicToReadFrom = CrownstoneCharacteristics.ResultV3
-        }
-        else {
-            characteristicToReadFrom = CrownstoneCharacteristics.StateRead
+        switch (self.bleManager.connectionState.connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2:
+                characteristicToReadFrom = CrownstoneCharacteristics.StateRead
+            case .v3:
+                characteristicToReadFrom = CrownstoneCharacteristics.ResultV3
+            case .v5:
+                characteristicToReadFrom = CrownstoneCharacteristics.ResultV5
         }
         
-        return BleParamaters(service: service, characteristic: characteristicToReadFrom)
+        return BleParameters(service: service, characteristic: characteristicToReadFrom)
     }
     
-    func _getStateWriteParameters() -> BleParamaters {
+    func _getStateWriteParameters() -> BleParameters {
         let service = CSServices.CrownstoneService;
         
         //determine where to write
         var characteristicToWriteTo : String
-        if self.bleManager.connectionState.connectionProtocolVersion == .v5 {
-            characteristicToWriteTo = CrownstoneCharacteristics.ControlV5
+        
+        switch (self.bleManager.connectionState.connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2:
+                characteristicToWriteTo = CrownstoneCharacteristics.Control
+            case .v3:
+                characteristicToWriteTo = CrownstoneCharacteristics.ControlV3
+            case .v5:
+                characteristicToWriteTo = CrownstoneCharacteristics.ControlV5
         }
-        else if self.bleManager.connectionState.connectionProtocolVersion == .v3 {
-            characteristicToWriteTo = CrownstoneCharacteristics.ControlV3
-        }
-        else {
-            characteristicToWriteTo = CrownstoneCharacteristics.Control
-        }
-
-        return BleParamaters(service: service, characteristic: characteristicToWriteTo)
+        
+        return BleParameters(service: service, characteristic: characteristicToWriteTo)
     }
     
 }

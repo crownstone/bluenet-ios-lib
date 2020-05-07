@@ -315,7 +315,7 @@ public class ConfigHandler {
     }
 
     
-    func _getConfigReadParameters() -> BleParamaters {
+    func _getConfigReadParameters() -> BleParameters {
         var service                  = CSServices.CrownstoneService;
         var characteristicToReadFrom = CrownstoneCharacteristics.ConfigRead
         
@@ -332,44 +332,42 @@ public class ConfigHandler {
                 characteristicToReadFrom = SetupCharacteristics.ConfigRead
             }
         }
-        return BleParamaters(service: service, characteristic: characteristicToReadFrom)
+        return BleParameters(service: service, characteristic: characteristicToReadFrom)
     }
     
-    func _getConfigWriteParameters() -> BleParamaters {
+    func _getConfigWriteParameters() -> BleParameters {
         let service : String
         let characteristic : String
         if self.bleManager.connectionState.operationMode == .setup {
             service = CSServices.SetupService
-            if self.bleManager.connectionState.connectionProtocolVersion == .v5 {
-                characteristic = SetupCharacteristics.SetupControlV5
-            }
-            else if self.bleManager.connectionState.connectionProtocolVersion == .v3 {
-                characteristic = SetupCharacteristics.SetupControlV3
-            }
-            else {
-                characteristic = SetupCharacteristics.ConfigControl
+            switch (self.bleManager.connectionState.connectionProtocolVersion) {
+                case .unknown, .legacy, .v1, .v2:
+                    characteristic = SetupCharacteristics.ConfigControl
+                case .v3:
+                    characteristic = SetupCharacteristics.SetupControlV3
+                case .v5:
+                    characteristic = SetupCharacteristics.SetupControlV5
             }
         }
         else {
             service = CSServices.CrownstoneService
-            if self.bleManager.connectionState.connectionProtocolVersion == .v5 {
-                characteristic = CrownstoneCharacteristics.ControlV5
-            }
-            else if self.bleManager.connectionState.connectionProtocolVersion == .v3 {
-                characteristic = CrownstoneCharacteristics.ControlV3
-            }
-            else {
-                characteristic = CrownstoneCharacteristics.ConfigControl
+            switch (self.bleManager.connectionState.connectionProtocolVersion) {
+                case .unknown, .legacy, .v1, .v2:
+                    characteristic = CrownstoneCharacteristics.ConfigControl
+                case .v3:
+                    characteristic = CrownstoneCharacteristics.ControlV3
+                case .v5:
+                    characteristic = CrownstoneCharacteristics.ControlV5
             }
         }
         
 
-        return BleParamaters(service: service, characteristic: characteristic)
+        return BleParameters(service: service, characteristic: characteristic)
     }
 }
 
 
-struct BleParamaters {
+struct BleParameters {
     var service: String
     var characteristic: String
 }

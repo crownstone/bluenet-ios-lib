@@ -18,43 +18,73 @@ public class StatePacketsGeneratorClass {
     init() {}
     
     func getWritePacket(type: ConfigurationType) -> BLEPacketBase {
-        if      self.connectionProtocolVersion == .v5 { return ControlStateSetPacketV5(type: StateTypeV3(rawValue: UInt16(type.rawValue))!) }
-        else if self.connectionProtocolVersion == .v3 { return ControlStateSetPacket(  type: StateTypeV3(rawValue: UInt16(type.rawValue))!) }
-        else                               { return WriteConfigPacket(type: type) }
+        switch (connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2:
+                return WriteConfigPacket(type: type)
+            case .v3:
+                return ControlStateSetPacket(  type: StateTypeV3(rawValue: UInt16(type.rawValue))!)
+            case .v5:
+                return ControlStateSetPacketV5(type: StateTypeV3(rawValue: UInt16(type.rawValue))!)
+        }
     }
     func getWritePacket(type: StateType) -> BLEPacketBase {
-        if      self.connectionProtocolVersion == .v5 { return ControlStateSetPacketV5(type: StateTypeV3(rawValue: UInt16(type.rawValue))!) }
-        else if self.connectionProtocolVersion == .v3 { return ControlStateSetPacket(type: StateTypeV3(rawValue: UInt16(type.rawValue))!) }
-        else                          { return WriteStatePacket(type: type) }
+        switch (connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2:
+                 return WriteStatePacket(type: type)
+            case .v3:
+                return ControlStateSetPacket(type: StateTypeV3(rawValue: UInt16(type.rawValue))!)
+            case .v5:
+                return ControlStateSetPacketV5(type: StateTypeV3(rawValue: UInt16(type.rawValue))!)
+        }
     }
     func getWritePacket(type: StateTypeV3, id: UInt16 = 0, persistenceMode: SetPersistenceMode = .STORED) -> BLEPacketBase {
-        if self.connectionProtocolVersion == .v5 {
-            return ControlStateSetPacketV5(type: type, id: id, persistence: persistenceMode)
-        }
-        else {
-            return ControlStateSetPacket(type: type)
+        switch (connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2, .v3:
+                return ControlStateSetPacket(type: type)
+            case .v5:
+                 return ControlStateSetPacketV5(type: type, id: id, persistence: persistenceMode)
         }
     }
     
     func getReadPacket(type: ConfigurationType) -> BLEPacketBase {
-        if      self.connectionProtocolVersion == .v5 { return ControlStateGetPacketV5(type: StateTypeV3(rawValue: UInt16(type.rawValue))!) }
-        else if self.connectionProtocolVersion == .v3 { return ControlStateGetPacket(  type: StateTypeV3(rawValue: UInt16(type.rawValue))!) }
-        else                          { return ReadConfigPacket(type: type) }
+        switch (connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2:
+                return ReadConfigPacket(type: type)
+            case .v3:
+                return ControlStateGetPacket(  type: StateTypeV3(rawValue: UInt16(type.rawValue))!)
+            case .v5:
+                return ControlStateGetPacketV5(type: StateTypeV3(rawValue: UInt16(type.rawValue))!)
+        }
     }
     func getReadPacket(type: StateType) -> BLEPacketBase {
-        if      self.connectionProtocolVersion == .v5 { return ControlStateGetPacketV5(type: StateTypeV3(rawValue: UInt16(type.rawValue))!) }
-        else if self.connectionProtocolVersion == .v3 { return ControlStateGetPacket(  type: StateTypeV3(rawValue: UInt16(type.rawValue))!) }
-        else                          { return ReadStatePacket(type: type) }
+        switch (connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2:
+                return ReadStatePacket(type: type)
+            case .v3:
+                return ControlStateGetPacket(  type: StateTypeV3(rawValue: UInt16(type.rawValue))!)
+            case .v5:
+                return ControlStateGetPacketV5(type: StateTypeV3(rawValue: UInt16(type.rawValue))!)
+        }
     }
     func getReadPacket(type: StateTypeV3, id: UInt16 = 0, persistenceMode: GetPersistenceMode = .CURRENT) -> BLEPacketBase {
-        if      self.connectionProtocolVersion == .v5 { return ControlStateGetPacketV5(type: type, id: id, persistence: persistenceMode) }
-        else if self.connectionProtocolVersion == .v3 { return ControlStateGetPacketV3(type: type, id: id) }
-        else                               { return ControlStateGetPacket(  type: type) }
-        
+        switch (connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2:
+                return ControlStateGetPacket(  type: type)
+            case .v3:
+                return ControlStateGetPacketV3(type: type, id: id)
+            case .v5:
+                return ControlStateGetPacketV5(type: type, id: id, persistence: persistenceMode)
+        }
     }
     func getReturnPacket() -> ResultBasePacket {
-        if self.connectionProtocolVersion == .v3 { return ResultPacketV3() }
-        else                          { return ResultPacket() }
+        switch (connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2:
+                return ResultPacket()
+            case .v3:
+                return ResultPacketV3()
+            case .v5:
+                return ResultPacketV5()
+        }
     }
     
     

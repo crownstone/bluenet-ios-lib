@@ -29,6 +29,8 @@ protocol BLEPacketBaseProtocol {
     func getPacket() -> [UInt8]
 }
 
+let PROTOCOL_VERSION_V5 : UInt8 = 5
+
 class BLEPacketBase: BLEPacketBaseProtocol {
     var payload = [UInt8]()
     var length : UInt16 = 0
@@ -245,6 +247,18 @@ class ControlPacketV3 : BLEPacketV3 {
     }
 }
 
+class ControlPacketV5 : ControlPacketV3 {
+    
+    override func getPacket() -> [UInt8] {
+        var arr = [UInt8]()
+        arr.append(PROTOCOL_VERSION_V5)
+        arr += Conversion.uint16_to_uint8_array(self.type)
+        arr += Conversion.uint16_to_uint8_array(self.length)
+        arr += self.payload
+        return arr
+    }
+}
+
 class ControlStateSetPacket : ControlPacketV3 {
     
     var stateType : UInt16
@@ -271,7 +285,6 @@ class ControlStateSetPacket : ControlPacketV3 {
 
 class ControlStateSetPacketV5 : ControlStateSetPacket {
     var persistence : SetPersistenceMode = .STORED
-    let protocolVersion: UInt8 = 5
     
     init(type: StateTypeV3,                        id: UInt16 = 0, persistence: SetPersistenceMode = .STORED) { self.persistence = persistence; super.init(type: type, id: id);                             self.id = id; self.stateType = type.rawValue; }
     init(type: StateTypeV3, payload:   String,     id: UInt16 = 0, persistence: SetPersistenceMode = .STORED) { self.persistence = persistence; super.init(type: type, payload: payload, id: id);           self.id = id; self.stateType = type.rawValue; }
@@ -283,7 +296,7 @@ class ControlStateSetPacketV5 : ControlStateSetPacket {
     
     override func getPacket() -> [UInt8] {
         var arr = [UInt8]()
-        arr.append(self.protocolVersion)
+        arr.append(PROTOCOL_VERSION_V5)
         arr += Conversion.uint16_to_uint8_array(self.type)
         arr += Conversion.uint16_to_uint8_array(self.length + 6) // the + 2 is for the stateType uint16 and +2 for the ID and +2 for the persistence mode
         arr += Conversion.uint16_to_uint8_array(self.stateType)
@@ -331,6 +344,7 @@ class ControlStateGetPacketV5 : ControlStateGetPacketV3 {
     
     override func getPacket() -> [UInt8] {
         var arr = [UInt8]()
+        arr.append(PROTOCOL_VERSION_V5)
         arr += Conversion.uint16_to_uint8_array(self.type)       // this is the command type
         arr += Conversion.uint16_to_uint8_array(self.length + 4) // 2 for the ID size, 2 for the persistence mode size
         arr += self.payload                                      // this is the state type
@@ -365,6 +379,9 @@ class FactoryResetPacket : ControlPacket {
 class FactoryResetPacketV3 : ControlPacketV3 {
     init() {super.init(type: ControlTypeV3.factory_RESET, payload32: 0xdeadbeef)}
 }
+class FactoryResetPacketV5 : ControlPacketV5 {
+    init() {super.init(type: ControlTypeV3.factory_RESET, payload32: 0xdeadbeef)}
+}
 
 
 class EnableScannerPacket : ControlPacket {
@@ -375,6 +392,7 @@ class EnableScannerDelayPacket : ControlPacket {
     init(delayInMs: Int) {super.init(type: ControlType.enable_SCANNER, payload16: UInt16(delayInMs))}
 }
 
+// LEGACY
 class ReadConfigPacket : BLEPacket {
 
     init(type: ConfigurationType)                    { super.init(type: type.rawValue) }
@@ -397,12 +415,13 @@ class ReadConfigPacket : BLEPacket {
         return arr
     }
 }
+// LEGACY
 class WriteConfigPacket : ReadConfigPacket {
     override func getOpCode() -> OpCode { return .write }
 }
 
 
-
+// LEGACY
 class ReadStatePacket : BLEPacket {
 
     init(type: StateType)                         { super.init(type: type.rawValue) }
@@ -426,7 +445,7 @@ class ReadStatePacket : BLEPacket {
         return arr
     }
 }
-
+// LEGACY
 class WriteStatePacket : ReadStatePacket {
     override func getOpCode() -> OpCode { return .write }
 }

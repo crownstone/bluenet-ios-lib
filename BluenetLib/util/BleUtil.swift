@@ -10,64 +10,105 @@ import Foundation
 import CoreBluetooth
 import PromiseKit
 
-
-func getControlWriteParameters(bleManager: BleManager) -> BleParamaters {
-    let service        = CSServices.CrownstoneService;
+func getSessionNonceReadParameters(bleManager: BleManager) -> BleParameters {
+    var service : String
 
     // determine where to write
     var characteristic : String
-    if bleManager.connectionState.connectionProtocolVersion == .v5 {
-        characteristic = CrownstoneCharacteristics.ControlV5
-    }
-    else if bleManager.connectionState.connectionProtocolVersion == .v3 {
-        characteristic = CrownstoneCharacteristics.ControlV3
+    if bleManager.connectionState.operationMode == .setup {
+        service = CSServices.SetupService
+        switch (bleManager.connectionState.connectionProtocolVersion) {
+            case  .unknown, .legacy, .v1, .v2, .v3:
+                characteristic = SetupCharacteristics.SessionNonce
+            case .v5:
+                characteristic = SetupCharacteristics.SessionNonceV5
+        }
     }
     else {
-        characteristic = CrownstoneCharacteristics.Control
+        service = CSServices.CrownstoneService
+        switch (bleManager.connectionState.connectionProtocolVersion) {
+            case  .unknown, .legacy, .v1, .v2, .v3:
+                characteristic = CrownstoneCharacteristics.SessionNonce
+            case .v5:
+                characteristic = CrownstoneCharacteristics.SessionNonceV5
+        }
     }
+    
 
-    return BleParamaters(service: service, characteristic: characteristic)
+    return BleParameters(service: service, characteristic: characteristic)
 }
 
-func getControlReadParameters(bleManager: BleManager) -> BleParamaters {
+func getControlWriteParameters(bleManager: BleManager) -> BleParameters {
+    // determine where to write
+    var service        : String
+    var characteristic : String
+    
+    if bleManager.connectionState.operationMode == .setup {
+        service = CSServices.SetupService
+        switch (bleManager.connectionState.connectionProtocolVersion) {
+            case .unknown, .legacy:
+                characteristic = SetupCharacteristics.Control
+            case .v1:
+                characteristic = SetupCharacteristics.SetupControl
+            case .v2:
+                characteristic = SetupCharacteristics.SetupControlV2
+            case .v3:
+                characteristic = SetupCharacteristics.SetupControlV3
+            case .v5:
+                characteristic = SetupCharacteristics.SetupControlV5
+        }
+    }
+    else {
+        // we do not check dfu here, we assume just setup en operation mode
+        service = CSServices.CrownstoneService
+        switch (bleManager.connectionState.connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2:
+                characteristic = CrownstoneCharacteristics.Control
+            case .v3:
+                characteristic = CrownstoneCharacteristics.ControlV3
+            case .v5:
+                characteristic = CrownstoneCharacteristics.ControlV5
+        }
+    }
+
+    return BleParameters(service: service, characteristic: characteristic)
+}
+
+func getControlReadParameters(bleManager: BleManager) -> BleParameters {
     var service        : String
     var characteristic : String
     // determine where to get result data from
     
     if bleManager.connectionState.operationMode == .setup {
         service = CSServices.SetupService
-        if bleManager.connectionState.connectionProtocolVersion == .v5 {
-            characteristic = SetupCharacteristics.SetupControlV5
-        }
-        else if bleManager.connectionState.connectionProtocolVersion == .v3 {
-            characteristic = SetupCharacteristics.SetupControlV3
-        }
-        else if bleManager.connectionState.connectionProtocolVersion == .v2 {
-            characteristic = SetupCharacteristics.SetupControlV2
-        }
-        else if bleManager.connectionState.connectionProtocolVersion == .v1 {
-            characteristic = SetupCharacteristics.SetupControl
-        }
-        else {
-            characteristic = SetupCharacteristics.Control
+        switch (bleManager.connectionState.connectionProtocolVersion) {
+            case .unknown, .legacy:
+                characteristic = SetupCharacteristics.Control
+            case .v1:
+                characteristic = SetupCharacteristics.SetupControl
+            case .v2:
+                characteristic = SetupCharacteristics.SetupControlV2
+            case .v3:
+                characteristic = SetupCharacteristics.ResultV3
+            case .v5:
+                characteristic = SetupCharacteristics.ResultV5
         }
     }
     else {
         // we do not check dfu here, we assume just setup en operation mode
         service = CSServices.CrownstoneService
-        if bleManager.connectionState.connectionProtocolVersion == .v5 {
-               characteristic = CrownstoneCharacteristics.ResultV5
-        }
-        else if bleManager.connectionState.connectionProtocolVersion == .v3 {
-            characteristic = CrownstoneCharacteristics.ResultV3
-        }
-        else {
-            characteristic = CrownstoneCharacteristics.Control
+        switch (bleManager.connectionState.connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2:
+                characteristic = CrownstoneCharacteristics.Control
+            case .v3:
+                characteristic = CrownstoneCharacteristics.ResultV3
+            case .v5:
+                characteristic = CrownstoneCharacteristics.ResultV5
         }
     }
     
 
-    return BleParamaters(service: service, characteristic: characteristic)
+    return BleParameters(service: service, characteristic: characteristic)
 }
   
 
@@ -99,19 +140,36 @@ func _writePacketWithReply(bleManager: BleManager, service: String, readCharacte
     }
 }
 
+
+func _writePacketWithReply(bleManager: BleManager, writeCommand : @escaping voidPromiseCallback) -> Promise<ResultBasePacket> {
+    let readParameters = getControlReadParameters(bleManager: bleManager);
+    return Promise<ResultBasePacket> { seal in
+        bleManager.setupSingleNotification(readParameters.service, characteristicId: readParameters.characteristic, writeCommand: writeCommand)
+            .done{ data -> Void in
+                let resultPacket = StatePacketsGenerator.getReturnPacket()
+                resultPacket.load(data)
+                if (resultPacket.valid == false) {
+                    LOG.error("BluenetLib: Error Invalid response data \(data)")
+                    return seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
+                }
+                seal.fulfill(resultPacket)
+            }
+            .catch{ err in seal.reject(err) }
+    }
+}
+
 func getConfigPayloadFromResultPacket<T>(_ bleManager: BleManager, _ resultPacket: ResultBasePacket) throws -> T {
     var resultPayload : [UInt8]
     
-    if bleManager.connectionState.connectionProtocolVersion == .v5 {
-        let packetSize = resultPacket.payload.count
-        resultPayload = Array(resultPacket.payload[6...packetSize-1]) // 6 is the 2 stateType and 2 ID and 2 persistence, rest is data payload
-    }
-    else if bleManager.connectionState.connectionProtocolVersion == .v3 {
-        let packetSize = resultPacket.payload.count
-        resultPayload = Array(resultPacket.payload[4...packetSize-1]) // 4 is the 2 stateType and 2 ID, rest is data payload
-    }
-    else {
-        resultPayload = resultPacket.payload
+    switch (bleManager.connectionState.connectionProtocolVersion) {
+        case .unknown, .legacy, .v1, .v2:
+            resultPayload = resultPacket.payload
+        case .v3:
+            let packetSize = resultPacket.payload.count
+            resultPayload = Array(resultPacket.payload[4...packetSize-1]) // 4 is the 2 stateType and 2 ID, rest is data payload
+        case .v5:
+             let packetSize = resultPacket.payload.count
+             resultPayload = Array(resultPacket.payload[6...packetSize-1]) // 6 is the 2 stateType and 2 ID and 2 persistence, rest is data payload
     }
     
     let result : T = try Convert(resultPayload)
@@ -143,7 +201,6 @@ func _getCrownstoneModeInformation(bleManager: BleManager) -> Promise<ModeInform
                 if getServiceFromList(services, CSServices.SetupService) != nil {
                     _ = bleManager.getCharacteristicsFromDevice(CSServices.SetupService)
                         .done{(characteristics : [CBCharacteristic]) -> Void in
-                            
                             if getCharacteristicFromList(characteristics, SetupCharacteristics.SetupControlV5) != nil {
                                 seal.fulfill(ModeInformation(controlMode: .v5, operationMode: .setup))
                             }

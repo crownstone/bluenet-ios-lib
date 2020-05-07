@@ -607,6 +607,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     }
     
     public func readCharacteristicWithoutEncryption(_ service: String, characteristic: String) -> Promise<[UInt8]> {
+        LOG.debug("BLUENET_LIB: Reading from Characteristic without Encryption. Service:\(service) Characteristic:\(characteristic)")
         return Promise<[UInt8]> { seal in
             self.connectionState.disableEncryptionTemporarily()
             self.readCharacteristic(service, characteristicId: characteristic)
@@ -622,6 +623,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     }
     
     public func readCharacteristic(_ serviceId: String, characteristicId: String) -> Promise<[UInt8]> {
+        LOG.debug("BLUENET_LIB: Reading from Characteristic. Service:\(serviceId) Characteristic:\(characteristicId)")
         return Promise<[UInt8]> { seal in
             self.getChacteristic(serviceId, characteristicId)
                 .done{characteristic -> Void in
@@ -657,7 +659,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         
                         // the fulfil and reject are handled in the peripheral delegate
                         if (self.connectionState.isEncryptionEnabled()) {
-                            LOG.debug("BLUENET_LIB: writing service \(serviceId) characteristic \(characteristic) data: \(data.bytes) which will be encrypted.")
+                            LOG.debug("BLUENET_LIB: writing service \(serviceId) characteristic \(characteristicId) data: \(data.bytes) which will be encrypted.")
                             do {
                                 let encryptedData = try EncryptionHandler.encrypt(data, connectionState: self.connectionState)
                                 self.connectedPeripheral!.writeValue(encryptedData, for: characteristic, type: type)
@@ -667,7 +669,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                             }
                         }
                         else {
-                            LOG.debug("BLUENET_LIB: writing \(data.bytes)")
+                            LOG.debug("BLUENET_LIB: writing service \(serviceId) characteristic \(characteristicId) data: \(data.bytes) which is not encrypted.")
                             self.connectedPeripheral!.writeValue(data, for: characteristic, type: type)
                         }
                     }
@@ -771,6 +773,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      * The merged, finalized reply to the write command will be in the fulfill of this promise.
      */
     public func setupSingleNotification(_ serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback, timeoutSeconds: Double = 2) -> Promise<[UInt8]> {
+        LOG.debug("BLUENET_LIB: Setting up single notification on service: \(serviceId) and characteristic \(characteristicId)")
         return Promise<[UInt8]> { seal in
             var unsubscribe : voidPromiseCallback? = nil
             var collectedData = [UInt8]();

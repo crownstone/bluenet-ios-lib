@@ -33,43 +33,48 @@ import CoreBluetooth
     }
     
      func getCommandFactoryResetPacket() -> [UInt8] {
-        if connectionProtocolVersion == .v3 { return FactoryResetPacketV3().getPacket()}
-        else                     { return FactoryResetPacket().getPacket()}
+        switch (connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2:
+                return FactoryResetPacket().getPacket()
+            case .v3:
+                return FactoryResetPacketV3().getPacket()
+            case .v5:
+                return FactoryResetPacketV5().getPacket()
+        }
     }
     
      func getSwitchStatePacket(_ state: Float) -> [UInt8] {
         let switchState = min(1,max(0,state))*100
-        
-        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .switch, payload8: NSNumber(value: switchState as Float).uint8Value).getPacket()}
-        else                     { return ControlPacket(  type: .switch, payload8: NSNumber(value: switchState as Float).uint8Value).getPacket() }
-        
+        let value = NSNumber(value: switchState as Float).uint8Value
+        return self._getControlPacket(type: ControlType.switch).load(value).getPacket()
     }
     
      func getResetPacket() -> [UInt8] {
-        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .reset).getPacket()}
-        else                     { return ControlPacket(  type: .reset).getPacket()}
+        switch (connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2:
+                return ControlPacket(  type: .reset).getPacket()
+            case .v3:
+                return ControlPacketV3(type: .reset).getPacket()
+            case .v5:
+                return ControlPacketV5(type: .reset).getPacket()
+        }
     }
     
      func getPutInDFUPacket() -> [UInt8] {
-        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .goto_DFU).getPacket()}
-        else                     { return ControlPacket(  type: .goto_DFU).getPacket()}
+        return self._getControlPacket(type: ControlType.goto_DFU).getPacket()
     }
     
      func getDisconnectPacket() -> [UInt8] {
-        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .disconnect).getPacket()}
-        else                     { return ControlPacket(  type: .disconnect).getPacket()}
+        return self._getControlPacket(type: ControlType.disconnect).getPacket()
     }
     
      func getRelaySwitchPacket(_ state: UInt8) -> [UInt8] {
-        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .relay, payload8: state).getPacket()}
-        else                     { return ControlPacket(  type: .relay, payload8: state).getPacket()}
+        return self._getControlPacket(type: ControlType.relay).load(state).getPacket()
     }
     
      func getPwmSwitchPacket(_ state: Float) -> [UInt8] {
         let switchState : UInt8 = NSNumber(value: min(1,max(0,state))*100).uint8Value
-        
-        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .pwm, payload8: switchState).getPacket()}
-        else                     { return ControlPacket(  type: .pwm, payload8: switchState).getPacket()}
+        return self._getControlPacket(type: ControlType.pwm).load(switchState).getPacket()
     }
     
     /** LEGACY **/
@@ -91,18 +96,15 @@ import CoreBluetooth
     }
     
      func getResetErrorPacket(errorMask: UInt32) -> [UInt8] {
-        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .reset_ERRORS, payload32: errorMask).getPacket()}
-        else                     { return ControlPacket(  type: .reset_ERRORS, payload32: errorMask).getPacket()}
+        return self._getControlPacket(type: ControlType.reset_ERRORS).load(errorMask).getPacket()
     }
     
      func getSetTimePacket(_ time: UInt32) -> [UInt8] {
-        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .set_TIME, payload32: time).getPacket()}
-        else                     { return ControlPacket(  type: .set_TIME, payload32: time).getPacket()}
+        return self._getControlPacket(type: ControlType.set_TIME).load(time).getPacket()
     }
     
      func getNoOpPacket() -> [UInt8] {
-        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .no_OPERATION).getPacket()}
-        else                     { return ControlPacket(  type: .no_OPERATION).getPacket()}
+        return self._getControlPacket(type: ControlType.no_OPERATION).getPacket()
     }
     
      func getAllowDimmingPacket(_ allow: Bool) -> [UInt8] {
@@ -110,8 +112,7 @@ import CoreBluetooth
         if (allow) {
             allowValue = 1
         }
-        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .allow_dimming, payload8: allowValue).getPacket()}
-        else                     { return ControlPacket(  type: .allow_dimming, payload8: allowValue).getPacket()}
+        return self._getControlPacket(type: ControlType.allow_dimming).load(allowValue).getPacket()
     }
     
      func getLockSwitchPacket(_ lock: Bool) -> [UInt8] {
@@ -119,9 +120,7 @@ import CoreBluetooth
         if (lock) {
             lockValue = 1
         }
-        
-        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .lock_switch, payload8: lockValue).getPacket()}
-        else                     { return ControlPacket(  type: .lock_switch, payload8: lockValue).getPacket()}
+        return self._getControlPacket(type: ControlType.lock_switch).load(lockValue).getPacket()
     }
     
      func getSwitchCraftPacket(_ enabled: Bool) -> [UInt8] {
@@ -130,88 +129,87 @@ import CoreBluetooth
             enabledValue = 1
         }
         
-        if connectionProtocolVersion == .v3 || connectionProtocolVersion == .v5 {
-            let packet = StatePacketsGenerator.getWritePacket(type: .SWITCHCRAFT_ENABLED)
-            return packet.load(enabledValue).getPacket()
-        }
-        else {
-            return ControlPacket(  type: .enable_switchcraft, payload8: enabledValue).getPacket()
+        switch (connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2:
+                return ControlPacket(  type: .enable_switchcraft, payload8: enabledValue).getPacket()
+            case .v3, .v5:
+                let packet = StatePacketsGenerator.getWritePacket(type: .SWITCHCRAFT_ENABLED)
+                return packet.load(enabledValue).getPacket()
         }
     }
     
     func getMeshCommandPacket(commandPacket: [UInt8]) -> [UInt8] {
-        if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .mesh_command, payloadArray: commandPacket).getPacket()}
-        else                     { return ControlPacket(  type: .mesh_command, payloadArray: commandPacket).getPacket()}
+        return self._getControlPacket(type: ControlType.mesh_command).load(commandPacket).getPacket()
     }
     
     
     func getTurnOnPacket(stones:[[String: NSNumber]]) -> [UInt8] {
-        if connectionProtocolVersion == .v3 {
-            var innerPacket = [UInt8]()
-            var count : UInt8 = 0
-            for stone in stones {
-                let crownstoneId  = stone["crownstoneId"]
-                let state : UInt8 = 255
-                
-                if (crownstoneId != nil) {
-                    innerPacket.append(crownstoneId!.uint8Value)
-                    innerPacket.append(state)
-                    count += 1
-                }
-            }
-            
-            var packet = [UInt8]()
-            packet.append(count)
-            packet += innerPacket
-            
-            return ControlPacketV3(type: .multiSwitch, payloadArray: packet).getPacket()
-        }
-        else {
-            return ControlPacketsGenerator.getMultiSwitchPacket(stones: stones)
-        }
+        switch (connectionProtocolVersion) {
+           case .unknown, .legacy, .v1, .v2:
+               return ControlPacketsGenerator.getMultiSwitchPacket(stones: stones)
+           case .v3, .v5:
+               var innerPacket = [UInt8]()
+               var count : UInt8 = 0
+               for stone in stones {
+                   let crownstoneId  = stone["crownstoneId"]
+                   let state : UInt8 = 255
+                   
+                   if (crownstoneId != nil) {
+                       innerPacket.append(crownstoneId!.uint8Value)
+                       innerPacket.append(state)
+                       count += 1
+                   }
+               }
+               
+               var dataArray = [UInt8]()
+               dataArray.append(count)
+               dataArray += innerPacket
+               
+               return self._getControlPacket(type: ControlTypeV3.multiSwitch).load(dataArray).getPacket()
+       }
     }
     
     func getMultiSwitchPacket(stones:[[String: NSNumber]]) -> [UInt8] {
-        if connectionProtocolVersion == .v3 {
-            var innerPacket = [UInt8]()
-            var count : UInt8 = 0
-            for stone in stones {
-                let crownstoneId = stone["crownstoneId"]
-                let state        = stone["state"]
-                
-                if (crownstoneId != nil && state != nil) {
-                    innerPacket.append(crownstoneId!.uint8Value)
-                    innerPacket.append(state!.uint8Value)
-                    count += 1
+        switch (connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2:
+                var packets = [StoneMultiSwitchPacket]()
+                for stone in stones {
+                    let crownstoneId = stone["crownstoneId"]
+                    let timeout      = NSNumber(value: 0)
+                    let state        = stone["state"]
+                    let intent       = NSNumber(value: 4)
+                    
+                    
+                    if (crownstoneId != nil && state != nil) {
+                        packets.append(StoneMultiSwitchPacket(crownstoneId: crownstoneId!.uint8Value, state: state!.floatValue, timeout: timeout.uint16Value, intent: intent.uint8Value))
+                    }
                 }
-            }
-            
-            var packet = [UInt8]()
-            packet.append(count)
-            packet += innerPacket
-            
-            return ControlPacketV3(type: .multiSwitch, payloadArray: packet).getPacket()
-        }
-        else {
-            var packets = [StoneMultiSwitchPacket]()
-            for stone in stones {
-                let crownstoneId = stone["crownstoneId"]
-                let timeout      = NSNumber(value: 0)
-                let state        = stone["state"]
-                let intent       = NSNumber(value: 4)
                 
-                
-                if (crownstoneId != nil && state != nil) {
-                    packets.append(StoneMultiSwitchPacket(crownstoneId: crownstoneId!.uint8Value, state: state!.floatValue, timeout: timeout.uint16Value, intent: intent.uint8Value))
+                if (packets.count > 0) {
+                    let meshPayload = MeshMultiSwitchPacket(type: .simpleList, packets: packets).getPacket()
+                    let commandPayload = ControlPacket(type: .mesh_multiSwitch, payloadArray: meshPayload).getPacket()
+                    return commandPayload
                 }
-            }
-            
-            if (packets.count > 0) {
-                let meshPayload = MeshMultiSwitchPacket(type: .simpleList, packets: packets).getPacket()
-                let commandPayload = ControlPacket(type: .mesh_multiSwitch, payloadArray: meshPayload).getPacket()
-                return commandPayload
-            }
-            return [UInt8]()
+                return [UInt8]()
+            case .v3, .v5:
+                var innerPacket = [UInt8]()
+                var count : UInt8 = 0
+                for stone in stones {
+                    let crownstoneId = stone["crownstoneId"]
+                    let state        = stone["state"]
+                    
+                    if (crownstoneId != nil && state != nil) {
+                        innerPacket.append(crownstoneId!.uint8Value)
+                        innerPacket.append(state!.uint8Value)
+                        count += 1
+                    }
+                }
+                
+                var dataArray = [UInt8]()
+                dataArray.append(count)
+                dataArray += innerPacket
+                
+                return self._getControlPacket(type: ControlTypeV3.multiSwitch).load(dataArray).getPacket()
         }
     }
     
@@ -236,7 +234,8 @@ import CoreBluetooth
             deviceToken:    deviceToken,
             ttlMinutes:     ttlMinutes
         )
-        return ControlPacketV3(type: .registerTrackedDevice, payloadArray: payload).getPacket()
+        
+        return self._getControlPacket(type: .registerTrackedDevice).load(payload).getPacket()
     }
     
     func getTrackedDeviceRegistrationPayload(
@@ -314,10 +313,37 @@ import CoreBluetooth
         data += Conversion.uint16_to_uint8_array(ibeaconMinor)
         
         
-       if connectionProtocolVersion == .v3 { return ControlPacketV3(type: .setup, payloadArray: data).getPacket()}
-       else                     { return ControlPacket(  type: .setup, payloadArray: data).getPacket()}
+        return self._getControlPacket(type: ControlTypeV3.setup).load(data).getPacket()
     }
-
+    
+    /**
+     Only for newer protocols.
+     */
+    func _getControlPacket(type: ControlTypeV3) -> BLEPacketBase {
+        switch (connectionProtocolVersion) {
+            case .v3:
+                 return ControlPacketV3(type: type)
+            default:
+                return ControlPacketV5(type: type)
+        }
+    }
+    func _getControlPacket(type: ControlType) -> BLEPacketBase {
+        let mappedType = mapControlType_toV3(type: type)
+        
+        switch (connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2:
+                return ControlPacket(type:   type)
+            case .v3:
+                return ControlPacketV3(type: mappedType)
+            case .v5:
+                return ControlPacketV5(type: mappedType)
+        }
+    }
+    
 }
+
+    
+
+
 
  let ControlPacketsGenerator = ControlPacketsGeneratorClass()

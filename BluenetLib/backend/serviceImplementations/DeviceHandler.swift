@@ -118,20 +118,22 @@ public class DeviceHandler {
     
     public func getBootloaderRevision() -> Promise<String> {
         if self.bleManager.connectionState.operationMode != .dfu {
-            if self.bleManager.connectionState.connectionProtocolVersion == .v5 {
-                let writeCommand : voidPromiseCallback = {
-                    return _writeControlPacket(bleManager: self.bleManager, ControlPacketV3(type: .GET_BOOTLOADER_VERSION).getPacket())
-                }
-                return _writePacketWithReply(bleManager: self.bleManager, service: CSServices.CrownstoneService, readCharacteristic: CrownstoneCharacteristics.ControlV5, writeCommand: writeCommand)
-                    .then{ resultPacket -> Promise<String> in
-                        return Promise<String> { seal in seal.fulfill(Conversion.uint8_array_to_string(resultPacket.payload)) }
+            switch (self.bleManager.connectionState.connectionProtocolVersion) {
+                case .unknown, .legacy, .v1, .v2, .v3:
+                    return self.getBootloaderRevisionInAppMode()
+                case .v5:
+                    let writeCommand : voidPromiseCallback = {
+                        return _writeControlPacket(bleManager: self.bleManager, ControlPacketV3(type: .GET_BOOTLOADER_VERSION).getPacket())
                     }
+                    return _writePacketWithReply(bleManager: self.bleManager, service: CSServices.CrownstoneService, readCharacteristic: CrownstoneCharacteristics.ControlV5, writeCommand: writeCommand)
+                        .then{ resultPacket -> Promise<String> in
+                            return Promise<String> { seal in seal.fulfill(Conversion.uint8_array_to_string(resultPacket.payload)) }
+                        }
             }
-            else {
-                 return self.getBootloaderRevisionInAppMode()
-            }           
         }
-        return self.getSoftwareRevision()
+        else {
+            return self.getSoftwareRevision()
+        }
     }
 
     

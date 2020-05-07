@@ -78,11 +78,11 @@ public class MeshHandler {
         let commandPayload = ControlPacketsGenerator.getSetTimePacket(time)
 
         var meshPayload : [UInt8]
-        if self.bleManager.connectionState.connectionProtocolVersion == .v5 {
-            meshPayload = MeshCommandPacketV5(type: .control, payload: commandPayload).getPacket()
-        }
-        else {
-            meshPayload = MeshCommandPacket(type: .control, crownstoneIds: [], payload: commandPayload).getPacket()
+        switch (self.bleManager.connectionState.connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2, .v3:
+                 meshPayload = MeshCommandPacket(type: .control, crownstoneIds: [], payload: commandPayload).getPacket()
+            case .v5:
+                 meshPayload = MeshCommandPacketV5(type: .control, payload: commandPayload).getPacket()
         }
         
         let packet = ControlPacketsGenerator.getMeshCommandPacket(commandPacket: meshPayload)
@@ -92,11 +92,11 @@ public class MeshHandler {
     public func sendNoOp( ) -> Promise<Void> {
         let commandPayload = ControlPacketsGenerator.getNoOpPacket()
         var meshPayload : [UInt8]
-        if self.bleManager.connectionState.connectionProtocolVersion == .v5 {
-            meshPayload = MeshCommandPacketV5(type: .control, payload: commandPayload).getPacket()
-        }
-        else {
-            meshPayload = MeshCommandPacket(type: .control, crownstoneIds: [], payload: commandPayload).getPacket()
+        switch (self.bleManager.connectionState.connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2, .v3:
+                 meshPayload = MeshCommandPacket(type: .control, crownstoneIds: [], payload: commandPayload).getPacket()
+            case .v5:
+                 meshPayload = MeshCommandPacketV5(type: .control, payload: commandPayload).getPacket()
         }
       
         let packet = ControlPacketsGenerator.getMeshCommandPacket(commandPacket: meshPayload)

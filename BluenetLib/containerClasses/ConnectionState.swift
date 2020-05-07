@@ -44,6 +44,7 @@ class ConnectionState {
     
     func clear() {
         self.sessionNonce = nil
+        self.setupKey = nil
         self.keySet = nil
         self.operationMode = .unknown
         self.connectionProtocolVersion = .unknown

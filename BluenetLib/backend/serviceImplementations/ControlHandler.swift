@@ -136,6 +136,23 @@ public class ControlHandler {
         }
     }
     
+    public func pulse() -> Promise<Void> {
+        let switchOn  = ControlPacketsGenerator.getSwitchStatePacket(1)
+        let switchOff = ControlPacketsGenerator.getSwitchStatePacket(0)
+        return Promise<Void> { seal in
+            _writeControlPacket(bleManager: self.bleManager, switchOn)
+                .then{ self.bleManager.wait(seconds: 1) }
+                .then{ _writeControlPacket(bleManager: self.bleManager, switchOff) }
+                .done{
+                    _ = self.bleManager.disconnect();
+                    seal.fulfill(())
+                }
+                .catch{(err: Error) -> Void in
+                    _ = self.bleManager.errorDisconnect()
+                    seal.reject(err)
+                }
+        }
+    }
     
     /**
      * Switches power intelligently.
@@ -152,23 +169,13 @@ public class ControlHandler {
     }
     
     public func putInDFU() -> Promise<Void> {
-        return self.bleManager.getServicesFromDevice()
-            .then{ services -> Promise<Void> in
-                var isInDfuMode = false
-                for service in services {
-                    if service.uuid == DFUServiceUUID || service.uuid == DFUSecureServiceUUID {
-                        isInDfuMode = true
-                        break
-                    }
-                }
-                
-                if (isInDfuMode == true) {
-                    LOG.info("BLUENET_LIB: Already in DFU.")
-                    return Promise.value(())
-                }
-                
-                LOG.info("BLUENET_LIB: switching to DFU")
-                return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getPutInDFUPacket())
+        if self.bleManager.connectionState.operationMode == .dfu {
+            LOG.info("BLUENET_LIB: Already in DFU.")
+            return Promise.value(())
+        }
+        else {
+            LOG.info("BLUENET_LIB: switching to DFU")
+            return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getPutInDFUPacket())
         }
     }
     
@@ -270,7 +277,9 @@ public class ControlHandler {
      **/
     public func getAndSetSessionNonce() -> Promise<Void> {
         LOG.info("BLUENET_LIB: getAndSetSessionNonce")
-        return self.bleManager.readCharacteristicWithoutEncryption(CSServices.CrownstoneService, characteristic: CrownstoneCharacteristics.SessionNonce)
+        let sessionParameters = getSessionNonceReadParameters(bleManager: self.bleManager)
+        
+        return self.bleManager.readCharacteristicWithoutEncryption(sessionParameters.service, characteristic: sessionParameters.characteristic)
             .then{(sessionData : [UInt8]) -> Promise<Void> in
                 return Promise <Void> { seal in
                     do {
