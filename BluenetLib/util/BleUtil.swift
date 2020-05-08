@@ -222,7 +222,7 @@ func _getCrownstoneModeInformation(bleManager: BleManager) -> Promise<ModeInform
                     _ = bleManager.getCharacteristicsFromDevice(CSServices.CrownstoneService)
                        .done{(characteristics : [CBCharacteristic]) -> Void in
                             if getCharacteristicFromList(characteristics, CrownstoneCharacteristics.ControlV5) != nil {
-                                seal.fulfill(ModeInformation(controlMode: .v5, operationMode: .setup))
+                                seal.fulfill(ModeInformation(controlMode: .v5, operationMode: .operation))
                             }
                             else if getCharacteristicFromList(characteristics, CrownstoneCharacteristics.ControlV3) != nil {
                                 seal.fulfill(ModeInformation(controlMode: .v3, operationMode: .operation))

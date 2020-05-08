@@ -79,8 +79,6 @@ class EncryptionHandler {
             throw BluenetError.NO_SESSION_NONCE_SET
         }
         
-        print("CONNETIONSTATE LEVEL", connectionState.userLevel)
-        
         if connectionState.userLevel == .unknown {
             throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY
         }
