@@ -32,6 +32,7 @@ public class ScanResponsePacket {
     public var accumulatedEnergy   :   Int64    = 0
     public var setupMode           :   Bool     = false
     public var stateOfExternalCrownstone : Bool = false
+    public var alternativeState    : Bool = false
     public var data                :   [UInt8]!
     public var encryptedDataStartIndex : Int = 1
     
@@ -196,6 +197,7 @@ public class ScanResponsePacket {
             "opCode"               : NSNumber(value: self.opCode),
             "dataType"             : NSNumber(value: self.dataType),
             "stateOfExternalCrownstone" : self.stateOfExternalCrownstone,
+            "alternativeState"     : self.alternativeState,
             "hasError"             : self.hasError,
             "setupMode"            : self.setupMode,
             

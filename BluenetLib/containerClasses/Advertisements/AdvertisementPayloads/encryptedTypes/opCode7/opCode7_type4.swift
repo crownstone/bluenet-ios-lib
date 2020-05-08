@@ -17,6 +17,7 @@ func parseOpcode7_type4(serviceData : ScanResponsePacket, data : [UInt8]) {
             let payload = DataStepper(data)
             
             serviceData.stateOfExternalCrownstone = false
+            serviceData.alternativeState = true
             
             try payload.skip() // first byte is the datatype.
             serviceData.crownstoneId         = try payload.getUInt8()
