@@ -46,7 +46,7 @@ import CoreBluetooth
      func getSwitchStatePacket(_ state: Float) -> [UInt8] {
         let switchState = min(1,max(0,state))*100
         let value = NSNumber(value: switchState as Float).uint8Value
-        return self._getControlPacket(type: ControlType.switch).load(value).getPacket()
+        return self.getControlPacket(type: ControlType.switch).load(value).getPacket()
     }
     
      func getResetPacket() -> [UInt8] {
@@ -61,20 +61,20 @@ import CoreBluetooth
     }
     
      func getPutInDFUPacket() -> [UInt8] {
-        return self._getControlPacket(type: ControlType.goto_DFU).getPacket()
+        return self.getControlPacket(type: ControlType.goto_DFU).getPacket()
     }
     
      func getDisconnectPacket() -> [UInt8] {
-        return self._getControlPacket(type: ControlType.disconnect).getPacket()
+        return self.getControlPacket(type: ControlType.disconnect).getPacket()
     }
     
      func getRelaySwitchPacket(_ state: UInt8) -> [UInt8] {
-        return self._getControlPacket(type: ControlType.relay).load(state).getPacket()
+        return self.getControlPacket(type: ControlType.relay).load(state).getPacket()
     }
     
      func getPwmSwitchPacket(_ state: Float) -> [UInt8] {
         let switchState : UInt8 = NSNumber(value: min(1,max(0,state))*100).uint8Value
-        return self._getControlPacket(type: ControlType.pwm).load(switchState).getPacket()
+        return self.getControlPacket(type: ControlType.pwm).load(switchState).getPacket()
     }
     
     /** LEGACY **/
@@ -96,15 +96,15 @@ import CoreBluetooth
     }
     
      func getResetErrorPacket(errorMask: UInt32) -> [UInt8] {
-        return self._getControlPacket(type: ControlType.reset_ERRORS).load(errorMask).getPacket()
+        return self.getControlPacket(type: ControlType.reset_ERRORS).load(errorMask).getPacket()
     }
     
      func getSetTimePacket(_ time: UInt32) -> [UInt8] {
-        return self._getControlPacket(type: ControlType.set_TIME).load(time).getPacket()
+        return self.getControlPacket(type: ControlType.set_TIME).load(time).getPacket()
     }
     
      func getNoOpPacket() -> [UInt8] {
-        return self._getControlPacket(type: ControlType.no_OPERATION).getPacket()
+        return self.getControlPacket(type: ControlType.no_OPERATION).getPacket()
     }
     
      func getAllowDimmingPacket(_ allow: Bool) -> [UInt8] {
@@ -112,7 +112,7 @@ import CoreBluetooth
         if (allow) {
             allowValue = 1
         }
-        return self._getControlPacket(type: ControlType.allow_dimming).load(allowValue).getPacket()
+        return self.getControlPacket(type: ControlType.allow_dimming).load(allowValue).getPacket()
     }
     
      func getLockSwitchPacket(_ lock: Bool) -> [UInt8] {
@@ -120,7 +120,7 @@ import CoreBluetooth
         if (lock) {
             lockValue = 1
         }
-        return self._getControlPacket(type: ControlType.lock_switch).load(lockValue).getPacket()
+        return self.getControlPacket(type: ControlType.lock_switch).load(lockValue).getPacket()
     }
     
      func getSwitchCraftPacket(_ enabled: Bool) -> [UInt8] {
@@ -139,8 +139,10 @@ import CoreBluetooth
     }
     
     func getMeshCommandPacket(commandPacket: [UInt8]) -> [UInt8] {
-        return self._getControlPacket(type: ControlType.mesh_command).load(commandPacket).getPacket()
+        return self.getControlPacket(type: ControlType.mesh_command).load(commandPacket).getPacket()
     }
+    
+    
     
     
     func getTurnOnPacket(stones:[[String: NSNumber]]) -> [UInt8] {
@@ -165,7 +167,7 @@ import CoreBluetooth
                dataArray.append(count)
                dataArray += innerPacket
                
-               return self._getControlPacket(type: ControlTypeV3.multiSwitch).load(dataArray).getPacket()
+               return self.getControlPacket(type: ControlTypeV3.multiSwitch).load(dataArray).getPacket()
        }
     }
     
@@ -209,7 +211,7 @@ import CoreBluetooth
                 dataArray.append(count)
                 dataArray += innerPacket
                 
-                return self._getControlPacket(type: ControlTypeV3.multiSwitch).load(dataArray).getPacket()
+                return self.getControlPacket(type: ControlTypeV3.multiSwitch).load(dataArray).getPacket()
         }
     }
     
@@ -235,7 +237,7 @@ import CoreBluetooth
             ttlMinutes:     ttlMinutes
         )
         
-        return self._getControlPacket(type: .registerTrackedDevice).load(payload).getPacket()
+        return self.getControlPacket(type: .registerTrackedDevice).load(payload).getPacket()
     }
     
     func getTrackedDeviceRegistrationPayload(
@@ -313,13 +315,13 @@ import CoreBluetooth
         data += Conversion.uint16_to_uint8_array(ibeaconMinor)
         
         
-        return self._getControlPacket(type: ControlTypeV3.setup).load(data).getPacket()
+        return self.getControlPacket(type: ControlTypeV3.setup).load(data).getPacket()
     }
     
     /**
      Only for newer protocols.
      */
-    func _getControlPacket(type: ControlTypeV3) -> BLEPacketBase {
+    func getControlPacket(type: ControlTypeV3) -> BLEPacketBase {
         switch (connectionProtocolVersion) {
             case .v3:
                  return ControlPacketV3(type: type)
@@ -327,7 +329,7 @@ import CoreBluetooth
                 return ControlPacketV5(type: type)
         }
     }
-    func _getControlPacket(type: ControlType) -> BLEPacketBase {
+    func getControlPacket(type: ControlType) -> BLEPacketBase {
         let mappedType = mapControlType_toV3(type: type)
         
         switch (connectionProtocolVersion) {

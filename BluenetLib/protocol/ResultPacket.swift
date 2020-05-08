@@ -16,7 +16,7 @@ public class ResultBasePacket {
     public var valid             : Bool        = true
     public var resultCode        : ResultValue = .UNSPECIFIED
     public var commandTypeUInt16 : UInt16      = 65535
-    
+    public var size              : UInt16 = 0
     func load(_ data : [UInt8]) {}
 }
 
@@ -72,7 +72,6 @@ public class ResultPacket : ResultBasePacket {
 
 public class ResultPacketV3 : ResultBasePacket {
     public var commandType : ControlTypeV3 = .UNSPECIFIED
-    public var size        : UInt16 = 0
     
     override init() {
         super.init()
@@ -115,7 +114,6 @@ public class ResultPacketV3 : ResultBasePacket {
 
 public class ResultPacketV5 : ResultBasePacket {
     public var commandType     : ControlTypeV3 = .UNSPECIFIED
-    public var size            : UInt16 = 0
     
     override init() {
         super.init()

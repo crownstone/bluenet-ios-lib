@@ -81,9 +81,9 @@ public class DeviceHandler {
     
     public func getUICRData() -> Promise<[String: Any]> {
         let writeCommand : voidPromiseCallback = {
-            return _writeControlPacket(bleManager: self.bleManager, ControlPacketV3(type: .GET_UICR_DATA).getPacket())
+            return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getControlPacket(type: .GET_UICR_DATA).getPacket())
         }
-        return _writePacketWithReply(bleManager: self.bleManager, service: CSServices.CrownstoneService, readCharacteristic: CrownstoneCharacteristics.ControlV5, writeCommand: writeCommand)
+        return _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
             .then{ resultPacket -> Promise<[String: Any]> in
                 return Promise<[String: Any]> { seal in
                     do {
@@ -123,9 +123,9 @@ public class DeviceHandler {
                     return self.getBootloaderRevisionInAppMode()
                 case .v5:
                     let writeCommand : voidPromiseCallback = {
-                        return _writeControlPacket(bleManager: self.bleManager, ControlPacketV3(type: .GET_BOOTLOADER_VERSION).getPacket())
+                        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getControlPacket(type: .GET_BOOTLOADER_VERSION).getPacket())
                     }
-                    return _writePacketWithReply(bleManager: self.bleManager, service: CSServices.CrownstoneService, readCharacteristic: CrownstoneCharacteristics.ControlV5, writeCommand: writeCommand)
+                    return _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
                         .then{ resultPacket -> Promise<String> in
                             return Promise<String> { seal in seal.fulfill(Conversion.uint8_array_to_string(resultPacket.payload)) }
                         }

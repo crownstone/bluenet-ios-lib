@@ -24,15 +24,19 @@ public class DebugHandler {
     
     public func getBehaviourDebugInformation() -> Promise<Dictionary<String,Any>> {
         return Promise<Dictionary<String,Any>> { seal in
+            let getBehaviourPacket = ControlPacketsGenerator.getControlPacket(type: .getBehaviourDebug).getPacket()
+            
             let writeCommand : voidPromiseCallback = {
-                return _writeControlPacket(bleManager: self.bleManager, ControlPacketV3(type: .getBehaviourDebug).getPacket())
+               return _writeControlPacket(bleManager: self.bleManager, getBehaviourPacket)
             }
-            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV3, writeCommand: writeCommand)
+            let readParameters = getControlReadParameters(bleManager: bleManager)
+            self.bleManager.setupSingleNotification(readParameters.service, characteristicId: readParameters.characteristic, writeCommand: writeCommand)
                 .done{ data -> Void in
 
                     var result = Dictionary<String,Any>()
-                    let resultPacket = ResultPacketV3()
+                    let resultPacket = StatePacketsGenerator.getReturnPacket()
                     resultPacket.load(data)
+                    
                     if (resultPacket.valid == false) {
                         return seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
                     }

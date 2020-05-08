@@ -22,8 +22,7 @@ public class BehaviourHandler {
         self.eventBus   = eventBus
     }
     
-    func _handleResponseIndexHash(data: [UInt8], seal: Resolver<BehaviourResultPacket>, notFoundIsSuccess: Bool = false) {
-        let resultPacket = ResultPacketV3(data)
+    func _handleResponseIndexHash(resultPacket: ResultBasePacket, seal: Resolver<BehaviourResultPacket>, notFoundIsSuccess: Bool = false) {
         if resultPacket.valid == false {
             seal.reject(BluenetError.BEHAVIOUR_INVALID_RESPONSE)
             return
@@ -53,14 +52,15 @@ public class BehaviourHandler {
     public func addBehaviour(behaviour: Behaviour) -> Promise<BehaviourResultPacket> {
         return Promise<BehaviourResultPacket> { seal in
             let behaviourDataPacket = behaviour.getPacket()
-            let packet = ControlPacketV3(type: .addBehaviour, payloadArray: behaviourDataPacket).getPacket()
+            let packet = ControlPacketsGenerator.getControlPacket(type: .addBehaviour).load(behaviourDataPacket).getPacket()
             
             let writeCommand : voidPromiseCallback = {
                return _writeControlPacket(bleManager: self.bleManager, packet)
             }
-            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV3, writeCommand: writeCommand)
-                .done{ data -> Void in
-                    self._handleResponseIndexHash(data: data, seal: seal)
+            
+            _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
+                .done{ resultPacket -> Void in
+                    self._handleResponseIndexHash(resultPacket: resultPacket, seal: seal)
                }
                .catch{ err in seal.reject(err) }
             }
@@ -68,47 +68,49 @@ public class BehaviourHandler {
     
     public func replaceBehaviour(index: UInt8, behaviour: Behaviour) -> Promise<BehaviourResultPacket> {
         return Promise<BehaviourResultPacket> { seal in
-            
             var dataPacket = [UInt8]()
             dataPacket.append(index)
             dataPacket += behaviour.getPacket()
-            
-            let packet = ControlPacketV3(type: .replaceBehaviour, payloadArray: dataPacket).getPacket()
+            let packet = ControlPacketsGenerator.getControlPacket(type: .replaceBehaviour).load(dataPacket).getPacket()
             
             let writeCommand : voidPromiseCallback = {
                return _writeControlPacket(bleManager: self.bleManager, packet)
             }
-            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV3, writeCommand: writeCommand)
-                .done{ data -> Void in
-                    self._handleResponseIndexHash(data: data, seal: seal)
-               }
+            _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
+                .done{ resultPacket -> Void in
+                    self._handleResponseIndexHash(resultPacket: resultPacket, seal: seal)
+                }
                .catch{ err in seal.reject(err) }
         }
     }
     
     public func removeBehaviour(index: UInt8) -> Promise<BehaviourResultPacket> {
         return Promise<BehaviourResultPacket> { seal in
-            let deletePacket = ControlPacketV3(type: .removeBehaviour, payload8: index).getPacket()
+            let deletePacket = ControlPacketsGenerator.getControlPacket(type: .removeBehaviour).load(index).getPacket()
             let writeCommand : voidPromiseCallback = {
-               return _writeControlPacket(bleManager: self.bleManager, deletePacket)
+                return _writeControlPacket(bleManager: self.bleManager, deletePacket)
             }
-            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV3, writeCommand: writeCommand)
-                .done{ data -> Void in
-                    self._handleResponseIndexHash(data: data, seal: seal, notFoundIsSuccess: true)
-               }
-               .catch{ err in seal.reject(err) }
+            
+            _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
+                 .done{ resultPacket -> Void in
+                     self._handleResponseIndexHash(resultPacket: resultPacket, seal: seal, notFoundIsSuccess: true)
+                 }
+                .catch{ err in seal.reject(err) }
         }
     }
     
     public func getBehaviour(index: UInt8) -> Promise<Behaviour>  {
         return Promise<Behaviour> { seal in
-            let getBehaviourPacket = ControlPacketV3(type: .getBehaviour, payload8: index).getPacket()
+            let getBehaviourPacket = ControlPacketsGenerator.getControlPacket(type: .getBehaviour).load(index).getPacket()
+            
             let writeCommand : voidPromiseCallback = {
                return _writeControlPacket(bleManager: self.bleManager, getBehaviourPacket)
             }
-            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV3, writeCommand: writeCommand)
+            let readParameters = getControlReadParameters(bleManager: bleManager)
+            self.bleManager.setupSingleNotification(readParameters.service, characteristicId: readParameters.characteristic, writeCommand: writeCommand)
                 .done{ data -> Void in
-                    let resultPacket = ResultPacketV3(data)
+                    let resultPacket = StatePacketsGenerator.getReturnPacket()
+                    resultPacket.load(data)
 
                     if resultPacket.valid == false {
                         seal.reject(BluenetError.BEHAVIOUR_INVALID_RESPONSE)
@@ -141,13 +143,18 @@ public class BehaviourHandler {
     
     public func getIndices() -> Promise<[IndexResultPacket]> {
         return Promise<[IndexResultPacket]> { seal in
-            let getBehaviourPacket = ControlPacketV3(type: .getBehaviourIndices).getPacket()
+            let getBehaviourPacket = ControlPacketsGenerator.getControlPacket(type: .getBehaviourIndices).getPacket()
+            
             let writeCommand : voidPromiseCallback = {
                return _writeControlPacket(bleManager: self.bleManager, getBehaviourPacket)
             }
-            self.bleManager.setupSingleNotification(CSServices.CrownstoneService, characteristicId: CrownstoneCharacteristics.ResultV3, writeCommand: writeCommand)
+            
+            let readParameters = getControlReadParameters(bleManager: bleManager)
+            self.bleManager.setupSingleNotification(readParameters.service, characteristicId: readParameters.characteristic, writeCommand: writeCommand)
                 .done{ data -> Void in
-                    let resultPacket = ResultPacketV3(data)
+                    let resultPacket = StatePacketsGenerator.getReturnPacket()
+                    resultPacket.load(data)
+                    
                     if resultPacket.valid == false {
                         seal.reject(BluenetError.BEHAVIOUR_INVALID_RESPONSE)
                         return
