@@ -127,7 +127,28 @@ public class DeviceHandler {
                     }
                     return _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
                         .then{ resultPacket -> Promise<String> in
-                            return Promise<String> { seal in seal.fulfill(Conversion.uint8_array_to_string(resultPacket.payload)) }
+                            return Promise<String> { seal in
+                                do {
+                                    let payload = DataStepper(resultPacket.payload)
+                                    let packetProtocolVersion = try payload.getUInt8()
+                                    let dfuVersion  = try payload.getUInt16()
+                                    let major       = try payload.getUInt8()
+                                    let minor       = try payload.getUInt8()
+                                    let patch       = try payload.getUInt8()
+                                    let prerelease  = try payload.getUInt8()
+                                    let buildType   = try payload.getUInt8()
+                                    
+                                    if (prerelease == 255) {
+                                        seal.fulfill("\(major).\(minor).\(patch)")
+                                    }
+                                    else {
+                                        seal.fulfill("\(major).\(minor).\(patch)-RC\(prerelease)")
+                                    }
+                                }
+                                catch {
+                                    seal.fulfill("")
+                                }
+                            }
                         }
             }
         }
