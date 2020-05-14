@@ -17,6 +17,7 @@ public class ResultBasePacket {
     public var resultCode        : ResultValue = .UNSPECIFIED
     public var commandTypeUInt16 : UInt16      = 65535
     public var size              : UInt16 = 0
+    public var data              : [UInt8] = []
     func load(_ data : [UInt8]) {}
 }
 
@@ -38,6 +39,7 @@ public class ResultPacket : ResultBasePacket {
     }
     
     override func load(_ data : [UInt8]) {
+        self.data = data
         if (data.count >= 4) {
             self.valid = true
             self.type = data[0]
@@ -83,6 +85,7 @@ public class ResultPacketV3 : ResultBasePacket {
     }
         
     override func load(_ data : [UInt8]) {
+        self.data = data
         let minSize = 6
 
         if (data.count >= minSize) {
@@ -125,6 +128,7 @@ public class ResultPacketV5 : ResultBasePacket {
     }
         
     override func load(_ data : [UInt8]) {
+        self.data = data
         let minSize = 7
 
         if (data.count >= minSize) {
