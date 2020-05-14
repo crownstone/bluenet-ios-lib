@@ -85,41 +85,17 @@ public class ControlHandler {
     
     public func commandFactoryReset() -> Promise<Void> {
         var writeWasSuccessful = false
-        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getCommandFactoryResetPacket())
-            .then{(_) -> Promise<Void> in
-                writeWasSuccessful = true
-                return self.bleManager.waitToWrite()
-            }
-            .then{(_) -> Promise<[UInt8]> in return self._readControlPacket()}
-            .then{(response: [UInt8]) -> Promise<Void> in
+        let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getCommandFactoryResetPacket()) }
+        return _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
+            .then{ responseBasePacket in
                 return Promise<Void> { seal in
-                    // new response types
-                    let result = StatePacketsGenerator.getReturnPacket()
-                    result.load(response)
-                    
-                    var passed = false
-                    
-                    if self.bleManager.connectionState.connectionProtocolVersion == .v3 {
-                        passed = result.commandTypeUInt16 == ControlTypeV3.factory_RESET.rawValue
-                    }
-                    else {
-                        passed = result.commandTypeUInt16 == UInt16(ControlType.factory_RESET.rawValue)
-                    }
-                    
-                    if (passed) {
-                        if (result.resultCode == ResultValue.SUCCESS) {
-                            seal.fulfill(())
-                        }
-                        else {
-                            seal.reject(BluenetError.COULD_NOT_FACTORY_RESET)
-                        }
-                    }
-                    else if (response[0] == 0) { // legacy
+                    if (responseBasePacket.valid) {
                         seal.fulfill(())
                     }
                     else {
                         seal.reject(BluenetError.COULD_NOT_FACTORY_RESET)
                     }
+                    
                 }
             }
             .recover{(err: Error) -> Promise<Void> in
@@ -378,20 +354,4 @@ public class ControlHandler {
         }
        
     }
-
-    
-    
-    func _readControlPacket() -> Promise<[UInt8]> {
-        if self.bleManager.connectionState.connectionProtocolVersion == .v3 {
-            return self.bleManager.readCharacteristic(
-                CSServices.CrownstoneService,
-                characteristicId: CrownstoneCharacteristics.ResultV3
-            )
-        }
-        return self.bleManager.readCharacteristic(
-            CSServices.CrownstoneService,
-            characteristicId: CrownstoneCharacteristics.Control
-        )
-    }
-    
 }
