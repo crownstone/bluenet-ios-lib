@@ -93,8 +93,8 @@ public class ControlHandler {
                         seal.fulfill(())
                     }
                     else {
-                        if (responseBasePacket.data[0] == 0 && self.bleManager.connectionState.proto) {
-                             seal.fulfill()
+                        if (responseBasePacket.data[0] == 0 && self.bleManager.connectionState.connectionProtocolVersion.rawValue < ConnectionProtocolVersion.v3.rawValue) {
+                             seal.fulfill(())
                         }
                         else {
                             seal.reject(BluenetError.COULD_NOT_FACTORY_RESET)
