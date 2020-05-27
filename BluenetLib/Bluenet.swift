@@ -363,7 +363,7 @@ public class Bluenet {
                     LOG.info("BLUENET_LIB: got mode info! \(modeInfo)")
                     self.bleManager.connectionState.setConnectionProtocolVersion(modeInfo.controlMode)
                     self.bleManager.connectionState.setOperationMode(modeInfo.operationMode)
-        
+
                     if modeInfo.operationMode == .setup {
                         // setup mode, handle the setup encryption.
                         return self.setup.handleSetupPhaseEncryption()

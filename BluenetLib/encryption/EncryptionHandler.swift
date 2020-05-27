@@ -190,45 +190,55 @@ class EncryptionHandler {
     }
     
     static func processSessionData(_ input: [UInt8], key: [UInt8], connectionState: ConnectionState) throws {
-        if (input.count == 16) {
-            guard key.count == 16 else { throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY }
-            let result = try AES(key: key, blockMode: CryptoSwift.ECB(), padding: .noPadding).decrypt(input)
-            let payload = DataStepper(result)
-
-            let checksum = try payload.getUInt32();
-            if (checksum == CHECKSUM) {
-                var protocolVersion : UInt8 = 0
-                var sessionNonce : [UInt8]
-                var validationKey: [UInt8]
-                if (connectionState.connectionProtocolVersion == .v5) {
-                    protocolVersion = try payload.getUInt8()
-                    sessionNonce    = try payload.getBytes(5)
-                    validationKey   = try payload.getBytes(4)
-                    
-                    let protocolEnum = ConnectionProtocolVersion.init(rawValue: protocolVersion)
-                    
-                    if protocolVersion != 5 && protocolEnum != nil {
-                        connectionState.setConnectionProtocolVersion(protocolEnum!)
-                    }
-                }
-                else {
-                    payload.mark()
-                    sessionNonce = try payload.getBytes(5)
-                    payload.reset()
-                    validationKey = try payload.getBytes(4)
-                }
-                LOG.info("BLUENET_LIB: SetSessionNonce \(sessionNonce)");
-                connectionState.setSessionNonce(sessionNonce)
-                connectionState.setProtocolVersion(protocolVersion)
-                connectionState.validationKey(validationKey)
+        var payload : DataStepper
+        switch (connectionState.connectionProtocolVersion) {
+        case  .unknown, .legacy, .v1, .v2, .v3:
+            if (input.count == 5) {
+                payload = DataStepper(input)
             }
             else {
-                throw BluenetError.COULD_NOT_VALIDATE_SESSION_NONCE
+                throw BluenetError.READ_SESSION_NONCE_ZERO_MAYBE_ENCRYPTION_DISABLED
+            }
+        case .v5:
+            if (input.count == 16) {
+                guard key.count == 16 else { throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY }
+                let result = try AES(key: key, blockMode: CryptoSwift.ECB(), padding: .noPadding).decrypt(input)
+                payload = DataStepper(result)
+                
+                let checksum = try payload.getUInt32();
+                if (checksum != CHECKSUM) {
+                    throw BluenetError.COULD_NOT_VALIDATE_SESSION_NONCE
+                }
+            }
+            else {
+                throw BluenetError.READ_SESSION_NONCE_ZERO_MAYBE_ENCRYPTION_DISABLED
+            }
+        }
+        
+        var protocolVersion : UInt8 = 0
+        var sessionNonce : [UInt8]
+        var validationKey: [UInt8]
+        if (connectionState.connectionProtocolVersion == .v5) {
+            protocolVersion = try payload.getUInt8()
+            sessionNonce    = try payload.getBytes(5)
+            validationKey   = try payload.getBytes(4)
+            
+            let protocolEnum = ConnectionProtocolVersion.init(rawValue: protocolVersion)
+            
+            if protocolVersion != 5 && protocolEnum != nil {
+                connectionState.setConnectionProtocolVersion(protocolEnum!)
             }
         }
         else {
-            throw BluenetError.READ_SESSION_NONCE_ZERO_MAYBE_ENCRYPTION_DISABLED
+            payload.mark()
+            sessionNonce = try payload.getBytes(5)
+            payload.reset()
+            validationKey = try payload.getBytes(4)
         }
+        LOG.info("BLUENET_LIB: SetSessionNonce \(sessionNonce)");
+        connectionState.setSessionNonce(sessionNonce)
+        connectionState.setProtocolVersion(protocolVersion)
+        connectionState.validationKey(validationKey)
     }
     
     static func decrypt(_ input: Data, connectionState: ConnectionState) throws -> Data {
