@@ -318,20 +318,30 @@ public class ConfigHandler {
     func _getConfigReadParameters() -> BleParameters {
         var service                  = CSServices.CrownstoneService;
         var characteristicToReadFrom = CrownstoneCharacteristics.ConfigRead
-        
-        //determine where to writeco
-        if self.bleManager.connectionState.connectionProtocolVersion == .v3 {
-            characteristicToReadFrom = CrownstoneCharacteristics.ResultV3
-        }
+                
         if self.bleManager.connectionState.operationMode == .setup {
-            service = CSServices.SetupService;
-            if self.bleManager.connectionState.connectionProtocolVersion == .v3 {
-                characteristicToReadFrom = SetupCharacteristics.ResultV3
-            }
-            else {
-                characteristicToReadFrom = SetupCharacteristics.ConfigRead
+            service = CSServices.SetupService
+            switch (self.bleManager.connectionState.connectionProtocolVersion) {
+                case .unknown, .legacy, .v1, .v2:
+                    characteristicToReadFrom = SetupCharacteristics.ConfigRead
+                case .v3:
+                    characteristicToReadFrom = SetupCharacteristics.ResultV3
+                case .v5:
+                    characteristicToReadFrom = SetupCharacteristics.ResultV5
             }
         }
+        else {
+            service = CSServices.CrownstoneService
+            switch (self.bleManager.connectionState.connectionProtocolVersion) {
+                case .unknown, .legacy, .v1, .v2:
+                    characteristicToReadFrom = CrownstoneCharacteristics.ConfigRead
+                case .v3:
+                    characteristicToReadFrom = CrownstoneCharacteristics.ResultV3
+                case .v5:
+                    characteristicToReadFrom = CrownstoneCharacteristics.ResultV5
+            }
+        }
+        
         return BleParameters(service: service, characteristic: characteristicToReadFrom)
     }
     

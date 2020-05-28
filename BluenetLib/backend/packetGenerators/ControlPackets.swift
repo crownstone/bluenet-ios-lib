@@ -331,7 +331,6 @@ import CoreBluetooth
     }
     func getControlPacket(type: ControlType) -> BLEPacketBase {
         let mappedType = mapControlType_toV3(type: type)
-        
         switch (connectionProtocolVersion) {
             case .unknown, .legacy, .v1, .v2:
                 return ControlPacket(type:   type)

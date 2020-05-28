@@ -189,30 +189,48 @@ class EncryptionHandler {
         return try AES(key: key, blockMode: CryptoSwift.ECB(), padding: .noPadding).decrypt(input)
     }
     
+    
+    static func _decryptSessionData(_ input: [UInt8], key: [UInt8], connectionState: ConnectionState) throws -> DataStepper {
+        var payload : DataStepper
+        if (input.count == 16) {
+            guard key.count == 16 else { throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY }
+            let result = try AES(key: key, blockMode: CryptoSwift.ECB(), padding: .noPadding).decrypt(input)
+            payload = DataStepper(result)
+            
+            let checksum = try payload.getUInt32();
+            if (checksum != CHECKSUM) {
+                throw BluenetError.COULD_NOT_VALIDATE_SESSION_NONCE
+            }
+        }
+        else {
+            throw BluenetError.READ_SESSION_NONCE_ZERO_MAYBE_ENCRYPTION_DISABLED
+        }
+        
+        return payload
+    }
+    
     static func processSessionData(_ input: [UInt8], key: [UInt8], connectionState: ConnectionState) throws {
         var payload : DataStepper
-        switch (connectionState.connectionProtocolVersion) {
-        case  .unknown, .legacy, .v1, .v2, .v3:
-            if (input.count == 5) {
-                payload = DataStepper(input)
+        
+        // we first check which mode we're in since older firmwares didnt encrypt the session data in setup mode.
+        if (connectionState.operationMode == .setup) {
+            switch (connectionState.connectionProtocolVersion) {
+            case  .unknown, .legacy, .v1, .v2, .v3:
+               if (input.count == 5) {
+                    payload = DataStepper(input)
+               }
+               else {
+                   throw BluenetError.READ_SESSION_NONCE_ZERO_MAYBE_ENCRYPTION_DISABLED
+               }
+            case .v5:
+                payload = try EncryptionHandler._decryptSessionData(input, key: key, connectionState: connectionState)
             }
-            else {
-                throw BluenetError.READ_SESSION_NONCE_ZERO_MAYBE_ENCRYPTION_DISABLED
-            }
-        case .v5:
-            if (input.count == 16) {
-                guard key.count == 16 else { throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY }
-                let result = try AES(key: key, blockMode: CryptoSwift.ECB(), padding: .noPadding).decrypt(input)
-                payload = DataStepper(result)
-                
-                let checksum = try payload.getUInt32();
-                if (checksum != CHECKSUM) {
-                    throw BluenetError.COULD_NOT_VALIDATE_SESSION_NONCE
-                }
-            }
-            else {
-                throw BluenetError.READ_SESSION_NONCE_ZERO_MAYBE_ENCRYPTION_DISABLED
-            }
+        }
+        else if (connectionState.operationMode == .operation) {
+            payload = try EncryptionHandler._decryptSessionData(input, key: key, connectionState: connectionState)
+        }
+        else {
+            throw BluenetError.CANNOT_DO_THIS_IN_DFU_MODE
         }
         
         var protocolVersion : UInt8 = 0
@@ -235,7 +253,7 @@ class EncryptionHandler {
             payload.reset()
             validationKey = try payload.getBytes(4)
         }
-        LOG.info("BLUENET_LIB: SetSessionNonce \(sessionNonce)");
+        LOG.info("BLUENET_LIB: SetSessionNonce Nonce:\(sessionNonce) validationKey:\(validationKey) protocolVersion:\(protocolVersion)");
         connectionState.setSessionNonce(sessionNonce)
         connectionState.setProtocolVersion(protocolVersion)
         connectionState.validationKey(validationKey)

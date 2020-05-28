@@ -42,7 +42,7 @@ func getControlWriteParameters(bleManager: BleManager) -> BleParameters {
     // determine where to write
     var service        : String
     var characteristic : String
-    
+
     if bleManager.connectionState.operationMode == .setup {
         service = CSServices.SetupService
         switch (bleManager.connectionState.connectionProtocolVersion) {

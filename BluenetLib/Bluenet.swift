@@ -389,7 +389,6 @@ public class Bluenet {
                                     
                                     // load the required encryption keys into the connectionstate.
                                     self.bleManager.connectionState.setActiveKeySet(self.settings.keySets[activeReferenceId!]!)
-                                    
                                     self.control.getAndSetSessionNonce()
                                         .done{_ -> Void in
                                             seal.fulfill(())

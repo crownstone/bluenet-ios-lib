@@ -64,6 +64,7 @@ public enum BluenetError : Error {
     case USERLEVEL_IN_READ_PACKET_INVALID
     case READ_SESSION_NONCE_ZERO_MAYBE_ENCRYPTION_DISABLED
     case SETUP_FAILED
+    case CANNOT_DO_THIS_IN_DFU_MODE
     
     // recovery error
     case NOT_IN_RECOVERY_MODE
