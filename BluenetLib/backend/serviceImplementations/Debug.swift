@@ -22,6 +22,100 @@ public class DebugHandler {
         self.eventBus   = eventBus
     }
     
+    
+    public func getUptime() -> Promise<UInt32> {
+        return Promise<UInt32> { seal in
+            let packet = ControlPacketsGenerator.getControlPacket(type: .getUptime).getPacket()
+            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packet) }
+            
+            _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
+                .done { resultPacket in
+                    let payload = DataStepper(resultPacket.payload)
+                    do { seal.fulfill(try payload.getUInt32()) }
+                    catch let err { seal.reject(err) }
+                }
+                .catch{ err in seal.reject(err)}
+            }
+    }
+    
+    
+    public func getAdcRestarts() -> Promise<Dictionary<String, NSNumber>> {
+        return Promise<Dictionary<String, NSNumber>> { seal in
+            let packet = ControlPacketsGenerator.getControlPacket(type: .getAdcRestart).getPacket()
+            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packet) }
+            
+            _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
+                .done { resultPacket in
+                    let payload = DataStepper(resultPacket.payload)
+                    do {
+                        let restartCount = try payload.getUInt32()
+                        let timestamp    = try payload.getUInt32()
+                        
+                        seal.fulfill([
+                            "restartCount": NSNumber(value: restartCount),
+                            "timestamp":    NSNumber(value: timestamp)
+                        ])
+                    }
+                    catch let err { seal.reject(err) }
+                }
+                .catch{ err in seal.reject(err)}
+            }
+    }
+    
+    
+    public func getSwitchHistory() -> Promise<[Dictionary<String, NSNumber>]> {
+        return Promise<[Dictionary<String, NSNumber>]> { seal in
+            let packet = ControlPacketsGenerator.getControlPacket(type: .getSwitchHistory).getPacket()
+            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packet) }
+
+            _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
+                .done { resultPacket in
+                    do {
+                        let package = try SwitchHistoryList(resultPacket.payload)
+                        seal.fulfill(package.items)
+                    }
+                    catch let err { seal.reject(err) }
+                }
+                .catch{ err in seal.reject(err)}
+            }
+    }
+    
+    public func getPowerSamples(triggeredSwitchcraft: Bool) -> Promise<[Dictionary<String, Any>]> {
+        return Promise<[Dictionary<String, Any>]> { seal in
+            var type : UInt8 = 0
+            if triggeredSwitchcraft == false { type = 1 }
+            
+            let packetIndex0 = ControlPacketsGenerator.getControlPacket(type: .getPowerSamples).load([type, 0]).getPacket()
+            let packetIndex1 = ControlPacketsGenerator.getControlPacket(type: .getPowerSamples).load([type, 1]).getPacket()
+            let packetIndex2 = ControlPacketsGenerator.getControlPacket(type: .getPowerSamples).load([type, 2]).getPacket()
+            
+            let writeCommandIndex0 : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packetIndex0) }
+            let writeCommandIndex1 : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packetIndex1) }
+            let writeCommandIndex2 : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packetIndex2) }
+            
+            var sampleList = [Dictionary<String, Any>]()
+            _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommandIndex0)
+                .then { resultPacket -> Promise<ResultBasePacket> in
+                    let package = try PowerSamples(resultPacket.payload)
+                    sampleList.append(package.getDict())
+                    return _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommandIndex1)
+                }
+                .then { resultPacket -> Promise<ResultBasePacket> in
+                    let package = try PowerSamples(resultPacket.payload)
+                    sampleList.append(package.getDict())
+                    return _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommandIndex2)
+                }
+                .done { resultPacket in
+                    let package = try PowerSamples(resultPacket.payload)
+                    sampleList.append(package.getDict())
+                    seal.fulfill(sampleList)
+                }
+                .catch{ err in seal.reject(err)}
+            }
+    }
+    
+
+    
     public func getBehaviourDebugInformation() -> Promise<Dictionary<String,Any>> {
         return Promise<Dictionary<String,Any>> { seal in
             let getBehaviourPacket = ControlPacketsGenerator.getControlPacket(type: .getBehaviourDebug).getPacket()

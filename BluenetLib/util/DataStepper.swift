@@ -29,6 +29,15 @@ public class DataStepper {
         return try self._request(1)[0]
     }
     
+    public func getInt16() throws -> Int16 {
+         let uint16 = Conversion.uint8_array_to_uint16(try self._request(2))
+        return Conversion.uint16_to_int16(uint16)
+     }
+    
+    public func getFloat() throws -> Float {
+        return Conversion.uint8_array_to_float(try self._request(4))
+     }
+    
     public func getUInt16() throws -> UInt16 {
         return Conversion.uint8_array_to_uint16(try self._request(2))
     }

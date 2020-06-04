@@ -169,6 +169,8 @@
 		FADA183E21CA7E6C0066DF9F /* RC5.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADA183C21CA7E6C0066DF9F /* RC5.swift */; };
 		FADB742122D3798100DCB92B /* BleUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA29280422C110BD004ABB5E /* BleUtil.swift */; };
 		FAE862621CF4B3830027539D /* Cartfile in Resources */ = {isa = PBXBuildFile; fileRef = FAE862611CF4B3830027539D /* Cartfile */; };
+		FAF4A7DA24880239005F4E32 /* SwitchHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAF4A7D924880239005F4E32 /* SwitchHistory.swift */; };
+		FAF4A7DB24880239005F4E32 /* SwitchHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAF4A7D924880239005F4E32 /* SwitchHistory.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -286,6 +288,7 @@
 		FADA183C21CA7E6C0066DF9F /* RC5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RC5.swift; sourceTree = "<group>"; };
 		FAE862611CF4B3830027539D /* Cartfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Cartfile; sourceTree = "<group>"; };
 		FAE9371D1D14453000945989 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		FAF4A7D924880239005F4E32 /* SwitchHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchHistory.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -434,6 +437,7 @@
 				FA5882A21E38C0F100913AE6 /* TrainingData.swift */,
 				FA4B678E213839B60050CE9D /* KeySet.swift */,
 				FA44DC4423685E99001CA4B8 /* ConnectionState.swift */,
+				FAF4A7D924880239005F4E32 /* SwitchHistory.swift */,
 			);
 			path = containerClasses;
 			sourceTree = "<group>";
@@ -783,6 +787,7 @@
 				FA4B678F213839B60050CE9D /* KeySet.swift in Sources */,
 				FAA1381F21B8035800044CF7 /* TimeUtil.swift in Sources */,
 				FA76EF2120976EDB0046DCDE /* ResultPacket.swift in Sources */,
+				FAF4A7DA24880239005F4E32 /* SwitchHistory.swift in Sources */,
 				FA4B67912138414D0050CE9D /* AdvertisementValidator.swift in Sources */,
 				FA7065E02003AEA500C833FE /* opCode3.swift in Sources */,
 				FA5882C91E38C0F100913AE6 /* iBeaconContainers.swift in Sources */,
@@ -852,6 +857,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FA94D01821A6E62F00AB8331 /* Bluenet.swift in Sources */,
+				FAF4A7DB24880239005F4E32 /* SwitchHistory.swift in Sources */,
 				FA94D01B21A6E62F00AB8331 /* BluenetCBDelegate.swift in Sources */,
 				FA94D01C21A6E62F00AB8331 /* BluenetCBDelegateBackground.swift in Sources */,
 				FA94D01D21A6E62F00AB8331 /* BleManager.swift in Sources */,

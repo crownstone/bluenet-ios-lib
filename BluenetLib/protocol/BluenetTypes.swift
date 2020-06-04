@@ -111,6 +111,12 @@ public enum ControlTypeV3 : UInt16 {
     case getBehaviourDebug      = 69
     case registerTrackedDevice  = 70
     
+    case getUptime              = 80
+    case getAdcRestart          = 81
+    case getSwitchHistory       = 82
+    case getPowerSamples        = 83
+    case getCpuUsageStatistics  = 84
+    
     case UNSPECIFIED = 65535
 }
 

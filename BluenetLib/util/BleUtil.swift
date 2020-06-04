@@ -158,6 +158,7 @@ func _writePacketWithReply(bleManager: BleManager, writeCommand : @escaping void
     }
 }
 
+
 func getConfigPayloadFromResultPacket<T>(_ bleManager: BleManager, _ resultPacket: ResultBasePacket) throws -> T {
     var resultPayload : [UInt8]
     
@@ -176,23 +177,12 @@ func getConfigPayloadFromResultPacket<T>(_ bleManager: BleManager, _ resultPacke
     return result
 }
 
-func getControlPayloadFromResultPacket<T>(_ bleManager: BleManager, _ resultPacket: ResultBasePacket) throws -> T {
-    if bleManager.connectionState.connectionProtocolVersion == .v3 {
-        let packetSize = resultPacket.payload.count
-        let resultPayload = Array(resultPacket.payload[4...packetSize-1]) // 4 is the 2 stateType and 2 ID, rest is data payload
-        let result : T = try Convert(resultPayload)
-        return result
-    }
-    else {
-        let result : T = try Convert(resultPacket.payload)
-        return result
-    }
-}
 
 struct ModeInformation {
     var controlMode: ConnectionProtocolVersion
     var operationMode: CrownstoneMode
 }
+
 
 func _getCrownstoneModeInformation(bleManager: BleManager) -> Promise<ModeInformation> {
     return bleManager.getServicesFromDevice()
