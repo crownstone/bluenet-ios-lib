@@ -56,7 +56,7 @@ class PowerSamples {
             "count":          NSNumber(value: self.count),
             "timestamp":      NSNumber(value: self.timestamp),
             "delay":          NSNumber(value: self.delay),
-            "sampleInterval": NSNumber(value: self.delay),
+            "sampleInterval": NSNumber(value: self.sampleInterval),
             "offset":         NSNumber(value: self.offset),
             "multiplier":     NSNumber(value: self.multiplier),
             "samples":        samples,
