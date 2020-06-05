@@ -14,10 +14,12 @@ class SwitchHistoryList {
     var items : [Dictionary<String, NSNumber>]
     
     init(_ dataBlob: [UInt8]) throws {
+        self.items =  [Dictionary<String, NSNumber>]()
         let stepper = DataStepper(dataBlob)
         
         let length = try stepper.getUInt8()
-        self.items =  [Dictionary<String, NSNumber>]()
+        if length == 0 { return }
+        
         for _ in [Int](0...(NSNumber(value: length).intValue)-1) {
             let timestamp     = try stepper.getUInt32()
             let switchCommand = try stepper.getUInt8()
