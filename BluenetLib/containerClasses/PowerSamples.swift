@@ -25,7 +25,7 @@ class PowerSamples {
     var reserved       : UInt16
     var offset         : Int16
     var multiplier     : Float32
-    var samples        : [Int16]
+    var samples        : [NSNumber]
     
 
     init(_ dataBlob: [UInt8]) throws {
@@ -40,10 +40,10 @@ class PowerSamples {
         self.reserved       = try stepper.getUInt16()
         self.offset         = try stepper.getInt16()
         self.multiplier     = try stepper.getFloat()
-        self.samples = [Int16]()
+        self.samples        = [NSNumber]()
 
         for _ in [Int](0...(NSNumber(value:self.count).intValue)-1) {
-            self.samples.append(try stepper.getInt16())
+            self.samples.append(NSNumber(value: try stepper.getInt16()))
         }
     }
     

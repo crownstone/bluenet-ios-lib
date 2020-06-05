@@ -22,12 +22,21 @@ class SwitchHistoryList {
             let timestamp     = try stepper.getUInt32()
             let switchCommand = try stepper.getUInt8()
             let switchState   = try stepper.getUInt8()
-            let source        = try stepper.getUInt16()
+            let sourceData    = try stepper.getUInt8()
+            let sourceId      = try stepper.getUInt8()
+            
+            let bits = Conversion.uint8_to_bit_array(sourceData)
+            let sourceType : UInt8 = sourceData >> 5
+            let viaMesh = bits[0]
+            
             self.items.append([
                 "timestamp":     NSNumber(value: timestamp),
                 "switchCommand": NSNumber(value: switchCommand),
                 "switchState":   NSNumber(value: switchState),
-                "source":        NSNumber(value: source)
+                "sourceData":    NSNumber(value: sourceData),
+                "sourceId":      NSNumber(value: sourceId),
+                "sourceType":    NSNumber(value: sourceType),
+                "viaMesh":       NSNumber(value: viaMesh),
             ])
         }
     }
