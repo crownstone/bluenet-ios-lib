@@ -11,6 +11,30 @@ import Foundation
 import PromiseKit
 import CoreBluetooth
 
+
+public enum PowerSampleType : UInt8 {
+    case triggeredSwitchcraft = 0
+    case missedSwitchcraft    = 1
+    case filteredBuffer       = 2
+    case unfilteredBuffer     = 3
+}
+public let PowerSampleTypeBufferCount : [UInt8: UInt8] = [
+    0: 3,
+    1: 3,
+    2: 2,
+    3: 2,
+]
+
+class Collector {
+    var data : [Dictionary<String, Any>]
+    init() {
+        self.data = [Dictionary<String, Any>]()
+    }
+    func collect(_ d: Dictionary<String, Any>) {
+        self.data.append(d)
+    }
+}
+
 public class DebugHandler {
     let bleManager : BleManager!
     var settings : BluenetSettings!
@@ -80,37 +104,32 @@ public class DebugHandler {
             }
     }
     
-    public func getPowerSamples(triggeredSwitchcraft: Bool) -> Promise<[Dictionary<String, Any>]> {
+    
+    public func getPowerSamples(type: PowerSampleType) -> Promise<[Dictionary<String, Any>]> {
         return Promise<[Dictionary<String, Any>]> { seal in
-            var type : UInt8 = 0
-            if triggeredSwitchcraft == false { type = 1 }
+            let collector = Collector()
+            let amountOfBuffers : UInt8 = PowerSampleTypeBufferCount[type.rawValue]!
             
-            let packetIndex0 = ControlPacketsGenerator.getControlPacket(type: .getPowerSamples).load([type, 0]).getPacket()
-            let packetIndex1 = ControlPacketsGenerator.getControlPacket(type: .getPowerSamples).load([type, 1]).getPacket()
-            let packetIndex2 = ControlPacketsGenerator.getControlPacket(type: .getPowerSamples).load([type, 2]).getPacket()
+            var promiseArray = [voidPromiseCallback]()
+            for i in (0...amountOfBuffers - 1) {
+                promiseArray.append({ return self._getPowerSamples(type: type, index: NSNumber(value:i).uint8Value, collector: collector) })
+            }
             
-            let writeCommandIndex0 : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packetIndex0) }
-            let writeCommandIndex1 : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packetIndex1) }
-            let writeCommandIndex2 : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packetIndex2) }
-            
-            var sampleList = [Dictionary<String, Any>]()
-            _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommandIndex0)
-                .then { resultPacket -> Promise<ResultBasePacket> in
-                    let package = try PowerSamples(resultPacket.payload)
-                    sampleList.append(package.getDict())
-                    return _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommandIndex1)
-                }
-                .then { resultPacket -> Promise<ResultBasePacket> in
-                    let package = try PowerSamples(resultPacket.payload)
-                    sampleList.append(package.getDict())
-                    return _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommandIndex2)
-                }
-                .done { resultPacket in
-                    let package = try PowerSamples(resultPacket.payload)
-                    sampleList.append(package.getDict())
-                    seal.fulfill(sampleList)
-                }
-                .catch{ err in seal.reject(err)}
+            promiseBatchPerformer(arr: promiseArray, index: 0)
+                .done { _ in seal.fulfill(collector.data) }
+                .catch{ err in seal.reject(err) }
+        }
+    }
+
+    
+    func _getPowerSamples(type: PowerSampleType, index: UInt8, collector: Collector) -> Promise<Void> {
+        let packetIndex = ControlPacketsGenerator.getControlPacket(type: .getPowerSamples).load([type.rawValue, index]).getPacket()
+        let writeCommandIndex : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packetIndex) }
+        
+        return _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommandIndex)
+            .done { resultPacket -> Void in
+                let package = try PowerSamples(resultPacket.payload)
+                collector.collect(package.getDict())
             }
     }
     
