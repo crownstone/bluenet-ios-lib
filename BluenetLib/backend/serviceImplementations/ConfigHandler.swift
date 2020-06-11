@@ -249,6 +249,25 @@ public class ConfigHandler {
         }
     }
     
+    public func getSoftOnSpeed () -> Promise<UInt8> {
+        return self._getConfig(StateTypeV3.softOnSpeed)
+      }
+    
+    public func setSoftOnSpeed (_ speed: NSNumber) -> Promise<Void> {
+        return Promise<Void> { seal in
+            let uint8Speed = speed.uint8Value
+            if (uint8Speed < 100) {
+                let data = StatePacketsGenerator.getWritePacket(type: StateTypeV3.softOnSpeed).load(uint8Speed)
+                self._writeToConfig(packet: data.getPacket())
+                    .done{ _ in seal.fulfill(()) }
+                    .catch{ err in seal.reject(err) }
+            }
+            else {
+                seal.reject(BluenetError.INVALID_SOFT_ON_SPEED_VALUE)
+            }
+        }
+    }
+    
     
     
     public func setSunTimes(sunriseSecondsSinceMidnight: UInt32, sunsetSecondsSinceMidnight: UInt32) -> Promise<Void> {

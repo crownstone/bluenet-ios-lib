@@ -364,6 +364,8 @@ public enum StateTypeV3 : UInt16 {
     case time = 136
     case error_BITMASK = 139
     case sunTimes = 149
+    case behaviourSettings = 150
+    case softOnSpeed = 156
 }
 
 public enum GetPersistenceMode : UInt8 {

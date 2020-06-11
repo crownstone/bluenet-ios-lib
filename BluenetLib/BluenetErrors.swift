@@ -73,6 +73,7 @@ public enum BluenetError : Error {
     
     // input errors
     case INVALID_TX_POWER_VALUE
+    case INVALID_SOFT_ON_SPEED_VALUE
     
     // mesh
     case NO_KEEPALIVE_STATE_ITEMS
