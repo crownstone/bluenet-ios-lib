@@ -230,6 +230,10 @@ public class ConfigHandler {
         return _writeControlPacket(bleManager: self.bleManager, packet)
     }
     
+    public func getTapToToggleThresholdOffset() -> Promise<Int8> {
+        return self._getConfig(.TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET)
+    }
+    
     public func setTapToToggleThresholdOffset(threshold: Int8) -> Promise<Void> {
         let packet = StatePacketsGenerator.getWritePacket(type: .TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET).load(Conversion.int8_to_uint8(threshold)).getPacket()
         return _writeControlPacket(bleManager: self.bleManager, packet)
