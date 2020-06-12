@@ -260,7 +260,7 @@ public class ConfigHandler {
     public func setSoftOnSpeed (_ speed: NSNumber) -> Promise<Void> {
         return Promise<Void> { seal in
             let uint8Speed = speed.uint8Value
-            if (uint8Speed < 100) {
+            if (uint8Speed <= 100) {
                 let data = StatePacketsGenerator.getWritePacket(type: StateTypeV3.softOnSpeed).load(uint8Speed)
                 self._writeToConfig(packet: data.getPacket())
                     .done{ _ in seal.fulfill(()) }
