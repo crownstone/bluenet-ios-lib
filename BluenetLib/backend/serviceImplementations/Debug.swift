@@ -17,12 +17,14 @@ public enum PowerSampleType : UInt8 {
     case missedSwitchcraft    = 1
     case filteredBuffer       = 2
     case unfilteredBuffer     = 3
+    case softFuse             = 4
 }
 public let PowerSampleTypeBufferCount : [UInt8: UInt8] = [
     0: 3,
     1: 3,
     2: 2,
     3: 2,
+    4: 1
 ]
 
 class Collector {
