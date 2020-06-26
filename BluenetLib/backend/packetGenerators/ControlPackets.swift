@@ -202,7 +202,7 @@ import CoreBluetooth
                     
                     if (crownstoneId != nil && state != nil) {
                         innerPacket.append(crownstoneId!.uint8Value)
-                        innerPacket.append(state!.uint8Value)
+                        innerPacket.append(NSNumber(value: min(1,max(0,state!.floatValue))*100).uint8Value)
                         count += 1
                     }
                 }
