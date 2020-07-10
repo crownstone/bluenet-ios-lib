@@ -692,7 +692,7 @@
 					FA3C18781CBBDA6B00A11CF7 = {
 						CreatedOnToolsVersion = 7.3;
 						DevelopmentTeam = 6LYJ9PNC3V;
-						LastSwiftMigration = 1020;
+						LastSwiftMigration = 1150;
 						ProvisioningStyle = Automatic;
 					};
 					FA3C18821CBBDA6B00A11CF7 = {
