@@ -216,6 +216,27 @@ import CoreBluetooth
     }
     
     
+    func getTrackedDeviceHeartbeatPacket(
+        trackingNumber: UInt16,
+        locationUid:    UInt8,
+        deviceToken:    UInt32,
+        ttlMinutes:    UInt16) -> [UInt8] {
+       
+        var payload : [UInt8] = []
+            
+        payload += Conversion.uint16_to_uint8_array(trackingNumber)
+        payload.append(locationUid)
+        
+        let token = Conversion.uint32_to_uint8_array(deviceToken)
+        payload.append(token[0])
+        payload.append(token[1])
+        payload.append(token[2])
+        
+        payload += Conversion.uint16_to_uint8_array(ttlMinutes)
+        
+        return self.getControlPacket(type: .trackedDeviceHeartbeat).load(payload).getPacket()
+    }
+    
     func getTrackedDeviceRegistrationPacket(
         trackingNumber: UInt16,
         locationUid:    UInt8,
@@ -271,6 +292,7 @@ import CoreBluetooth
         
         return data
     }
+    
     
     /** LEGACY **/
      func getSetupPacket(type: UInt8, crownstoneId: UInt8, adminKey: String, memberKey: String, guestKey: String, meshAccessAddress: String, ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16) -> [UInt8] {

@@ -37,6 +37,7 @@ struct timeoutDurations {
 
 public class BleManager: NSObject, CBPeripheralDelegate {
     public var centralManager : CBCentralManager!
+    var peripheralStateManager : PeripheralStateManager!
     var connectedPeripheral: CBPeripheral?
     var connectingPeripheral: CBPeripheral?
     var connectionState : ConnectionState!
@@ -69,9 +70,9 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     var CBDelegate : BluenetCBDelegate!
     var CBDelegateBackground : BluenetCBDelegateBackground!
 
-    public init(eventBus: EventBus, settings: BluenetSettings, backgroundEnabled: Bool = true) {
+    public init(peripheralStateManager: PeripheralStateManager, eventBus: EventBus, settings: BluenetSettings, backgroundEnabled: Bool = true) {
         super.init();
-        
+        self.peripheralStateManager = peripheralStateManager
         self.connectionState = ConnectionState()
         self.notificationEventBus = EventBus()
         self.settings = settings
@@ -285,6 +286,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      */
     public func connect(_ uuid: String) -> Promise<Void> {
         LOG.info("BLUENET_LIB: starting to connect")
+        self.peripheralStateManager.pauseAdvertising()
         return Promise<Void> { seal in
             if (self.BleState != .poweredOn) {
                 seal.reject(BluenetError.NOT_INITIALIZED)
@@ -319,7 +321,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         .catch{ err in seal.reject(err)}
                 }
             }
-        };
+        }
     }
     
     

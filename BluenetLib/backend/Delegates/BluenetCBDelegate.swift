@@ -160,6 +160,7 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
                 }
             }
         }
+        BleManager.peripheralStateManager.resumeAdvertising()
     }
 
 }

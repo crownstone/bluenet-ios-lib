@@ -75,12 +75,13 @@ import CoreBluetooth
  
  **/
 
-class PeripheralStateManager {
+public class PeripheralStateManager {
     var settings: BluenetSettings
     var blePeripheralManager : BlePeripheralManager!
     var elements = [BroadcastElement]()
     
     var advertising = false
+    var cachedAdvertising = false
     var baseRefreshTickPostponed = false
     
     var runningBroadcastCycle = false
@@ -157,6 +158,19 @@ class PeripheralStateManager {
     
     #if os(iOS)
     /**   GLOBAL ADVERTISING STATE HANDLING METHODS, this is not used for watchOS as it has no background **/
+    func pauseAdvertising() {
+        self.cachedAdvertising = true
+        if self.advertising {
+            self.stopAdvertising()
+        }
+    }
+    
+    func resumeAdvertising() {
+        if self.cachedAdvertising {
+            self.startAdvertising()
+        }
+    }
+    
     func startAdvertising() {
         self.advertising = true
         if self.settings.backgroundState {
@@ -176,6 +190,9 @@ class PeripheralStateManager {
             self.stopForegroundBroadcasts()
         }
     }
+    #else
+    func pauseAdvertising() {}
+    func resumeAdvertising() {}
     #endif
     
     func stopBroadcasting() {

@@ -110,12 +110,16 @@ public enum ControlTypeV3 : UInt16 {
     
     case getBehaviourDebug      = 69
     case registerTrackedDevice  = 70
+    case trackedDeviceHeartbeat = 71
     
     case getUptime              = 80
     case getAdcRestart          = 81
     case getSwitchHistory       = 82
     case getPowerSamples        = 83
-    case getCpuUsageStatistics  = 84
+    case getMinSchedulerFreeSpace = 84
+    case getLastResetReason     = 85
+    case getGPREGRET            = 86
+    case getAdcChannelSwaps     = 87
     
     case UNSPECIFIED = 65535
 }
@@ -266,6 +270,9 @@ public enum ResultValue: UInt16 {
     case NO_SPACE               = 38
     case BUSY                   = 39
     case ERR_ALREADY_EXISTS     = 41
+    case ERR_TIMEOUT            = 42
+    case ERR_CANCELLED          = 43
+    case ERR_PROTOCOL_UNSUPPORTED = 44
     case NO_ACCESS              = 48     // Invalid access for this command.
     case NOT_AVAILABLE          = 64     // Command currently not available.
     case NOT_IMPLEMENTED        = 65     // Command not implemented (not yet or not anymore).

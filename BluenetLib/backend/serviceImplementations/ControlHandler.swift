@@ -135,6 +135,40 @@ public class ControlHandler {
         }
     }
     
+    
+    
+    public func trackedDeviceHeartbeat(trackingNumber: UInt16, locationId: UInt8, deviceToken: UInt32, ttlMinutes: UInt16) -> Promise<Void> {
+        return Promise<Void> { seal in
+            let packet = ControlPacketsGenerator.getTrackedDeviceHeartbeatPacket(
+                trackingNumber: trackingNumber,
+                locationUid: locationId,
+                deviceToken: deviceToken,
+                ttlMinutes: ttlMinutes
+            )
+            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packet) }
+            
+            _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
+                .done { resultPacket in
+                    switch resultPacket.resultCode {
+                    case .SUCCESS:
+                        seal.fulfill(())
+                    case.ERR_ALREADY_EXISTS:
+                        seal.reject(BluenetError.ERR_ALREADY_EXISTS)
+                    case .ERR_TIMEOUT:
+                        seal.reject(BluenetError.ERR_TIMEOUT)
+                    case .NO_ACCESS:
+                        seal.reject(BluenetError.ERR_NO_ACCESS)
+                    default:
+                        seal.reject(BluenetError.UNKNOWN_ERROR)
+                    }
+                }
+                .catch{ err in seal.reject(err)
+            }
+        }
+    }
+    
+    
+    
     /**
      * Switches power intelligently.
      * State has to be between 0 and 1

@@ -37,6 +37,7 @@ class Collector {
     }
 }
 
+
 public class DebugHandler {
     let bleManager : BleManager!
     var settings : BluenetSettings!
@@ -135,7 +136,114 @@ public class DebugHandler {
             }
     }
     
+    public func getMinSchedulerFreeSpace() -> Promise<UInt16> {
+        return Promise<UInt16> { seal in
+            let packet = ControlPacketsGenerator.getControlPacket(type: .getMinSchedulerFreeSpace).getPacket()
+            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packet) }
+            
+            _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
+                .done { resultPacket in
+                    let payload = DataStepper(resultPacket.payload)
+                    do { seal.fulfill(try payload.getUInt16()) }
+                    catch let err { seal.reject(err) }
+                }
+                .catch{ err in seal.reject(err)}
+        }
+    }
+    
+    public func getLastResetReason() -> Promise<Dictionary<String, Any>> {
+        return Promise<Dictionary<String, Any>> { seal in
+            let packet = ControlPacketsGenerator.getControlPacket(type: .getLastResetReason).getPacket()
+            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packet) }
+            
+            _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
+                .done { resultPacket in
+                    let payload = DataStepper(resultPacket.payload)
+                    do {
+                        let data = try payload.getUInt32()
+                        let bits = Conversion.uint32_to_bit_array(data)
+                        let dict : [String: Any] = [
+                            "resetPin":  bits[0],
+                            "watchdog":  bits[1],
+                            "softReset": bits[2],
+                            "lockup":    bits[3],
+                            "gpio":      bits[16],
+                            "lpComp":    bits[17],
+                            "debugInterface": bits[18],
+                            "nfc":       bits[19],
+                            "raw":       NSNumber(value: data)
+                        ]
+                        seal.fulfill(dict) }
+                    catch let err { seal.reject(err) }
+                }
+                .catch{ err in seal.reject(err)}
+        }
+    }
+    
+    
+    public func getGPREGRET() -> Promise<[[String:Any]]> {
+        var arr = [[String:Any]]()
+        return self._getGPREGRET(index: 0)
+            .then{ result -> Promise<UInt32> in
+                let bits = Conversion.uint32_to_bit_array(result)
+                let counter = NSNumber(value: (result & 0x1F))
+                
+                arr.append([
+                    "counter":          counter,
+                    "brownout":         bits[5],
+                    "dfuMode":          bits[6],
+                    "storageRecovered": bits[7],
+                    "raw" :             NSNumber(value: result),
+                ])
+                
+                return self._getGPREGRET(index: 1)
+            }
+            .then{ result -> Promise<[[String:Any]]> in
+                arr.append(["raw" : NSNumber(value: result)])
+                return Promise<[[String:Any]]> { seal in seal.fulfill(arr) }
+            }
+    }
+    
+    
+    func _getGPREGRET(index: UInt8) -> Promise<UInt32> {
+        return Promise<UInt32> { seal in
+            let packet = ControlPacketsGenerator.getControlPacket(type: .getGPREGRET).load(index).getPacket()
+            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packet) }
+            
+            _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
+            .done { resultPacket in
+                let payload = DataStepper(resultPacket.payload)
+                do {
+                    try payload.skip()
+                    seal.fulfill(try payload.getUInt32())
+                }
+                catch let err { seal.reject(err) }
+            }
+            .catch{ err in seal.reject(err)}
+        }
+    }
 
+    
+    public func getAdcChannelSwaps() -> Promise<Dictionary<String, NSNumber>> {
+        return Promise<Dictionary<String, NSNumber>> { seal in
+            let packet = ControlPacketsGenerator.getControlPacket(type: .getAdcChannelSwaps).getPacket()
+            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packet) }
+
+            _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
+            .done { resultPacket in
+                let payload = DataStepper(resultPacket.payload)
+                do {
+                    let returnDict = [
+                        "swapCount" : NSNumber(value: try payload.getUInt32()),
+                        "timestamp" : NSNumber(value: try payload.getUInt32()),
+                    ]
+                    seal.fulfill(returnDict)
+                }
+                catch let err { seal.reject(err) }
+            }
+            .catch{ err in seal.reject(err)}
+        }
+    }
     
     public func getBehaviourDebugInformation() -> Promise<Dictionary<String,Any>> {
         return Promise<Dictionary<String,Any>> { seal in

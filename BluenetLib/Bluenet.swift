@@ -100,8 +100,9 @@ public class Bluenet {
     public init(backgroundEnabled: Bool = true) {
         self.settings   = BluenetSettings()
         self.eventBus   = EventBus()
-        self.bleManager = BleManager(eventBus: self.eventBus, settings: settings, backgroundEnabled: backgroundEnabled)
         self.peripheralStateManager = PeripheralStateManager(eventBus: self.eventBus, settings: settings, backgroundEnabled: backgroundEnabled)
+        self.bleManager = BleManager(peripheralStateManager: self.peripheralStateManager, eventBus: self.eventBus, settings: settings, backgroundEnabled: backgroundEnabled)
+        
         
         self.setupList               = CrownstoneContainer(setupMode: true,  dfuMode: false)
         self.dfuList                 = CrownstoneContainer(setupMode: false, dfuMode: true )
@@ -110,7 +111,7 @@ public class Bluenet {
        
         // pass on the shared objects to the worker classes
     #if os(iOS)
-        self.dfu     = DfuHandler(     bleManager:bleManager, eventBus: eventBus, settings: settings)
+        self.dfu     = DfuHandler(bleManager:bleManager, eventBus: eventBus, settings: settings)
     #endif
         self.config    = ConfigHandler(   bleManager:bleManager,  eventBus: eventBus, settings: settings)
         self.setup     = SetupHandler(    bleManager:bleManager,  eventBus: eventBus, settings: settings)
@@ -359,7 +360,7 @@ public class Bluenet {
                     LOG.info("BLUENET_LIB: connected!")
                     return _getCrownstoneModeInformation(bleManager: self.bleManager)
                 }
-                .then{modeInfo -> Promise<Void> in
+                .then{ modeInfo -> Promise<Void> in
                     LOG.info("BLUENET_LIB: got mode info! \(modeInfo)")
                     self.bleManager.connectionState.setConnectionProtocolVersion(modeInfo.controlMode)
                     self.bleManager.connectionState.setOperationMode(modeInfo.operationMode)

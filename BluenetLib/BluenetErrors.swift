@@ -104,6 +104,7 @@ public enum BluenetError : Error {
     
     // general errors
     case INVALID_INPUT
+    case UNKNOWN_ERROR
     
     // Broadcast Protocol errors
     case INVALID_BROADCAST_ACCESS_LEVEL
@@ -157,7 +158,12 @@ public enum BluenetError : Error {
     case NO_END_CONDITION_DURATION
     
     case FIRMWARE_TOO_OLD
+    
     case ERR_ALREADY_EXISTS
+    case ERR_TIMEOUT
+    case ERR_CANCELLED
+    case ERR_PROTOCOL_UNSUPPORTED
+    case ERR_NO_ACCESS
 }
 
 

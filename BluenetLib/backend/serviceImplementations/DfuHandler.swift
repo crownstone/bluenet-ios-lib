@@ -50,8 +50,8 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
             self.promisePending = true
             let dfuPeripheral = self.bleManager.getPeripheral(handle)
 
-            self.pendingDFUPromiseReject = seal.reject
-            self.pendingDFUPromiseFulfill = seal.fulfill
+            self.pendingDFUPromiseReject  = { err in self.bleManager.peripheralStateManager.resumeAdvertising(); seal.reject(err) }
+            self.pendingDFUPromiseFulfill = { _   in self.bleManager.peripheralStateManager.resumeAdvertising(); seal.fulfill(()) }
             
             guard dfuPeripheral != nil else {
                 self.rejectPromise(BluenetError.COULD_NOT_FIND_PERIPHERAL)
@@ -59,6 +59,7 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
             }
             
             self.bleManager.decoupleFromDelegate()
+            self.bleManager.peripheralStateManager.pauseAdvertising()
             let dfuInitiator = DFUServiceInitiator(centralManager: self.bleManager.centralManager!, target: dfuPeripheral!)
             dfuInitiator.delegate = self
             dfuInitiator.progressDelegate = self
