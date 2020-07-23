@@ -281,6 +281,17 @@ public class Conversion {
         let one : UInt32 = 1
         
         for i in 0...31 {
+            result[i] = (val & (one << NSNumber(value: i).uint32Value)) != 0
+        }
+        
+        return result
+    }
+    
+    public static func uint32_to_reversed_bit_array(_ val: UInt32) -> [Bool] {
+        var result = [Bool](repeating: false, count: 32)
+        let one : UInt32 = 1
+        
+        for i in 0...31 {
             result[i] = (val & (one << NSNumber(value: 31-i).uint32Value)) != 0
         }
         
@@ -292,7 +303,7 @@ public class Conversion {
         let one : UInt32 = 1
         
         for i in 0...31 {
-            if (bitArray[i]) { result = result | (one << NSNumber(value: 31 - i).uint32Value) }
+            if (bitArray[i]) { result = result | (one << NSNumber(value: i).uint32Value) }
         }
         
         return result

@@ -30,12 +30,12 @@ public class CrownstoneErrors {
 
         let bitArray = Conversion.uint32_to_bit_array(bitMask)
 
-        self.overCurrent       = bitArray[31-0]
-        self.overCurrentDimmer = bitArray[31-1]
-        self.temperatureChip   = bitArray[31-2]
-        self.temperatureDimmer = bitArray[31-3]
-        self.dimmerOnFailure   = bitArray[31-4]
-        self.dimmerOffFailure  = bitArray[31-5]
+        self.overCurrent       = bitArray[0]
+        self.overCurrentDimmer = bitArray[1]
+        self.temperatureChip   = bitArray[2]
+        self.temperatureDimmer = bitArray[3]
+        self.dimmerOnFailure   = bitArray[4]
+        self.dimmerOffFailure  = bitArray[5]
     }
     
     init(dictionary: NSDictionary) {
@@ -47,12 +47,12 @@ public class CrownstoneErrors {
         self.dimmerOffFailure  = (dictionary["dimmerOffFailure"]  as? Bool) != nil ? (dictionary["dimmerOffFailure"]  as! Bool) : false
         
         var bitArray = [Bool](repeating: false, count: 32)
-        bitArray[31-0] = self.overCurrent
-        bitArray[31-1] = self.overCurrentDimmer
-        bitArray[31-2] = self.temperatureChip
-        bitArray[31-3] = self.temperatureDimmer
-        bitArray[31-4] = self.dimmerOnFailure
-        bitArray[31-5] = self.dimmerOffFailure
+        bitArray[0] = self.overCurrent
+        bitArray[1] = self.overCurrentDimmer
+        bitArray[2] = self.temperatureChip
+        bitArray[3] = self.temperatureDimmer
+        bitArray[4] = self.dimmerOnFailure
+        bitArray[5] = self.dimmerOffFailure
         
         self.bitMask = Conversion.bit_array_to_uint32(bitArray)
     }
