@@ -115,6 +115,7 @@ public enum BluenetError : Error {
     case BROADCAST_ERROR
     case BROADCAST_ABORTED
     
+    case WRONG_PARAMETER
     
     // behaviour errors
     case BEHAVIOUR_INDEX_OUT_OF_RANGE

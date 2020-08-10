@@ -19,13 +19,7 @@ public enum PowerSampleType : UInt8 {
     case unfilteredBuffer     = 3
     case softFuse             = 4
 }
-public let PowerSampleTypeBufferCount : [UInt8: UInt8] = [
-    0: 3,
-    1: 3,
-    2: 2,
-    3: 2,
-    4: 1
-]
+
 
 class Collector {
     var data : [Dictionary<String, Any>]
@@ -111,14 +105,19 @@ public class DebugHandler {
     public func getPowerSamples(type: PowerSampleType) -> Promise<[Dictionary<String, Any>]> {
         return Promise<[Dictionary<String, Any>]> { seal in
             let collector = Collector()
-            let amountOfBuffers : UInt8 = PowerSampleTypeBufferCount[type.rawValue]!
             
-            var promiseArray = [voidPromiseCallback]()
-            for i in (0...amountOfBuffers - 1) {
-                promiseArray.append({ return self._getPowerSamples(type: type, index: NSNumber(value:i).uint8Value, collector: collector) })
-            }
-            
-            promiseBatchPerformer(arr: promiseArray, index: 0)
+            self._getPowerSamples(type: type, index: 0, collector: collector)
+                .recover{(err: Error) -> Promise<Void> in
+                    return Promise <Void> { seal in
+                        if let bleErr = err as? BluenetError {
+                            if bleErr == BluenetError.WRONG_PARAMETER {
+                                seal.fulfill(())
+                                return
+                            }
+                        }
+                        seal.reject((err))
+                    }
+                }
                 .done { _ in seal.fulfill(collector.data) }
                 .catch{ err in seal.reject(err) }
         }
@@ -130,9 +129,15 @@ public class DebugHandler {
         let writeCommandIndex : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packetIndex) }
         
         return _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommandIndex)
-            .done { resultPacket -> Void in
-                let package = try PowerSamples(resultPacket.payload)
-                collector.collect(package.getDict())
+            .then { resultPacket -> Promise<Void> in
+                if (resultPacket.resultCode == .SUCCESS) {
+                    let package = try PowerSamples(resultPacket.payload)
+                    collector.collect(package.getDict())
+                    return self._getPowerSamples(type: type, index: index+1, collector: collector)
+                }
+                else {
+                    return Promise <Void> { seal in seal.reject(BluenetError.WRONG_PARAMETER) }
+                }
             }
     }
     

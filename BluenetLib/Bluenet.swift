@@ -355,6 +355,8 @@ public class Bluenet {
         let connectionCommand : voidPromiseCallback = {
             LOG.info("BLUENET_LIB: Connecting to \(handle) now.")
             self.bleManager.connectionState.start(settings: self.settings)
+            
+            
             return self.bleManager.connect(handle)
                 .then{_ -> Promise<ModeInformation> in
                     LOG.info("BLUENET_LIB: connected!")

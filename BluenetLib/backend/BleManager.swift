@@ -17,7 +17,7 @@ struct timeoutDurations {
     static let disconnect              : Double = 3
     static let errorDisconnect         : Double = 5
     static let cancelPendingConnection : Double = 3
-    static let connect                 : Double = 10
+    static let connect                 : Double = 12
     static let reconnect               : Double = 0.5
     static let getServices             : Double = 3
     static let getCharacteristics      : Double = 3
@@ -368,6 +368,8 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             else {
                 // get a peripheral from the known list (TODO: check what happens if it requests an unknown one)
                 let uuidArray = [nsUuid!]
+                
+                
                 let peripherals = self.centralManager.retrievePeripherals(withIdentifiers: uuidArray);
                 if (peripherals.count == 0) {
                     seal.reject(BluenetError.CAN_NOT_CONNECT_TO_UUID)
@@ -380,7 +382,12 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     // setup the pending promise for connection
                     self.pendingPromise.load(seal.fulfill, seal.reject, type: .CONNECT)
                     self.pendingPromise.setDelayedReject(timeoutDurations.connect, errorOnReject: .CONNECT_TIMEOUT)
-                    self.centralManager.connect(connectingPeripheral!, options: nil)
+                    var connectionOptions : [String: Any]? = nil
+                    connectionOptions = [
+                        "CBConnectPeripheralOptionEnableTransportBridgingKey": false,
+                        "CBConnectPeripheralOptionStartDelayKey": NSNumber(value: 0)
+                    ]
+                    self.centralManager.connect(connectingPeripheral!, options: connectionOptions)
                 }
             }
         }
