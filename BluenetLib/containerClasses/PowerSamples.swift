@@ -41,9 +41,12 @@ class PowerSamples {
         self.offset         = try stepper.getInt16()
         self.multiplier     = try stepper.getFloat()
         self.samples        = [NSNumber]()
-
-        for _ in [Int](0...(NSNumber(value:self.count).intValue)-1) {
-            self.samples.append(NSNumber(value: try stepper.getInt16()))
+        
+        
+        if (self.count > 0) {
+            for _ in [Int](0...(NSNumber(value:self.count).intValue)-1) {
+                self.samples.append(NSNumber(value: try stepper.getInt16()))
+            }
         }
     }
     
