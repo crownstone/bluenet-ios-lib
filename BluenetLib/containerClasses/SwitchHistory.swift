@@ -20,7 +20,7 @@ class SwitchHistoryList {
         let length = try stepper.getUInt8()
         if length == 0 { return }
         
-        for _ in [Int](0...(NSNumber(value: length).intValue)-1) {
+        for _ in [Int](0..<(NSNumber(value: length).intValue)) {
             let timestamp     = try stepper.getUInt32()
             let switchCommand = try stepper.getUInt8()
             let switchState   = try stepper.getUInt8()

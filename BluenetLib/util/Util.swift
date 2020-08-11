@@ -103,7 +103,7 @@ public func fletcher32( _ data: [UInt16]) -> UInt32 {
     var index = 0
     for _ in 0...iterations {
         let blockLength = min(360, length)
-        for _ in 0...blockLength - 1 {
+        for _ in 0..<blockLength {
             c0 = c0 + UInt32(data[index]);
             c1 = c1 + c0;
             index += 1

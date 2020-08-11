@@ -50,7 +50,7 @@ public class ResultPacket : ResultBasePacket {
             self.commandTypeUInt16 = UInt16(data[0])
             
             if (data.count >= totalSize) {
-                for i in [Int](4...totalSize-1) {
+                for i in [Int](4..<totalSize) {
                     self.payload.append(data[i])
                 }
                 

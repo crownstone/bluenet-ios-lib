@@ -117,7 +117,7 @@ public class BehaviourHandler {
                     }
                     if resultPacket.resultCode == .SUCCESS {
                         let indexStored = resultPacket.payload[0]
-                        let behaviourData = Array(resultPacket.payload[1...resultPacket.payload.count-1])
+                        let behaviourData = Array(resultPacket.payload[1..<resultPacket.payload.count])
                         let behaviour = Behaviour(data: behaviourData)
                         
                         // store the index into the behaviour
@@ -163,7 +163,7 @@ public class BehaviourHandler {
                         var result = [IndexResultPacket]()
                         let amountOfPackets = resultPacket.payload.count/5
                         if (amountOfPackets > 0) {
-                            for i in 0...amountOfPackets-1 {
+                            for i in 0..<amountOfPackets {
                                 let baseIndex = i*5
                                 let packet = IndexResultPacket.init(
                                     index: resultPacket.payload[baseIndex],

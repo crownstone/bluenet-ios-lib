@@ -24,13 +24,13 @@ class NotificationMerger {
         LOG.info("----- BLUENET NotificationMerger: Incoming data part \(data)")
         if (data.count > 0) {
             if (data[0] == 0xFF) {
-                self.data += data[1...data.count-1]
+                self.data += data[1...]
                 self.callback(self.data)
                 self.data = []
             }
             else {
                 if (data[0] == 0 && self.lastPacketIndex == 0xFF || (data[0] > 0 && (data[0] - 1) == self.lastPacketIndex)) {
-                    self.data += data[1...data.count-1]
+                    self.data += data[1...]
                 }
                 else {
                     LOG.warn("----- BLUENET NotificationMerger: missed packet, invalid payload")

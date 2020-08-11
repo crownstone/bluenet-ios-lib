@@ -44,7 +44,7 @@ class PowerSamples {
         
         
         if (self.count > 0) {
-            for _ in [Int](0...(NSNumber(value:self.count).intValue)-1) {
+            for _ in [Int](0..<(NSNumber(value:self.count).intValue)) {
                 self.samples.append(NSNumber(value: try stepper.getInt16()))
             }
         }

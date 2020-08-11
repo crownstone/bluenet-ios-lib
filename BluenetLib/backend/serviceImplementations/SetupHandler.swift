@@ -497,7 +497,7 @@ public class SetupHandler {
         let dataLength = Int(Conversion.uint8_array_to_uint16([input[2],input[3]]))
         var match = (input.count >= (prefixLength + dataLength) && target.count >= (prefixLength + dataLength))
         if (match == true) {
-            for i in [Int](0...dataLength-1) {
+            for i in [Int](0..<dataLength) {
                 if (input[i+prefixLength] != target[i+prefixLength]) {
                     match = false
                 }

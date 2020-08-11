@@ -33,7 +33,7 @@ class EncryptedPackage {
         }
         
         // copy the nonce over to the class var
-        for i in [Int](0...nonce.count-1) {
+        for i in [Int](0..<nonce.count) {
             nonce[i] = dataArray[i]
         }
         
@@ -53,7 +53,7 @@ class EncryptedPackage {
         }
         
         // copy the nonce over to the class var
-        for i in (0...payloadData.count - 1) {
+        for i in (0..<payloadData.count) {
             payloadData[i] = dataArray[i + prefixLength]
         }
         

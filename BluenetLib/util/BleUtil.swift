@@ -166,11 +166,9 @@ func getConfigPayloadFromResultPacket<T>(_ bleManager: BleManager, _ resultPacke
         case .unknown, .legacy, .v1, .v2:
             resultPayload = resultPacket.payload
         case .v3:
-            let packetSize = resultPacket.payload.count
-            resultPayload = Array(resultPacket.payload[4...packetSize-1]) // 4 is the 2 stateType and 2 ID, rest is data payload
+            resultPayload = Array(resultPacket.payload[4...]) // 4 is the 2 stateType and 2 ID, rest is data payload
         case .v5:
-             let packetSize = resultPacket.payload.count
-             resultPayload = Array(resultPacket.payload[6...packetSize-1]) // 6 is the 2 stateType and 2 ID and 2 persistence, rest is data payload
+             resultPayload = Array(resultPacket.payload[6...]) // 6 is the 2 stateType and 2 ID and 2 persistence, rest is data payload
     }
     
     let result : T = try Convert(resultPayload)

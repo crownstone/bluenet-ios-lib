@@ -46,7 +46,7 @@ func RC5ExpandKey(key: [UInt8]) -> [UInt16] {
 //    }
     
     L[c-1] = 0
-    for i in (0...keyLength-1).reversed() {
+    for i in (0..<keyLength).reversed() {
         L[i/u] = (L[i/u] << 8) + UInt16(key[i])
     }
     

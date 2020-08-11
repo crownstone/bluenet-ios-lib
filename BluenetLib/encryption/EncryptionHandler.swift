@@ -93,7 +93,7 @@ class EncryptionHandler {
         var nonce = [UInt8](repeating: 0, count: PACKET_NONCE_LENGTH)
         
         // fill Nonce with random stuff
-        for i in [Int](0...PACKET_NONCE_LENGTH-1) {
+        for i in [Int](0..<PACKET_NONCE_LENGTH) {
             nonce[i] = getRandomNumbers()
         }
         
@@ -103,7 +103,7 @@ class EncryptionHandler {
         
         // pad payload with sessionId
         var paddedPayload = [UInt8](repeating: 0, count: payloadArray.count + SESSION_KEY_LENGTH)
-        for i in [Int](0...SESSION_KEY_LENGTH-1) {
+        for i in [Int](0..<SESSION_KEY_LENGTH) {
             paddedPayload[i] = sessionData.validationKey[i]
         }
         
@@ -120,7 +120,7 @@ class EncryptionHandler {
         var result = [UInt8](repeating: 0, count: PACKET_NONCE_LENGTH+PACKET_USERLEVEL_LENGTH + encryptedPayload.count)
         
         // copy nonce into result
-        for i in [Int](0...PACKET_NONCE_LENGTH-1) {
+        for i in [Int](0..<PACKET_NONCE_LENGTH) {
             result[i] = nonce[i]
         }
         
@@ -128,7 +128,7 @@ class EncryptionHandler {
         result[PACKET_NONCE_LENGTH] = UInt8(connectionState.userLevel.rawValue)
         
         // copy encrypted payload into the result
-        for i in [Int](0...encryptedPayload.count-1) {
+        for i in [Int](0..<encryptedPayload.count) {
             let index = i + PACKET_NONCE_LENGTH + PACKET_USERLEVEL_LENGTH
             result[index] = encryptedPayload[i]
         }
@@ -285,7 +285,7 @@ class EncryptionHandler {
         if (Conversion.uint8_array_to_uint32(decrypted) == Conversion.uint8_array_to_uint32(sessionData.validationKey!)) {
             // remove checksum from decyption and return payload
             var result = [UInt8](repeating: 0, count: decrypted.count - SESSION_KEY_LENGTH)
-            for i in [Int](SESSION_KEY_LENGTH...decrypted.count-1) {
+            for i in [Int](SESSION_KEY_LENGTH..<decrypted.count) {
                 result[i-SESSION_KEY_LENGTH] = decrypted[i]
             }
             return result
@@ -338,12 +338,12 @@ class EncryptionHandler {
         }
         var IV = [UInt8](repeating: 0, count: NONCE_LENGTH)
         // the IV used in the CTR mode is 8 bytes, the first 3 are random
-        for i in [Int](0...PACKET_NONCE_LENGTH-1) {
+        for i in [Int](0..<PACKET_NONCE_LENGTH) {
             IV[i] = packetNonce[i]
         }
         
         // the IV used in the CTR mode is 8 bytes, the last 5 are from the session data
-        for i in [Int](0...SESSION_DATA_LENGTH-1) {
+        for i in [Int](0..<SESSION_DATA_LENGTH) {
             IV[i + PACKET_NONCE_LENGTH] = sessionData[i]
         }
         return IV

@@ -125,7 +125,7 @@ public class Conversion {
     
     public static func uint8_array_to_macAddress(_ input:[UInt8]) -> String {
         var string = ""
-        for i in [Int](0...input.count-1) {
+        for i in [Int](0..<input.count) {
             // due to little endian, we read it out in the reverse order.
             string += Conversion.uint8_to_hex_string(input[input.count-1-i])
             
@@ -225,7 +225,7 @@ public class Conversion {
     public static func bit_array_to_010_array(_ bitArray: [Bool]) -> [UInt8] {
         var result = [UInt8](repeating: 0, count: bitArray.count)
        
-        for i in 0...(bitArray.count - 1) {
+        for i in 0..<bitArray.count {
             if (bitArray[i]) {
                 result[bitArray.count - 1 - i] = 1
             }
@@ -314,7 +314,7 @@ public class Conversion {
     public static func flip_bit_array(_ bitArray: [Bool]) -> [Bool] {
         var result = [Bool](repeating: false, count: bitArray.count)
         
-        for i in 0...(bitArray.count - 1) {
+        for i in 0..<bitArray.count {
             result[i] = !bitArray[i]
         }
         
