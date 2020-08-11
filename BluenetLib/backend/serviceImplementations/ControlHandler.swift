@@ -137,7 +137,7 @@ public class ControlHandler {
     
     
     
-    public func trackedDeviceHeartbeat(trackingNumber: UInt16, locationId: UInt8, deviceToken: UInt32, ttlMinutes: UInt16) -> Promise<Void> {
+    public func trackedDeviceHeartbeat(trackingNumber: UInt16, locationId: UInt8, deviceToken: UInt32, ttlMinutes: UInt8) -> Promise<Void> {
         return Promise<Void> { seal in
             let packet = ControlPacketsGenerator.getTrackedDeviceHeartbeatPacket(
                 trackingNumber: trackingNumber,

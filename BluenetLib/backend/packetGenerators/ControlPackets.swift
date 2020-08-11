@@ -220,7 +220,7 @@ import CoreBluetooth
         trackingNumber: UInt16,
         locationUid:    UInt8,
         deviceToken:    UInt32,
-        ttlMinutes:    UInt16) -> [UInt8] {
+        ttlMinutes:     UInt8) -> [UInt8] {
        
         var payload : [UInt8] = []
             
@@ -232,7 +232,7 @@ import CoreBluetooth
         payload.append(token[1])
         payload.append(token[2])
         
-        payload += Conversion.uint16_to_uint8_array(ttlMinutes)
+        payload.append(ttlMinutes)
         
         return self.getControlPacket(type: .trackedDeviceHeartbeat).load(payload).getPacket()
     }
