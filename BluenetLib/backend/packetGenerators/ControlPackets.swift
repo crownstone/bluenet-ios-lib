@@ -313,8 +313,10 @@ import CoreBluetooth
         return ControlPacket(type: .setup, payloadArray: data).getPacket()
     }
     
+    
     func getSetupPacketV3(
-        crownstoneId: UInt8, sphereId: UInt8,
+        crownstoneId: UInt8,
+        sphereId: UInt8,
         adminKey: String, memberKey: String, basicKey: String, localizationKey: String, serviceDataKey: String, meshNetworkKey: String, meshApplicationKey: String, meshDeviceKey: String,
         ibeaconUUID: String, ibeaconMajor: UInt16, ibeaconMinor: UInt16
         ) -> [UInt8] {
@@ -335,9 +337,8 @@ import CoreBluetooth
         data += Conversion.ibeaconUUIDString_to_reversed_uint8_array(ibeaconUUID)
         data += Conversion.uint16_to_uint8_array(ibeaconMajor)
         data += Conversion.uint16_to_uint8_array(ibeaconMinor)
-        
-        
-        return self.getControlPacket(type: ControlTypeV3.setup).load(data).getPacket()
+    
+        return self.getControlPacket(type: ControlType.setup).load(data).getPacket()
     }
     
     /**
@@ -346,7 +347,7 @@ import CoreBluetooth
     func getControlPacket(type: ControlTypeV3) -> BLEPacketBase {
         switch (connectionProtocolVersion) {
             case .v3:
-                 return ControlPacketV3(type: type)
+                return ControlPacketV3(type: type)
             default:
                 return ControlPacketV5(type: type)
         }
