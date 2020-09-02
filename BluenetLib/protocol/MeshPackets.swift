@@ -8,63 +8,6 @@
 
 import Foundation
 
-class StoneKeepAlivePacket {
-    var crownstoneId  : UInt8 = 0
-    var actionAndState : UInt8 = 0
-    
-    convenience init(crownstoneId: UInt8, action: Bool, state: Float) {
-        let switchState = NSNumber(value: min(1,max(0,state))*100).uint8Value
-        self.init(crownstoneId: crownstoneId, action: action, state: switchState)
-    }
-    
-    convenience init(crownstoneId: UInt8, action: Bool, state: UInt8) {
-        var combinedState = state
-        if (action == false) {
-            combinedState = 255
-        }
-        self.init(crownstoneId: crownstoneId, actionAndState: combinedState)
-    }
-    
-    init(crownstoneId: UInt8, actionAndState: UInt8) {
-        self.crownstoneId = crownstoneId
-        self.actionAndState = actionAndState
-    }
-    
-    
-    func getPacket() -> [UInt8] {
-        var arr = [UInt8]()
-        arr.append(self.crownstoneId)
-        arr.append(self.actionAndState)
-        return arr
-    }
-}
-
-
-class MeshKeepAlivePacket {
-    var type : UInt8
-    var timeout : UInt16 = 0
-    var numberOfItems : UInt8  = 0
-    var packets : [StoneKeepAlivePacket]!
-    
-    init(type: MeshKeepAliveTypes, timeout: UInt16, packets: [StoneKeepAlivePacket]) {
-        self.type = type.rawValue;
-        self.timeout = timeout
-        self.numberOfItems = NSNumber(value: packets.count).uint8Value
-        self.packets = packets
-    }
-    
-    func getPacket() -> [UInt8] {
-        var arr = [UInt8]()
-        arr.append(self.type)
-        arr += Conversion.uint16_to_uint8_array(self.timeout)
-        arr.append(self.numberOfItems)
-        for packet in self.packets {
-            arr += packet.getPacket()
-        }
-        return arr
-    }
-}
-
 class MeshCommandPacket {
     var type          : UInt8 = 0
     var idCounter     : UInt8 = 0
@@ -147,13 +90,13 @@ class StoneMultiSwitchPacket {
         self.init(crownstoneId: crownstoneId, state: state, timeout:0, intent: intent.rawValue)
     }
     
-    convenience init(crownstoneId: UInt8, state: Float, timeout: UInt16, intent: IntentType) {
-        let switchState = NSNumber(value: min(1,max(0,state))*100).uint8Value
+    convenience init(crownstoneId: UInt8, state: UInt8, timeout: UInt16, intent: IntentType) {
+        let switchState = min(100, state)
         self.init(crownstoneId: crownstoneId, state: switchState, timeout: timeout, intent: intent.rawValue)
     }
     
     convenience init(crownstoneId: UInt8, state: Float, timeout: UInt16, intent: UInt8) {
-        let switchState = NSNumber(value: min(1,max(0,state))*100).uint8Value
+        let switchState = min(100, state)
         self.init(crownstoneId: crownstoneId, state: switchState, timeout: timeout, intent: intent)
     }
     

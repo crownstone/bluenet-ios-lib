@@ -73,68 +73,6 @@ public class StateHandler {
         }
     }
     
-    public func getAllSchedules() -> Promise<[ScheduleConfigurator]> {
-        return Promise<[ScheduleConfigurator]> { seal in
-            let dataPromise : Promise<[UInt8]> = self._getState(StateType.schedule)
-            dataPromise
-                .done{ data -> Void in
-                    if (data.count == 0) {
-                        LOG.error("Got empty list from scheduler state")
-                        seal.reject(BluenetError.INCORRECT_DATA_COUNT_FOR_ALL_TIMERS)
-                        return
-                    }
-            
-                    let amountOfTimers : UInt8 = data[0]
-                    
-                    if (amountOfTimers == 0) {
-                        seal.reject(BluenetError.NO_TIMER_FOUND)
-                        return
-                    }
-                    
-                    let amountOfDatapoints : UInt8 = 12
-                    
-                    let amountOfTimersInt : Int = NSNumber(value: amountOfTimers).intValue
-                    let amountOfDatapointsInt : Int = NSNumber(value: amountOfDatapoints).intValue
-                    
-                    let totalCount : Int = 1 + amountOfTimersInt * amountOfDatapointsInt
-                    
-                    if (data.count < totalCount) {
-                        LOG.error("Got list of size \(data.count) from scheduler state: \(data)")
-                        seal.reject(BluenetError.INCORRECT_DATA_COUNT_FOR_ALL_TIMERS)
-                        return
-                    }
-                    
-                    var result = [ScheduleConfigurator]()
-                    for i in [Int](0..<amountOfTimersInt) {
-                        var datablock = [UInt8]()
-                        for j in [Int](0..<amountOfDatapointsInt) {
-                            datablock.append(data[i*amountOfDatapointsInt + j + 1])
-                        }
-                        result.append(ScheduleConfigurator(scheduleEntryIndex: NSNumber(value: i).uint8Value, data: datablock))
-                    }
-                    
-                    seal.fulfill(result)
-                    
-                }
-                .catch{ err in seal.reject(err) }
-        }
-    }
-    
-    public func getAvailableScheduleEntryIndex() -> Promise<UInt8> {
-        return Promise<UInt8> { seal in
-            self.getAllSchedules()
-                .done{ schedules -> Void in
-                    for schedule in schedules {
-                        if (schedule.isAvailable()) {
-                            seal.fulfill(schedule.scheduleEntryIndex)
-                            return
-                        }
-                    }
-                    seal.reject(BluenetError.NO_SCHEDULE_ENTRIES_AVAILABLE)
-                }
-                .catch{ err in seal.reject(err) }
-        }
-    }
     
     func _writeToState(packet: [UInt8]) -> Promise<Void> {
         let params = _getStateWriteParameters()

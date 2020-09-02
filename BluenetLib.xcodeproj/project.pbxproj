@@ -92,7 +92,6 @@
 		FA843F0021B6D51800F633A3 /* BroadcastProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA843EFF21B6D51800F633A3 /* BroadcastProtocol.swift */; };
 		FA843F1C21B6DDD200F633A3 /* PeripheralStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA843F1B21B6DDD200F633A3 /* PeripheralStateManager.swift */; };
 		FA843F1E21B6E47800F633A3 /* BluenetErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA843F1D21B6E47800F633A3 /* BluenetErrors.swift */; };
-		FA8A9E061F15007E002028F6 /* SchedulerPackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA8A9E051F15007E002028F6 /* SchedulerPackets.swift */; };
 		FA8AC2C821C939C5000C35C1 /* BluenetTimekeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA8AC2C721C939C5000C35C1 /* BluenetTimekeeper.swift */; };
 		FA94D01821A6E62F00AB8331 /* Bluenet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882921E38C0F000913AE6 /* Bluenet.swift */; };
 		FA94D01B21A6E62F00AB8331 /* BluenetCBDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0B813A1F94BB510090168B /* BluenetCBDelegate.swift */; };
@@ -136,7 +135,6 @@
 		FA94D04821A6E63000AB8331 /* BluenetTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882AA1E38C0F100913AE6 /* BluenetTypes.swift */; };
 		FA94D04921A6E63000AB8331 /* Characteristics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882AB1E38C0F100913AE6 /* Characteristics.swift */; };
 		FA94D04A21A6E63000AB8331 /* Services.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882AC1E38C0F100913AE6 /* Services.swift */; };
-		FA94D04B21A6E63000AB8331 /* SchedulerPackets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA8A9E051F15007E002028F6 /* SchedulerPackets.swift */; };
 		FA94D04C21A6E63000AB8331 /* WatchLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA40BD52199CD9000ACF053 /* WatchLogger.swift */; };
 		FA94D04D21A6E63000AB8331 /* Conversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882AF1E38C0F100913AE6 /* Conversion.swift */; };
 		FA94D04E21A6E63000AB8331 /* Eventbus.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5882B01E38C0F100913AE6 /* Eventbus.swift */; };
@@ -271,7 +269,6 @@
 		FA843EFF21B6D51800F633A3 /* BroadcastProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastProtocol.swift; sourceTree = "<group>"; };
 		FA843F1B21B6DDD200F633A3 /* PeripheralStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeripheralStateManager.swift; sourceTree = "<group>"; };
 		FA843F1D21B6E47800F633A3 /* BluenetErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluenetErrors.swift; sourceTree = "<group>"; };
-		FA8A9E051F15007E002028F6 /* SchedulerPackets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SchedulerPackets.swift; sourceTree = "<group>"; };
 		FA8AC2C721C939C5000C35C1 /* BluenetTimekeeper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluenetTimekeeper.swift; sourceTree = "<group>"; };
 		FA94D08421A71D0000AB8331 /* CryptoSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoSwift.framework; path = Carthage/Build/watchOS/CryptoSwift.framework; sourceTree = "<group>"; };
 		FA94D08521A71D0100AB8331 /* SwiftyJSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftyJSON.framework; path = Carthage/Build/watchOS/SwiftyJSON.framework; sourceTree = "<group>"; };
@@ -462,7 +459,6 @@
 				FA5882AA1E38C0F100913AE6 /* BluenetTypes.swift */,
 				FA5882AB1E38C0F100913AE6 /* Characteristics.swift */,
 				FA5882AC1E38C0F100913AE6 /* Services.swift */,
-				FA8A9E051F15007E002028F6 /* SchedulerPackets.swift */,
 			);
 			path = protocol;
 			sourceTree = "<group>";
@@ -773,7 +769,6 @@
 				FA761ABB2397CFDC003FEF41 /* BehaviourHasher.swift in Sources */,
 				FAA023F121C2A4D30059A64D /* BroadcastElement.swift in Sources */,
 				FA2261C11E55A7B9001D0262 /* DeviceHandler.swift in Sources */,
-				FA8A9E061F15007E002028F6 /* SchedulerPackets.swift in Sources */,
 				FA8AC2C821C939C5000C35C1 /* BluenetTimekeeper.swift in Sources */,
 				FA7BE69E1E449287009E633D /* MeshPackets.swift in Sources */,
 				FA843EFE21B6D3A600F633A3 /* BroadcastHandler.swift in Sources */,
@@ -916,7 +911,6 @@
 				FA94D04921A6E63000AB8331 /* Characteristics.swift in Sources */,
 				FA94D04A21A6E63000AB8331 /* Services.swift in Sources */,
 				FAAB602A21CBCD9700183587 /* BluenetErrors.swift in Sources */,
-				FA94D04B21A6E63000AB8331 /* SchedulerPackets.swift in Sources */,
 				FA94D04C21A6E63000AB8331 /* WatchLogger.swift in Sources */,
 				FA94D04D21A6E63000AB8331 /* Conversion.swift in Sources */,
 				FA94D04E21A6E63000AB8331 /* Eventbus.swift in Sources */,

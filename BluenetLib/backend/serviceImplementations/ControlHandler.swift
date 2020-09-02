@@ -118,7 +118,7 @@ public class ControlHandler {
     }
     
     public func pulse() -> Promise<Void> {
-        let switchOn  = ControlPacketsGenerator.getSwitchStatePacket(1)
+        let switchOn  = ControlPacketsGenerator.getSwitchStatePacket(100)
         let switchOff = ControlPacketsGenerator.getSwitchStatePacket(0)
         return Promise<Void> { seal in
             _writeControlPacket(bleManager: self.bleManager, switchOn)
@@ -173,7 +173,7 @@ public class ControlHandler {
      * Switches power intelligently.
      * State has to be between 0 and 1
      */
-    public func setSwitchState(_ state: Float) -> Promise<Void> {
+    public func setSwitchState(_ state: UInt8) -> Promise<Void> {
         let packet = ControlPacketsGenerator.getSwitchStatePacket(state)
         return _writeControlPacket(bleManager: self.bleManager, packet)
     }
@@ -225,10 +225,10 @@ public class ControlHandler {
      * This method will ask the current switch state and listen to the notification response. 
      * It will then switch the crownstone. If it was > 0 --> 0 if it was 0 --> 1.
      **/
-    public func toggleSwitchState(stateForOn : Float = 1.0) -> Promise<Float> {
+    public func toggleSwitchState(stateForOn : UInt8 = 100) -> Promise<UInt8> {
         let stateHandler = StateHandler(bleManager: self.bleManager, eventBus: self.eventBus, settings: self.settings)
-        return Promise<Float> { seal -> Void in
-            var newSwitchState : Float = 0;
+        return Promise<UInt8> { seal -> Void in
+            var newSwitchState : UInt8 = 0;
             stateHandler.getSwitchState()
                 .then{ currentSwitchState -> Promise<Void> in
                     if (currentSwitchState == 0) {
@@ -247,7 +247,7 @@ public class ControlHandler {
     /**
     State is a number between 0 and 1
     */
-    public func switchPWM(_ state: Float) -> Promise<Void> {
+    public func switchPWM(_ state: UInt8) -> Promise<Void> {
         LOG.info("BLUENET_LIB: switching PWM to \(state)")
         return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getPwmSwitchPacket(state))
     }
@@ -262,19 +262,6 @@ public class ControlHandler {
         return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getResetErrorPacket(errorMask: resetErrorMask))
     }
     
-    
-    /**
-     * If the changeState is true, then the state and timeout will be used. If it is false, the keepaliveState on the Crownstone will be cleared and nothing will happen when the timer runs out.
-     */
-    public func keepAliveState(changeState: Bool, state: Float, timeout: UInt16) -> Promise<Void> {
-        LOG.info("BLUENET_LIB: Keep alive State")
-        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getKeepAliveStatePacket(changeState: changeState, state: state, timeout: timeout))
-    }
-    
-    public func keepAliveRepeat() -> Promise<Void> {
-        LOG.info("BLUENET_LIB: Keep alive")
-        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getKeepAliveRepeatPacket())
-    }
     
     public func allowDimming(allow: Bool) -> Promise<Void> {
         LOG.info("BLUENET_LIB: allowDimming")
@@ -324,31 +311,7 @@ public class ControlHandler {
                 }
             }
     }
-    
-    /**
-     * This is used to configure the scheduler. The ScheduleConfigurator can be used to configure the data without knowing the protocol.
-     **/
-    public func setSchedule(scheduleConfig: ScheduleConfigurator) -> Promise<Void> {
-        if (scheduleConfig.scheduleEntryIndex > 9) {
-            return Promise<Void> { seal in seal.reject(BluenetError.INCORRECT_SCHEDULE_ENTRY_INDEX) }
-        }
-        let packet = ControlPacketsGenerator.getSetSchedulePacket(data: scheduleConfig.getPacket())
-
-        return _writeControlPacket(bleManager: self.bleManager, packet)
-    }
-    
-    
-    /**
-     * There are 10 schedulers. You pick which one you want to clear with the timerIndex which can be 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
-     **/
-    public func clearSchedule(scheduleEntryIndex: UInt8) -> Promise<Void> {
-        if (scheduleEntryIndex > 9) {
-            return Promise<Void> { seal in seal.reject(BluenetError.INCORRECT_SCHEDULE_ENTRY_INDEX) }
-        }
         
-        return _writeControlPacket(bleManager: self.bleManager, ControlPacketsGenerator.getScheduleRemovePacket(timerIndex: scheduleEntryIndex))
-    }
-    
     
     public func registerTrackedDevice(
         trackingNumber: UInt16,

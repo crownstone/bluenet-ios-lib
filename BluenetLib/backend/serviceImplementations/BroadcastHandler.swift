@@ -25,10 +25,10 @@ public class BroadcastHandler {
 
     
     
-    public func multiSwitch(referenceId: String, stoneId: UInt8, switchState: Float, autoExecute: Bool = true) -> Promise<Void> {
+    public func multiSwitch(referenceId: String, stoneId: UInt8, switchState: UInt8, autoExecute: Bool = true) -> Promise<Void> {
         return Promise<Void> { seal in
             
-            let switchState = NSNumber(value: min(1,max(0,switchState))*100).uint8Value
+            let switchState = min(100, switchState)
             let packet  = BroadcastStone_SwitchPacket(crownstoneId: stoneId, state: switchState).getPacket()
             let element = BroadcastElement(referenceId: referenceId, type: .multiSwitch, packet: packet, seal: seal, target: stoneId)
             

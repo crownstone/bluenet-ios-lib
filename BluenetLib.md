@@ -220,12 +220,6 @@ bluenet.control.commandFactoryReset()
 #### disconnect() -> Promise\<Void> 
 > If you tell iOS to disconnect, it will actually remain connected for about 10 seconds. This method will tell the Crownstone to break the connection instead. This allows you to disconnect instantly.
 
-#### keepAliveState(changeState: Bool, state: Float, timeout: UInt16) -> Promise\<Void> 
-> Keepalives are meant to instruct the Crownstone what to do if it doesnot hear anything anymore. If the changeState is true, then the state and timeout (which is seconds) will be used. This means that the Crownstone will switch to match state once the timeout expires. If any keepalive is received in the meantime, the timeout will be postponed. Only the last received state will be executed. If changeState is false, the keepaliveState on the Crownstone will be cleared and nothing will happen when the timer runs out.
-
-#### keepAlive() -> Promise\<Void> 
-> This keepAlive is just to postpone the timeout and does not influence the set state.
-
 ### Config
 
 #### IMPORTANT! After setting the settings you want, you need to call the reset() method: bluenet.control.reset() before the new settings are used!

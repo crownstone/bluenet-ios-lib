@@ -43,9 +43,8 @@ import CoreBluetooth
         }
     }
     
-     func getSwitchStatePacket(_ state: Float) -> [UInt8] {
-        let switchState = min(1,max(0,state))*100
-        let value = NSNumber(value: switchState as Float).uint8Value
+     func getSwitchStatePacket(_ state: UInt8) -> [UInt8] {
+        let value = min(100, state)
         return self.getControlPacket(type: ControlType.switch).load(value).getPacket()
     }
     
@@ -72,27 +71,9 @@ import CoreBluetooth
         return self.getControlPacket(type: ControlType.relay).load(state).getPacket()
     }
     
-     func getPwmSwitchPacket(_ state: Float) -> [UInt8] {
-        let switchState : UInt8 = NSNumber(value: min(1,max(0,state))*100).uint8Value
-        return self.getControlPacket(type: ControlType.pwm).load(switchState).getPacket()
-    }
-    
-    /** LEGACY **/
-     func getKeepAliveStatePacket(changeState: Bool, state: Float, timeout: UInt16) -> [UInt8] {
-        let switchState = min(1,max(0,state))*100
-        
-        // make sure we do not
-        var actionState : UInt8 = 0
-        if (changeState == true) {
-            actionState = 1
-        }
-        
-        return KeepAliveStatePacket(action: actionState, state: NSNumber(value: switchState as Float).uint8Value, timeout: timeout).getPacket()
-    }
-    
-    /** LEGACY **/
-     func getKeepAliveRepeatPacket() -> [UInt8] {
-        return ControlPacket(type: .keepAliveRepeat).getPacket()
+     func getPwmSwitchPacket(_ state: UInt8) -> [UInt8] {
+        let value = min(100, state)
+        return self.getControlPacket(type: ControlType.pwm).load(value).getPacket()
     }
     
      func getResetErrorPacket(errorMask: UInt32) -> [UInt8] {
@@ -202,7 +183,7 @@ import CoreBluetooth
                     
                     if (crownstoneId != nil && state != nil) {
                         innerPacket.append(crownstoneId!.uint8Value)
-                        innerPacket.append(NSNumber(value: min(1,max(0,state!.floatValue))*100).uint8Value)
+                        innerPacket.append(min(100,state!.uint8Value))
                         count += 1
                     }
                 }
