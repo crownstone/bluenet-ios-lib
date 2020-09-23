@@ -370,9 +370,9 @@ public class BroadcastProtocol {
         let time = NSNumber(value: getCurrentTimestampForCrownstone()).uint32Value
         var validationTime = NSNumber(value: (time >> 7 & 0x0000FFFF)).uint16Value
         
-        // HACK OVERRIDE
-        validationTime = 0xCAFE
-        
+        if (devicePreferences.useTimeBasedNonce == false) {
+            validationTime = 0xCAFE
+        }
         
         let encryptedBlock = BroadcastProtocol.getRC5Payload(firstPart: validationTime, locationState: locationState, devicePreferences: devicePreferences, key: key)
         

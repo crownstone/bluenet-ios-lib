@@ -71,10 +71,11 @@ class BroadcastBuffer {
         }
     }
     
-    func getPacket(validationNonce: UInt32) -> [UInt8] {
+    func getPacket(devicePreferences : DevicePreferences) -> [UInt8] {
         var data = [UInt8]()
         
-        var nonceToUse = validationNonce
+        var nonceToUse = NSNumber(value: getCurrentTimestampForCrownstone()).uint32Value
+    
         if (self.elements.count == 1) {
             // since the nonce is based on time, we might need to overwrite this with a crownstone time instead of the current time (if stone has no time yet)
             if (self.elements[0].singular == true && self.elements[0].customValidationNonce != nil) {
@@ -82,8 +83,9 @@ class BroadcastBuffer {
             }
         }
         
-        // HACK OVERRIDE
-        nonceToUse = 0xCAFEBABE
+        if (devicePreferences.useTimeBasedNonce == false) {
+            nonceToUse = 0xCAFEBABE
+        }
         
 //        print("Creating buffer packet")
 //        print("time \(Conversion.uint32_to_uint8_array(nonceToUse))")

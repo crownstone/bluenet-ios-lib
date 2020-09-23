@@ -536,7 +536,7 @@ public class PeripheralStateManager {
         }
         
         if let localizationKey = self.settings.getLocalizationKey(referenceId: referenceIdOfBuffer) {
-            let packet = bufferToBroadcast.getPacket(validationNonce: NSNumber(value:time).uint32Value)
+            let packet = bufferToBroadcast.getPacket(devicePreferences: self.settings.devicePreferences)
             
             do {
                 let otherUUIDs = try BroadcastProtocol.getUInt16ServiceNumbers(
