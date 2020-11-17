@@ -10,7 +10,11 @@ import Foundation
 import PromiseKit
 import CoreBluetooth
 
-
+enum EncryptionOption : UInt8 {
+    case noEncryption        = 0
+    case optionalEncryption  = 1
+    case mandatoryEncryption = 2
+}
 
  public class ControlPacketsGeneratorClass {
     var connectionProtocolVersion : ConnectionProtocolVersion = .v1
@@ -196,6 +200,13 @@ import CoreBluetooth
         }
     }
     
+    func getHubDataPacket(encryptionOption: EncryptionOption, payload: [UInt8]) -> [UInt8] {
+        var data : [UInt8] = []
+        data.append(encryptionOption.rawValue)
+        data += payload
+        
+        return self.getControlPacket(type: .trackedDeviceHeartbeat).load(payload).getPacket()
+    }
     
     func getTrackedDeviceHeartbeatPacket(
         trackingNumber: UInt16,

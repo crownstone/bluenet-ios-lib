@@ -74,7 +74,8 @@ public class Bluenet {
 
     // declare the classes handling the library protocol
 #if os(iOS)
-    public let dfu      : DfuHandler!
+    public let dfu        : DfuHandler!
+    public let hub        : HubHandler!
 #endif
     public let config     : ConfigHandler!
     public let setup      : SetupHandler!
@@ -111,7 +112,8 @@ public class Bluenet {
        
         // pass on the shared objects to the worker classes
     #if os(iOS)
-        self.dfu     = DfuHandler(bleManager:bleManager, eventBus: eventBus, settings: settings)
+        self.dfu       = DfuHandler(bleManager:bleManager, eventBus: eventBus, settings: settings)
+        self.hub       = HubHandler(bleManager:bleManager, eventBus: eventBus, settings: settings)
     #endif
         self.config    = ConfigHandler(   bleManager:bleManager,  eventBus: eventBus, settings: settings)
         self.setup     = SetupHandler(    bleManager:bleManager,  eventBus: eventBus, settings: settings)

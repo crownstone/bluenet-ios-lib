@@ -102,6 +102,7 @@ public enum ControlTypeV3 : UInt16 {
     case allow_dimming          = 40
     case lock_switch            = 41
     case UART_message           = 50
+    case hub_data               = 51
     case addBehaviour           = 60
     case replaceBehaviour       = 61
     case removeBehaviour        = 62
@@ -120,6 +121,9 @@ public enum ControlTypeV3 : UInt16 {
     case getLastResetReason     = 85
     case getGPREGRET            = 86
     case getAdcChannelSwaps     = 87
+    case getRAMStatistics       = 88
+    case uploadMicroApp         = 90
+    case cleanFlashMemory       = 100
     
     case UNSPECIFIED = 65535
 }
@@ -250,6 +254,8 @@ public enum DeviceType : UInt8 {
     case builtin = 3
     case crownstoneUSB = 4
     case builtinOne = 5
+    case plugOne = 6
+    case hub = 7
 }
 
 

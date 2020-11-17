@@ -161,6 +161,7 @@
 		FAAB603121CBCE1800183587 /* BroadcastBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA023ED21C2A3B10059A64D /* BroadcastBuffer.swift */; };
 		FAAB603221CBCE1B00183587 /* BroadcastElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA023F021C2A4D30059A64D /* BroadcastElement.swift */; };
 		FAAB603321CBCE3800183587 /* BroadcastHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA843EFD21B6D3A600F633A3 /* BroadcastHandler.swift */; };
+		FAB69334256400A0002F4C92 /* HubHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB69333256400A0002F4C92 /* HubHandler.swift */; };
 		FACF2AD924631E0500B88E0D /* opCode7_type4.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA588E3524334BF800343B8A /* opCode7_type4.swift */; };
 		FAD2AFD72189F85D00458520 /* BluenetWatch.h in Headers */ = {isa = PBXBuildFile; fileRef = FAD2AFD52189F85D00458520 /* BluenetWatch.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FADA183D21CA7E6C0066DF9F /* RC5.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADA183C21CA7E6C0066DF9F /* RC5.swift */; };
@@ -279,6 +280,7 @@
 		FAA1381E21B8035800044CF7 /* TimeUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeUtil.swift; sourceTree = "<group>"; };
 		FAA40BD52199CD9000ACF053 /* WatchLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchLogger.swift; sourceTree = "<group>"; };
 		FAA40BD72199D1F300ACF053 /* BlePeripheralManagerWatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlePeripheralManagerWatch.swift; sourceTree = "<group>"; };
+		FAB69333256400A0002F4C92 /* HubHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HubHandler.swift; sourceTree = "<group>"; };
 		FAD2AFD32189F85D00458520 /* BluenetWatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BluenetWatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAD2AFD52189F85D00458520 /* BluenetWatch.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BluenetWatch.h; sourceTree = "<group>"; };
 		FAD2AFD62189F85D00458520 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -411,6 +413,7 @@
 				FA5882911E38C0F000913AE6 /* SetupHandler.swift */,
 				FA3FC25A1ED3499C00DD2F76 /* StateHandler.swift */,
 				FA829309235F21DC0072D9FE /* BehaviourHandler.swift */,
+				FAB69333256400A0002F4C92 /* HubHandler.swift */,
 			);
 			path = serviceImplementations;
 			sourceTree = "<group>";
@@ -828,6 +831,7 @@
 				FA44DC4523685E99001CA4B8 /* ConnectionState.swift in Sources */,
 				FADA183D21CA7E6C0066DF9F /* RC5.swift in Sources */,
 				FA7065DC2003AE8F00C833FE /* opCode1.swift in Sources */,
+				FAB69334256400A0002F4C92 /* HubHandler.swift in Sources */,
 				FA5882C71E38C0F100913AE6 /* EncryptedPackage.swift in Sources */,
 				FA5882CB1E38C0F100913AE6 /* PowerSamples.swift in Sources */,
 				FA7065DE2003AE9D00C833FE /* opCode2.swift in Sources */,
