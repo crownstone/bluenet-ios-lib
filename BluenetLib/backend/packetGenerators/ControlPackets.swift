@@ -108,6 +108,7 @@ enum EncryptionOption : UInt8 {
         return self.getControlPacket(type: ControlType.lock_switch).load(lockValue).getPacket()
     }
     
+     
      func getSwitchCraftPacket(_ enabled: Bool) -> [UInt8] {
         var enabledValue : UInt8 = 0
         if (enabled) {

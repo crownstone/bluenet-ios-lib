@@ -274,6 +274,9 @@ public class ControlHandler {
     }
      
     
+
+    
+    
     /**
      * The session nonce is the only char that is ECB encrypted. We therefore read it without the libraries decryption (AES CTR) and decrypt it ourselves.
      **/

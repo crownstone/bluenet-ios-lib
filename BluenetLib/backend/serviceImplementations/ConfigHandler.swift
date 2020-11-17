@@ -253,6 +253,7 @@ public class ConfigHandler {
         }
     }
     
+    
     public func getSoftOnSpeed () -> Promise<UInt8> {
         return self._getConfig(StateTypeV3.softOnSpeed)
       }
@@ -289,6 +290,13 @@ public class ConfigHandler {
             return Promise<Void> { seal in seal.fulfill(()) }
         }
     }
+    
+    public func setUartKey(_ uartKey: String) -> Promise<Void> {
+        let key = Conversion.hex_string_to_uint8_array(uartKey)
+        let data = StatePacketsGenerator.getWritePacket(type: StateTypeV3.uartKey).load(key)
+        return self._writeToConfig(packet: data.getPacket())
+    }
+    
     
     func _writeToConfig(packet: [UInt8]) -> Promise<Void> {
         let params = _getConfigWriteParameters()
