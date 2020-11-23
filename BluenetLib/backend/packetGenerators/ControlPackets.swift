@@ -10,7 +10,7 @@ import Foundation
 import PromiseKit
 import CoreBluetooth
 
-enum EncryptionOption : UInt8 {
+public enum EncryptionOption : UInt8 {
     case noEncryption        = 0
     case optionalEncryption  = 1
     case mandatoryEncryption = 2

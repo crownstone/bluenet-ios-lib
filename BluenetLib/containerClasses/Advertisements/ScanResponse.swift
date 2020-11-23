@@ -32,7 +32,7 @@ public class ScanResponsePacket {
     public var accumulatedEnergy   :   Int64    = 0
     public var setupMode           :   Bool     = false
     public var stateOfExternalCrownstone : Bool = false
-    public var alternativeState    : Bool = false
+    public var alternativeState    :   Bool = false
     public var data                :   [UInt8]!
     public var encryptedDataStartIndex : Int = 1
     
@@ -40,6 +40,16 @@ public class ScanResponsePacket {
     public var dimmingAllowed      :   Bool     = false
     public var hasError            :   Bool     = false
     public var switchLocked        :   Bool     = false
+    
+    public var uartAlive           :   Bool     = false
+    public var uartAliveEncrypted  :   Bool     = false
+    public var uartEncryptionRequiredByCrownstone : Bool = false
+    public var uartEncryptionRequiredByHub        : Bool = false
+    public var hubIsSetup          :   Bool     = false
+    public var hubHasInternet      :   Bool     = false
+    public var hubHasError         :   Bool     = false
+    
+    public var hubData             :   [UInt8]   = []
     
     public var partialTimestamp    :   UInt16   = 0
     public var timestamp           :   Double   = -1

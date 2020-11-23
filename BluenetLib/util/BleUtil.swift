@@ -140,6 +140,24 @@ func _writePacketWithReply(bleManager: BleManager, service: String, readCharacte
     }
 }
 
+func _writePacketWithReply(bleManager: BleManager, _ packet: [UInt8]) -> Promise<ResultBasePacket> {
+    let writeCommand =  { _writeControlPacket(bleManager: bleManager, packet) }
+    let readParameters = getControlReadParameters(bleManager: bleManager);
+    return Promise<ResultBasePacket> { seal in
+        bleManager.setupSingleNotification(readParameters.service, characteristicId: readParameters.characteristic, writeCommand: writeCommand)
+            .done{ data -> Void in
+                let resultPacket = StatePacketsGenerator.getReturnPacket()
+                resultPacket.load(data)
+                if (resultPacket.valid == false) {
+                    LOG.error("BluenetLib: Error Invalid response data \(data)")
+                    return seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
+                }
+                seal.fulfill(resultPacket)
+            }
+            .catch{ err in seal.reject(err) }
+    }
+}
+
 
 func _writePacketWithReply(bleManager: BleManager, writeCommand : @escaping voidPromiseCallback) -> Promise<ResultBasePacket> {
     let readParameters = getControlReadParameters(bleManager: bleManager);
