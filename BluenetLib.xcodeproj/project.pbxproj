@@ -162,7 +162,6 @@
 		FAAB603221CBCE1B00183587 /* BroadcastElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA023F021C2A4D30059A64D /* BroadcastElement.swift */; };
 		FAAB603321CBCE3800183587 /* BroadcastHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA843EFD21B6D3A600F633A3 /* BroadcastHandler.swift */; };
 		FAB69334256400A0002F4C92 /* HubHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB69333256400A0002F4C92 /* HubHandler.swift */; };
-		FAB6933B25642D6B002F4C92 /* hubData.md in Resources */ = {isa = PBXBuildFile; fileRef = FAB6933A25642D6B002F4C92 /* hubData.md */; };
 		FAB6934025643B68002F4C92 /* opCode7_type5.swift in Resources */ = {isa = PBXBuildFile; fileRef = FAB6933F25643B68002F4C92 /* opCode7_type5.swift */; };
 		FACF2AD924631E0500B88E0D /* opCode7_type4.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA588E3524334BF800343B8A /* opCode7_type4.swift */; };
 		FAD2AFD72189F85D00458520 /* BluenetWatch.h in Headers */ = {isa = PBXBuildFile; fileRef = FAD2AFD52189F85D00458520 /* BluenetWatch.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -283,7 +282,6 @@
 		FAA40BD52199CD9000ACF053 /* WatchLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchLogger.swift; sourceTree = "<group>"; };
 		FAA40BD72199D1F300ACF053 /* BlePeripheralManagerWatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlePeripheralManagerWatch.swift; sourceTree = "<group>"; };
 		FAB69333256400A0002F4C92 /* HubHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HubHandler.swift; sourceTree = "<group>"; };
-		FAB6933A25642D6B002F4C92 /* hubData.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = hubData.md; sourceTree = "<group>"; };
 		FAB6933F25643B68002F4C92 /* opCode7_type5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode7_type5.swift; sourceTree = "<group>"; };
 		FAD2AFD32189F85D00458520 /* BluenetWatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BluenetWatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAD2AFD52189F85D00458520 /* BluenetWatch.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BluenetWatch.h; sourceTree = "<group>"; };
@@ -343,7 +341,6 @@
 				FA2EEF771DA3FF9A0096B67F /* CryptoSwift.framework */,
 				FA2EEF781DA3FF9A0096B67F /* PromiseKit.framework */,
 				FA2EEF791DA3FF9A0096B67F /* SwiftyJSON.framework */,
-				FAB6933925642D47002F4C92 /* doc */,
 				FA5882881E38C0F000913AE6 /* BluenetLib */,
 				FA5882B41E38C0F100913AE6 /* BluenetLibTests */,
 				FA94D08421A71D0000AB8331 /* CryptoSwift.framework */,
@@ -598,14 +595,6 @@
 			path = Broadcast;
 			sourceTree = "<group>";
 		};
-		FAB6933925642D47002F4C92 /* doc */ = {
-			isa = PBXGroup;
-			children = (
-				FAB6933A25642D6B002F4C92 /* hubData.md */,
-			);
-			path = doc;
-			sourceTree = "<group>";
-		};
 		FAD2AFD42189F85D00458520 /* BluenetWatch */ = {
 			isa = PBXGroup;
 			children = (
@@ -746,7 +735,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FAB6933B25642D6B002F4C92 /* hubData.md in Resources */,
 				FAE862621CF4B3830027539D /* Cartfile in Resources */,
 				FAB6934025643B68002F4C92 /* opCode7_type5.swift in Resources */,
 			);

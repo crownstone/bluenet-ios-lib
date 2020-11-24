@@ -26,12 +26,15 @@ public class HubHandler {
         self.eventBus   = eventBus
     }
     
-    public func sendHubData(_ encryptionOption: UInt8, payload: [UInt8] ) -> Promise<Void> {
+    public func sendHubData(_ encryptionOption: UInt8, payload: [UInt8], timeoutSeconds: Double = 5, successIfWriteSuccessful: Bool = true ) -> Promise<[UInt8]> {
+        return Promise<[UInt8]> { seal in
+        
         let option = EncryptionOption(rawValue: encryptionOption)!
         let packet = ControlPacketsGenerator.getHubDataPacket(encryptionOption: option, payload: payload)
         let readParameters = getControlReadParameters(bleManager: bleManager);
         let writeCommand = {() -> Promise<Void> in return _writeControlPacket(bleManager: self.bleManager, packet) }
-        return self.bleManager.setupNotificationStream(
+        var resultData : [UInt8] = []
+        self.bleManager.setupNotificationStream(
             readParameters.service,
             characteristicId: readParameters.characteristic,
             writeCommand: writeCommand,
@@ -44,6 +47,7 @@ public class HubHandler {
                             return .CONTINUE
                         }
                         else if (result.resultCode == ResultValue.SUCCESS) {
+                            resultData = result.payload
                             return .FINISHED
                         }
                         else {
@@ -60,22 +64,13 @@ public class HubHandler {
                     return .ABORT_ERROR
                 }
             },
-            timeout: 5, successIfWriteSuccessful: true)
+            timeout: timeoutSeconds, successIfWriteSuccessful: successIfWriteSuccessful)
+            .done{ _ -> Void in
+                seal.fulfill(resultData)
+            }
+            .catch{ err in seal.reject(err) }
+        }
     }
     
-    public func transferTokenAndSphereId(hubToken: String, sphereId: String) -> Promise<Void> {
-        var payload : [UInt8] = []
-        let hubTokenBytes = Conversion.string_to_uint8_array(hubToken)
-        let sphereIdBytes = Conversion.string_to_uint8_array(sphereId)
-        
-        payload.append(HubDataTypes.setup.rawValue)
-        payload += Conversion.uint16_to_uint8_array(NSNumber(value: hubTokenBytes.count).uint16Value)
-        payload += hubTokenBytes
-        payload += Conversion.uint16_to_uint8_array(NSNumber(value: sphereIdBytes.count).uint16Value)
-        payload += sphereIdBytes
-        
-        return self.sendHubData(EncryptionOption.noEncryption.rawValue, payload: payload)
-    }
-
 }
 
