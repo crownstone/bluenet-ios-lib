@@ -806,6 +806,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 }
                 else {
                     collectedData = data
+                    LOG.info("Successfully combined data: \(collectedData)")
                 }
                 resolved = true
                 unsubscribe!()
