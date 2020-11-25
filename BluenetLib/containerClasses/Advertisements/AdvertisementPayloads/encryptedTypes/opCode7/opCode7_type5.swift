@@ -16,6 +16,7 @@ func parseOpcode7_type5(serviceData : ScanResponsePacket, data : [UInt8]) {
             
             let payload = DataStepper(data)
             
+            serviceData.hubMode = true
             serviceData.stateOfExternalCrownstone = false
             serviceData.alternativeState = true
             

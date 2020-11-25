@@ -855,6 +855,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         // attempt to decrypt it
                         let decryptedData = try EncryptionHandler.decrypt(Data(data), connectionState: self.connectionState)
                         collectedData = decryptedData.bytes;
+                        LOG.info("Successfully decrypted data: \(collectedData)")
                     }
                     catch {
                         LOG.error("Error decrypting notifcation in stream! \(error)")
@@ -864,7 +865,10 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 }
                 else {
                     collectedData = data
+                    LOG.info("Successfully combined data: \(collectedData)")
                 }
+                
+                
                 
                 if let data = collectedData {
                     let result = resultHandler(data)

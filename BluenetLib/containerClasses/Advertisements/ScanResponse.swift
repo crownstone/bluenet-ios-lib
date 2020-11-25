@@ -62,6 +62,7 @@ public class ScanResponsePacket {
     public var errorMode           :   Bool     = false
     public var timeSet             :   Bool     = false
     public var switchCraftEnabled  :   Bool     = false
+    public var hubMode             :   Bool     = false
     public var tapToToggleEnabled  :   Bool     = false
     public var behaviourOverridden :   Bool     = false
     
@@ -208,6 +209,7 @@ public class ScanResponsePacket {
             "dataType"             : NSNumber(value: self.dataType),
             "stateOfExternalCrownstone" : self.stateOfExternalCrownstone,
             "alternativeState"     : self.alternativeState,
+            "hubMode"              : self.hubMode,
             "hasError"             : self.hasError,
             "setupMode"            : self.setupMode,
             
