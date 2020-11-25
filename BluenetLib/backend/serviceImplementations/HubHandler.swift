@@ -11,10 +11,6 @@ import PromiseKit
 import CoreBluetooth
 
 
-public enum HubDataTypes : UInt8 {
-    case setup = 0
-}
-
 public class HubHandler {
     let bleManager : BleManager!
     var settings : BluenetSettings!
