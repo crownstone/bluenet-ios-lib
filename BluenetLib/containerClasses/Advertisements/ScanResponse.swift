@@ -235,6 +235,16 @@ public class ScanResponsePacket {
             "errorMode"            : self.errorMode,
             "errors"               : errorsDictionary,
             
+            "hubData"              : self.hubData,
+            
+            "uartAlive"            : self.uartAlive,
+            "uartAliveEncrypted"   : self.uartAliveEncrypted,
+            "uartEncryptionRequiredByCrownstone" : self.uartEncryptionRequiredByCrownstone,
+            "uartEncryptionRequiredByHub"        : self.uartEncryptionRequiredByHub,
+            "hubIsSetup"           : self.hubIsSetup,
+            "hubHasInternet"       : self.hubHasInternet,
+            "hubHasError"          : self.hubHasError,
+            
             "uniqueElement"        : self.uniqueIdentifier,
             "timeSet"              : self.timeSet,
             "deviceType"           : String(describing: self.deviceType),

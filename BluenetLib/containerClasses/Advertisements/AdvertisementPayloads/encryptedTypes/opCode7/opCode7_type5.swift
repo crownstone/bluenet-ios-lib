@@ -21,7 +21,7 @@ func parseOpcode7_type5(serviceData : ScanResponsePacket, data : [UInt8]) {
             
             try payload.skip() // first byte is the datatype.
             serviceData.crownstoneId      = try payload.getUInt8()
-            serviceData.flagsBitmask        = try payload.getUInt8()
+            serviceData.flagsBitmask      = try payload.getUInt8()
             serviceData.hubData           = try payload.getBytes(9)
             serviceData.partialTimestamp  = try payload.getUInt16()
             try payload.skip()
@@ -38,7 +38,7 @@ func parseOpcode7_type5(serviceData : ScanResponsePacket, data : [UInt8]) {
             serviceData.hubIsSetup          = bitmaskArray[4]
             serviceData.hubHasInternet      = bitmaskArray[5]
             serviceData.hubHasError         = bitmaskArray[6]
-            // serviceData.reserved = bitmaskArray[7]
+            serviceData.timeSet             = bitmaskArray[7]
           
            
             serviceData.uniqueIdentifier = NSNumber(value: serviceData.partialTimestamp)
