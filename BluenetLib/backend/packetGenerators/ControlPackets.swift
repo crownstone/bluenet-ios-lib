@@ -204,9 +204,10 @@ public enum EncryptionOption : UInt8 {
     func getHubDataPacket(encryptionOption: EncryptionOption, payload: [UInt8]) -> [UInt8] {
         var data : [UInt8] = []
         data.append(encryptionOption.rawValue)
+        data.append(0)  // reserved, 0 mandatory
         data += payload
         
-        return self.getControlPacket(type: .hub_data).load(payload).getPacket()
+        return self.getControlPacket(type: .hub_data).load(data).getPacket()
     }
     
     func getTrackedDeviceHeartbeatPacket(

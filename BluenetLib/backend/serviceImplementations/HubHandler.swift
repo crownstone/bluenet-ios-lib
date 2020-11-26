@@ -24,7 +24,6 @@ public class HubHandler {
     
     public func sendHubData(_ encryptionOption: UInt8, payload: [UInt8], timeoutSeconds: Double = 5, successIfWriteSuccessful: Bool = true ) -> Promise<[UInt8]> {
         return Promise<[UInt8]> { seal in
-        
         let option = EncryptionOption(rawValue: encryptionOption)!
         let packet = ControlPacketsGenerator.getHubDataPacket(encryptionOption: option, payload: payload)
         let readParameters = getControlReadParameters(bleManager: bleManager);
