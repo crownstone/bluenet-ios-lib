@@ -380,7 +380,7 @@ public enum StateTypeV3 : UInt16 {
     case behaviourSettings = 150
     case softOnSpeed = 156
     case hubMode = 157
-    case uartKey = 160
+    case uartKey = 158
 }
 
 public enum GetPersistenceMode : UInt8 {
