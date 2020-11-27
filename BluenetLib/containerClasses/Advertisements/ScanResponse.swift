@@ -45,7 +45,7 @@ public class ScanResponsePacket {
     public var uartAliveEncrypted  :   Bool     = false
     public var uartEncryptionRequiredByCrownstone : Bool = false
     public var uartEncryptionRequiredByHub        : Bool = false
-    public var hubIsSetup          :   Bool     = false
+    public var hubHasBeenSetup     :   Bool     = false
     public var hubHasInternet      :   Bool     = false
     public var hubHasError         :   Bool     = false
     
@@ -243,7 +243,7 @@ public class ScanResponsePacket {
             "uartAliveEncrypted"   : self.uartAliveEncrypted,
             "uartEncryptionRequiredByCrownstone" : self.uartEncryptionRequiredByCrownstone,
             "uartEncryptionRequiredByHub"        : self.uartEncryptionRequiredByHub,
-            "hubIsSetup"           : self.hubIsSetup,
+            "hubHasBeenSetup"      : self.hubHasBeenSetup,
             "hubHasInternet"       : self.hubHasInternet,
             "hubHasError"          : self.hubHasError,
             
