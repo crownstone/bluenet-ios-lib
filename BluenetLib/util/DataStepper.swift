@@ -54,6 +54,11 @@ public class DataStepper {
         return try self._request(amount)
     }
     
+    public func getRemainingBytes() throws -> [UInt8] {
+        let amount = self.length - self.position
+        return try self._request(amount)
+    }
+    
     public func getBytes(_ amount : UInt16) throws -> [UInt8] {
         let int = NSNumber(value: amount).intValue
         return try self._request(int)
