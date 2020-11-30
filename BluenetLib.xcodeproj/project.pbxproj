@@ -162,7 +162,8 @@
 		FAAB603221CBCE1B00183587 /* BroadcastElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA023F021C2A4D30059A64D /* BroadcastElement.swift */; };
 		FAAB603321CBCE3800183587 /* BroadcastHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA843EFD21B6D3A600F633A3 /* BroadcastHandler.swift */; };
 		FAB69334256400A0002F4C92 /* HubHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB69333256400A0002F4C92 /* HubHandler.swift */; };
-		FAB6934025643B68002F4C92 /* opCode7_type5.swift in Resources */ = {isa = PBXBuildFile; fileRef = FAB6933F25643B68002F4C92 /* opCode7_type5.swift */; };
+		FACDA5F225752E760081693E /* opCode7_type5.swift in Sources */ = {isa = PBXBuildFile; fileRef = FACDA5F125752E760081693E /* opCode7_type5.swift */; };
+		FACDA5F325752E760081693E /* opCode7_type5.swift in Sources */ = {isa = PBXBuildFile; fileRef = FACDA5F125752E760081693E /* opCode7_type5.swift */; };
 		FACF2AD924631E0500B88E0D /* opCode7_type4.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA588E3524334BF800343B8A /* opCode7_type4.swift */; };
 		FAD2AFD72189F85D00458520 /* BluenetWatch.h in Headers */ = {isa = PBXBuildFile; fileRef = FAD2AFD52189F85D00458520 /* BluenetWatch.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FADA183D21CA7E6C0066DF9F /* RC5.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADA183C21CA7E6C0066DF9F /* RC5.swift */; };
@@ -282,7 +283,7 @@
 		FAA40BD52199CD9000ACF053 /* WatchLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchLogger.swift; sourceTree = "<group>"; };
 		FAA40BD72199D1F300ACF053 /* BlePeripheralManagerWatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlePeripheralManagerWatch.swift; sourceTree = "<group>"; };
 		FAB69333256400A0002F4C92 /* HubHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HubHandler.swift; sourceTree = "<group>"; };
-		FAB6933F25643B68002F4C92 /* opCode7_type5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode7_type5.swift; sourceTree = "<group>"; };
+		FACDA5F125752E760081693E /* opCode7_type5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = opCode7_type5.swift; sourceTree = "<group>"; };
 		FAD2AFD32189F85D00458520 /* BluenetWatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BluenetWatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAD2AFD52189F85D00458520 /* BluenetWatch.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BluenetWatch.h; sourceTree = "<group>"; };
 		FAD2AFD62189F85D00458520 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -501,7 +502,7 @@
 			isa = PBXGroup;
 			children = (
 				FA588E3524334BF800343B8A /* opCode7_type4.swift */,
-				FAB6933F25643B68002F4C92 /* opCode7_type5.swift */,
+				FACDA5F125752E760081693E /* opCode7_type5.swift */,
 			);
 			path = opCode7;
 			sourceTree = "<group>";
@@ -736,7 +737,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				FAE862621CF4B3830027539D /* Cartfile in Resources */,
-				FAB6934025643B68002F4C92 /* opCode7_type5.swift in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -766,6 +766,7 @@
 				FA5882CA1E38C0F100913AE6 /* NearestItem.swift in Sources */,
 				FA7065D92003AE4600C833FE /* ScanResponse.swift in Sources */,
 				FA5882D31E38C0F100913AE6 /* BlePackets.swift in Sources */,
+				FACDA5F225752E760081693E /* opCode7_type5.swift in Sources */,
 				FA5882C61E38C0F100913AE6 /* BluenetSettings.swift in Sources */,
 				FA588E3624334BF800343B8A /* opCode7_type4.swift in Sources */,
 				FAA023EE21C2A3B10059A64D /* BroadcastBuffer.swift in Sources */,
@@ -924,6 +925,7 @@
 				FA94D04E21A6E63000AB8331 /* Eventbus.swift in Sources */,
 				FA94D04F21A6E63000AB8331 /* JSONUtils.swift in Sources */,
 				FA94D05021A6E63000AB8331 /* NotificationMerger.swift in Sources */,
+				FACDA5F325752E760081693E /* opCode7_type5.swift in Sources */,
 				FA94D05121A6E63000AB8331 /* Util.swift in Sources */,
 				FA94D05221A6E63000AB8331 /* Globals.swift in Sources */,
 				FA1F799F21A328CF00E05F31 /* Watch.swift in Sources */,
