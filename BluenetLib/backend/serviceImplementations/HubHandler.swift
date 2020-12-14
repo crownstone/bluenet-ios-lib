@@ -63,7 +63,19 @@ public class HubHandler {
             .done{ _ -> Void in
                 seal.fulfill(resultData)
             }
-            .catch{ err in seal.reject(err) }
+            .catch{ err in
+                if let bleErr = err as? BluenetError {
+                    if (bleErr == BluenetError.NOTIFICATION_STREAM_TIMEOUT) {
+                        seal.reject(BluenetError.HUB_REPLY_TIMEOUT)
+                    }
+                    else {
+                        seal.reject(err)
+                    }
+                }
+                else {
+                    seal.reject(err)
+                }
+            }
         }
     }
     

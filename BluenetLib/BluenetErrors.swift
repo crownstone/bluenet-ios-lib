@@ -165,6 +165,9 @@ public enum BluenetError : Error {
     case ERR_CANCELLED
     case ERR_PROTOCOL_UNSUPPORTED
     case ERR_NO_ACCESS
+    
+    //hub
+    case HUB_REPLY_TIMEOUT
 }
 
 
