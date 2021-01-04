@@ -351,7 +351,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         }
         
         self.manager!.desiredAccuracy = kCLLocationAccuracyThreeKilometers
-        self.manager!.pausesLocationUpdatesAutomatically = true
+        self.manager!.pausesLocationUpdatesAutomatically = false
 //        self.manager!.startUpdatingLocation()
         if (self.manager!.responds(to: #selector(getter: CLLocationManager.allowsBackgroundLocationUpdates))) {
             LOG.info("BLUENET_LIB_NAV: Manager allows background location updates. We enable it.")
@@ -532,6 +532,29 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
         }
     }
     
+    
+    /*
+     *  Discussion:
+     *    Invoked when location updates are automatically paused.
+     */
+    public func locationManagerDidPauseLocationUpdates(_ manager: CLLocationManager) {
+        LOG.error("BLUENET_LIB_NAV: PAUSED locationManagerDidPauseLocationUpdates\n");
+        self.eventBus.emit("LOCALIZATION_PAUSED_STATE", 1)
+    }
+    
+    /*
+     *  Discussion:
+     *    Invoked when location updates are automatically resumed.
+     *
+     *    In the event that your application is terminated while suspended, you will
+     *      not receive this notification.
+     */
+    @available(iOS 6.0, *)
+    public func locationManagerDidResumeLocationUpdates(_ manager: CLLocationManager) {
+        LOG.error("BLUENET_LIB_NAV: RESUMED locationManagerDidResumeLocationUpdates\n");
+        self.eventBus.emit("LOCALIZATION_PAUSED_STATE", 0)
+    }
+
     
     
     

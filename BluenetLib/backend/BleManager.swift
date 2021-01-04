@@ -280,6 +280,48 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         return peripherals[0]
     }
     
+    
+//    public func massConnect(handles: [String]) {
+//        return Promise<Void> { seal in
+//
+//
+//            var uuidArray : [UUID] = [];
+//            for handle in handles {
+//                let handleUuid = UUID(uuidString: uuid)
+//                if let handle = handleUuid {
+//                    uuidArray.append(handleUuid)
+//                }
+//            }
+//
+//                let peripherals = self.centralManager.retrievePeripherals(withIdentifiers: uuidArray);
+//                if (peripherals.count == 0) {
+//                    seal.reject(BluenetError.CAN_NOT_CONNECT_TO_UUID)
+//                }
+//                else {
+//                    let peripheral = peripherals[0]
+//                    self.connectingPeripheral = peripheral
+//                    self.connectingPeripheral!.delegate = self
+//
+//                    // setup the pending promise for connection
+//                    self.pendingPromise.load(seal.fulfill, seal.reject, type: .CONNECT)
+//                    self.pendingPromise.setDelayedReject(timeoutDurations.connect, errorOnReject: .CONNECT_TIMEOUT)
+//                    var connectionOptions : [String: Any]? = nil
+//                    connectionOptions = [
+//                        "CBConnectPeripheralOptionEnableTransportBridgingKey": false,
+//                        "CBConnectPeripheralOptionStartDelayKey": NSNumber(value: 0)
+//                    ]
+//                    self.centralManager.connect(connectingPeripheral!, options: connectionOptions)
+//                }
+//            }
+//        }
+//        .recover{(error: Error) -> Void in
+//            // we want to hook into the failed connect to set the connecting peripheral to nil. The promise should still fail
+//            // for other users of the returned promise.
+//            self.connectingPeripheral = nil
+//            throw error
+//        }
+//    }
+    
     /**
      * Connect to a ble device. The uuid is the Apple UUID which differs between phones for a single device
      *
