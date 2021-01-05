@@ -159,6 +159,7 @@ public class ControlHandler {
                     case .NO_ACCESS:
                         seal.reject(BluenetError.ERR_NO_ACCESS)
                     default:
+                        LOG.error("BLUENET_LIB: trackedDeviceHeartbeat error \(resultPacket.resultCode)")
                         seal.reject(BluenetError.UNKNOWN_ERROR)
                     }
                 }
