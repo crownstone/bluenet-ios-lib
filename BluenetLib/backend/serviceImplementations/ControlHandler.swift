@@ -137,37 +137,6 @@ public class ControlHandler {
     
     
     
-    public func trackedDeviceHeartbeat(trackingNumber: UInt16, locationId: UInt8, deviceToken: UInt32, ttlMinutes: UInt8) -> Promise<Void> {
-        return Promise<Void> { seal in
-            let packet = ControlPacketsGenerator.getTrackedDeviceHeartbeatPacket(
-                trackingNumber: trackingNumber,
-                locationUid: locationId,
-                deviceToken: deviceToken,
-                ttlMinutes: ttlMinutes
-            )
-            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packet) }
-            
-            _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
-                .done { resultPacket in
-                    switch resultPacket.resultCode {
-                    case .SUCCESS:
-                        seal.fulfill(())
-                    case.ERR_ALREADY_EXISTS:
-                        seal.reject(BluenetError.ERR_ALREADY_EXISTS)
-                    case .ERR_TIMEOUT:
-                        seal.reject(BluenetError.ERR_TIMEOUT)
-                    case .NO_ACCESS:
-                        seal.reject(BluenetError.ERR_NO_ACCESS)
-                    default:
-                        LOG.error("BLUENET_LIB: trackedDeviceHeartbeat error \(resultPacket.resultCode)")
-                        seal.reject(BluenetError.UNKNOWN_ERROR)
-                    }
-                }
-                .catch{ err in seal.reject(err)
-            }
-        }
-    }
-    
     
     
     /**
@@ -327,19 +296,74 @@ public class ControlHandler {
         deviceToken: UInt32,
         ttlMinutes: UInt16
     ) -> Promise<Void> {
-        return self._writeControlPacketWithReply(ControlPacketsGenerator.getTrackedDeviceRegistrationPacket(
-            trackingNumber: trackingNumber,
-            locationUid: locationUid,
-            profileId: profileId,
-            rssiOffset: rssiOffset,
-            ignoreForPresence: ignoreForPresence,
-            tapToToggle: tapToToggle,
-            deviceToken: deviceToken,
-            ttlMinutes: ttlMinutes
-        ))
+        return Promise<Void> { seal in
+            let packet = ControlPacketsGenerator.getTrackedDeviceRegistrationPacket(
+                trackingNumber: trackingNumber,
+                locationUid: locationUid,
+                profileId: profileId,
+                rssiOffset: rssiOffset,
+                ignoreForPresence: ignoreForPresence,
+                tapToToggle: tapToToggle,
+                deviceToken: deviceToken,
+                ttlMinutes: ttlMinutes
+            )
+            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packet) }
+            
+            _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
+                .done { resultPacket in
+                    switch resultPacket.resultCode {
+                    case .SUCCESS:
+                        seal.fulfill(())
+                    case.ERR_ALREADY_EXISTS:
+                        seal.reject(BluenetError.ERR_ALREADY_EXISTS)
+                    case .NO_SPACE:
+                        seal.reject(BluenetError.ERR_NO_SPACE)
+                    case .NO_ACCESS:
+                        seal.reject(BluenetError.ERR_NO_ACCESS)
+                    default:
+                        LOG.error("BLUENET_LIB: registerTrackedDevice error \(resultPacket.resultCode)")
+                        seal.reject(BluenetError.UNKNOWN_ERROR)
+                    }
+                }
+                .catch{ err in seal.reject(err) }
+        }
         
     }
 
+    public func trackedDeviceHeartbeat(trackingNumber: UInt16, locationId: UInt8, deviceToken: UInt32, ttlMinutes: UInt8) -> Promise<Void> {
+        return Promise<Void> { seal in
+            let packet = ControlPacketsGenerator.getTrackedDeviceHeartbeatPacket(
+                trackingNumber: trackingNumber,
+                locationUid: locationId,
+                deviceToken: deviceToken,
+                ttlMinutes: ttlMinutes
+            )
+            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, packet) }
+            
+            _writePacketWithReply(bleManager: self.bleManager, writeCommand: writeCommand)
+                .done { resultPacket in
+                    switch resultPacket.resultCode {
+                    case .SUCCESS:
+                        seal.fulfill(())
+                    case.ERR_ALREADY_EXISTS:
+                        seal.reject(BluenetError.ERR_ALREADY_EXISTS)
+                    case .ERR_TIMEOUT:
+                        seal.reject(BluenetError.ERR_TIMEOUT)
+                    case .NO_ACCESS:
+                        seal.reject(BluenetError.ERR_NO_ACCESS)
+                    case .NOT_FOUND:
+                        seal.reject(BluenetError.ERR_NOT_FOUND)
+                    default:
+                        LOG.error("BLUENET_LIB: trackedDeviceHeartbeat error \(resultPacket.resultCode)")
+                        seal.reject(BluenetError.UNKNOWN_ERROR)
+                    }
+                }
+                .catch{ err in seal.reject(err)
+            }
+        }
+    }
+    
+    
     
     
     // MARK: Util
