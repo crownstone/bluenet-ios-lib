@@ -79,7 +79,7 @@ public class ScanResponsePacket {
     var validData = false
     public var dataReadyForUse = false // decryption is successful
     
-    init(_ data: [UInt8], serviceUUID: CBUUID? = nil) {        
+    public init(_ data: [UInt8], serviceUUID: CBUUID? = nil) {        
         self.data = data
         self.serviceUUID = serviceUUID
         

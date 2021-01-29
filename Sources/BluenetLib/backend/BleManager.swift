@@ -110,6 +110,8 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         return self._notificationEventBusses[handle]!
     }
     
+    func isConnected(_ handle: UUID) -> Bool { return self.connections[handle] != nil }
+    
     func _handleStateUpdate(_ state: Any) {
         LOG.info("BLUENET_LIB: Handling a state update \(state)")
         if let stateStr = state as? String {
@@ -343,7 +345,6 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      */
     func abortConnecting(_ handle: UUID) -> Promise<Void> {
         LOG.info("BLUENET_LIB: starting to abort pending connection request for \(handle)")
-        self.peripheralStateManager.pauseAdvertising()
         return Promise<Void> { seal in
             // if there was a connection in progress, cancel it with an error
             if (task(handle).type == .CONNECT) {
@@ -411,7 +412,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     public func waitForPeripheralToDisconnect(_ handle: UUID, timeout : Double) -> Promise<Void> {
         return Promise<Void> { seal in
             // only disconnect if we are actually connected!
-            if self.connections[handle] != nil {
+            if self.isConnected(handle) {
                 LOG.info("BLUENET_LIB: waiting for the connected peripheral to disconnect from us")
                 let disconnectPromise = Promise<Void> { innerSeal in
                     // in case the connected peripheral has been disconnected beween the start and invocation of this method.
@@ -478,11 +479,11 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     func _disconnect(_ handle: UUID, errorMode: Bool = false) -> Promise<Void> {
         return Promise<Void> { seal in
             // only disconnect if we are actually connected!
-            if (self.connections[handle] != nil) {
+            if self.isConnected(handle) {
                 LOG.info("BLUENET_LIB: disconnecting from connected peripheral")
                 let disconnectPromise = Promise<Void> { innerSeal in
                     // in case the connected peripheral has been disconnected beween the start and invocation of this method.
-                    if (self.connections[handle] != nil) {
+                    if self.isConnected(handle) {
                         if (errorMode == true) {
                             self.task(handle).load(innerSeal.fulfill, innerSeal.reject, type: .ERROR_DISCONNECT)
                             self.task(handle).setDelayedReject(timeoutDurations.errorDisconnect, errorOnReject: .ERROR_DISCONNECT_TIMEOUT)
@@ -538,7 +539,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     public func getCharacteristicsFromDevice(_ handle: UUID, serviceId: String) -> Promise<[CBCharacteristic]> {
         return Promise<[CBCharacteristic]> { seal in
             // if we are not connected, exit
-            if self.connections[handle] != nil {
+            if self.isConnected(handle) {
                 // get all services from connected device (is cached if we already know it)
                 self.getServicesFromDevice(handle)
                     // then get all characteristics from connected device (is cached if we already know it)
@@ -589,7 +590,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     func getChacteristic(_ handle: UUID, _ serviceId: String, _ characteristicId: String) -> Promise<CBCharacteristic> {
         return Promise<CBCharacteristic> { seal in
             // if we are not connected, exit
-            if self.connections[handle] != nil {
+            if self.isConnected(handle) {
                 // get all services from connected device (is cached if we already know it)
                 self.getServicesFromDevice(handle)
                     // then get all characteristics from connected device (is cached if we already know it)

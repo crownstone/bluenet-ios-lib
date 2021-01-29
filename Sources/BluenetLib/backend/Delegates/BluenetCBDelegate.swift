@@ -114,6 +114,8 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         BleManager.connectionState(handle).connected()
         BleManager.pendingConnections.removeValue(forKey: handle)
         BleManager.connections[handle] = peripheral
+        
+        BleManager.eventBus.emit("connectedToPeripheral", handle.uuidString)
     }
     
     public func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
@@ -131,6 +133,7 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         BleManager.pendingConnections.removeValue(forKey: handle)
         // lets just remove it from the connections, just in case. It shouldn't be in here, but if it is, its cleaned up again.
         BleManager.connections.removeValue(forKey: handle)
+        BleManager.eventBus.emit("connectedToPeripheralFailed", handle.uuidString)
     }
     
     public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
@@ -179,6 +182,7 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         
         // lets just remove it from the pending connections, just in case. It shouldn't be in here, but if it is, its cleaned up again.
         BleManager.pendingConnections.removeValue(forKey: handle)
+        BleManager.eventBus.emit("disconnectedFromPeripheral", handle.uuidString)
     }
 
 }

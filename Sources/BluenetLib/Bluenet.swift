@@ -356,95 +356,76 @@ public class Bluenet {
      *   - It will disconnect from a connected device if that is the case
      */
     public func connect(_ handle: String, referenceId: String? = nil) -> Promise<Void> {
-        var delayTime : Double = 0
-        if let timeOfLastDisconnectCommand = self.disconnectCommandTimeList[handle] {
-            let minimumTimeBetweenReconnects = timeoutDurations.reconnect // seconds
-            let diff = Date().timeIntervalSince1970 - timeOfLastDisconnectCommand
-            if (diff < minimumTimeBetweenReconnects) {
-                delayTime = minimumTimeBetweenReconnects - diff
-            }
-        }
+        let uid = UUID(uuidString: handle)
+        guard uid != nil else { return Promise<Void> { seal in seal.reject(BluenetError.INVALID_UUID) }}
         
-        let connectionCommand : voidPromiseCallback = {
-            let uid = UUID(uuidString: handle)
-            if let handleUUID = uid {
-                LOG.info("BLUENET_LIB: Connecting to \(handle) now.")
-                self.bleManager.connectionState(handleUUID).start(settings: self.settings)
-                
-                
-                return self.bleManager.connect(handle)
-                    .then{_ -> Promise<ModeInformation> in
-                        LOG.info("BLUENET_LIB: connected!")
-                        return _getCrownstoneModeInformation(bleManager: self.bleManager, handle: handleUUID)
-                    }
-                    .then{ modeInfo -> Promise<Void> in
-                        LOG.info("BLUENET_LIB: got mode info! \(modeInfo)")
-                        self.bleManager.connectionState(handleUUID).setConnectionProtocolVersion(modeInfo.controlMode)
-                        self.bleManager.connectionState(handleUUID).setOperationMode(modeInfo.operationMode)
+        let handleUUID = uid!
+        guard self.bleManager.isConnected(handleUUID) else { return Promise<Void> { seal in seal.fulfill(()) }}
+        
+        LOG.info("BLUENET_LIB: Connecting to \(handle) nowXX.")
+        self.bleManager.connectionState(handleUUID).start(settings: self.settings)
+        
+        
+        return self.bleManager.connect(handle)
+            .then{_ -> Promise<ModeInformation> in
+                LOG.info("BLUENET_LIB: connected!")
+                return _getCrownstoneModeInformation(bleManager: self.bleManager, handle: handleUUID)
+            }
+            .then{ modeInfo -> Promise<Void> in
+                LOG.info("BLUENET_LIB: got mode info! \(modeInfo)")
+                self.bleManager.connectionState(handleUUID).setConnectionProtocolVersion(modeInfo.controlMode)
+                self.bleManager.connectionState(handleUUID).setOperationMode(modeInfo.operationMode)
 
-                        if modeInfo.operationMode == .setup {
-                            // setup mode, handle the setup encryption.
-                            return self.setup(handleUUID).handleSetupPhaseEncryption()
-                        }
-                        else {
-                            return Promise<Void> {seal in
-                                // operation mode (or dfu mode), setup the session nonce.
-                                if modeInfo.operationMode == .operation {
-                                    if (self.bleManager.connectionState(handleUUID).isEncryptionEnabled()) {
-                                        // we have to validate if the referenceId is valid here, otherwise we cannot do encryption
-                                        var activeReferenceId = referenceId
-                                        
-                                        if (referenceId == nil) {
-                                            activeReferenceId = self.getReferenceId(handle: handle)
-                                            if (activeReferenceId == nil) {
-                                                return seal.reject(BluenetError.INVALID_SESSION_REFERENCE_ID)
-                                            }
-                                        }
-                                        
-                                        if (self.settings.keysAvailable(referenceId: activeReferenceId!) == false) {
-                                            return seal.reject(BluenetError.INVALID_SESSION_REFERENCE_ID)
-                                        }
-                                        
-                                        // load the required encryption keys into the connectionstate.
-                                        self.bleManager.connectionState(handleUUID).setActiveKeySet(self.settings.keySets[activeReferenceId!]!)
-                                        self.control(handleUUID).getAndSetSessionNonce()
-                                            .done{_ -> Void in
-                                                seal.fulfill(())
-                                            }
-                                            .catch{err in seal.reject(err)}
+                if modeInfo.operationMode == .setup {
+                    // setup mode, handle the setup encryption.
+                    return self.setup(handleUUID).handleSetupPhaseEncryption()
+                }
+                else {
+                    return Promise<Void> {seal in
+                        // operation mode (or dfu mode), setup the session nonce.
+                        if modeInfo.operationMode == .operation {
+                            if (self.bleManager.connectionState(handleUUID).isEncryptionEnabled()) {
+                                // we have to validate if the referenceId is valid here, otherwise we cannot do encryption
+                                var activeReferenceId = referenceId
+                                
+                                if (referenceId == nil) {
+                                    activeReferenceId = self.getReferenceId(handle: handle)
+                                    if (activeReferenceId == nil) {
+                                        return seal.reject(BluenetError.INVALID_SESSION_REFERENCE_ID)
                                     }
-                                    else {
+                                }
+                                
+                                if (self.settings.keysAvailable(referenceId: activeReferenceId!) == false) {
+                                    return seal.reject(BluenetError.INVALID_SESSION_REFERENCE_ID)
+                                }
+                                
+                                // load the required encryption keys into the connectionstate.
+                                self.bleManager.connectionState(handleUUID).setActiveKeySet(self.settings.keySets[activeReferenceId!]!)
+                                self.control(handleUUID).getAndSetSessionNonce()
+                                    .done{_ -> Void in
                                         seal.fulfill(())
                                     }
-                                }
-                                else {
-                                    seal.fulfill(())
-                                }
+                                    .catch{err in seal.reject(err)}
+                            }
+                            else {
+                                seal.fulfill(())
                             }
                         }
+                        else {
+                            seal.fulfill(())
+                        }
+                    }
                 }
             }
-            else {
-                return Promise<Void> { seal in seal.reject(BluenetError.INVALID_UUID) }
-            }
-        }
-        
-        
-        if (delayTime != 0) {
-            LOG.info("BLUENET_LIB: Delaying connection to \(handle) with \(delayTime) seconds since it recently got a disconnectCommand.")
-            return Promise<Void> { seal in
-                delay(delayTime, {
-                    connectionCommand()
-                        .done{ _ in seal.fulfill(()) }
-                        .catch{err in seal.reject(err) }
-                })
-            }
-        }
-        else {
-            return connectionCommand()
-        }
+      
     }
+
     
+    public func cancelConnectionRequest(_ handle: String) -> Promise<Void> {
+        let handleUUID = UUID(uuidString: handle)
+        
+        return self.bleManager.abortConnecting(handleUUID!)
+    }
     
     /**
      * Disconnect from the connected device. Will also fulfil if there is nothing connected.

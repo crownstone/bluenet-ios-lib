@@ -28,7 +28,7 @@ public class Advertisement {
     public var serviceUUID : CBUUID?
     public var scanResponse : ScanResponsePacket?
     
-    init(handle: String, name: String?, rssi: NSNumber, serviceData: [CBUUID: Data]?, serviceUUID: [CBUUID]?) {
+    public init(handle: String, name: String?, rssi: NSNumber, serviceData: [CBUUID: Data]?, serviceUUID: [CBUUID]?) {
         if (name != nil) {
             self.name = name!
         }

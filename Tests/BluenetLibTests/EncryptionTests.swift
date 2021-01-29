@@ -20,30 +20,30 @@ class EncryptionTests: XCTestCase {
         
         // Put setup code here. This method is called before the invocation of each test method in the class.
         settings = BluenetSettings()
-        
-        settings.loadKeySets(encryptionEnabled: true, keySets: [
-            KeySet(adminKey: "adminKeyForCrown",
-                   memberKey: "memberKeyForHome",
-                   basicKey: "guestKeyForOther",
-                   localizationKey: "localizationKeyX",
-                   serviceDataKey: "myServiceDataKey",
-                   referenceId: "test")
-            ])
-        
-        settings.setLocationState(
-            sphereUID: 234,
-            locationId: 60,
-            profileIndex: 6,
-            deviceToken: 2,
-            referenceId: "test"
-        )
-        settings.setDevicePreferences(
-            rssiOffset: -10,
-            tapToToggle: true,
-            ignoreForBehaviour: false,
-            useBackgroundBroadcasts:true,
-            useBaseBroadcasts: true
-        )
+//        
+//        settings.loadKeySets(encryptionEnabled: true, keySets: [
+//            KeySet(adminKey: "adminKeyForCrown",
+//                   memberKey: "memberKeyForHome",
+//                   basicKey: "guestKeyForOther",
+//                   localizationKey: "localizationKeyX",
+//                   serviceDataKey: "myServiceDataKey",
+//                   referenceId: "test")
+//            ])
+//        
+//        settings.setLocationState(
+//            sphereUID: 234,
+//            locationId: 60,
+//            profileIndex: 6,
+//            deviceToken: 2,
+//            referenceId: "test"
+//        )
+//        settings.setDevicePreferences(
+//            rssiOffset: -10,
+//            tapToToggle: true,
+//            ignoreForBehaviour: false,
+//            useBackgroundBroadcasts:true,
+//            useBaseBroadcasts: true
+//        )
         
         
         BLUENET_ENCRYPTION_TESTING = true
@@ -205,36 +205,36 @@ class EncryptionTests: XCTestCase {
     }
     
     func testBroadcastEncryption() {
-        let devicePreferences = DevicePreferences(rssiOffset: 0, tapToToggle: false, ignoreForBehaviour: true, useBackgroundBroadcasts: false, useBaseBroadcasts: false)
-        let locationState     = LocationState(sphereUID: 4, locationId: 0, profileIndex: 0, deviceToken: 0xf0, referenceId: "test")
-        
-        let otherUUIDs = try? BroadcastProtocol.getUInt16ServiceNumbers(
-            broadcastCounter: 0,
-            locationState: locationState,
-            devicePreferences: devicePreferences,
-            protocolVersion: 0,
-            accessLevel: .basic,
-            key: Conversion.string_to_uint8_array("aLocalizationKey")
-        )
-        
-        var settings = BluenetSettings()
-        settings.userLevel = .basic
-        let keyset = KeySet(adminKey: nil, memberKey: nil, basicKey: "basicKeyForOther", localizationKey: "MyServiceDataKey", serviceDataKey: "aLocalizationKey", referenceId: "test")
-        settings.loadKeySets(encryptionEnabled: true, keySets: [keyset])
-        
-        for uu in otherUUIDs! {
-            print(Conversion.bit_array_to_010_array(Conversion.uint16_to_bit_array(uu)))
-        }
-        
-        
-       var nonce = [UInt8]()
-       for uuidNum in otherUUIDs! {
-           nonce += Conversion.uint16_to_uint8_array(uuidNum)
-       }
-        print(otherUUIDs)
-        
-        let serviceUUID = try? BroadcastProtocol.getEncryptedServiceUUID(referenceId: "test", settings: settings, data: [190, 186, 254, 202,1,2,3], nonce: nonce)
-        print(serviceUUID)
+//        let devicePreferences = DevicePreferences(rssiOffset: 0, tapToToggle: false, ignoreForBehaviour: true, useBackgroundBroadcasts: false, useBaseBroadcasts: false)
+//        let locationState     = LocationState(sphereUID: 4, locationId: 0, profileIndex: 0, deviceToken: 0xf0, referenceId: "test")
+//
+//        let otherUUIDs = try? BroadcastProtocol.getUInt16ServiceNumbers(
+//            broadcastCounter: 0,
+//            locationState: locationState,
+//            devicePreferences: devicePreferences,
+//            protocolVersion: 0,
+//            accessLevel: .basic,
+//            key: Conversion.string_to_uint8_array("aLocalizationKey")
+//        )
+//
+//        var settings = BluenetSettings()
+//        settings.userLevel = .basic
+//        let keyset = KeySet(adminKey: nil, memberKey: nil, basicKey: "basicKeyForOther", localizationKey: "MyServiceDataKey", serviceDataKey: "aLocalizationKey", referenceId: "test")
+//        settings.loadKeySets(encryptionEnabled: true, keySets: [keyset])
+//
+//        for uu in otherUUIDs! {
+//            print(Conversion.bit_array_to_010_array(Conversion.uint16_to_bit_array(uu)))
+//        }
+//
+//
+//       var nonce = [UInt8]()
+//       for uuidNum in otherUUIDs! {
+//           nonce += Conversion.uint16_to_uint8_array(uuidNum)
+//       }
+//        print(otherUUIDs)
+//
+//        let serviceUUID = try? BroadcastProtocol.getEncryptedServiceUUID(referenceId: "test", settings: settings, data: [190, 186, 254, 202,1,2,3], nonce: nonce)
+//        print(serviceUUID)
     }
     
     func testFletcher32() {
