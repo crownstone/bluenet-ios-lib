@@ -110,7 +110,10 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         return self._notificationEventBusses[handle]!
     }
     
-    func isConnected(_ handle: UUID) -> Bool { return self.connections[handle] != nil }
+    func isConnected(_ handle: UUID) -> Bool {
+        print(self.connections)
+        return self.connections[handle] != nil
+    }
     
     func _handleStateUpdate(_ state: Any) {
         LOG.info("BLUENET_LIB: Handling a state update \(state)")
