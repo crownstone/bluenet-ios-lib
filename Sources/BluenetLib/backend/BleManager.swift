@@ -111,7 +111,6 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     }
     
     func isConnected(_ handle: UUID) -> Bool {
-        print(self.connections)
         return self.connections[handle] != nil
     }
     

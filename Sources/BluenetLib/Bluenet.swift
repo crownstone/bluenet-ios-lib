@@ -360,7 +360,7 @@ public class Bluenet {
         guard uid != nil else { return Promise<Void> { seal in seal.reject(BluenetError.INVALID_UUID) }}
         
         let handleUUID = uid!
-        guard self.bleManager.isConnected(handleUUID) else {
+        guard self.bleManager.isConnected(handleUUID) == false else {
             LOG.info("BLUENET_LIB: Already connected to this handle \(handle).")
             return Promise<Void> { seal in seal.fulfill(()) }
         }
