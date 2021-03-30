@@ -131,22 +131,26 @@ public enum EncryptionOption : UInt8 {
     
     
     
-    func getTurnOnPacket(stones:[[String: NSNumber]]) -> [UInt8] {
+    func getTurnOnPacket(stoneIds: [NSNumber]) -> [UInt8] {
         switch (connectionProtocolVersion) {
            case .unknown, .legacy, .v1, .v2:
-               return ControlPacketsGenerator.getMultiSwitchPacket(stones: stones)
+            var convertedPayload : [[String: NSNumber]] = []
+                for crownstoneId in stoneIds {
+                    let state : NSNumber = 100
+                    convertedPayload.append([crownstoneId.stringValue: state])
+                }
+                return ControlPacketsGenerator.getMultiSwitchPacket(stones: convertedPayload)
            case .v3, .v5:
                var innerPacket = [UInt8]()
                var count : UInt8 = 0
-               for stone in stones {
-                   let crownstoneId  = stone["crownstoneId"]
+               for crownstoneId in stoneIds {
                    let state : UInt8 = 255
+
                    
-                   if (crownstoneId != nil) {
-                       innerPacket.append(crownstoneId!.uint8Value)
-                       innerPacket.append(state)
-                       count += 1
-                   }
+                   innerPacket.append(crownstoneId.uint8Value)
+                   innerPacket.append(state)
+                   count += 1
+                   
                }
                
                var dataArray = [UInt8]()

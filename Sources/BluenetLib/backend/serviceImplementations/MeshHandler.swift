@@ -28,8 +28,8 @@ public class MeshHandler {
     /**
      * This channel is used to send different switch commands with individual timeouts, switch states and intents to different crownstones in one message
      */
-    public func turnOn(stones:[[String: NSNumber]]) -> Promise<Void> {
-        return _writeControlPacket(bleManager: self.bleManager, self.handle, ControlPacketsGenerator.getTurnOnPacket(stones: stones))
+    public func turnOn(stoneIds:[NSNumber]) -> Promise<Void> {
+        return _writeControlPacket(bleManager: self.bleManager, self.handle, ControlPacketsGenerator.getTurnOnPacket(stoneIds: stoneIds))
     }
     
     /**

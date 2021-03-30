@@ -68,7 +68,6 @@ public class SetupHandler {
         meshNetworkKey: String,
         meshApplicationKey: String,
         meshDeviceKey: String,
-        meshAccessAddress: String,
         ibeaconUUID: String,
         ibeaconMajor: UInt16,
         ibeaconMinor: UInt16
@@ -82,7 +81,7 @@ public class SetupHandler {
                 adminKey: adminKey,
                 memberKey: memberKey,
                 guestKey: basicKey,
-                meshAccessAddress: meshAccessAddress,
+                meshAccessAddress: "8Ea9BEa6",
                 ibeaconUUID: ibeaconUUID,
                 ibeaconMajor: ibeaconMajor,
                 ibeaconMinor: ibeaconMinor
@@ -95,7 +94,7 @@ public class SetupHandler {
                 adminKey: adminKey,
                 memberKey: memberKey,
                 guestKey: basicKey,
-                meshAccessAddress: meshAccessAddress,
+                meshAccessAddress: "8Ea9BEa6",
                 ibeaconUUID: ibeaconUUID,
                 ibeaconMajor: ibeaconMajor,
                 ibeaconMinor: ibeaconMinor

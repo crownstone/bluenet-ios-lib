@@ -355,16 +355,16 @@ public class Bluenet {
      *   - It will abort other pending connection requests
      *   - It will disconnect from a connected device if that is the case
      */
-    public func connect(_ handle: String, referenceId: String? = nil) -> Promise<Void> {
+    public func connect(_ handle: String, referenceId: String? = nil) -> Promise<CrownstoneMode> {
         let uid = UUID(uuidString: handle)
-        guard uid != nil else { return Promise<Void> { seal in seal.reject(BluenetError.INVALID_UUID) }}
+        guard uid != nil else { return Promise<CrownstoneMode> { seal in seal.reject(BluenetError.INVALID_UUID) }}
         
         let handleUUID = uid!
         guard self.bleManager.isConnected(handleUUID) == false else {
             LOG.info("BLUENET_LIB: Already connected to this handle \(handle).")
-            return Promise<Void> { seal in seal.fulfill(()) }
+            return Promise<CrownstoneMode> { seal in seal.fulfill(self.bleManager.connectionState(handleUUID).operationMode) }
         }
-        LOG.info("BLUENET_LIB: Connecting to \(handle) nowXX.")
+        LOG.info("BLUENET_LIB: Connecting to \(handle) now.")
        
         self.bleManager.connectionState(handleUUID).start(settings: self.settings)
         
@@ -374,17 +374,21 @@ public class Bluenet {
                 LOG.info("BLUENET_LIB: connected!")
                 return _getCrownstoneModeInformation(bleManager: self.bleManager, handle: handleUUID)
             }
-            .then{ modeInfo -> Promise<Void> in
+            .then{ modeInfo -> Promise<CrownstoneMode> in
                 LOG.info("BLUENET_LIB: got mode info! \(modeInfo)")
                 self.bleManager.connectionState(handleUUID).setConnectionProtocolVersion(modeInfo.controlMode)
                 self.bleManager.connectionState(handleUUID).setOperationMode(modeInfo.operationMode)
 
                 if modeInfo.operationMode == .setup {
                     // setup mode, handle the setup encryption.
-                    return self.setup(handleUUID).handleSetupPhaseEncryption()
+                    return Promise<CrownstoneMode> {seal in
+                        self.setup(handleUUID).handleSetupPhaseEncryption()
+                            .done{ _   in seal.fulfill(.setup) }
+                            .catch{err in seal.reject(err)     }
+                    }
                 }
                 else {
-                    return Promise<Void> {seal in
+                    return Promise<CrownstoneMode> {seal in
                         // operation mode (or dfu mode), setup the session nonce.
                         if modeInfo.operationMode == .operation {
                             if (self.bleManager.connectionState(handleUUID).isEncryptionEnabled()) {
@@ -406,21 +410,20 @@ public class Bluenet {
                                 self.bleManager.connectionState(handleUUID).setActiveKeySet(self.settings.keySets[activeReferenceId!]!)
                                 self.control(handleUUID).getAndSetSessionNonce()
                                     .done{_ -> Void in
-                                        seal.fulfill(())
+                                        seal.fulfill(modeInfo.operationMode)
                                     }
                                     .catch{err in seal.reject(err)}
                             }
                             else {
-                                seal.fulfill(())
+                                seal.fulfill(modeInfo.operationMode)
                             }
                         }
                         else {
-                            seal.fulfill(())
+                            seal.fulfill(modeInfo.operationMode)
                         }
                     }
                 }
             }
-      
     }
 
     
