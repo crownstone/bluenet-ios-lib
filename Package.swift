@@ -20,7 +20,7 @@ let package = Package(
         .package(
             name:"BluenetShared",
             url: "https://github.com/crownstone/bluenet-ios-shared",
-            .exact("1.0.1")
+            .exact("1.0.2")
         ),
         .package(
             url: "https://github.com/krzyzanowskim/CryptoSwift",
