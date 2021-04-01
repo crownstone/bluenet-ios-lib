@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import BluenetShared
 
 public var LOG = LogClass(daysToStoreLogs: 7)
 

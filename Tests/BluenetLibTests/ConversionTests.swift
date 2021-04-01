@@ -5,7 +5,7 @@
 //  Created by Alex de Mulder on 11/04/16.
 //  Copyright © 2016 Alex de Mulder. All rights reserved.
 //
-
+#if !os(watchOS)
 import XCTest
 import SwiftyJSON
 @testable import BluenetLib
@@ -102,3 +102,4 @@ class ConversionTests: XCTestCase {
         print(Conversion.uint16_to_hex_string(0x000f))
     }
 }
+#endif

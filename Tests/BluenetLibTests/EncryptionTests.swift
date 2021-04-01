@@ -6,6 +6,7 @@
 //  Copyright © 2016 Alex de Mulder. All rights reserved.
 //
 
+#if !os(watchOS)
 import XCTest
 import CryptoSwift
 import PromiseKit
@@ -462,3 +463,4 @@ class EncryptionTests: XCTestCase {
 //        
 //    }
 }
+#endif

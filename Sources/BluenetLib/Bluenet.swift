@@ -132,9 +132,11 @@ public class Bluenet {
         return StateHandler(handle: handle, bleManager:bleManager, eventBus: eventBus, settings: settings)
     }
     
+    #if os(iOS)
     public func dfu(_ handle: UUID) -> DfuHandler {
         return DfuHandler(handle: handle, bleManager:bleManager, eventBus: eventBus, settings: settings)
     }
+    #endif
     
     public func hub(_ handle: UUID) -> HubHandler {
         return HubHandler(handle: handle, bleManager:bleManager, eventBus: eventBus, settings: settings)

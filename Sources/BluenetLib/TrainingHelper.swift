@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 import SwiftyJSON
 
+#if os(iOS)
 
 /**
 
@@ -112,3 +113,4 @@ public class TrainingHelper {
    
 }
 
+#endif

@@ -6,7 +6,7 @@
 //  Copyright © 2018 Alex de Mulder. All rights reserved.
 //
 
-
+#if !os(watchOS)
 import XCTest
 import SwiftyJSON
 @testable import BluenetLib
@@ -34,3 +34,4 @@ class PacketTests: XCTestCase {
     }
     
 }
+#endif

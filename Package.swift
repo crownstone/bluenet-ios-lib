@@ -2,6 +2,7 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
+import Foundation
 
 let package = Package(
     name: "BluenetLib",
@@ -20,7 +21,7 @@ let package = Package(
         .package(
             name:"BluenetShared",
             url: "https://github.com/crownstone/bluenet-ios-shared",
-            .exact("1.0.2")
+            .exact("1.1.0")
         ),
         .package(
             url: "https://github.com/krzyzanowskim/CryptoSwift",
@@ -39,10 +40,6 @@ let package = Package(
             url: "https://github.com/mxcl/PromiseKit",
             .exact("6.13.2")
         )
-
-
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -52,8 +49,13 @@ let package = Package(
             dependencies: ["PromiseKit","CryptoSwift","BluenetShared","NordicDFU","SwiftyJSON"],
             path: "Sources"
         ),
-        .testTarget(
-            name: "BluenetLibTests",
-            dependencies: ["PromiseKit","CryptoSwift","BluenetShared","NordicDFU","SwiftyJSON", "BluenetLib"]),
+//        .testTarget(
+//            name: "BluenetLibTests",
+//            dependencies: ["PromiseKit","CryptoSwift","BluenetShared","NordicDFU","SwiftyJSON", "BluenetLib"]),
     ]
 )
+
+if ProcessInfo.processInfo.environment["TARGETING_WATCHOS"] == "true" {
+  // #workaround(xcodebuild -version 11.6, Test targets don’t work on watchOS.) @exempt(from: unicode)
+  package.targets.removeAll(where: { $0.isTest })
+}

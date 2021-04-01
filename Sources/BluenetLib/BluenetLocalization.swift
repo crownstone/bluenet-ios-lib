@@ -41,6 +41,7 @@ struct LocationSummary {
                                                         we emit the exit location event if we were in a different location before.
     "currentLocation"           Dictionary              ["region": String, "location": String], returns the result of the classifier each second as long as it is a valid measurement.
  */
+#if os(iOS)
 public class BluenetLocalization {
     // Modules
     public var locationManager : LocationManager!
@@ -333,3 +334,4 @@ public class BluenetLocalization {
     }
 }
 
+#endif

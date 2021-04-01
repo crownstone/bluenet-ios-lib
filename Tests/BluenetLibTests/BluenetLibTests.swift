@@ -6,6 +6,7 @@
 //  Copyright © 2016 Alex de Mulder. All rights reserved.
 //
 
+#if !os(watchOS)
 import XCTest
 import SwiftyJSON
 import PromiseKit
@@ -225,3 +226,4 @@ class BluenetLibTests: XCTestCase {
         XCTAssertEqual(3957429649, fletcher32(abcdefgh))
     }
 }
+#endif

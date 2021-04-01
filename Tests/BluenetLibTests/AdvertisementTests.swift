@@ -6,6 +6,7 @@
 //  Copyright © 2016 Alex de Mulder. All rights reserved.
 //
 
+#if !os(watchOS)
 import XCTest
 import SwiftyJSON
 @testable import BluenetLib
@@ -97,3 +98,4 @@ class AdvertisementTests: XCTestCase {
         //print("RESPONSE: \(response.getJSON())")
     }
 }
+#endif

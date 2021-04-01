@@ -9,6 +9,7 @@
 import Foundation
 import SwiftyJSON
 
+#if os(iOS)
 public class TrainingData {
     public var data = [[String: Any]]()
     
@@ -45,3 +46,4 @@ public class TrainingData {
         return JSONUtils.stringify(JSON(self.data))
     }
 }
+#endif

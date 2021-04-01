@@ -11,7 +11,7 @@ import PromiseKit
 import CoreBluetooth
 import NordicDFU
 
-
+#if os(iOS)
 public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate {
     let bleManager : BleManager!
     var settings : BluenetSettings!
@@ -281,3 +281,4 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
     }
     
 }
+#endif

@@ -11,6 +11,7 @@ import CoreLocation
 import SwiftyJSON
 import BluenetShared
 
+#if os(iOS)
 public class iBeaconContainer {
     var UUID : Foundation.UUID;
     var referenceId = ""
@@ -87,3 +88,4 @@ public class iBeaconPacket: iBeaconPacketProtocol {
     }
     
 }
+#endif

@@ -1,8 +1,7 @@
 //
-//  guideStoneManager.swift
 //  BluenetLibIOS
 //
-//  Created by Alex de Mulder on 11/04/16./Users/alex/Library/Developer/Xcode/DerivedData/BluenetLibIOS-dcbozafhnxsptqgpaxsncklrmaoz/Build/Products/Debug-iphoneos/BluenetLibIOS.framework
+//  Created by Alex de Mulder on 11/04/16.
 //  Copyright © 2016 Alex de Mulder. All rights reserved.
 //
 
@@ -11,6 +10,9 @@ import CoreLocation
 import PromiseKit
 import SwiftyJSON
 import UIKit
+
+
+#if os(iOS)
 
 public class LocationManager : NSObject, CLLocationManagerDelegate {
     var manager : CLLocationManager?
@@ -664,3 +666,4 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     }
 
 }
+#endif
