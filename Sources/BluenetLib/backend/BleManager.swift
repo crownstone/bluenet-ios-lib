@@ -91,7 +91,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     
     func task(_ handle: UUID) -> PromiseContainer {
         if self._tasks[handle] == nil {
-            self._tasks[handle] = PromiseContainer()
+            self._tasks[handle] = PromiseContainer(handle)
         }
         return self._tasks[handle]!
     }

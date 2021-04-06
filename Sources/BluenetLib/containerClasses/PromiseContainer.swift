@@ -37,6 +37,8 @@ enum PromiseType {
 
 
 class PromiseContainer {
+    var handle : UUID?
+    
     fileprivate var _fulfillVoidPromise             : (Void) -> ()                  = {_ in }
     fileprivate var _fulfillIntPromise              : (Int) -> Void                 = {_ in }
     fileprivate var _fulfillServiceListPromise      : ([CBService]) -> Void         = {_ in }
@@ -45,10 +47,20 @@ class PromiseContainer {
     fileprivate var _fulfillDataPromise             : ([UInt8]) -> Void    = {_ in }
     fileprivate var _rejectPromise                  : (Error) -> Void           = {_ in }
     fileprivate var rejectId : String = ""
+    
     var type = RequestType.NONE
     var promiseType = PromiseType.NONE
     var completed = false
     var loadedPromise = false
+    
+    /**
+        Handle is only used for logging.
+     */
+    init(handle: UUID) {
+        self.handle = UUID
+        self._clear()
+    }
+    
     
     func load(_ fulfill: @escaping (Void) -> (), _ reject: @escaping (Error) -> Void, type: RequestType) {
         _cancelAnyPreviousPromise(newPromiseType: type)
@@ -108,7 +120,7 @@ class PromiseContainer {
             delay(delayTimeInSeconds, { self.fulfill(()) })
         }
         else {
-            _rejectPromise(BluenetError.CANNOT_SET_TIMEOUT_WITH_THIS_TYPE_OF_PROMISE)
+            _reject(BluenetError.CANNOT_SET_TIMEOUT_WITH_THIS_TYPE_OF_PROMISE)
         }
     }
     
@@ -122,10 +134,6 @@ class PromiseContainer {
         })
     }
     
-    
-    init() {
-        self._clear()
-    }
     
     
     func _clear() {
@@ -173,7 +181,7 @@ class PromiseContainer {
                 self._clear()
             }
             else {
-                LOG.error("DEALLOCATING PROMISE OF TYPE \(self.type) \(self.promiseType) TO SET: \(newPromiseType)")
+                LOG.error("DEALLOCATING PROMISE OF TYPE \(self.type) \(self.promiseType) TO SET: \(newPromiseType) \(self.handle)")
                 self.reject(BluenetError.REPLACED_WITH_OTHER_PROMISE)
                 self._clear()
             }
@@ -187,7 +195,7 @@ class PromiseContainer {
                 _fulfillVoidPromise(())
             }
             else {
-                _rejectPromise(BluenetError.WRONG_TYPE_OF_PROMISE)
+                _reject(BluenetError.WRONG_TYPE_OF_PROMISE)
             }
             _clear()
         }
@@ -200,7 +208,7 @@ class PromiseContainer {
                 _fulfillVoidPromise(())
             }
             else {
-                _rejectPromise(BluenetError.WRONG_TYPE_OF_PROMISE)
+                _reject(BluenetError.WRONG_TYPE_OF_PROMISE)
             }
             _clear()
         }
@@ -213,7 +221,7 @@ class PromiseContainer {
                 _fulfillIntPromise(data)
             }
             else {
-                _rejectPromise(BluenetError.WRONG_TYPE_OF_PROMISE)
+                _reject(BluenetError.WRONG_TYPE_OF_PROMISE)
             }
         }
         _clear()
@@ -226,7 +234,7 @@ class PromiseContainer {
                 _fulfillServiceListPromise(data)
             }
             else {
-                _rejectPromise(BluenetError.WRONG_TYPE_OF_PROMISE)
+                _reject(BluenetError.WRONG_TYPE_OF_PROMISE)
             }
         }
         _clear()
@@ -239,7 +247,7 @@ class PromiseContainer {
                 _fulfillCharacteristicListPromise(data)
             }
             else {
-                _rejectPromise(BluenetError.WRONG_TYPE_OF_PROMISE)
+                _reject(BluenetError.WRONG_TYPE_OF_PROMISE)
             }
         }
         _clear()
@@ -252,7 +260,7 @@ class PromiseContainer {
                 _fulfillCharacteristicPromise(data)
             }
             else {
-                _rejectPromise(BluenetError.WRONG_TYPE_OF_PROMISE)
+                _reject(BluenetError.WRONG_TYPE_OF_PROMISE)
             }
         }
         _clear()
@@ -265,7 +273,7 @@ class PromiseContainer {
                 _fulfillDataPromise(data)
             }
             else {
-                _rejectPromise(BluenetError.WRONG_TYPE_OF_PROMISE)
+                _reject(BluenetError.WRONG_TYPE_OF_PROMISE)
             }
         }
         _clear()
@@ -275,9 +283,14 @@ class PromiseContainer {
     func reject(_ error: Error) {
         if (self.completed == false) {
             self.completed = true
-            _rejectPromise(error)
+            _reject(error)
         }
         _clear()
+    }
+    
+    func _reject(_ error: Error) {
+        LOG.error("BLUENET_LIB: PromiseContainer error \(error) \(self.handle)")
+        _rejectPromise(error)
     }
     
 }
