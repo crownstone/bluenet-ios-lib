@@ -56,8 +56,8 @@ class PromiseContainer {
     /**
         Handle is only used for logging.
      */
-    init(handle: UUID) {
-        self.handle = UUID
+    init(_ handle: UUID) {
+        self.handle = handle
         self._clear()
     }
     
