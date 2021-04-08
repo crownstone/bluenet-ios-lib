@@ -17,7 +17,7 @@ struct timeoutDurations {
     static let disconnect              : Double = 3
     static let errorDisconnect         : Double = 5
     static let cancelPendingConnection : Double = 3
-    static let connect                 : Double = 12
+    static let connect                 : Double = 15
     static let reconnect               : Double = 0.5
     static let getServices             : Double = 3
     static let getCharacteristics      : Double = 3
@@ -674,7 +674,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
 
                         // the fulfil and reject are handled in the peripheral delegate
                         if (self.connectionState(handle).isEncryptionEnabled()) {
-                            LOG.debug("BLUENET_LIB: writing service \(serviceId) characteristic \(characteristicId) data: \(data.bytes) which will be encrypted.")
+                            LOG.info("BLUENET_LIB: writing service \(serviceId) characteristic \(characteristicId) data: \(data.bytes) which will be encrypted.")
                             do {
                                 let encryptedData = try EncryptionHandler.encrypt(data, connectionState: self.connectionState(handle))
                                 connection.writeValue(encryptedData, for: characteristic, type: type)
@@ -801,7 +801,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         // attempt to decrypt it
                         let decryptedData = try EncryptionHandler.decrypt(Data(data), connectionState: self.connectionState(handle))
                         collectedData = decryptedData.bytes;
-                        LOG.info("Successfully decrypted data: \(collectedData) from \(handle)")
+                        LOG.debug("Successfully decrypted data: \(collectedData) from \(handle)")
                     }
                     catch let err  {
                         LOG.error("Error decrypting single notification! Original data: \(data) err: \(err) from \(handle)")
@@ -809,7 +809,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 }
                 else {
                     collectedData = data
-                    LOG.info("Successfully combined data: \(collectedData) from \(handle)")
+                    LOG.debug("Successfully combined data: \(collectedData) from \(handle)")
                 }
                 resolved = true
                 unsubscribe!()
@@ -859,7 +859,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         // attempt to decrypt it
                         let decryptedData = try EncryptionHandler.decrypt(Data(data), connectionState: self.connectionState(handle))
                         collectedData = decryptedData.bytes;
-                        LOG.info("Successfully decrypted data: \(String(describing: collectedData)) from \(handle)")
+                        LOG.debug("Successfully decrypted data: \(String(describing: collectedData)) from \(handle)")
                     }
                     catch {
                         LOG.error("Error decrypting notifcation in stream! \(error) from \(handle)")
@@ -869,7 +869,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 }
                 else {
                     collectedData = data
-                    LOG.info("Successfully combined data: \(String(describing: collectedData))  from \(handle)")
+                    LOG.debug("Successfully combined data: \(String(describing: collectedData))  from \(handle)")
                 }
 
 

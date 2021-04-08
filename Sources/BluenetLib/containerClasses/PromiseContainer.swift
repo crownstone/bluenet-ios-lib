@@ -38,14 +38,14 @@ enum PromiseType {
 
 class PromiseContainer {
     var handle : UUID?
-    
-    fileprivate var _fulfillVoidPromise             : (Void) -> ()                  = {_ in }
-    fileprivate var _fulfillIntPromise              : (Int) -> Void                 = {_ in }
-    fileprivate var _fulfillServiceListPromise      : ([CBService]) -> Void         = {_ in }
+     
+    fileprivate var _fulfillVoidPromise             : (Void) -> ()                   = {_ in }
+    fileprivate var _fulfillIntPromise              : (Int) -> Void                  = {_ in }
+    fileprivate var _fulfillServiceListPromise      : ([CBService]) -> Void          = {_ in }
     fileprivate var _fulfillCharacteristicListPromise : ([CBCharacteristic]) -> Void = {_ in }
-    fileprivate var _fulfillCharacteristicPromise   : (CBCharacteristic) -> Void    = {_ in }
-    fileprivate var _fulfillDataPromise             : ([UInt8]) -> Void    = {_ in }
-    fileprivate var _rejectPromise                  : (Error) -> Void           = {_ in }
+    fileprivate var _fulfillCharacteristicPromise   : (CBCharacteristic) -> Void     = {_ in }
+    fileprivate var _fulfillDataPromise             : ([UInt8]) -> Void              = {_ in }
+    fileprivate var _rejectPromise                  : (Error) -> Void                = {_ in }
     fileprivate var rejectId : String = ""
     
     var type = RequestType.NONE
@@ -289,7 +289,12 @@ class PromiseContainer {
     }
     
     func _reject(_ error: Error) {
-        LOG.error("BLUENET_LIB: PromiseContainer error \(error) \(self.handle)")
+        if let handle = self.handle {
+            LOG.error("BLUENET_LIB: PromiseContainer error \(error) \(handle)")
+        }
+        else {
+            LOG.error("BLUENET_LIB: PromiseContainer error \(error) NO_HANDLE")
+        }
         _rejectPromise(error)
     }
     

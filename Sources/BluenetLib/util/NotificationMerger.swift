@@ -21,7 +21,7 @@ class NotificationMerger {
     }
     
     func merge(_ data: [UInt8]) {
-        LOG.info("----- BLUENET NotificationMerger: Incoming data part \(data)")
+        LOG.debug("----- BLUENET NotificationMerger: Incoming data part \(data)")
         if (data.count > 0) {
             if (data[0] == 0xFF) {
                 self.data += data[1...]
