@@ -18,37 +18,39 @@ struct s128Bits {
 public class BroadcastProtocol {
     
     
-    
+    /**
+     This functionality will be disabled since it is not tested anymore.
+     */
     public static func useDynamicBackground() -> Bool {
-        #if os(iOS)
-            
-            let systemVersion = UIDevice.current.systemVersion
-            let versions = systemVersion.components(separatedBy: ".")
-            var major : Int? = 0
-            var minor : Int? = 0
-            var micro : Int? = 0
-            
-            if versions.count > 2 {
-                major = Int(versions[0])
-                minor = Int(versions[1])
-                micro = Int(versions[2])
-            }
-            else if versions.count == 2 {
-                major = Int(versions[0])
-                minor = Int(versions[1])
-            }
-            else if versions.count == 1 {
-                major = Int(versions[0])
-            }
-            
-            if let majorValue = major {
-                if majorValue < 13 {
-                    return true
-                }
-            }
-            
-        #endif
-        
+//        #if os(iOS)
+//
+//            let systemVersion = UIDevice.current.systemVersion
+//            let versions = systemVersion.components(separatedBy: ".")
+//            var major : Int? = 0
+//            var minor : Int? = 0
+//            var micro : Int? = 0
+//
+//            if versions.count > 2 {
+//                major = Int(versions[0])
+//                minor = Int(versions[1])
+//                micro = Int(versions[2])
+//            }
+//            else if versions.count == 2 {
+//                major = Int(versions[0])
+//                minor = Int(versions[1])
+//            }
+//            else if versions.count == 1 {
+//                major = Int(versions[0])
+//            }
+//
+//            if let majorValue = major {
+//                if majorValue < 13 {
+//                    return true
+//                }
+//            }
+//
+//        #endif
+
         return false
     }
     
