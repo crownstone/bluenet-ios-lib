@@ -27,6 +27,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     
     var backgroundRangingEnabled = false
     var appIsInBackground = false
+    var resetMonitorRequested = false
     
     // cache for the location
     var coordinates = CLLocationCoordinate2D()
@@ -320,6 +321,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
      */
     func resetBeaconMonitoring() {
         LOG.info("BLUENET_LIB_NAV: Resetting ibeacon tracking")
+        self.resetMonitorRequested = false
         self.pauseMonitoringRegions()
         self.startMonitoringRegions()
     }
@@ -432,7 +434,7 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     
     
     public func locationManager(_ manager : CLLocationManager, didStartMonitoringFor region : CLRegion) {
-        LOG.info("BLUENET_LIB_NAV: did start MONITORING \(region) \n");
+        LOG.info("BLUENET_LIB_NAV: didStartMonitoringFor \(region) \n");
     }
         
     
@@ -494,8 +496,10 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
      */
     public func locationManager(_ manager: CLLocationManager, rangingBeaconsDidFailFor region: CLBeaconRegion, withError error: Error) {
         LOG.error("BLUENET_LIB_NAV: did rangingBeaconsDidFailForRegion \(region)  withError: \(error) \n");
-        
-        delay(2, { self.resetBeaconMonitoring() })
+        if self.resetMonitorRequested == false {
+            self.resetMonitorRequested = true
+            delay(2, { self.resetBeaconMonitoring() })
+        }
     }
     
     
@@ -510,7 +514,10 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error){
         LOG.error("BLUENET_LIB_NAV: did didFailWithError withError: \(error) \n");
         
-        delay(2, { self.resetBeaconMonitoring() })
+        if self.resetMonitorRequested == false {
+            self.resetMonitorRequested = true
+            delay(2, { self.resetBeaconMonitoring() })
+        }
     }
     
     /*
@@ -522,7 +529,10 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error){
         LOG.error("BLUENET_LIB_NAV: did monitoringDidFailForRegion \(String(describing: region))  withError: \(error)\n");
         
-        delay(2, { self.resetBeaconMonitoring() })
+        if self.resetMonitorRequested == false {
+            self.resetMonitorRequested = true
+            delay(2, { self.resetBeaconMonitoring() })
+        }
     }
     
 
