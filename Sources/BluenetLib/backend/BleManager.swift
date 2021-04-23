@@ -17,7 +17,7 @@ struct timeoutDurations {
     static let disconnect              : Double = 3
     static let errorDisconnect         : Double = 5
     static let cancelPendingConnection : Double = 3
-    static let connect                 : Double = 15
+    static let connect                 : Double = 30
     static let reconnect               : Double = 0.5
     static let getServices             : Double = 3
     static let getCharacteristics      : Double = 3
@@ -316,23 +316,25 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     public func connect(_ handle: String, timeout: Double = 0) -> Promise<Void> {
         let nsUuid = UUID(uuidString: handle)
         
-        LOG.info("BLUENET_LIB: starting to connect")
+        LOG.info("BLUENET_LIB: starting to connect \(handle).")
         return Promise<Void> { seal in
             if (nsUuid == nil) {
+                LOG.error("BLUENET_LIB: Invalid uuid \(handle).")
                 return seal.reject(BluenetError.INVALID_UUID)
             }
             
             if (self.BleState != .poweredOn) {
+                LOG.error("BLUENET_LIB: BLE OFF \(handle).")
                 return seal.reject(BluenetError.NOT_INITIALIZED)
             }
             
             
             if (self.pendingConnections[nsUuid!] != nil) {
-                LOG.info("BLUENET_LIB: Already connecting to this peripheral. This throws an error to avoid multiple triggers on successful completion.")
+                LOG.info("BLUENET_LIB: Already connecting to this peripheral. This throws an error to avoid multiple triggers on successful completion.  \(handle).")
                 return seal.reject(BluenetError.ALREADY_CONNECTING)
             }
                 
-            LOG.info("BLUENET_LIB: connecting...")
+            LOG.info("BLUENET_LIB: connecting...  \(handle).")
             self._connect(nsUuid!)
                 .done{    _ in seal.fulfill(())}
                 .catch{ err in seal.reject(err)}
@@ -386,6 +388,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             
             let peripherals = self.centralManager.retrievePeripherals(withIdentifiers: uuidArray);
             if (peripherals.count == 0) {
+                LOG.error("BLUENET_LIB: Can not get peripheral \(BluenetError.CAN_NOT_CONNECT_TO_UUID) \(handle)")
                 seal.reject(BluenetError.CAN_NOT_CONNECT_TO_UUID)
             }
             else {
@@ -399,6 +402,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 if (timeout > 0) {
                     self.task(handle).setDelayedReject(timeoutDurations.connect, errorOnReject: .CONNECT_TIMEOUT)
                 }
+                LOG.error("BLUENET_LIB: Can not get peripheral \(BluenetError.CAN_NOT_CONNECT_TO_UUID) \(handle)")
                 
                 var connectionOptions : [String: Any]? = nil
                 connectionOptions = [
@@ -415,7 +419,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         return Promise<Void> { seal in
             // only disconnect if we are actually connected!
             if self.isConnected(handle) {
-                LOG.info("BLUENET_LIB: waiting for the connected peripheral to disconnect from us")
+                LOG.info("BLUENET_LIB: waiting for the connected peripheral to disconnect from us \(handle)")
                 let disconnectPromise = Promise<Void> { innerSeal in
                     // in case the connected peripheral has been disconnected beween the start and invocation of this method.
                     self.task(handle).load(innerSeal.fulfill, innerSeal.reject, type: .AWAIT_DISCONNECT)
@@ -442,7 +446,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         return Promise<Void> { seal in
             // cancel any pending connections
             if (self.pendingConnections[handle] != nil) {
-                LOG.info("BLUENET_LIB: disconnecting from connecting peripheral due to error")
+                LOG.info("BLUENET_LIB: disconnecting from connecting peripheral due to error \(handle)")
                 self.abortConnecting(handle)
                     .then{ _ in return self._disconnect(handle, errorMode: true) }
                     .done{_ -> Void in seal.fulfill(())}
@@ -463,7 +467,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         return Promise<Void> { seal in
             // cancel any pending connections
             if (self.pendingConnections[handle] != nil) {
-                LOG.info("BLUENET_LIB: disconnecting from connecting peripheral")
+                LOG.info("BLUENET_LIB: disconnecting from connecting peripheral \(handle)")
                 abortConnecting(handle)
                     .then{ _ in return self._disconnect(handle) }
                     .done{_ -> Void in seal.fulfill(())}
@@ -482,7 +486,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         return Promise<Void> { seal in
             // only disconnect if we are actually connected!
             if self.isConnected(handle) {
-                LOG.info("BLUENET_LIB: disconnecting from connected peripheral")
+                LOG.info("BLUENET_LIB: disconnecting from connected peripheral \(handle)")
                 let disconnectPromise = Promise<Void> { innerSeal in
                     // in case the connected peripheral has been disconnected beween the start and invocation of this method.
                     if self.isConnected(handle) {
@@ -622,7 +626,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     }
 
     public func readCharacteristicWithoutEncryption(_ handle: UUID, service: String, characteristic: String) -> Promise<[UInt8]> {
-        LOG.debug("BLUENET_LIB: Reading from Characteristic without Encryption. Service:\(service) Characteristic:\(characteristic)")
+        LOG.debug("BLUENET_LIB: Reading from Characteristic without Encryption.  handle:\(handle) Service:\(service) Characteristic:\(characteristic)")
         return Promise<[UInt8]> { seal in
             self.connectionState(handle).disableEncryptionTemporarily()
             self.readCharacteristic(handle, serviceId: service, characteristicId: characteristic)
@@ -638,7 +642,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     }
 
     public func readCharacteristic(_ handle: UUID, serviceId: String, characteristicId: String) -> Promise<[UInt8]> {
-        LOG.debug("BLUENET_LIB: Reading from Characteristic. Service:\(serviceId) Characteristic:\(characteristicId)")
+        LOG.debug("BLUENET_LIB: Reading from Characteristic. handle:\(handle) Service:\(serviceId) Characteristic:\(characteristicId)")
         return Promise<[UInt8]> { seal in
             self.getChacteristic(handle, serviceId, characteristicId)
                 .done{characteristic -> Void in
@@ -674,7 +678,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
 
                         // the fulfil and reject are handled in the peripheral delegate
                         if (self.connectionState(handle).isEncryptionEnabled()) {
-                            LOG.info("BLUENET_LIB: writing service \(serviceId) characteristic \(characteristicId) data: \(data.bytes) which will be encrypted.")
+                            LOG.info("BLUENET_LIB: writing service \(serviceId) characteristic \(characteristicId) data: \(data.bytes) which will be encrypted. handle:\(handle)")
                             do {
                                 let encryptedData = try EncryptionHandler.encrypt(data, connectionState: self.connectionState(handle))
                                 connection.writeValue(encryptedData, for: characteristic, type: type)
@@ -684,7 +688,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                             }
                         }
                         else {
-                            LOG.debug("BLUENET_LIB: writing service \(serviceId) characteristic \(characteristicId) data: \(data.bytes) which is not encrypted.")
+                            LOG.debug("BLUENET_LIB: writing service \(serviceId) characteristic \(characteristicId) data: \(data.bytes) which is not encrypted. handle:\(handle)")
                             connection.writeValue(data, for: characteristic, type: type)
                         }
                     }
@@ -693,7 +697,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     }
                 }
                 .catch{(error: Error) -> Void in
-                    LOG.error("BLUENET_LIB: FAILED writing to characteristic \(error)")
+                    LOG.error("BLUENET_LIB: FAILED writing to characteristic \(error) handle:\(handle)")
                     seal.reject(error)
                 }
         }

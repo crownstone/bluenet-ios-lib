@@ -373,11 +373,11 @@ public class Bluenet {
         
         return self.bleManager.connect(handle)
             .then{_ -> Promise<ModeInformation> in
-                LOG.info("BLUENET_LIB: connected!")
+                LOG.info("BLUENET_LIB: connected! \(handle).")
                 return _getCrownstoneModeInformation(bleManager: self.bleManager, handle: handleUUID)
             }
             .then{ modeInfo -> Promise<CrownstoneMode> in
-                LOG.info("BLUENET_LIB: got mode info! \(modeInfo)")
+                LOG.info("BLUENET_LIB: got mode info! \(modeInfo)  \(handle).")
                 self.bleManager.connectionState(handleUUID).setConnectionProtocolVersion(modeInfo.controlMode)
                 self.bleManager.connectionState(handleUUID).setOperationMode(modeInfo.operationMode)
 
