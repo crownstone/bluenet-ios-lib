@@ -16,7 +16,7 @@ import PromiseKit
 struct timeoutDurations {
     static let disconnect              : Double = 3
     static let errorDisconnect         : Double = 5
-    static let cancelPendingConnection : Double = 3
+    static let cancelPendingConnection : Double = 2
     static let connect                 : Double = 30
     static let reconnect               : Double = 0.5
     static let getServices             : Double = 3
@@ -402,7 +402,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 if (timeout > 0) {
                     self.task(handle).setDelayedReject(timeoutDurations.connect, errorOnReject: .CONNECT_TIMEOUT)
                 }
-                LOG.error("BLUENET_LIB: Can not get peripheral \(BluenetError.CAN_NOT_CONNECT_TO_UUID) \(handle)")
+                LOG.error("BLUENET_LIB: Starting connection to \(handle)")
                 
                 var connectionOptions : [String: Any]? = nil
                 connectionOptions = [

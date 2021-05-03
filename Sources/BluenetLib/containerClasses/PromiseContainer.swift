@@ -131,7 +131,7 @@ class PromiseContainer {
         delay(delayTimeInSeconds, {
             LOG.info("PromiseContainer: Firing delayed reject delayTimeInSeconds:\(delayTimeInSeconds) rejectId:\(rejectId) errorOnReject:\(errorOnReject)")
             if (rejectId == self.rejectId) {
-                LOG.info("PromiseContainer: actually apllying delayed reject delayTimeInSeconds:\(delayTimeInSeconds) rejectId:\(rejectId) errorOnReject:\(errorOnReject)")
+                LOG.info("PromiseContainer: actually applying delayed reject delayTimeInSeconds:\(delayTimeInSeconds) rejectId:\(rejectId) errorOnReject:\(errorOnReject)")
                 self.reject(errorOnReject as Error)
             }
         })
