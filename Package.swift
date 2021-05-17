@@ -49,9 +49,9 @@ let package = Package(
             dependencies: ["PromiseKit","CryptoSwift","BluenetShared","NordicDFU","SwiftyJSON"],
             path: "Sources"
         ),
-//        .testTarget(
-//            name: "BluenetLibTests",
-//            dependencies: ["PromiseKit","CryptoSwift","BluenetShared","NordicDFU","SwiftyJSON", "BluenetLib"]),
+        .testTarget(
+            name: "BluenetLibTests",
+            dependencies: ["PromiseKit","CryptoSwift","BluenetShared","NordicDFU","SwiftyJSON", "BluenetLib"]),
     ]
 )
 

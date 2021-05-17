@@ -487,29 +487,33 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             // only disconnect if we are actually connected!
             if self.isConnected(handle) {
                 LOG.info("BLUENET_LIB: disconnecting from connected peripheral \(handle)")
-                let disconnectPromise = Promise<Void> { innerSeal in
-                    // in case the connected peripheral has been disconnected beween the start and invocation of this method.
-                    if self.isConnected(handle) {
-                        if (errorMode == true) {
-                            self.task(handle).load(innerSeal.fulfill, innerSeal.reject, type: .ERROR_DISCONNECT)
-                            self.task(handle).setDelayedReject(timeoutDurations.errorDisconnect, errorOnReject: .ERROR_DISCONNECT_TIMEOUT)
-                        }
-                        else {
-                            self.task(handle).load(innerSeal.fulfill, innerSeal.reject, type: .DISCONNECT)
-                            self.task(handle).setDelayedReject(timeoutDurations.disconnect, errorOnReject: .DISCONNECT_TIMEOUT)
-                        }
-                        self.centralManager.cancelPeripheralConnection(self.connections[handle]!)
+                self._disconnectFromDevice(handle, errorMode: errorMode)
+                    .done { _ -> Void in
+                        // make sure the connected peripheral is set to nil so we know nothing is connected
+                        self.connections.removeValue(forKey: handle)
+                        seal.fulfill(())
                     }
-                    else {
-                        innerSeal.fulfill(())
-                    }
+                    .catch { err in seal.reject(err) }
+            }
+            else {
+                seal.fulfill(())
+            }
+        }
+    }
+    
+    func _disconnectFromDevice(_ handle: UUID, errorMode: Bool = false) -> Promise<Void> {
+        return Promise<Void> { seal in
+            // in case the connected peripheral has been disconnected beween the start and invocation of this method.
+            if self.isConnected(handle) {
+                if (errorMode == true) {
+                    self.task(handle).load(seal.fulfill, seal.reject, type: .ERROR_DISCONNECT)
+                    self.task(handle).setDelayedReject(timeoutDurations.errorDisconnect, errorOnReject: .ERROR_DISCONNECT_TIMEOUT)
                 }
-                disconnectPromise.done { _ -> Void in
-                    // make sure the connected peripheral is set to nil so we know nothing is connected
-                    self.connections.removeValue(forKey: handle)
-                    seal.fulfill(())
+                else {
+                    self.task(handle).load(seal.fulfill, seal.reject, type: .DISCONNECT)
+                    self.task(handle).setDelayedReject(timeoutDurations.disconnect, errorOnReject: .DISCONNECT_TIMEOUT)
                 }
-                .catch { err in seal.reject(err) }
+                self.centralManager.cancelPeripheralConnection(self.connections[handle]!)
             }
             else {
                 seal.fulfill(())
