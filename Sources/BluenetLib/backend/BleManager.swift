@@ -505,6 +505,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         return Promise<Void> { seal in
             // in case the connected peripheral has been disconnected beween the start and invocation of this method.
             if self.isConnected(handle) {
+                LOG.info("BLUENET_LIB: disconnecting from connected peripheral in _disconnectFromDevice \(handle) \(errorMode)")
                 if (errorMode == true) {
                     self.task(handle).load(seal.fulfill, seal.reject, type: .ERROR_DISCONNECT)
                     self.task(handle).setDelayedReject(timeoutDurations.errorDisconnect, errorOnReject: .ERROR_DISCONNECT_TIMEOUT)
