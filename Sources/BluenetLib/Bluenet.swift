@@ -430,9 +430,13 @@ public class Bluenet {
 
     
     public func cancelConnectionRequest(_ handle: String) -> Promise<Void> {
-        let handleUUID = UUID(uuidString: handle)
-        
-        return self.bleManager.abortConnecting(handleUUID!)
+        if let handleUUID = UUID(uuidString: handle) {
+            self.bleManager.abortConnecting(handleUUID)
+            return Promise<Void> { seal in seal.fulfill(()) }
+        }
+        else {
+            return Promise<Void> { seal in seal.reject(BluenetError.INVALID_UUID) }
+        }
     }
     
     /**
@@ -440,8 +444,7 @@ public class Bluenet {
      * Timeout is set to 2 seconds.
      */
     public func disconnect(handle: String) -> Promise<Void> {
-        let uid = UUID(uuidString: handle)
-        if let handleUUID = uid {
+        if let handleUUID = UUID(uuidString: handle) {
             return self.bleManager.disconnect(handleUUID)
         }
         else {

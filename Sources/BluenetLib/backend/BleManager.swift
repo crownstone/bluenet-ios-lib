@@ -90,24 +90,33 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     
     
     func task(_ handle: UUID) -> PromiseContainer {
-        if self._tasks[handle] == nil {
-            self._tasks[handle] = PromiseContainer(handle)
+        if let task = self._tasks[handle] {
+            return task
         }
-        return self._tasks[handle]!
+        
+        let task = PromiseContainer(handle)
+        self._tasks[handle] = task
+        return task
     }
     
     func connectionState(_ handle: UUID) -> ConnectionState {
-        if self._connectionStates[handle] == nil {
-            self._connectionStates[handle] = ConnectionState(bleManager: self, handle: handle)
+        if let state = self._connectionStates[handle] {
+            return state
         }
-        return self._connectionStates[handle]!
+        
+        let state = ConnectionState(bleManager: self, handle: handle)
+        self._connectionStates[handle] = state
+        return state
     }
     
     func notificationBus(_ handle: UUID) -> EventBus {
-        if self._notificationEventBusses[handle] == nil {
-            self._notificationEventBusses[handle] = EventBus()
+        if let bus = self._notificationEventBusses[handle] {
+            return bus
         }
-        return self._notificationEventBusses[handle]!
+        
+        let bus = EventBus()
+        self._notificationEventBusses[handle] = bus
+        return bus
     }
     
     func isConnected(_ handle: UUID) -> Bool {
@@ -347,32 +356,27 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      *  Cancel a pending connection
      *
      */
-    func abortConnecting(_ handle: UUID) -> Promise<Void> {
+    func abortConnecting(_ handle: UUID) {
         LOG.info("BLUENET_LIB: starting to abort pending connection request for \(handle)")
-        return Promise<Void> { seal in
-            // if there was a connection in progress, cancel it with an error
-            if (task(handle).type == .CONNECT) {
-                LOG.info("BLUENET_LIB: rejecting the connection promise for \(handle)")
-                task(handle).reject(BluenetError.CONNECTION_CANCELLED)
-            }
-            
-            // remove peripheral from pending list.
-            if let connectingPeripheral = self.pendingConnections[handle] {
-                LOG.info("BLUENET_LIB: Waiting to cancel connection... for \(handle).")
-                self.task(handle).load(seal.fulfill, seal.reject, type: .CANCEL_PENDING_CONNECTION)
-                self.task(handle).setDelayedReject(timeoutDurations.cancelPendingConnection, errorOnReject: .CANCEL_PENDING_CONNECTION_TIMEOUT)
-                
-                self.centralManager.cancelPeripheralConnection(connectingPeripheral)
-                self.pendingConnections.removeValue(forKey: handle)
-            }
-            else {
-                // If it's not in the pending list, see if we can retrieve a peripheral with this handle and cancel a connection attempt to it.
-                // If there is no connection attempt, this *should* not matter.
-                let peripherals = self.centralManager.retrievePeripherals(withIdentifiers: [handle]);
-                if (peripherals.count > 0) {
-                    self.centralManager.cancelPeripheralConnection(peripherals[0])
-                }
-                seal.fulfill(())
+
+        // if there was a connection in progress, cancel it with an error
+        if (task(handle).type == .CONNECT) {
+            LOG.info("BLUENET_LIB: rejecting the connection promise for \(handle)")
+            task(handle).reject(BluenetError.CONNECTION_CANCELLED)
+        }
+        
+        // remove peripheral from pending list.
+        if let connectingPeripheral = self.pendingConnections[handle] {
+            LOG.info("BLUENET_LIB: Waiting to cancel connection... for \(handle).")
+            self.centralManager.cancelPeripheralConnection(connectingPeripheral)
+            self.pendingConnections.removeValue(forKey: handle)
+        }
+        else {
+            // If it's not in the pending list, see if we can retrieve a peripheral with this handle and cancel a connection attempt to it.
+            // If there is no connection attempt, this *should* not matter.
+            let peripherals = self.centralManager.retrievePeripherals(withIdentifiers: [handle]);
+            if (peripherals.count > 0) {
+                self.centralManager.cancelPeripheralConnection(peripherals[0])
             }
         }
     }
@@ -448,7 +452,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             if (self.pendingConnections[handle] != nil) {
                 LOG.info("BLUENET_LIB: disconnecting from connecting peripheral due to error \(handle)")
                 self.abortConnecting(handle)
-                    .then{ _ in return self._disconnect(handle, errorMode: true) }
+                self._disconnect(handle, errorMode: true)
                     .done{_ -> Void in seal.fulfill(())}
                     .catch{err in seal.reject(err)}
             }
@@ -469,7 +473,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             if (self.pendingConnections[handle] != nil) {
                 LOG.info("BLUENET_LIB: disconnecting from connecting peripheral \(handle)")
                 abortConnecting(handle)
-                    .then{ _ in return self._disconnect(handle) }
+                self._disconnect(handle)
                     .done{_ -> Void in seal.fulfill(())}
                     .catch{err in seal.reject(err)}
             }
@@ -797,9 +801,10 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      * The merged, finalized reply to the write command will be in the fulfill of this promise.
      */
     public func setupSingleNotification(_ handle: UUID, serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback, timeoutSeconds: Double = 2) -> Promise<[UInt8]> {
+        var unsubscribe : voidPromiseCallback = { return Promise.value(()) }
+        
         LOG.debug("BLUENET_LIB: Setting up single notification on service: \(serviceId) and characteristic \(characteristicId) for \(handle)")
-        return Promise<[UInt8]> { seal in
-            var unsubscribe : voidPromiseCallback? = nil
+        return Promise<[UInt8]> { seal in            
             var collectedData = [UInt8]();
             var resolved = false
 
@@ -821,7 +826,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     LOG.debug("Successfully combined data: \(collectedData) from \(handle)")
                 }
                 resolved = true
-                unsubscribe!()
+                unsubscribe()
                     .done{ _  in seal.fulfill(collectedData) }
                     .catch{ err in seal.reject(err) }
             })
@@ -839,7 +844,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     delay(timeoutSeconds, {
                         if (resolved == false) {
                             seal.reject(BluenetError.TIMEOUT)
-                            _ = unsubscribe!()
+                            _ = unsubscribe()
                         }
                     })
                     return writeCommand()

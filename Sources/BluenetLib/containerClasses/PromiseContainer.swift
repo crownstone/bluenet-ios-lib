@@ -15,7 +15,6 @@ enum RequestType {
     case DISCONNECT
     case ERROR_DISCONNECT
     case AWAIT_DISCONNECT
-    case CANCEL_PENDING_CONNECTION
     case CONNECT
     case GET_SERVICES
     case GET_CHARACTERISTICS

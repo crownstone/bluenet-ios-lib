@@ -142,30 +142,29 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         
         let pendingTask = BleManager.task(handle)
         
-        if (pendingTask.type == .CANCEL_PENDING_CONNECTION) {
-            LOG.info("BLUENET_LIB: Connection cancelled for handle: \(handle)")
-            pendingTask.fulfill()
+        if (pendingTask.type == .NONE) {
+            LOG.info("BLUENET_LIB: Peripheral disconnected for handle: \(handle) taskType:\(pendingTask.type)")
         }
         else if (pendingTask.type == .AWAIT_DISCONNECT) {
-            LOG.info("BLUENET_LIB: Peripheral disconnected from us succesfully for handle: \(handle)")
+            LOG.info("BLUENET_LIB: Peripheral disconnected from us succesfully for handle: \(handle) taskType:\(pendingTask.type)")
             pendingTask.fulfill()
         }
         else if (pendingTask.type == .ERROR_DISCONNECT) {
             if (error != nil) {
-                LOG.info("BLUENET_LIB: Operation Error_Disconnect: Peripheral disconnected from us for handle: \(handle)")
+                LOG.info("BLUENET_LIB: Operation Error_Disconnect: Peripheral disconnected from us for handle: \(handle) taskType:\(pendingTask.type)")
             }
             else {
-                LOG.info("BLUENET_LIB: Operation Error_Disconnect: We disconnected from Peripheral for handle: \(handle)")
+                LOG.info("BLUENET_LIB: Operation Error_Disconnect: We disconnected from Peripheral for handle: \(handle) taskType:\(pendingTask.type)")
             }
             pendingTask.fulfill()
         }
         else {
             if (error != nil) {
-                LOG.info("BLUENET_LIB: Disconnected with error \(error!) for handle: \(handle)")
+                LOG.info("BLUENET_LIB: Disconnected with error \(error!) for handle: \(handle) taskType:\(pendingTask.type)")
                 pendingTask.reject(error!)
             }
             else {
-                LOG.info("BLUENET_LIB: Disconnected succesfully for handle: \(handle)")
+                LOG.info("BLUENET_LIB: Disconnected succesfully for handle: \(handle) taskType:\(pendingTask.type)")
                 // if the pending promise is NOT for disconnect, a disconnection event is a rejection.
                 if (pendingTask.type != .DISCONNECT) {
                     pendingTask.reject(BluenetError.DISCONNECTED)
