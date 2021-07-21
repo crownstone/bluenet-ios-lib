@@ -36,7 +36,7 @@ enum PromiseType {
 
 
 class PromiseContainer {
-    var handle : UUID?
+    var handle : String?
      
     fileprivate var _fulfillVoidPromise             : (Void) -> ()                   = {_ in }
     fileprivate var _fulfillIntPromise              : (Int) -> Void                  = {_ in }
@@ -55,7 +55,7 @@ class PromiseContainer {
     /**
         Handle is only used for logging.
      */
-    init(_ handle: UUID) {
+    init(_ handle: String) {
         self.handle = handle
         self._clear()
     }

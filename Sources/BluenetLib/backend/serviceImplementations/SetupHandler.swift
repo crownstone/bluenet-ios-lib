@@ -150,7 +150,7 @@ public class SetupHandler {
                     _ = self.clearNotifications()
                     self.bleManager.connectionState(self.handle).exitSetup()
                     self.bleManager.connectionState(self.handle).restoreEncryption()
-                    _ = self.bleManager.errorDisconnect(self.handle)
+                    _ = self.bleManager.errorDisconnect(self.handle.uuidString)
                     seal.reject(err)
             }
         }
@@ -273,7 +273,7 @@ public class SetupHandler {
                     self.eventBus.emit("setupProgress", 0)
                     self.bleManager.connectionState(self.handle).exitSetup()
                     self.bleManager.connectionState(self.handle).restoreEncryption()
-                    _ = self.bleManager.errorDisconnect(self.handle)
+                    _ = self.bleManager.errorDisconnect(self.handle.uuidString)
                     seal.reject(err)
             }
         }
@@ -343,7 +343,7 @@ public class SetupHandler {
     func wrapUp() -> Promise<Void> {
         return self.clearNotifications()
             .then{(_) -> Promise<Void> in return self.finalizeSetup()}
-            .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 12); return self.bleManager.disconnect(self.handle)}
+            .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 12); return self.bleManager.disconnect(self.handle.uuidString)}
     }
     
     public func getSessionKey() -> Promise<[UInt8]> {
@@ -518,7 +518,7 @@ public class SetupHandler {
      */
     public func factoryReset() -> Promise<Void> {
         return self._factoryReset()
-            .done{ (_) -> Void in _ = self.bleManager.disconnect(self.handle) }
+            .done{ (_) -> Void in _ = self.bleManager.disconnect(self.handle.uuidString) }
     }
     
     

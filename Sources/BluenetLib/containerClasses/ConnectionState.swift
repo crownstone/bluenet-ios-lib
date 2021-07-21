@@ -38,10 +38,10 @@ class ConnectionState {
     
     var userLevel : UserLevel = .unknown
     var BleManager : BleManager
-    var handle : UUID
+    var handle : String
     var lastActionTimestamp : Double = 0
     
-    init (bleManager: BleManager, handle: UUID) {
+    init (bleManager: BleManager, handle: String) {
         self.BleManager = bleManager
         self.handle = handle
     }

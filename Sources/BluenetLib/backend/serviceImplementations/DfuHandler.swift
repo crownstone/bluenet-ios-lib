@@ -171,7 +171,7 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
                 }
                 .then {(_) -> Promise<Void> in
                     cleanup = nil
-                    return self.bleManager.disconnect(self.handle)
+                    return self.bleManager.disconnect(self.handle.uuidString)
                 }
                 .done {(_) -> Void in seal.fulfill(())}
                 .catch {(err) -> Void in
@@ -179,7 +179,7 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
                     if (cleanup != nil) {
                         _ = cleanup!()
                     }
-                    self.bleManager.disconnect(self.handle)
+                    self.bleManager.disconnect(self.handle.uuidString)
                         .done{_ -> Void in
                             if (success) { seal.fulfill(()) }
                             else { seal.reject(err) }

@@ -39,14 +39,14 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     public var centralManager : CBCentralManager!
     var peripheralStateManager : PeripheralStateManager!
     
-    var _connectionStates = [UUID: ConnectionState]()
-    var _tasks = [UUID: PromiseContainer]()
-    var _notificationEventBusses = [UUID: EventBus]()
+    var _connectionStates = [String: ConnectionState]()
+    var _tasks = [String: PromiseContainer]()
+    var _notificationEventBusses = [String: EventBus]()
     
     var BleState : CBManagerState = .unknown
     
-    var pendingConnections = [UUID: CBPeripheral]()
-    var connections        = [UUID: CBPeripheral]()
+    var pendingConnections = [String: CBPeripheral]()
+    var connections        = [String: CBPeripheral]()
     
     
     
@@ -88,8 +88,19 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         _ = self.eventBus.on("bleStatus", self._handleStateUpdate)
     }
     
-    
     func task(_ handle: UUID) -> PromiseContainer {
+        return self.task(handle.uuidString)
+    }
+    
+    func connectionState(_ handle: UUID) -> ConnectionState {
+        return self.connectionState(handle.uuidString)
+    }
+    
+    func notificationBus(_ handle: UUID) -> EventBus {
+        return self.notificationBus(handle.uuidString)
+    }
+    
+    func task(_ handle: String) -> PromiseContainer {
         if let task = self._tasks[handle] {
             return task
         }
@@ -99,7 +110,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         return task
     }
     
-    func connectionState(_ handle: UUID) -> ConnectionState {
+    func connectionState(_ handle: String) -> ConnectionState {
         if let state = self._connectionStates[handle] {
             return state
         }
@@ -109,7 +120,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         return state
     }
     
-    func notificationBus(_ handle: UUID) -> EventBus {
+    func notificationBus(_ handle: String) -> EventBus {
         if let bus = self._notificationEventBusses[handle] {
             return bus
         }
@@ -120,6 +131,10 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     }
     
     func isConnected(_ handle: UUID) -> Bool {
+        return self.isConnected(handle.uuidString)
+    }
+    
+    func isConnected(_ handle: String) -> Bool {
         return self.connections[handle] != nil
     }
     
@@ -135,8 +150,8 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     promiseManager.clearDueToReset()
                 }
                 
-                self.pendingConnections = [UUID: CBPeripheral]()
-                self.connections        = [UUID: CBPeripheral]()
+                self.pendingConnections = [String: CBPeripheral]()
+                self.connections        = [String: CBPeripheral]()
                 
             default:
                 break
@@ -323,31 +338,32 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      *
      */
     public func connect(_ handle: String, timeout: Double = 0) -> Promise<Void> {
-        let nsUuid = UUID(uuidString: handle)
-        
-        LOG.info("BLUENET_LIB: starting to connect \(handle).")
-        return Promise<Void> { seal in
-            if (nsUuid == nil) {
-                LOG.error("BLUENET_LIB: Invalid uuid \(handle).")
-                return seal.reject(BluenetError.INVALID_UUID)
-            }
-            
-            if (self.BleState != .poweredOn) {
-                LOG.error("BLUENET_LIB: BLE OFF \(handle).")
-                return seal.reject(BluenetError.NOT_INITIALIZED)
-            }
-            
-            
-            if (self.pendingConnections[nsUuid!] != nil) {
-                LOG.info("BLUENET_LIB: Already connecting to this peripheral. This throws an error to avoid multiple triggers on successful completion.  \(handle).")
-                return seal.reject(BluenetError.ALREADY_CONNECTING)
-            }
+        if let nsUUID = UUID(uuidString: handle) {
+            LOG.info("BLUENET_LIB: starting to connect \(handle).")
+            return Promise<Void> { seal in
+                if (self.BleState != .poweredOn) {
+                    LOG.error("BLUENET_LIB: BLE OFF \(handle).")
+                    return seal.reject(BluenetError.NOT_INITIALIZED)
+                }
                 
-            LOG.info("BLUENET_LIB: connecting...  \(handle).")
-            self._connect(nsUuid!)
-                .done{    _ in seal.fulfill(())}
-                .catch{ err in seal.reject(err)}
+                
+                if (self.pendingConnections[nsUUID.uuidString] != nil) {
+                    LOG.info("BLUENET_LIB: Already connecting to this peripheral. This throws an error to avoid multiple triggers on successful completion.  \(handle).")
+                    return seal.reject(BluenetError.ALREADY_CONNECTING)
+                }
+                    
+                LOG.info("BLUENET_LIB: connecting...  \(handle).")
+                self._connect(nsUUID)
+                    .done{    _ in seal.fulfill(())}
+                    .catch{ err in seal.reject(err)}
+            }
         }
+        else {
+            LOG.error("BLUENET_LIB: Invalid uuid \(handle).")
+            return Promise<Void> { seal in seal.reject(BluenetError.INVALID_UUID)}
+        }
+        
+        
     }
     
     
@@ -356,7 +372,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      *  Cancel a pending connection
      *
      */
-    func abortConnecting(_ handle: UUID) {
+    func abortConnecting(_ handle: String) {
         LOG.info("BLUENET_LIB: starting to abort pending connection request for \(handle)")
 
         // if there was a connection in progress, cancel it with an error
@@ -371,13 +387,9 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             self.centralManager.cancelPeripheralConnection(connectingPeripheral)
             self.pendingConnections.removeValue(forKey: handle)
         }
-        else {
-            // If it's not in the pending list, see if we can retrieve a peripheral with this handle and cancel a connection attempt to it.
-            // If there is no connection attempt, this *should* not matter.
-            let peripherals = self.centralManager.retrievePeripherals(withIdentifiers: [handle]);
-            if (peripherals.count > 0) {
-                self.centralManager.cancelPeripheralConnection(peripherals[0])
-            }
+        else if let connectedPeripheral = self.connections[handle] {
+            self.disconnect(connectedPeripheral.identifier.uuidString)
+                .catch{ _ in }
         }
     }
     
@@ -397,7 +409,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             }
             else {
                 let peripheral = peripherals[0]
-                self.pendingConnections[handle] = peripheral
+                self.pendingConnections[handle.uuidString] = peripheral
                 
                 peripheral.delegate = self
                 
@@ -432,7 +444,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 // we clean up (self.connectedPeripheral = nil) inside the disconnect() method, thereby needing this inner promise
                 disconnectPromise.done { _ -> Void in
                     // make sure the connected peripheral is set to nil so we know nothing is connected
-                    self.connections.removeValue(forKey: handle)
+                    self.connections.removeValue(forKey: handle.uuidString)
                     seal.fulfill(())
                 }
                 .catch { err in seal.reject(err) }
@@ -446,42 +458,54 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     /**
      *  Disconnect from the connected BLE device
      */
-    public func errorDisconnect(_ handle: UUID) -> Promise<Void> {
-        return Promise<Void> { seal in
-            // cancel any pending connections
-            if (self.pendingConnections[handle] != nil) {
-                LOG.info("BLUENET_LIB: disconnecting from connecting peripheral due to error \(handle)")
-                self.abortConnecting(handle)
-                self._disconnect(handle, errorMode: true)
-                    .done{_ -> Void in seal.fulfill(())}
-                    .catch{err in seal.reject(err)}
+    public func errorDisconnect(_ handle: String) -> Promise<Void> {
+        if let uuidHandle = UUID(uuidString: handle) {
+            let handleString = uuidHandle.uuidString
+            return Promise<Void> { seal in
+                // cancel any pending connections
+                if (self.pendingConnections[handleString] != nil) {
+                    LOG.info("BLUENET_LIB: disconnecting from connecting peripheral due to error \(handle)")
+                    self.abortConnecting(uuidHandle.uuidString)
+                    self._disconnect(uuidHandle, errorMode: true)
+                        .done{_ -> Void in seal.fulfill(())}
+                        .catch{err in seal.reject(err)}
+                }
+                else {
+                    self._disconnect(uuidHandle, errorMode: true)
+                        .done{_ -> Void in seal.fulfill(())}
+                        .catch{err in seal.reject(err)}
+                }
             }
-            else {
-                self._disconnect(handle, errorMode: true)
-                    .done{_ -> Void in seal.fulfill(())}
-                    .catch{err in seal.reject(err)}
-            }
+        }
+        else {
+            return Promise<Void> { seal in seal.reject(BluenetError.INVALID_UUID) }
         }
     }
 
     /**
      *  Disconnect from the connected BLE device
      */
-    public func disconnect(_ handle: UUID) -> Promise<Void> {
-        return Promise<Void> { seal in
-            // cancel any pending connections
-            if (self.pendingConnections[handle] != nil) {
-                LOG.info("BLUENET_LIB: disconnecting from connecting peripheral \(handle)")
-                abortConnecting(handle)
-                self._disconnect(handle)
-                    .done{_ -> Void in seal.fulfill(())}
-                    .catch{err in seal.reject(err)}
+    public func disconnect(_ handle: String) -> Promise<Void> {
+        if let uuidHandle = UUID(uuidString: handle) {
+            let handleString = uuidHandle.uuidString
+            return Promise<Void> { seal in
+                // cancel any pending connections
+                if (self.pendingConnections[handleString] != nil) {
+                    LOG.info("BLUENET_LIB: disconnecting from connecting peripheral \(handleString)")
+                    abortConnecting(handleString)
+                    self._disconnect(uuidHandle)
+                        .done{_ -> Void in seal.fulfill(())}
+                        .catch{err in seal.reject(err)}
+                }
+                else {
+                    self._disconnect(uuidHandle)
+                        .done{_ -> Void in seal.fulfill(())}
+                        .catch{err in seal.reject(err)}
+                }
             }
-            else {
-                self._disconnect(handle)
-                    .done{_ -> Void in seal.fulfill(())}
-                    .catch{err in seal.reject(err)}
-            }
+        }
+        else {
+            return Promise<Void> { seal in seal.reject(BluenetError.INVALID_UUID) }
         }
     }
 
@@ -494,7 +518,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 self._disconnectFromDevice(handle, errorMode: errorMode)
                     .done { _ -> Void in
                         // make sure the connected peripheral is set to nil so we know nothing is connected
-                        self.connections.removeValue(forKey: handle)
+                        self.connections.removeValue(forKey: handle.uuidString)
                         seal.fulfill(())
                     }
                     .catch { err in seal.reject(err) }
@@ -518,7 +542,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     self.task(handle).load(seal.fulfill, seal.reject, type: .DISCONNECT)
                     self.task(handle).setDelayedReject(timeoutDurations.disconnect, errorOnReject: .DISCONNECT_TIMEOUT)
                 }
-                self.centralManager.cancelPeripheralConnection(self.connections[handle]!)
+                self.centralManager.cancelPeripheralConnection(self.connections[handle.uuidString]!)
             }
             else {
                 seal.fulfill(())
@@ -533,7 +557,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      */
     public func getServicesFromDevice(_ handle: UUID) -> Promise<[CBService]> {
         return Promise<[CBService]> { seal in
-            if let connection = self.connections[handle] {
+            if let connection = self.connections[handle.uuidString] {
                 if let services = connection.services {
                     seal.fulfill(services)
                 }
@@ -582,7 +606,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
 
     func getCharacteristicsFromDevice(_ handle: UUID, service: CBService) -> Promise<[CBCharacteristic]> {
         return Promise<[CBCharacteristic]> { seal in
-            if let connection = self.connections[handle] {
+            if let connection = self.connections[handle.uuidString] {
                 if let characteristics = service.characteristics {
                     seal.fulfill(characteristics)
                 }
@@ -655,7 +679,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         return Promise<[UInt8]> { seal in
             self.getChacteristic(handle, serviceId, characteristicId)
                 .done{characteristic -> Void in
-                    if let connection = self.connections[handle] {
+                    if let connection = self.connections[handle.uuidString] {
                         self.task(handle).load(seal.fulfill, seal.reject, type: .READ_CHARACTERISTIC)
                         self.task(handle).setDelayedReject(timeoutDurations.readCharacteristic, errorOnReject: .READ_CHARACTERISTIC_TIMEOUT)
 
@@ -674,7 +698,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         return Promise<Void> { seal in
             self.getChacteristic(handle, serviceId, characteristicId)
                 .done{characteristic -> Void in
-                    if let connection = self.connections[handle] {
+                    if let connection = self.connections[handle.uuidString] {
                         self.task(handle).load(seal.fulfill, seal.reject, type: .WRITE_CHARACTERISTIC)
 
                         if (type == .withResponse) {
@@ -734,7 +758,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
 
                         // we now tell the device to notify us.
                         return Promise<Void> { innerSeal in
-                            if let connection = self.connections[handle] {
+                            if let connection = self.connections[handle.uuidString] {
                                 // the success and failure are handled in the peripheral delegate
                                 self.task(handle).load(innerSeal.fulfill, innerSeal.reject, type: .ENABLE_NOTIFICATIONS)
                                 self.task(handle).setDelayedReject(timeoutDurations.enableNotifications, errorOnReject: .ENABLE_NOTIFICATIONS_TIMEOUT)
@@ -769,11 +793,11 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             if (self.notificationBus(handle).hasListeners(serviceId + "_" + characteristicId)) {
                 seal.fulfill(())
             }
-            else if let connection = self.connections[handle] {
+            else if let connection = self.connections[handle.uuidString] {
                 // if there are no more people listening, we tell the device to stop the notifications.
                 self.getChacteristic(handle, serviceId, characteristicId)
                     .done{characteristic -> Void in
-                        if (self.connections[handle] == nil) {
+                        if (self.connections[handle.uuidString] == nil) {
                             seal.fulfill(())
                         }
                         else {

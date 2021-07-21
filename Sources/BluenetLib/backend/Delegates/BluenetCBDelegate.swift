@@ -105,7 +105,7 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
     
     
     public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        let handle = peripheral.identifier
+        let handle = peripheral.identifier.uuidString
         LOG.info("BLUENET_LIB: in didConnectPeripheral. Connected to \(handle)")
         if (BleManager.task(handle).type == .CONNECT) {
             BleManager.task(handle).fulfill()
@@ -115,11 +115,11 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         BleManager.pendingConnections.removeValue(forKey: handle)
         BleManager.connections[handle] = peripheral
         
-        BleManager.eventBus.emit("connectedToPeripheral", handle.uuidString)
+        BleManager.eventBus.emit("connectedToPeripheral", handle)
     }
     
     public func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
-        let handle = peripheral.identifier
+        let handle = peripheral.identifier.uuidString
         LOG.info("BLUENET_LIB: in didFailToConnectPeripheral. Failed to connect to \(handle)")
         var errorVal : Error = BluenetError.CONNECTION_FAILED
         if error != nil {
@@ -133,11 +133,11 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         BleManager.pendingConnections.removeValue(forKey: handle)
         // lets just remove it from the connections, just in case. It shouldn't be in here, but if it is, its cleaned up again.
         BleManager.connections.removeValue(forKey: handle)
-        BleManager.eventBus.emit("connectedToPeripheralFailed", handle.uuidString)
+        BleManager.eventBus.emit("connectedToPeripheralFailed", handle)
     }
     
     public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
-        let handle = peripheral.identifier
+        let handle = peripheral.identifier.uuidString
         LOG.info("BLUENET_LIB: in didDisconnectPeripheral for handle: \(handle)")
         
         let pendingTask = BleManager.task(handle)
@@ -181,7 +181,7 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         
         // lets just remove it from the pending connections, just in case. It shouldn't be in here, but if it is, its cleaned up again.
         BleManager.pendingConnections.removeValue(forKey: handle)
-        BleManager.eventBus.emit("disconnectedFromPeripheral", handle.uuidString)
+        BleManager.eventBus.emit("disconnectedFromPeripheral", handle)
     }
 
 }

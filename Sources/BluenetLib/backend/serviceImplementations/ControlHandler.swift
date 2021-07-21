@@ -32,19 +32,19 @@ public class ControlHandler {
                 .then {(_) -> Promise<Void> in return self.bleManager.connect(self.handle.uuidString, timeout: timeoutDurations.connect)}
                 .then {(_) -> Promise<Void> in return self._recoverByFactoryReset()}
                 .then {(_) -> Promise<Void> in return self._checkRecoveryProcess()}
-                .then {(_) -> Promise<Void> in return self.bleManager.disconnect(self.handle)}
+                .then {(_) -> Promise<Void> in return self.bleManager.disconnect(self.handle.uuidString)}
                 .then {(_) -> Promise<Void> in return self.bleManager.waitToReconnect()}
                 .then {(_) -> Promise<Void> in return self.bleManager.connect(self.handle.uuidString, timeout: timeoutDurations.connect)}
                 .then {(_) -> Promise<Void> in return self._recoverByFactoryReset()}
                 .then {(_) -> Promise<Void> in return self._checkRecoveryProcess()}
                 .then {(_) -> Promise<Void> in
                     self.bleManager.connectionState(self.handle).restoreEncryption()
-                    return self.bleManager.disconnect(self.handle)
+                    return self.bleManager.disconnect(self.handle.uuidString)
                 }
                 .done {(_) -> Void in seal.fulfill(())}
                 .catch {(err) -> Void in
                     self.bleManager.connectionState(self.handle).restoreEncryption()
-                    self.bleManager.disconnect(self.handle).done{_ in seal.reject(err)}.catch{_ in seal.reject(err)}
+                    self.bleManager.disconnect(self.handle.uuidString).done{_ in seal.reject(err)}.catch{_ in seal.reject(err)}
                 }
         }
     }
@@ -134,11 +134,11 @@ public class ControlHandler {
                 .then{ self.bleManager.wait(seconds: 1) }
                 .then{ _writeControlPacket(bleManager: self.bleManager, self.handle, switchOff) }
                 .done{
-                    _ = self.bleManager.disconnect(self.handle);
+                    _ = self.bleManager.disconnect(self.handle.uuidString);
                     seal.fulfill(())
                 }
                 .catch{(err: Error) -> Void in
-                    _ = self.bleManager.errorDisconnect(self.handle)
+                    _ = self.bleManager.errorDisconnect(self.handle.uuidString)
                     seal.reject(err)
                 }
         }
@@ -182,7 +182,7 @@ public class ControlHandler {
                 self.eventBus.emit("disconnectCommandWritten", self.handle)
                 
                 
-                return self.bleManager.disconnect(self.handle)
+                return self.bleManager.disconnect(self.handle.uuidString)
             }
     }
     
