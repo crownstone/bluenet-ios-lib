@@ -8,6 +8,8 @@
 
 import Foundation
 
+let serialQueue = DispatchQueue(label: "Eventbus") // custom dispatch queues are serial by default
+
 public class EventBus {
     public init() {}
     
@@ -15,23 +17,26 @@ public class EventBus {
     var topics      = [String: [String: eventCallback]]()
     
     public func emit(_ topic: String, _ data: Any) {
-        if (self.topics[topic] != nil) {
-            for (_ , callback) in self.topics[topic]! {
-                callback(data)
+        serialQueue.async {
+            if let topicset = self.topics[topic] {
+                for (_ , callback) in topicset {
+                    callback(data)
+                }
             }
         }
     }
     
     public func on(_ topic: String, _ callback: @escaping (_ notification: Any) -> Void) -> voidCallback {
-        if (self.topics[topic] == nil) {
-            self.topics[topic] = [String: eventCallback]()
-        }
         let id = getUUID()
-
-        self.subscribers[id] = topic;
-        self.topics[topic]![id] = callback
-        
-        return { 
+        serialQueue.async {
+            if (self.topics[topic] == nil) {
+                self.topics[topic] = [String: eventCallback]()
+            }
+            
+            self.subscribers[id] = topic;
+            self.topics[topic]![id] = callback
+        }
+        return {
             self._off(id);
         }
     }
@@ -41,27 +46,31 @@ public class EventBus {
     }
     
     public func reset() {
-        self.topics = [String: [String: eventCallback]]()
-        self.subscribers = [String: String]()
+        serialQueue.async {
+            self.topics = [String: [String: eventCallback]]()
+            self.subscribers = [String: String]()
+        }
     }
     
     
     // MARK: Util
     
     func _off(_ id: String) {
-        if (self.subscribers[id] != nil) {
-            let topic = self.subscribers[id]!;
-            if (self.topics[topic] != nil) {
-                // remove callback from topic
-                self.topics[topic]!.removeValue(forKey: id)
-                
-                // clean topic if empty
-                if (self.topics[topic]!.count == 0) {
-                    self.topics.removeValue(forKey: topic);
+        serialQueue.async {
+            if (self.subscribers[id] != nil) {
+                let topic = self.subscribers[id]!;
+                if (self.topics[topic] != nil) {
+                    // remove callback from topic
+                    self.topics[topic]!.removeValue(forKey: id)
+                    
+                    // clean topic if empty
+                    if (self.topics[topic]!.count == 0) {
+                        self.topics.removeValue(forKey: topic);
+                    }
+                    
+                    // remove subscriber index
+                    self.subscribers.removeValue(forKey: id);
                 }
-                
-                // remove subscriber index
-                self.subscribers.removeValue(forKey: id);
             }
         }
     }

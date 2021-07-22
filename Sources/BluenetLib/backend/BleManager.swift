@@ -48,8 +48,6 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     var pendingConnections = [String: CBPeripheral]()
     var connections        = [String: CBPeripheral]()
     
-    
-    
     var eventBus : EventBus!
     
     public var settings : BluenetSettings!
