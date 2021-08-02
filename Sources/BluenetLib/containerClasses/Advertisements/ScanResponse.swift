@@ -30,6 +30,8 @@ public class ScanResponsePacket {
     public var powerUsageReal      :   Double   = 0
     public var powerUsageApparent  :   Double   = 0
     public var accumulatedEnergy   :   Int64    = 0
+    public var assetFiltersMasterVersion : UInt16 = 0
+    public var assetFiltersCRC     : UInt32 = 0
     public var setupMode           :   Bool     = false
     public var stateOfExternalCrownstone : Bool = false
     public var alternativeState    :   Bool = false
@@ -231,6 +233,8 @@ public class ScanResponsePacket {
             "behaviourOverridden"  : self.behaviourOverridden,
             
             "behaviourMasterHash"  : self.behaviourMasterHash,
+            "assetFiltersMasterVersion" : self.assetFiltersMasterVersion,
+            "assetFiltersCRC"       : self.assetFiltersCRC,
             
             "behaviourEnabled"     : self.behaviourEnabled,
             

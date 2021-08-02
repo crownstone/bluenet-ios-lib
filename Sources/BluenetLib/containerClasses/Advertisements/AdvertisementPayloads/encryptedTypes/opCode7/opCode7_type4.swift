@@ -23,8 +23,10 @@ func parseOpcode7_type4(serviceData : ScanResponsePacket, data : [UInt8]) {
             serviceData.crownstoneId         = try payload.getUInt8()
             serviceData.switchState          = try payload.getUInt8()
             serviceData.flagsBitmask         = try payload.getUInt8()
-            serviceData.behaviourMasterHash  = try payload.getUInt16()
-            try payload.skip(6)
+            serviceData.behaviourMasterHash  = try payload.getUInt16() // Still fletcher
+            serviceData.assetFiltersMasterVersion  = try payload.getUInt16()
+            serviceData.assetFiltersCRC      = try payload.getUInt32() // crc32
+        
             serviceData.partialTimestamp     = try payload.getUInt16()
             try payload.skip()
             serviceData.validation           = try payload.getUInt8()

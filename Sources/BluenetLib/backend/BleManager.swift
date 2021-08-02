@@ -386,7 +386,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             self.pendingConnections.removeValue(forKey: handle)
         }
         else if let connectedPeripheral = self.connections[handle] {
-            self.disconnect(connectedPeripheral.identifier.uuidString)
+            self.disconnect(handle)
                 .catch{ _ in }
         }
     }
@@ -464,12 +464,12 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 if (self.pendingConnections[handleString] != nil) {
                     LOG.info("BLUENET_LIB: disconnecting from connecting peripheral due to error \(handle)")
                     self.abortConnecting(uuidHandle.uuidString)
-                    self._disconnect(uuidHandle, errorMode: true)
+                    self._disconnect(handleString, errorMode: true)
                         .done{_ -> Void in seal.fulfill(())}
                         .catch{err in seal.reject(err)}
                 }
                 else {
-                    self._disconnect(uuidHandle, errorMode: true)
+                    self._disconnect(handleString, errorMode: true)
                         .done{_ -> Void in seal.fulfill(())}
                         .catch{err in seal.reject(err)}
                 }
@@ -491,12 +491,12 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 if (self.pendingConnections[handleString] != nil) {
                     LOG.info("BLUENET_LIB: disconnecting from connecting peripheral \(handleString)")
                     abortConnecting(handleString)
-                    self._disconnect(uuidHandle)
+                    self._disconnect(handleString)
                         .done{_ -> Void in seal.fulfill(())}
                         .catch{err in seal.reject(err)}
                 }
                 else {
-                    self._disconnect(uuidHandle)
+                    self._disconnect(handleString)
                         .done{_ -> Void in seal.fulfill(())}
                         .catch{err in seal.reject(err)}
                 }
@@ -508,42 +508,52 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     }
 
 
-    func _disconnect(_ handle: UUID, errorMode: Bool = false) -> Promise<Void> {
+    func _disconnect(_ handle: String, errorMode: Bool = false) -> Promise<Void> {
         return Promise<Void> { seal in
-            // only disconnect if we are actually connected!
-            if self.isConnected(handle) {
-                LOG.info("BLUENET_LIB: disconnecting from connected peripheral \(handle)")
-                self._disconnectFromDevice(handle, errorMode: errorMode)
-                    .done { _ -> Void in
-                        // make sure the connected peripheral is set to nil so we know nothing is connected
-                        self.connections.removeValue(forKey: handle.uuidString)
-                        seal.fulfill(())
-                    }
-                    .catch { err in seal.reject(err) }
+            if let uuidHandle = UUID(uuidString: handle) {
+                // only disconnect if we are actually connected!
+                if let connection = self.connections[uuidHandle.uuidString] {
+                    LOG.info("BLUENET_LIB: disconnecting from connected peripheral \(handle)")
+                    self._disconnectFromDevice(handle, errorMode: errorMode)
+                        .done { _ -> Void in
+                            // make sure the connected peripheral is set to nil so we know nothing is connected
+                            self.connections.removeValue(forKey: uuidHandle.uuidString)
+                            seal.fulfill(())
+                        }
+                        .catch { err in seal.reject(err) }
+                }
+                else {
+                    seal.fulfill(())
+                }
             }
             else {
-                seal.fulfill(())
+                seal.reject(BluenetError.INVALID_UUID)
             }
         }
     }
     
-    func _disconnectFromDevice(_ handle: UUID, errorMode: Bool = false) -> Promise<Void> {
+    func _disconnectFromDevice(_ handle: String, errorMode: Bool = false) -> Promise<Void> {
         return Promise<Void> { seal in
-            // in case the connected peripheral has been disconnected beween the start and invocation of this method.
-            if self.isConnected(handle) {
-                LOG.info("BLUENET_LIB: disconnecting from connected peripheral in _disconnectFromDevice \(handle) \(errorMode)")
-                if (errorMode == true) {
-                    self.task(handle).load(seal.fulfill, seal.reject, type: .ERROR_DISCONNECT)
-                    self.task(handle).setDelayedReject(timeoutDurations.errorDisconnect, errorOnReject: .ERROR_DISCONNECT_TIMEOUT)
+            if let uuidHandle = UUID(uuidString: handle) {
+                // in case the connected peripheral has been disconnected beween the start and invocation of this method.
+                if let connection = self.connections[uuidHandle.uuidString] {
+                    LOG.info("BLUENET_LIB: disconnecting from connected peripheral in _disconnectFromDevice \(handle) \(errorMode)")
+                    if (errorMode == true) {
+                        self.task(handle).load(seal.fulfill, seal.reject, type: .ERROR_DISCONNECT)
+                        self.task(handle).setDelayedReject(timeoutDurations.errorDisconnect, errorOnReject: .ERROR_DISCONNECT_TIMEOUT)
+                    }
+                    else {
+                        self.task(handle).load(seal.fulfill, seal.reject, type: .DISCONNECT)
+                        self.task(handle).setDelayedReject(timeoutDurations.disconnect, errorOnReject: .DISCONNECT_TIMEOUT)
+                    }
+                    self.centralManager.cancelPeripheralConnection(connection)
                 }
                 else {
-                    self.task(handle).load(seal.fulfill, seal.reject, type: .DISCONNECT)
-                    self.task(handle).setDelayedReject(timeoutDurations.disconnect, errorOnReject: .DISCONNECT_TIMEOUT)
+                    seal.fulfill(())
                 }
-                self.centralManager.cancelPeripheralConnection(self.connections[handle.uuidString]!)
             }
             else {
-                seal.fulfill(())
+                seal.reject(BluenetError.INVALID_UUID)
             }
         }
     }
