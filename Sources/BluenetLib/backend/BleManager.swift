@@ -33,7 +33,7 @@ struct timeoutDurations {
     static let waitForMeshPropagation  : Double = 0.5
 }
 
-
+let semaphore = DispatchSemaphore(value: 1)
 
 public class BleManager: NSObject, CBPeripheralDelegate {
     public var centralManager : CBCentralManager!
@@ -99,32 +99,39 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     }
     
     func task(_ handle: String) -> PromiseContainer {
+        semaphore.wait()
         if let task = self._tasks[handle] {
             return task
         }
         
         let task = PromiseContainer(handle)
         self._tasks[handle] = task
+        semaphore.signal()
         return task
     }
     
     func connectionState(_ handle: String) -> ConnectionState {
+        semaphore.wait()
         if let state = self._connectionStates[handle] {
             return state
         }
         
         let state = ConnectionState(bleManager: self, handle: handle)
         self._connectionStates[handle] = state
+        semaphore.signal()
         return state
     }
     
     func notificationBus(_ handle: String) -> EventBus {
+        semaphore.wait()
         if let bus = self._notificationEventBusses[handle] {
+            semaphore.signal()
             return bus
         }
         
         let bus = EventBus()
         self._notificationEventBusses[handle] = bus
+        semaphore.signal()
         return bus
     }
     
