@@ -101,6 +101,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     func task(_ handle: String) -> PromiseContainer {
         semaphore.wait()
         if let task = self._tasks[handle] {
+            semaphore.signal()
             return task
         }
         
@@ -113,6 +114,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     func connectionState(_ handle: String) -> ConnectionState {
         semaphore.wait()
         if let state = self._connectionStates[handle] {
+            semaphore.signal()
             return state
         }
         
