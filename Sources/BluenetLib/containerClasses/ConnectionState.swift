@@ -19,7 +19,7 @@ public enum ConnectionProtocolVersion: UInt8 {
 }
 
 
-
+let FALLBACK_CONNECTION_TIMEOUT : Double = 10.0
 
 class ConnectionState {
     
@@ -71,9 +71,10 @@ class ConnectionState {
     }
     func _bump() {
         self.lastActionTimestamp = Date().timeIntervalSince1970
-        delay(12, {
+        delay(FALLBACK_CONNECTION_TIMEOUT + 1, {
             let now = Date().timeIntervalSince1970
-            if self._connected && now - self.lastActionTimestamp > 10 {
+            if self._connected && now - self.lastActionTimestamp > FALLBACK_CONNECTION_TIMEOUT {
+                print("Closing connection due to timeout", self.handle)
                 _ = self.BleManager.disconnect(self.handle)
             }
         })

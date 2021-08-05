@@ -13,7 +13,6 @@ import CoreBluetooth
 import SwiftyJSON
 import PromiseKit
 
-
 public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
     var BleManager : BleManager!
     
@@ -107,13 +106,19 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
     public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         let handle = peripheral.identifier.uuidString
         LOG.info("BLUENET_LIB: in didConnectPeripheral. Connected to \(handle)")
+        
+        // we do not add a semaphore to the task because the promise callbacks might cause a deadlock.
         if (BleManager.task(handle).type == .CONNECT) {
             BleManager.task(handle).fulfill()
         }
     
+        // -- Accessing shared resources
+        semaphore.wait()
         BleManager.connectionState(handle).connected()
         BleManager.pendingConnections.removeValue(forKey: handle)
         BleManager.connections[handle] = peripheral
+        semaphore.signal()
+        // -- end of shared resource access.
         
         BleManager.eventBus.emit("connectedToPeripheral", handle)
     }
@@ -126,13 +131,19 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
             errorVal = error!
         }
         
+        // we do not add a semaphore to the task because the promise callbacks might cause a deadlock.
         if (BleManager.task(handle).type == .CONNECT) {
             BleManager.task(handle).reject(errorVal)
         }
         
+        // -- Accessing shared resources
+        semaphore.wait()
         BleManager.pendingConnections.removeValue(forKey: handle)
         // lets just remove it from the connections, just in case. It shouldn't be in here, but if it is, its cleaned up again.
         BleManager.connections.removeValue(forKey: handle)
+        semaphore.signal();
+        // -- end of shared resource access.
+        
         BleManager.eventBus.emit("connectedToPeripheralFailed", handle)
     }
     
@@ -175,12 +186,18 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
             }
         }
         
+        // -- Accessing shared resources
+        semaphore.wait()
+        
         BleManager.connections.removeValue(forKey: handle)
         BleManager.connectionState(handle).clear()
         BleManager._connectionStates.removeValue(forKey: handle)
-        
         // lets just remove it from the pending connections, just in case. It shouldn't be in here, but if it is, its cleaned up again.
         BleManager.pendingConnections.removeValue(forKey: handle)
+        
+        semaphore.signal();
+        // -- end of shared resource access.
+        
         BleManager.eventBus.emit("disconnectedFromPeripheral", handle)
     }
 
