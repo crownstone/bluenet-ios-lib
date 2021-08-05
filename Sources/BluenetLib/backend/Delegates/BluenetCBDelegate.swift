@@ -13,6 +13,8 @@ import CoreBluetooth
 import SwiftyJSON
 import PromiseKit
 
+let delegateSemaphore = DispatchSemaphore(value: 1)
+
 public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
     var BleManager : BleManager!
     
@@ -112,9 +114,10 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
             BleManager.task(handle).fulfill()
         }
     
+        
+        BleManager.connectionState(handle).connected()
         // -- Accessing shared resources
         semaphore.wait()
-        BleManager.connectionState(handle).connected()
         BleManager.pendingConnections.removeValue(forKey: handle)
         BleManager.connections[handle] = peripheral
         semaphore.signal()
@@ -186,11 +189,14 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
             }
         }
         
+        
+        BleManager.connectionState(handle).clear()
+        
+        
         // -- Accessing shared resources
         semaphore.wait()
         
         BleManager.connections.removeValue(forKey: handle)
-        BleManager.connectionState(handle).clear()
         BleManager._connectionStates.removeValue(forKey: handle)
         // lets just remove it from the pending connections, just in case. It shouldn't be in here, but if it is, its cleaned up again.
         BleManager.pendingConnections.removeValue(forKey: handle)
