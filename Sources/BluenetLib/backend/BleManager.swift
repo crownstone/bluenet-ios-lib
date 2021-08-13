@@ -392,7 +392,11 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         if let connectingPeripheral = self.pendingConnections[handle] {
             LOG.info("BLUENET_LIB: Waiting to cancel connection... for \(handle).")
             self.centralManager.cancelPeripheralConnection(connectingPeripheral)
+            
+            // accessing shared resources.
+            semaphore.wait()
             self.pendingConnections.removeValue(forKey: handle)
+            semaphore.signal()
         }
         else if let connectedPeripheral = self.connections[handle] {
             self.disconnect(handle)
