@@ -143,9 +143,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     }
     
     func isConnected(_ handle: String) -> Bool {
-        semaphore.wait()
         return self.connections[handle] != nil
-        semaphore.signal()
     }
     
     func _handleStateUpdate(_ state: Any) {
