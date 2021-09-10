@@ -12,11 +12,6 @@ import SwiftyJSON
 import BluenetShared
 import PromiseKit
 
-struct LocationSummary {
-    var present: Bool = false
-    var locationId: String? = nil
-}
-
 /**
  * Bluenet Localization.
  * This lib is used to handle the iBeacon functionality of the Crownstone. It wraps around the CoreLocation services to handle all iBeacon logic.
@@ -46,16 +41,12 @@ public class BluenetLocalization {
     // Modules
     public var locationManager : LocationManager!
     var eventBus : EventBus!
-    var classifier : LocalizationClassifier?
-    
     
     var beaconUuidMap  = [String: String]()
     var referenceIdMap = [String: String]()
-    var locationState  = [String: LocationSummary]()
-    // class vars
-    public var indoorLocalizationEnabled : Bool = false
+    var regionPresenceState = [String: Bool]()
+
     var initializedLocation : Bool = false
-    
     
     // used for debug prints
     var counter : Int64 = 0;
@@ -75,33 +66,17 @@ public class BluenetLocalization {
         // use the ibeacon advertisements for the module logic.
         _ = self.eventBus.on("lowLevelEnterRegion",  self._handleRegionEnter)
         _ = self.eventBus.on("lowLevelExitRegion",   self._handleRegionExit)
-        _ = self.eventBus.on("iBeaconAdvertisement", self._updateState)
+
     }
     
     func _clearPresentState() {
-        for (refId, _) in self.locationState {
-            self.locationState[refId]!.present = false
-            self.locationState[refId]!.locationId = nil
+        for (refId, _) in self.regionPresenceState {
+            self.regionPresenceState[refId] = false
         }
     }
-    
-    func _clearLocationsInState() {
-        for (refId, _) in self.locationState {
-            self.locationState[refId]!.locationId = nil
-        }
-    }
-    
-    
     
     public func setBackgroundScanning(newBackgroundState: Bool) {
         self.locationManager.setBackgroundScanning(newBackgroundState: newBackgroundState)
-    }
-    
-    /**
-     * This method allows you to load a custom classifier into the module. A classifier is optional but required for the enter/exit/current location events.
-     */
-    public func insertClassifier( classifier : LocalizationClassifier ) {
-        self.classifier = classifier
     }
     
     /**
@@ -128,10 +103,6 @@ public class BluenetLocalization {
             LOG.warn("BLUENET LOCALIZATION ---- Cannot track \(referenceId) with UUID \(uuid)")
         }
         else {
-            if self.locationState[referenceId] == nil {
-                self.locationState[referenceId] = LocationSummary()
-            }
-            
             self.referenceIdMap[referenceId] = uuid
             self.beaconUuidMap[uuid] = referenceId
             
@@ -171,8 +142,7 @@ public class BluenetLocalization {
      */
     public func stopTrackingIBeacon(_ uuid: String) {
         if let referenceId = self.beaconUuidMap[uuid] {
-            self.locationState[referenceId]!.present = false
-            self.locationState[referenceId]!.locationId = nil
+            self.regionPresenceState[referenceId] = false
         }
         self.locationManager.stopTrackingIBeacon(uuid);
     }
@@ -199,21 +169,6 @@ public class BluenetLocalization {
     
     
     /**
-     * This will enable the classifier. It requires the TrainingData to be setup and will trigger the current/enter/exitRoom events
-     * This should be used if the user is sure the TrainingData process has been finished.
-     */
-    public func startIndoorLocalization() {
-        self._clearLocationsInState()
-        self.indoorLocalizationEnabled = true;
-    }
-    /**
-     * This will disable the classifier. The current/enter/exitRoom events will no longer be fired.
-     */
-    public func stopIndoorLocalization() {
-        self.indoorLocalizationEnabled = false;
-    }
-    
-    /**
      * Subscribe to a topic with a callback. This method returns an Int which is used as identifier of the subscription.
      * This identifier is supplied to the off method to unsubscribe.
      */
@@ -237,78 +192,13 @@ public class BluenetLocalization {
     
     // MARK: Util
     
-    func _updateState(_ ibeaconData: Any) {
-        if let data = ibeaconData as? [iBeaconPacket] {
-            // log ibeacon receiving for debugging purposes {
-            self.counter += 1
-            LOG.verbose("received iBeacon nr: \(self.counter)")
-            var referenceIdSet = Set<String>()
-            for packet in data {
-                referenceIdSet.insert(packet.referenceId)
-                LOG.verbose("received iBeacon DETAIL \(packet.idString) \(packet.rssi) \(packet.referenceId)")
-            }
-            
-            
-            // I assume we will only get one set of referenceIds in this method, but if there are more, we cleanly handle them
-            for referenceId in referenceIdSet {
-                if (self.locationState[referenceId] != nil) {
-                    if (self.locationState[referenceId]!.present == false) {
-                        self.locationState[referenceId]!.present = true
-                        self.eventBus.emit("enterRegion", referenceId)
-                    }
-                    
-                    // use the data for classification
-                    if (data.count > 0 && self.classifier != nil && self.indoorLocalizationEnabled) {
-                        let currentLocation = self.classifier!.classify(data, referenceId: referenceId)
-                        if (currentLocation != nil) {
-                            
-                            // change in location!
-                            if (self.locationState[referenceId]!.locationId != currentLocation!) {
-                                
-                                // we already were in a specific location
-                                if (self.locationState[referenceId]!.locationId != nil) {
-                                    // exit previous location
-                                    var exitLocationDict = [String: String?]()
-                                    exitLocationDict["region"] = referenceId
-                                    exitLocationDict["location"] = self.locationState[referenceId]!.locationId!
-                                    self.eventBus.emit("exitLocation", exitLocationDict)
-                                }
-                                
-                                // store the new location as my current location in this region
-                                self.locationState[referenceId]!.locationId = currentLocation!
-                                
-                                var enterLocationDict = [String: String?]()
-                                enterLocationDict["region"] = referenceId
-                                enterLocationDict["location"] = currentLocation!
-                                
-                                // emit enter event
-                                self.eventBus.emit("enterLocation", enterLocationDict)
-                            }
-                            
-                            // always emit the current location prediction
-                            var locationDict = [String: String?]()
-                            locationDict["region"] = referenceId
-                            locationDict["location"] = currentLocation!
-                            self.eventBus.emit("currentLocation", locationDict)
-                        }
-                    }
-                }
-                else {
-                    LOG.error("BluenetLocalization: Received ibeacon referenceId that does not exist in our locationState object. This should not be possible!")
-                }
-            }
-        }
-    }
-    
-    
     
     func _handleRegionExit(_ regionId: Any) {
         if let regionIdString = regionId as? String {
             LOG.info("BluenetLocalization: REGION EXIT \(regionIdString)")
-            if (self.locationState[regionIdString] != nil) {
-                if (self.locationState[regionIdString]!.present == true) {
-                    self.locationState[regionIdString]!.present = false
-                    self.locationState[regionIdString]!.locationId = nil
+            if (self.regionPresenceState[regionIdString] != nil) {
+                if (self.regionPresenceState[regionIdString] == true) {
+                    self.regionPresenceState[regionIdString] = false
                     self.eventBus.emit("exitRegion", regionIdString)
                 }
             }
@@ -321,11 +211,9 @@ public class BluenetLocalization {
     func _handleRegionEnter(_ regionId: Any) {
         if let regionIdString = regionId as? String {
             LOG.info("BluenetLocalization: REGION ENTER \(regionIdString)")
-            if (self.locationState[regionIdString] != nil) {
-                if (self.locationState[regionIdString]!.present == false) {
-                    self.locationState[regionIdString]!.present = true
-                    self.eventBus.emit("enterRegion", regionIdString)
-                }
+            if (self.regionPresenceState[regionIdString] == false || self.regionPresenceState[regionIdString] == nil) {
+                self.regionPresenceState[regionIdString] = true
+                self.eventBus.emit("enterRegion", regionIdString)
             }
         }
         else {

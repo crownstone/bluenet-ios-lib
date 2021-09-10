@@ -414,14 +414,17 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             // get a peripheral from the known list (TODO: check what happens if it requests an unknown one)
             let uuidArray = [handle]
             
+            semaphore.wait()
             let peripherals = self.centralManager.retrievePeripherals(withIdentifiers: uuidArray);
             if (peripherals.count == 0) {
+                semaphore.signal()
                 LOG.error("BLUENET_LIB: Can not get peripheral \(BluenetError.CAN_NOT_CONNECT_TO_UUID) \(handle)")
                 seal.reject(BluenetError.CAN_NOT_CONNECT_TO_UUID)
             }
             else {
                 let peripheral = peripherals[0]
                 self.pendingConnections[handle.uuidString] = peripheral
+                semaphore.signal()
                 
                 peripheral.delegate = self
                 

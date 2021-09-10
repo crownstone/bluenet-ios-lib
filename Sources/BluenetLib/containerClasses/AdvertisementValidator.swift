@@ -195,12 +195,14 @@ public class AdvertismentValidator {
         
         // the decryption key used to be the basic key. In the new firmware (3.0.0+) we have a separate key for this: the serviceData key.
         // we need to have a serviceData key for this reference Id
+        self.settings.lock()
         var decryptionKey = self.settings.getBasicKey(referenceId: referenceId)
         if (scanResponse.opCode >= 7) {
             decryptionKey = self.settings.getServiceDataKey(referenceId: referenceId)
         }
         
         if (decryptionKey == nil) {
+            self.settings.release()
             return .ERROR
         }
         
@@ -212,8 +214,8 @@ public class AdvertismentValidator {
         
         
         let validationMap = self.validationMap[referenceId]!
-        
         scanResponse.decrypt(decryptionKey!)
+        self.settings.release()
         
         var validMeasurement = false
         if (validationMap.uniqueIdentifier != nil || firstTime) {

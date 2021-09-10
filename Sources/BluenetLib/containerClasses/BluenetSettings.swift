@@ -49,7 +49,7 @@ public struct DevicePreferences {
     }
 }
 
-
+let settingsSemaphore = DispatchSemaphore(value: 1)
 
 public class BluenetSettings {
     public var encryptionEnabled = false
@@ -71,11 +71,13 @@ public class BluenetSettings {
     }
     
     public func loadKeySets(encryptionEnabled: Bool, keySets: [KeySet]) {
+        settingsSemaphore.wait()
         self.encryptionEnabled = encryptionEnabled
         self.keySetList = keySets
         for keySet in keySets {
             self.keySets[keySet.referenceId] = keySet
         }
+        settingsSemaphore.signal()
     }
     
     public func setLocationState(sphereUID: UInt8, locationId: UInt8, profileIndex: UInt8, deviceToken: UInt8, referenceId: String) {
@@ -111,13 +113,28 @@ public class BluenetSettings {
         return true
     }
     
+    /**
+     This lock ensures that the keys will not be changed between the lock adn release command
+     */
+    public func lock() {
+        settingsSemaphore.wait()
+    }
+    
+    
+    /**
+     Release the lock on the keys. As long as they are locked, the keys cannot be changed.
+     */
+    public func release() {
+        settingsSemaphore.signal()
+    }
+    
     
     /**
      * This gets the admin key of the session reference keySet
      **/
     func getAdminKey(referenceId: String) -> [UInt8]? {
-        if self.keySets[referenceId] != nil {
-            return self.keySets[referenceId]!.adminKey
+        if let keySet = self.keySets[referenceId] {
+            return keySet.adminKey
         }
         else {
             return nil
@@ -128,8 +145,8 @@ public class BluenetSettings {
      * This gets the member key of the session reference keySet
      **/
     func getMemberKey(referenceId: String) -> [UInt8]? {
-        if self.keySets[referenceId] != nil {
-            return self.keySets[referenceId]!.memberKey
+        if let keySet = self.keySets[referenceId] {
+            return keySet.memberKey
         }
         else {
             return nil
@@ -140,8 +157,8 @@ public class BluenetSettings {
      * This gets the basic key of the session reference keySet
      **/
     func getBasicKey(referenceId: String) -> [UInt8]? {
-        if self.keySets[referenceId] != nil {
-            return self.keySets[referenceId]!.basicKey
+        if let keySet = self.keySets[referenceId] {
+            return keySet.basicKey
         }
         else {
             return nil
@@ -153,8 +170,8 @@ public class BluenetSettings {
      * This gets the basic key of the session reference keySet
      **/
     func getServiceDataKey(referenceId: String) -> [UInt8]? {
-        if self.keySets[referenceId] != nil {
-            return self.keySets[referenceId]!.serviceDataKey
+        if let keySet = self.keySets[referenceId] {
+            return keySet.serviceDataKey
         }
         else {
             return nil
@@ -164,8 +181,8 @@ public class BluenetSettings {
 
 
     func getLocalizationKey(referenceId: String) -> [UInt8]? {
-        if self.keySets[referenceId] != nil {
-            return self.keySets[referenceId]!.localizationKey
+        if let keySet = self.keySets[referenceId] {
+            return keySet.localizationKey
         }
         else {
             return nil
