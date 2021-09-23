@@ -34,7 +34,7 @@ let package = Package(
         .package(
             name:"NordicDFU",
             url: "https://github.com/NordicSemiconductor/IOS-Pods-DFU-Library",
-            .exact("4.9.0")
+            .exact("4.11.0")
         ),
         .package(
             url: "https://github.com/mxcl/PromiseKit",
