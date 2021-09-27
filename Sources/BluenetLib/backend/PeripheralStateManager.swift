@@ -75,6 +75,11 @@ import CoreBluetooth
  
  **/
 
+struct TimeKeeperData {
+    var data: Double
+    var updatedAt: Double
+}
+
 public class PeripheralStateManager {
     var settings: BluenetSettings
     var blePeripheralManager : BlePeripheralManager!
@@ -90,8 +95,8 @@ public class PeripheralStateManager {
     let eventBus : EventBus!
     var broadcastCounter : UInt8 = 0
     
-    var timeOffsetMap = [String: Double]() // track time difference between crownstones and this phone per referenceId
-    var timeStoneMap  = [String: Double]() // track time difference between crownstones and this phone per referenceId
+    var timeOffsetMap = [String: TimeKeeperData]() // track time difference between crownstones and this phone per referenceId
+    var timeStoneMap  = [String: TimeKeeperData]() // track time difference between crownstones and this phone per referenceId
     
     init(eventBus: EventBus, settings: BluenetSettings, backgroundEnabled: Bool = true) {
         self.settings = settings
@@ -525,7 +530,7 @@ public class PeripheralStateManager {
         let referenceIdOfBuffer = bufferToBroadcast.referenceId
         var time = getCurrentTimestampForCrownstone()
         if let offset = self.timeOffsetMap[referenceIdOfBuffer] {
-            time -= offset
+            time -= offset.data
         }
         
         let userLevelForReferenceId = self.settings.getUserLevel(referenceId: referenceIdOfBuffer)
@@ -582,20 +587,21 @@ public class PeripheralStateManager {
                 }
                 
                 if let refId = castData.referenceId {
+                    let now = Date().timeIntervalSince1970
                     let currentTimestamp = getCurrentTimestampForCrownstone()
                     let diff = currentTimestamp - scanResponse.timestamp
                     
-                    self.timeStoneMap[castData.handle] = scanResponse.timestamp
+                    self.timeStoneMap[castData.handle] = TimeKeeperData(data: scanResponse.timestamp, updatedAt: now)
                     
-                    if diff > 300 {
-                        print("WARN: LARGE TIME DIFFERENCE!", diff)
+                    if abs(diff) > 120 {
+                        LOG.info("WARN: LARGE TIME DIFFERENCE! \(diff)")
                     }
                     
                     if (self.timeOffsetMap[refId] != nil) {
-                        self.timeOffsetMap[refId] = 0.9 * self.timeOffsetMap[refId]! + 0.1*diff
+                        self.timeOffsetMap[refId] = TimeKeeperData(data: 0.9 * self.timeOffsetMap[refId]!.data + 0.1*diff, updatedAt: now)
                     }
                     else {
-                        self.timeOffsetMap[refId] = diff
+                        self.timeOffsetMap[refId] = TimeKeeperData(data: diff, updatedAt: now)
                     }
                 }
             }

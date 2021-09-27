@@ -24,7 +24,6 @@ public class BroadcastHandler {
     
 
     
-    
     public func multiSwitch(referenceId: String, stoneId: UInt8, switchState: UInt8, autoExecute: Bool = true) -> Promise<Void> {
         return Promise<Void> { seal in
             
@@ -71,7 +70,7 @@ public class BroadcastHandler {
     /**
      * Method for setting the time on a crownstone
      */
-    public func setTime(referenceId: String, time: UInt32? = nil, sunriseSecondsSinceMidnight: UInt32, sunsetSecondsSinceMidnight: UInt32) -> Promise<Void> {
+    public func setTime(referenceId: String, time: UInt32? = nil, sunriseSecondsSinceMidnight: UInt32, sunsetSecondsSinceMidnight: UInt32, customValidationNonce: UInt32? = nil) -> Promise<Void> {
         return Promise<Void> { seal in
             
             var packet : [UInt8]!
@@ -88,7 +87,8 @@ public class BroadcastHandler {
                 type: .timeData,
                 packet: packet,
                 seal: seal,
-                singular: true
+                singular: true,
+                customValidationNonce: customValidationNonce
             )
             
             self.peripheralStateManager.loadElement(element: element)

@@ -75,15 +75,17 @@ class BroadcastBuffer {
         var data = [UInt8]()
         
         var nonceToUse = NSNumber(value: getCurrentTimestampForCrownstone()).uint32Value
+        var useCustomNonce = false
     
         if (self.elements.count == 1) {
             // since the nonce is based on time, we might need to overwrite this with a crownstone time instead of the current time (if stone has no time yet)
             if (self.elements[0].singular == true && self.elements[0].customValidationNonce != nil) {
                 nonceToUse = self.elements[0].customValidationNonce!
+                useCustomNonce = true
             }
         }
         
-        if (devicePreferences.useTimeBasedNonce == false) {
+        if (devicePreferences.useTimeBasedNonce == false && useCustomNonce == false) {
             nonceToUse = 0xCAFEBABE
         }
         

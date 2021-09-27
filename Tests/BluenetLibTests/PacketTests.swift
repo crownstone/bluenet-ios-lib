@@ -28,14 +28,10 @@ class Timetests: XCTestCase {
     func testTimePacke(){
         // the time on the Crownstone is GMT + timeoffset (so + 7200s for dutch summer time)
         // we have to do the same when reconstructing it
-
         let now = Date().timeIntervalSince1970
         let reconstructed = reconstructTimestamp(currentTimestamp: now, LsbTimestamp: 53028)
         print(now, reconstructed, now - reconstructed)
         print(now - getCurrentTimestampForCrownstone())
-//        print(Date().timeIntervalSince1970)
-//        print(NSNumber(value: TimeZone.current.secondsFromGMT()).doubleValue) // +7200
-        
     }
     
     func testControlPackets() {
