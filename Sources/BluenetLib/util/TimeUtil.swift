@@ -50,7 +50,7 @@ func reconstructTimestamp(currentTimestamp: Double, LsbTimestamp : UInt16) -> Do
 
 func getCurrentTimestampForCrownstone() -> Double {
     let secondsFromGMT: Double = NSNumber(value: TimeZone.current.secondsFromGMT()).doubleValue
-    let correctedTimestamp = Date().timeIntervalSince1970 - secondsFromGMT
+    let correctedTimestamp = Date().timeIntervalSince1970 + secondsFromGMT
     
     return correctedTimestamp
 }
