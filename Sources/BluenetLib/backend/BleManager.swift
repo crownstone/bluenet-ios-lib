@@ -34,6 +34,7 @@ struct timeoutDurations {
 }
 
 let semaphore = DispatchSemaphore(value: 1)
+let isConnectedSemaphore = DispatchSemaphore(value: 1)
 
 public class BleManager: NSObject, CBPeripheralDelegate {
     public var centralManager : CBCentralManager!
@@ -143,7 +144,10 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     }
     
     func isConnected(_ handle: String) -> Bool {
-        return self.connections[handle] != nil
+        isConnectedSemaphore.wait()
+        let state = self.connections.keys.contains(handle)
+        isConnectedSemaphore.signal()
+        return state
     }
     
     func _handleStateUpdate(_ state: Any) {
