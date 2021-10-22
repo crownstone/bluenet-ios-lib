@@ -68,8 +68,6 @@ public class Bluenet {
     var crownstoneList: CrownstoneContainer!
     var validatedCrownstoneList: CrownstoneContainer!
     
-    var disconnectCommandTimeList = [String: Double]()
-    
     var encryptionMap = [String: String]()
 
     public let broadcast  : BroadcastHandler!
@@ -96,8 +94,6 @@ public class Bluenet {
         self.validatedCrownstoneList = CrownstoneContainer()
         
         self.broadcast = BroadcastHandler(peripheralStateManager: self.peripheralStateManager, eventBus: eventBus, settings: settings)
-        
-        _ = eventBus.on("disconnectCommandWritten", self._storeDisconnectCommandList)
         
         // subscribe to BLE advertisements
 //        _ = self.eventBus.on("advertisementData", self._parseAdvertisement)
@@ -510,13 +506,6 @@ public class Bluenet {
     }
     
     // MARK: util
-    func _storeDisconnectCommandList(_ data: Any) {
-        if let handleString = data as? String {
-            self.disconnectCommandTimeList[handleString] = Date().timeIntervalSince1970
-        }
-    }
-    
-
 
     func _checkAdvertisement(_ data: Any) {
         // first we check if the data is conforming to an advertisment

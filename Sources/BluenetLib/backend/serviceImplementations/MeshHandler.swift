@@ -15,7 +15,6 @@ public class MeshHandler {
     var settings : BluenetSettings!
     let eventBus : EventBus!
     let handle : UUID
-    var disconnectCommandTimeList : [String: Double]!
     
     init (handle: UUID, bleManager:BleManager, eventBus: EventBus, settings: BluenetSettings) {
         self.handle     = handle

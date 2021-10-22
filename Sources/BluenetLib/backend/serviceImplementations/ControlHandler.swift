@@ -14,7 +14,6 @@ public class ControlHandler {
     let bleManager : BleManager!
     var settings : BluenetSettings!
     let eventBus : EventBus!
-    var disconnectCommandTimeList : [String: Double]!
     var handle : UUID
     
     init (handle: UUID, bleManager:BleManager, eventBus: EventBus, settings: BluenetSettings) {
@@ -175,13 +174,22 @@ public class ControlHandler {
     
     public func disconnect() -> Promise<Void> {
         LOG.info("BLUENET_LIB: REQUESTING IMMEDIATE DISCONNECT FROM \(self.handle)")
+        var disconnectStarted = false
         return _writeControlPacket(bleManager: self.bleManager, self.handle, ControlPacketsGenerator.getDisconnectPacket())
             .then{_ -> Promise<Void> in
                 LOG.info("BLUENET_LIB: Written disconnect command, emitting event for... \(self.handle)")
-                
-                self.eventBus.emit("disconnectCommandWritten", self.handle)
-                
+                disconnectStarted = true
+                LOG.info("BLUENET_LIB: Disconnecting in library...")
                 return self.bleManager.disconnect(self.handle.uuidString)
+            }
+            .recover { _ -> Promise<Void> in
+                if (disconnectStarted == false) {
+                    LOG.info("BLUENET_LIB: Disconnecting in library...")
+                    return self.bleManager.disconnect(self.handle.uuidString)
+                }
+                else {
+                    return Promise.value(())
+                }
             }
     }
     
