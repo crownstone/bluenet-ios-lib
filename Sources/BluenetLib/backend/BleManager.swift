@@ -83,7 +83,6 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         
         
         // initialize the pending promise containers
-        
         _ = self.eventBus.on("bleStatus", self._handleStateUpdate)
     }
     

@@ -170,9 +170,6 @@ public class ControlHandler {
         else {
             LOG.info("BLUENET_LIB: switching to DFU")
             return _writeControlPacket(bleManager: self.bleManager, self.handle, ControlPacketsGenerator.getPutInDFUPacket())
-                .then{ _ -> Promise<Void> in
-                    return self.bleManager.waitForPeripheralToDisconnect(self.handle, timeout: 5)
-                }
         }
     }
     
