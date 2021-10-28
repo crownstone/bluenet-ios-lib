@@ -263,7 +263,7 @@ public class ControlHandler {
      * The session nonce is the only char that is ECB encrypted. We therefore read it without the libraries decryption (AES CTR) and decrypt it ourselves.
      **/
     public func getAndSetSessionNonce() -> Promise<Void> {
-        LOG.info("BLUENET_LIB: getAndSetSessionNonce", self.handle)
+        LOG.info("BLUENET_LIB: getAndSetSessionNonce \(self.handle)")
         let sessionParameters = getSessionNonceReadParameters(bleManager: self.bleManager, handle: self.handle)
         
         return self.bleManager.readCharacteristicWithoutEncryption(self.handle, service: sessionParameters.service, characteristic: sessionParameters.characteristic)
