@@ -118,11 +118,6 @@ class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
     }
     
     
-//    public func peripheralManager(_ peripheral: CBPeripheralManager, willRestoreState dict: [String : Any]) {
-//        LOG.info("BLUENET_LIB: Peripheral manager WILL RESTORE STATE \(dict)");
-//    }
-    
-    
     public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         self.BleState = peripheral.state.rawValue
     }

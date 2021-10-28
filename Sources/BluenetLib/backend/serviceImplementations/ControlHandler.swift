@@ -263,7 +263,7 @@ public class ControlHandler {
      * The session nonce is the only char that is ECB encrypted. We therefore read it without the libraries decryption (AES CTR) and decrypt it ourselves.
      **/
     public func getAndSetSessionNonce() -> Promise<Void> {
-        LOG.info("BLUENET_LIB: getAndSetSessionNonce")
+        LOG.info("BLUENET_LIB: getAndSetSessionNonce", self.handle)
         let sessionParameters = getSessionNonceReadParameters(bleManager: self.bleManager, handle: self.handle)
         
         return self.bleManager.readCharacteristicWithoutEncryption(self.handle, service: sessionParameters.service, characteristic: sessionParameters.characteristic)
@@ -287,12 +287,12 @@ public class ControlHandler {
                 return Promise <Void> { seal in
                     // we only want to pass this to the main promise of connect if we successfully received the nonce, but cant decrypt it.
                     if let bleErr = err as? BluenetError {
-                        if bleErr == BluenetError.COULD_NOT_VALIDATE_SESSION_NONCE || bleErr == BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY {
-                            seal.reject(err)
+                        if bleErr == BluenetError.READ_SESSION_NONCE_ZERO_MAYBE_ENCRYPTION_DISABLED || bleErr == BluenetError.CANNOT_DO_THIS_IN_DFU_MODE {
+                            seal.fulfill(())
                             return
                         }
                     }
-                    seal.fulfill(())
+                    seal.reject(err)
                 }
             }
     }

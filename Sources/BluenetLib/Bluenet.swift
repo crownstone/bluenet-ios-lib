@@ -376,7 +376,7 @@ public class Bluenet {
                 LOG.info("BLUENET_LIB: got mode info! \(modeInfo)  \(handle).")
                 self.bleManager.connectionState(handleUUID).setConnectionProtocolVersion(modeInfo.controlMode)
                 self.bleManager.connectionState(handleUUID).setOperationMode(modeInfo.operationMode)
-
+                
                 if modeInfo.operationMode == .setup {
                     // setup mode, handle the setup encryption.
                     return Promise<CrownstoneMode> {seal in
