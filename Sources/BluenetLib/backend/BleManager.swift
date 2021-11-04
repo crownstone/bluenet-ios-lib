@@ -102,12 +102,14 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     func task(_ handle: String) -> PromiseContainer {
         semaphore.wait()
         if let task = self._tasks[handle] {
+            LOG.info("Returning task for \(handle)")
             semaphore.signal()
             return task
         }
         
         let task = PromiseContainer(handle)
         self._tasks[handle] = task
+        LOG.info("Creating task for \(handle)")
         semaphore.signal()
         return task
     }
@@ -145,6 +147,19 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     func isConnected(_ handle: String) -> Bool {
         isConnectedSemaphore.wait()
         let state = self.connections.keys.contains(handle)
+        isConnectedSemaphore.signal()
+        return state
+    }
+    
+    
+    
+    func isConnecting(_ handle: UUID) -> Bool {
+        return self.isConnecting(handle.uuidString)
+    }
+    
+    func isConnecting(_ handle: String) -> Bool {
+        isConnectedSemaphore.wait()
+        let state = self.pendingConnections.keys.contains(handle)
         isConnectedSemaphore.signal()
         return state
     }
@@ -346,7 +361,6 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     
     /**
      * Connect to a ble device. The handle is the Apple UUID which differs between phones for a single device
-     *
      */
     public func connect(_ handle: String, timeout: Double = 0) -> Promise<Void> {
         if let nsUUID = UUID(uuidString: handle) {
@@ -373,40 +387,11 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             LOG.error("BLUENET_LIB: Invalid uuid \(handle).")
             return Promise<Void> { seal in seal.reject(BluenetError.INVALID_UUID)}
         }
-        
-        
     }
     
     
     
-    /**
-     *  Cancel a pending connection
-     *
-     */
-    func abortConnecting(_ handle: String) {
-        LOG.info("BLUENET_LIB: starting to abort pending connection request for \(handle)")
-
-        // if there was a connection in progress, cancel it with an error
-        if (task(handle).type == .CONNECT) {
-            LOG.info("BLUENET_LIB: rejecting the connection promise for \(handle)")
-            task(handle).reject(BluenetError.CONNECTION_CANCELLED)
-        }
-        
-        // remove peripheral from pending list.
-        if let connectingPeripheral = self.pendingConnections[handle] {
-            LOG.info("BLUENET_LIB: Waiting to cancel connection... for \(handle).")
-            self.centralManager.cancelPeripheralConnection(connectingPeripheral)
-            
-            // accessing shared resources.
-            semaphore.wait()
-            self.pendingConnections.removeValue(forKey: handle)
-            semaphore.signal()
-        }
-        else if self.isConnected(handle) {
-            self.disconnect(handle)
-                .catch{ _ in }
-        }
-    }
+   
     
     
     /**
@@ -436,7 +421,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 if (timeout > 0) {
                     self.task(handle).setDelayedReject(timeoutDurations.connect, errorOnReject: .CONNECT_TIMEOUT)
                 }
-                LOG.error("BLUENET_LIB: Starting connection to \(handle)")
+                LOG.info("BLUENET_LIB: Starting connection to \(handle)")
                 
                 var connectionOptions : [String: Any]? = nil
                 connectionOptions = [
@@ -447,6 +432,36 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             }
         }
     }
+    
+    
+    /**
+     *  Cancel a pending connection
+     */
+    func abortConnecting(_ handle: String) {
+        LOG.info("BLUENET_LIB: starting to abort pending connection request for \(handle)")
+
+        // if there was a connection in progress, cancel it with an error
+        if (task(handle).type == .CONNECT) {
+            LOG.info("BLUENET_LIB: rejecting the connection promise for \(handle)")
+            task(handle).reject(BluenetError.CONNECTION_CANCELLED)
+        }
+        
+        // remove peripheral from pending list.
+        if let connectingPeripheral = self.pendingConnections[handle] {
+            LOG.info("BLUENET_LIB: Waiting to cancel connection... for \(handle).")
+            self.centralManager.cancelPeripheralConnection(connectingPeripheral)
+            
+            // accessing shared resources.
+            semaphore.wait()
+            self.pendingConnections.removeValue(forKey: handle)
+            semaphore.signal()
+        }
+        else if self.isConnected(handle) {
+            self.disconnect(handle)
+                .catch{ _ in }
+        }
+    }
+    
     
     
     public func waitForPeripheralToDisconnect(_ handle: UUID, timeout : Double) -> Promise<Void> {

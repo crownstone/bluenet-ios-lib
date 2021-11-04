@@ -225,5 +225,11 @@ class BluenetLibTests: XCTestCase {
         XCTAssertEqual(1448095018, fletcher32(abcdef))
         XCTAssertEqual(3957429649, fletcher32(abcdefgh))
     }
+    
+    func testLogs() {
+        BluenetLib.LOG.setPrintLevel(.DEBUG)
+        let b  = Bluenet(backgroundEnabled: false)
+        let bl = BluenetLocalization(backgroundEnabled: false)
+    }
 }
 #endif

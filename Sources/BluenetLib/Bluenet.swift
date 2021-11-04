@@ -87,6 +87,7 @@ public class Bluenet {
         self.peripheralStateManager = PeripheralStateManager(eventBus: self.eventBus, settings: settings, backgroundEnabled: backgroundEnabled)
         self.bleManager = BleManager(peripheralStateManager: self.peripheralStateManager, eventBus: self.eventBus, settings: settings, backgroundEnabled: backgroundEnabled)
         
+        LOG.info("BLUENET: Initializing with background \(backgroundEnabled)")
         
         self.setupList               = CrownstoneContainer()
         self.dfuList                 = CrownstoneContainer()

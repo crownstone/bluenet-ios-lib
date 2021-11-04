@@ -57,6 +57,7 @@ public class BluenetLocalization {
      * On init the handlers and interpreters are bound to the events broadcasted by this lib.
      */
     public init(backgroundEnabled: Bool = true) {
+        LOG.info("BLUENET_LOCALIZATION: Initializing with background \(backgroundEnabled)")
         self.eventBus = EventBus()
         self.locationManager = LocationManager(eventBus: self.eventBus, backgroundRangingEnabled: backgroundEnabled)
         
@@ -100,7 +101,7 @@ public class BluenetLocalization {
      */
     public func trackIBeacon(uuid: String, referenceId: String) {
         if (uuid.count < 30) {
-            LOG.warn("BLUENET LOCALIZATION ---- Cannot track \(referenceId) with UUID \(uuid)")
+            LOG.warn("BLUENET_LOCALIZATION ---- Cannot track \(referenceId) with UUID \(uuid)")
         }
         else {
             self.referenceIdMap[referenceId] = uuid
@@ -195,7 +196,7 @@ public class BluenetLocalization {
     
     func _handleRegionExit(_ regionId: Any) {
         if let regionIdString = regionId as? String {
-            LOG.info("BluenetLocalization: REGION EXIT \(regionIdString)")
+            LOG.info("BLUENET_LOCALIZATION: REGION EXIT \(regionIdString)")
             if (self.regionPresenceState[regionIdString] != nil) {
                 if (self.regionPresenceState[regionIdString] == true) {
                     self.regionPresenceState[regionIdString] = false
@@ -204,20 +205,20 @@ public class BluenetLocalization {
             }
         }
         else {
-            LOG.info("BluenetLocalization: REGION EXIT (id not string)")
+            LOG.info("BLUENET_LOCALIZATION: REGION EXIT (id not string)")
         }
     }
     
     func _handleRegionEnter(_ regionId: Any) {
         if let regionIdString = regionId as? String {
-            LOG.info("BluenetLocalization: REGION ENTER \(regionIdString)")
+            LOG.info("BLUENET_LOCALIZATION: REGION ENTER \(regionIdString)")
             if (self.regionPresenceState[regionIdString] == false || self.regionPresenceState[regionIdString] == nil) {
                 self.regionPresenceState[regionIdString] = true
                 self.eventBus.emit("enterRegion", regionIdString)
             }
         }
         else {
-            LOG.info("BluenetLocalization: REGION ENTER region not string")
+            LOG.info("BLUENET_LOCALIZATION: REGION ENTER region not string")
         }
     }
 }

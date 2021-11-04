@@ -126,11 +126,11 @@ class PromiseContainer {
     func setDelayedReject(_ delayTimeInSeconds: Double, errorOnReject: BluenetError) {
         let rejectId = getUUID()
         self.rejectId = rejectId
-        LOG.info("PromiseContainer: Setting Delayed Reject delayTimeInSeconds:\(delayTimeInSeconds) rejectId:\(rejectId) errorOnReject:\(errorOnReject)")
+        LOG.info("PromiseContainer: Setting Delayed Reject delayTimeInSeconds:\(delayTimeInSeconds) rejectId:\(rejectId) errorOnReject:\(errorOnReject) handle:\(self.handle)")
         delay(delayTimeInSeconds, {
-            LOG.info("PromiseContainer: Firing delayed reject delayTimeInSeconds:\(delayTimeInSeconds) rejectId:\(rejectId) errorOnReject:\(errorOnReject)")
+            LOG.info("PromiseContainer: Firing delayed reject delayTimeInSeconds:\(delayTimeInSeconds) rejectId:\(rejectId) errorOnReject:\(errorOnReject) handle:\(self.handle)")
             if (rejectId == self.rejectId) {
-                LOG.info("PromiseContainer: actually applying delayed reject delayTimeInSeconds:\(delayTimeInSeconds) rejectId:\(rejectId) errorOnReject:\(errorOnReject)")
+                LOG.info("PromiseContainer: actually applying delayed reject delayTimeInSeconds:\(delayTimeInSeconds) rejectId:\(rejectId) errorOnReject:\(errorOnReject) handle:\(self.handle)")
                 self.reject(errorOnReject as Error)
             }
         })
