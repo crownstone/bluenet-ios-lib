@@ -12,8 +12,11 @@ import Foundation
 public class BehaviourHasher {
     var behaviours : [Behaviour]!
     
-    public init(_ dictArray: [NSDictionary], dayStartTimeSecondsSinceMidnight: UInt32) {
-        behaviours = [Behaviour]()
+    init() {}
+    
+    convenience init(_ dictArray: [NSDictionary], dayStartTimeSecondsSinceMidnight: UInt32) {
+        self.init()
+        self.behaviours = [Behaviour]()
         for dict in dictArray {
             let behaviour = try? BehaviourDictionaryParser(dict, dayStartTimeSecondsSinceMidnight: dayStartTimeSecondsSinceMidnight)
             if behaviour != nil {
@@ -21,9 +24,19 @@ public class BehaviourHasher {
             }
         }
         
+        self.sort()
+    }
+    
+    convenience init(_ behaviourArray: [Behaviour]) {
+        self.init()
+        self.behaviours = behaviourArray
+        self.sort()
+    }
+    
+    func sort() {
         behaviours.sort( by: { a,b in
             if a.indexOnCrownstone != nil && b.indexOnCrownstone != nil {
-                return a.indexOnCrownstone! > b.indexOnCrownstone!
+                return a.indexOnCrownstone! < b.indexOnCrownstone!
             }
             return false
         })

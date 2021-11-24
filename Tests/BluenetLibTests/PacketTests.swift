@@ -13,7 +13,7 @@ import SwiftyJSON
 
 
 
-class Timetests: XCTestCase {
+class Behaviourtests: XCTestCase {
     
     override func setUp() {
         super.setUp()
@@ -25,21 +25,31 @@ class Timetests: XCTestCase {
         super.tearDown()
     }
     
-    func testTimePacke(){
+    func testBehaviourHash(){
         // the time on the Crownstone is GMT + timeoffset (so + 7200s for dutch summer time)
         // we have to do the same when reconstructing it
-        let now = Date().timeIntervalSince1970
-        let reconstructed = reconstructTimestamp(currentTimestamp: now, LsbTimestamp: 53028)
-        print(now, reconstructed, now - reconstructed)
-        print(now - getCurrentTimestampForCrownstone())
-    }
-    
-    func testControlPackets() {
-       
-    }
-    
-    func testMeshPackets() {
-       
+        let allDays = ActiveDays(data: 255)
+        let time0 = BehaviourTimeContainer(from: BehaviourTime(hours: 23, minutes: 30), until: BehaviourTime(type: .afterSunrise, offset: UInt32(0)))
+        let behaviour0 = Behaviour(profileIndex: 0, type: .twilight, intensity: 20, activeDays: allDays, time: time0)
+        behaviour0.indexOnCrownstone = 4
+        
+        
+        let time1 = BehaviourTimeContainer(from: BehaviourTime(hours: 21, minutes: 30), until: BehaviourTime(type: .afterSunrise, offset: UInt32(0)))
+        let behaviour1 = Behaviour(profileIndex: 0, type: .twilight, intensity: 40, activeDays: allDays, time: time1)
+        behaviour1.indexOnCrownstone = 3
+        
+        let time2 = BehaviourTimeContainer(from: BehaviourTime(hours: 22, minutes: 30), until: BehaviourTime(type: .afterSunrise, offset: UInt32(0)))
+        let behaviour2 = Behaviour(profileIndex: 0, type: .twilight, intensity: 34, activeDays: allDays, time: time2)
+        behaviour2.indexOnCrownstone = 0
+        
+        XCTAssertEqual(behaviour0.getHash(),3862170956)
+        XCTAssertEqual(behaviour1.getHash(),3519283504)
+        XCTAssertEqual(behaviour2.getHash(),4160490302)
+        
+        let hasher = BehaviourHasher([behaviour0, behaviour1, behaviour2])
+        let hash = hasher.getMasterHash()
+        
+        XCTAssertEqual(hash, 1839667649)
     }
     
 }
