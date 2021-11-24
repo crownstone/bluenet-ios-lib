@@ -14,7 +14,7 @@ public class BehaviourHasher {
     
     init() {}
     
-    convenience init(_ dictArray: [NSDictionary], dayStartTimeSecondsSinceMidnight: UInt32) {
+    public convenience init(_ dictArray: [NSDictionary], dayStartTimeSecondsSinceMidnight: UInt32) {
         self.init()
         self.behaviours = [Behaviour]()
         for dict in dictArray {
@@ -27,7 +27,7 @@ public class BehaviourHasher {
         self.sort()
     }
     
-    convenience init(_ behaviourArray: [Behaviour]) {
+    public convenience init(_ behaviourArray: [Behaviour]) {
         self.init()
         self.behaviours = behaviourArray
         self.sort()
