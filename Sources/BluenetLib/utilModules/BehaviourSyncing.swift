@@ -57,7 +57,10 @@ public class BehaviourSyncer {
     
     
     func _sync() -> Promise<[Behaviour]> {
-        print("BehaviourSyncing: start sync")
+        print("BehaviourSyncing: start sync with the following index result packet \(self.existingIndices) and behaviours:")
+        for behaviour in hasher.behaviours {
+            print(behaviour.getDictionary(dayStartTimeSecondsSinceMidnight: self.dayStartTimeSecondsSinceMidnight))
+        }
         var todo = [voidPromiseCallback]()
         
         self.finalBehaviourList = [Behaviour]()
