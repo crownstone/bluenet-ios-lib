@@ -227,9 +227,9 @@ class BluenetLibTests: XCTestCase {
     }
     
     func testLogs() {
-        BluenetLib.LOG.setPrintLevel(.DEBUG)
-        let b  = Bluenet(backgroundEnabled: false)
-        let bl = BluenetLocalization(backgroundEnabled: false)
+//        BluenetLib.LOG.setPrintLevel(.DEBUG)
+//        let b  = Bluenet(backgroundEnabled: false)
+//        let bl = BluenetLocalization(backgroundEnabled: false)
     }
 }
 #endif

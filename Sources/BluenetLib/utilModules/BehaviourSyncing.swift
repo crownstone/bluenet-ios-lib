@@ -57,16 +57,18 @@ public class BehaviourSyncer {
     
     
     func _sync() -> Promise<[Behaviour]> {
+        print("BehaviourSyncing: start sync")
         var todo = [voidPromiseCallback]()
         
         self.finalBehaviourList = [Behaviour]()
 
         // loop over all behaviours and check if the indices we expect them to have exist on the Crownstone
         // if they exist, check if we need to update our behaviour (if hashes do not match)
-        // if they do not exist, remove behaviour from our store
+        // if they do not exist, we might want to upload them later.
         for behaviour in hasher.behaviours {
             if behaviour.indexOnCrownstone == nil {
                 self.finalBehaviourList.append(behaviour)
+                print("BehaviourSyncing: adding behaviour without index")
             }
         }
         
@@ -77,6 +79,7 @@ public class BehaviourSyncer {
             for behaviour in hasher.behaviours {
                 if indexPacket.behaviourHash == behaviour.getHash() {
                     // match! Jey! Do nothing!
+                    print("BehaviourSyncing: Found matching behaviour! CsIndex: \(indexPacket.index) BehaviourIndex:\(behaviour.indexOnCrownstone)")
                     self.finalBehaviourList.append(behaviour)
                     foundIndex = true
                     break
@@ -88,6 +91,7 @@ public class BehaviourSyncer {
                 // generate the todo task for the getting of the behaviour
                 todo.append({ () in
                     return Promise<Void> { seal in
+                        print("Getting behaviour for index: \(indexPacket.index) from cs")
                         self.bluenet.behaviour(self.handle).getBehaviour(index: indexPacket.index)
                             .done{ (behaviour: Behaviour) -> Void in
                                 self.finalBehaviourList.append(behaviour)

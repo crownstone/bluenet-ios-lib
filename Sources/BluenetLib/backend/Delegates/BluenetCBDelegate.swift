@@ -147,7 +147,7 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         semaphore.signal();
         // -- end of shared resource access.
         
-        BleManager.eventBus.emit("connectedToPeripheralFailed", handle)
+        BleManager.eventBus.emit("connectingToPeripheralFailed", handle)
     }
     
     public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
