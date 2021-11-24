@@ -59,7 +59,7 @@ public class BehaviourSyncer {
     func _sync() -> Promise<[Behaviour]> {
         print("BehaviourSyncing: start sync with the following index result packet \(self.existingIndices) and behaviours:")
         for behaviour in hasher.behaviours {
-            print(behaviour.getDictionary(dayStartTimeSecondsSinceMidnight: self.dayStartTimeSecondsSinceMidnight))
+            print("\(behaviour.getDictionary(dayStartTimeSecondsSinceMidnight: self.dayStartTimeSecondsSinceMidnight)) hash \(behaviour.getHash())")
         }
         var todo = [voidPromiseCallback]()
         
@@ -85,6 +85,17 @@ public class BehaviourSyncer {
                     print("BehaviourSyncing: Found matching behaviour! CsIndex: \(indexPacket.index) BehaviourIndex:\(behaviour.indexOnCrownstone)")
                     self.finalBehaviourList.append(behaviour)
                     foundIndex = true
+                    todo.append({ () in
+                        return Promise<Void> { seal in
+                        print("replacing behaviour for index: \(indexPacket.index) from cs")
+                            self.bluenet.behaviour(self.handle).replaceBehaviour(index: indexPacket.index, behaviour: behaviour)
+                            .done{ (behaviourResultPacket: BehaviourResultPacket) -> Void in
+                                print("Result from overwriting \(indexPacket.index) MH:\(behaviourResultPacket.masterHash)")
+                                seal.fulfill(())
+                            }
+                            .catch { err in seal.reject(err) }
+                    }
+                })
                     break
                 }
             }
