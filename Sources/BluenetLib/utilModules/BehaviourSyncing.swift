@@ -78,7 +78,6 @@ public class BehaviourSyncer {
                     // match! Jey! Do nothing!
                     self.finalBehaviourList.append(behaviour)
                     foundIndex = true
-                })
                     break
                 }
             }
