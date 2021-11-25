@@ -104,7 +104,7 @@ public class DeviceHandler {
                              
                             "productHousing" : try payload.getUInt8(),
                             "productionWeek" : try payload.getUInt8(),
-                            "producitonYear" : try payload.getUInt8(),
+                            "productionYear" : try payload.getUInt8(),
                             "reserved3"      : try payload.getUInt8(),
                         ]
                                                         

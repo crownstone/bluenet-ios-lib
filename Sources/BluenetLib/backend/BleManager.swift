@@ -832,7 +832,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 self.getChacteristic(handle, serviceId, characteristicId)
                     // then we subscribe to the feed before we know it works to miss no data.
                     .then{(characteristic: CBCharacteristic) -> Promise<Void> in
-                        unsubscribeCallback = self.notificationBus(handle).on(characteristic.service!.uuid.uuidString + "_" + characteristic.uuid.uuidString, callback)
+                        unsubscribeCallback = self.notificationBus(handle).on(serviceId + "_" + characteristicId, callback)
 
                         // we now tell the device to notify us.
                         return Promise<Void> { innerSeal in
