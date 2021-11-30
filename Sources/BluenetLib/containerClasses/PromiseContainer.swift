@@ -9,6 +9,7 @@
 import Foundation
 import PromiseKit
 import CoreBluetooth
+import CryptoSwift
 
 enum RequestType {
     case NONE
@@ -128,10 +129,13 @@ class PromiseContainer {
         self.rejectId = rejectId
         LOG.info("PromiseContainer: Setting Delayed Reject delayTimeInSeconds:\(delayTimeInSeconds) rejectId:\(rejectId) errorOnReject:\(errorOnReject) handle:\(self.handle)")
         delay(delayTimeInSeconds, {
-            LOG.info("PromiseContainer: Firing delayed reject delayTimeInSeconds:\(delayTimeInSeconds) rejectId:\(rejectId) errorOnReject:\(errorOnReject) handle:\(self.handle)")
+            LOG.debug("PromiseContainer: Firing delayed reject delayTimeInSeconds:\(delayTimeInSeconds) rejectId:\(rejectId) errorOnReject:\(errorOnReject) handle:\(self.handle)")
             if (rejectId == self.rejectId) {
                 LOG.info("PromiseContainer: actually applying delayed reject delayTimeInSeconds:\(delayTimeInSeconds) rejectId:\(rejectId) errorOnReject:\(errorOnReject) handle:\(self.handle)")
                 self.reject(errorOnReject as Error)
+            }
+            else {
+                LOG.debug("PromiseContainer: no need to apply the delayed rejection delayTimeInSeconds:\(delayTimeInSeconds) rejectId:\(rejectId) errorOnReject:\(errorOnReject) handle:\(self.handle)")
             }
         })
     }
