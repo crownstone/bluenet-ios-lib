@@ -102,7 +102,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     func task(_ handle: String) -> PromiseContainer {
         semaphore.wait()
         if let task = self._tasks[handle] {
-            LOG.info("Returning task for \(handle)")
+            LOG.debug("Returning task for \(handle)")
             semaphore.signal()
             return task
         }
@@ -1274,15 +1274,20 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     
     public func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
         let handle = peripheral.identifier
-        LOG.info("BLUENET_LIB: didUpdateNotificationStateFor for \(handle)")
+        LOG.info("BLUENET_LIB: in didUpdateNotificationStateFor for \(handle)")
         self.connectionState(handle).written()
         if (self.task(handle).type == .ENABLE_NOTIFICATIONS || self.task(handle).type == .DISABLE_NOTIFICATIONS) {
             if (error != nil) {
+                LOG.info("BLUENET_LIB: reject didUpdateNotificationStateFor for \(handle)")
                 self.task(handle).reject(error!)
             }
             else {
+                LOG.info("BLUENET_LIB: fulfill didUpdateNotificationStateFor for \(handle)")
                 self.task(handle).fulfill(())
             }
+        }
+        else {
+            LOG.info("BLUENET_LIB: Unexpected type in task \(self.task(handle).type)")
         }
     }
     
