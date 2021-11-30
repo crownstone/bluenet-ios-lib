@@ -817,6 +817,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     public func enableNotifications(_ handle: UUID, serviceId: String, characteristicId: String, callback: @escaping eventCallback) -> Promise<voidPromiseCallback> {
         var unsubscribeCallback : voidCallback? = nil
         return Promise<voidPromiseCallback> { seal in
+            print("NOTIFICATIONS checking to topic \(serviceId + "_" + characteristicId)")
             // if there is already a listener on this topic, we assume notifications are already enabled. We just add another listener
             if (self.notificationBus(handle).hasListeners(serviceId + "_" + characteristicId)) {
                 unsubscribeCallback = self.notificationBus(handle).on(serviceId + "_" + characteristicId, callback)
@@ -832,6 +833,8 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 self.getChacteristic(handle, serviceId, characteristicId)
                     // then we subscribe to the feed before we know it works to miss no data.
                     .then{(characteristic: CBCharacteristic) -> Promise<Void> in
+                        
+                        print("NOTIFICATIONS listening to topic \(serviceId + "_" + characteristicId)")
                         unsubscribeCallback = self.notificationBus(handle).on(serviceId + "_" + characteristicId, callback)
 
                         // we now tell the device to notify us.
@@ -1226,6 +1229,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         let serviceId = characteristic.service!.uuid.uuidString
         let characteristicId = characteristic.uuid.uuidString
         let topicString = serviceId + "_" + characteristicId
+        print("NOTIFICATIONS sending to topic \(topicString)")
         if (self.notificationBus(handle).hasListeners(topicString)) {
             if let data = characteristic.value {
                 // notifications are a chopped up encrypted message. We leave decryption for the handling methods.
