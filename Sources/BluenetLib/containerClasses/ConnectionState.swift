@@ -74,7 +74,7 @@ class ConnectionState {
         delay(FALLBACK_CONNECTION_TIMEOUT + 1, {
             let now = Date().timeIntervalSince1970
             if self._connected && now - self.lastActionTimestamp > FALLBACK_CONNECTION_TIMEOUT {
-                print("Closing connection due to timeout", self.handle)
+                LOG.info("BLUENET_LIB Closing connection due to timeout \(self.handle)")
                 _ = self.BleManager.disconnect(self.handle)
             }
         })

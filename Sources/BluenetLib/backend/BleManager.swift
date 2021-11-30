@@ -817,10 +817,10 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     public func enableNotifications(_ handle: UUID, serviceId: String, characteristicId: String, callback: @escaping eventCallback) -> Promise<voidPromiseCallback> {
         var unsubscribeCallback : voidCallback? = nil
         return Promise<voidPromiseCallback> { seal in
-            print("NOTIFICATIONS checking to topic \(serviceId + "_" + characteristicId)")
+            var topic = characteristicId.uppercased()
             // if there is already a listener on this topic, we assume notifications are already enabled. We just add another listener
-            if (self.notificationBus(handle).hasListeners(serviceId + "_" + characteristicId)) {
-                unsubscribeCallback = self.notificationBus(handle).on(serviceId + "_" + characteristicId, callback)
+            if (self.notificationBus(handle).hasListeners(topic)) {
+                unsubscribeCallback = self.notificationBus(handle).on(topic, callback)
 
                 // create the cleanup callback and return it.
                 let cleanupCallback : voidPromiseCallback = {
@@ -833,9 +833,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 self.getChacteristic(handle, serviceId, characteristicId)
                     // then we subscribe to the feed before we know it works to miss no data.
                     .then{(characteristic: CBCharacteristic) -> Promise<Void> in
-                        
-                        print("NOTIFICATIONS listening to topic \(serviceId + "_" + characteristicId)")
-                        unsubscribeCallback = self.notificationBus(handle).on(serviceId + "_" + characteristicId, callback)
+                        unsubscribeCallback = self.notificationBus(handle).on(topic, callback)
 
                         // we now tell the device to notify us.
                         return Promise<Void> { innerSeal in
@@ -875,7 +873,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             unsubscribeCallback()
 
             // if there are still other callbacks listening, we're done!
-            if (self.notificationBus(handle).hasListeners(serviceId + "_" + characteristicId)) {
+            if (self.notificationBus(handle).hasListeners(characteristicId.uppercased())) {
                 seal.fulfill(())
             }
             else if self.isConnected(handle) {
@@ -1226,10 +1224,8 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         
         
         // in case of notifications:
-        let serviceId = characteristic.service!.uuid.uuidString
         let characteristicId = characteristic.uuid.uuidString
-        let topicString = serviceId + "_" + characteristicId
-        print("NOTIFICATIONS sending to topic \(topicString)")
+        let topicString = characteristicId.uppercased()
         if (self.notificationBus(handle).hasListeners(topicString)) {
             if let data = characteristic.value {
                 // notifications are a chopped up encrypted message. We leave decryption for the handling methods.
