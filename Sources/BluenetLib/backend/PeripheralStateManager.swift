@@ -504,6 +504,10 @@ public class PeripheralStateManager {
     
     func _broadcastElements() {
         // check in which referenceId the first block to be advertised lives and what it's type is.
+        if (self.elements.count == 0) {
+            self.updateBaseAdvertisement()
+        }
+        
         let broadcastType = self.elements[0].type
         let broadcastReferenceId = self.elements[0].referenceId
         
