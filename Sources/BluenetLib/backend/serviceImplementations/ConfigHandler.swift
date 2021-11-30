@@ -286,6 +286,7 @@ public class ConfigHandler {
             data += Conversion.uint32_to_uint8_array( sunsetSecondsSinceMidnight)
             
             let packet = StatePacketsGenerator.getWritePacket(type: .sunTimes).load(data).getPacket()
+            
             return _writeControlPacket(bleManager: self.bleManager, handle, packet)
         }
         else {

@@ -29,7 +29,7 @@ public class HubHandler {
         let option = EncryptionOption(rawValue: encryptionOption)!
         let packet = ControlPacketsGenerator.getHubDataPacket(encryptionOption: option, payload: payload)
         let readParameters = getControlReadParameters(bleManager: bleManager, handle: self.handle);
-        let writeCommand = {() -> Promise<Void> in return _writeControlPacket(bleManager: self.bleManager, self.handle, packet) }
+        let writeCommand = {() -> Promise<Void> in return _writeControlPacketWithoutWaitingForReply(bleManager: self.bleManager, self.handle, packet) }
         var resultData : [UInt8] = []
         self.bleManager.setupNotificationStream(
             self.handle,

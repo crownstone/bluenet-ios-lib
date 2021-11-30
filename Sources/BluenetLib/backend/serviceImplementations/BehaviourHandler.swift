@@ -56,11 +56,7 @@ public class BehaviourHandler {
             let behaviourDataPacket = behaviour.getPacket()
             let packet = ControlPacketsGenerator.getControlPacket(type: .addBehaviour).load(behaviourDataPacket).getPacket()
             
-            let writeCommand : voidPromiseCallback = {
-                return _writeControlPacket(bleManager: self.bleManager, self.handle, packet)
-            }
-            
-            _writePacketWithReply(bleManager: self.bleManager, handle :self.handle, writeCommand: writeCommand)
+            _writePacketWithReply(bleManager: self.bleManager, handle :self.handle, packet)
                 .done{ resultPacket -> Void in
                     self._handleResponseIndexHash(resultPacket: resultPacket, seal: seal)
                }
@@ -74,11 +70,8 @@ public class BehaviourHandler {
             dataPacket.append(index)
             dataPacket += behaviour.getPacket()
             let packet = ControlPacketsGenerator.getControlPacket(type: .replaceBehaviour).load(dataPacket).getPacket()
-            
-            let writeCommand : voidPromiseCallback = {
-               return _writeControlPacket(bleManager: self.bleManager, self.handle, packet)
-            }
-            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, writeCommand: writeCommand)
+        
+            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, packet)
                 .done{ resultPacket -> Void in
                     self._handleResponseIndexHash(resultPacket: resultPacket, seal: seal)
                 }
@@ -89,11 +82,8 @@ public class BehaviourHandler {
     public func removeBehaviour(index: UInt8) -> Promise<BehaviourResultPacket> {
         return Promise<BehaviourResultPacket> { seal in
             let deletePacket = ControlPacketsGenerator.getControlPacket(type: .removeBehaviour).load(index).getPacket()
-            let writeCommand : voidPromiseCallback = {
-                return _writeControlPacket(bleManager: self.bleManager, self.handle, deletePacket)
-            }
-            
-            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, writeCommand: writeCommand)
+         
+            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, deletePacket)
                  .done{ resultPacket -> Void in
                      self._handleResponseIndexHash(resultPacket: resultPacket, seal: seal, notFoundIsSuccess: true)
                  }
@@ -106,7 +96,7 @@ public class BehaviourHandler {
             let getBehaviourPacket = ControlPacketsGenerator.getControlPacket(type: .getBehaviour).load(index).getPacket()
             
             let writeCommand : voidPromiseCallback = {
-               return _writeControlPacket(bleManager: self.bleManager, self.handle, getBehaviourPacket)
+               return _writeControlPacketWithoutWaitingForReply(bleManager: self.bleManager, self.handle, getBehaviourPacket)
             }
             let readParameters = getControlReadParameters(bleManager: bleManager, handle: self.handle)
             self.bleManager.setupSingleNotification(self.handle, serviceId: readParameters.service, characteristicId: readParameters.characteristic, writeCommand: writeCommand)
@@ -148,7 +138,7 @@ public class BehaviourHandler {
             let getBehaviourPacket = ControlPacketsGenerator.getControlPacket(type: .getBehaviourIndices).getPacket()
             
             let writeCommand : voidPromiseCallback = {
-               return _writeControlPacket(bleManager: self.bleManager, self.handle, getBehaviourPacket)
+               return _writeControlPacketWithoutWaitingForReply(bleManager: self.bleManager, self.handle, getBehaviourPacket)
             }
             
             let readParameters = getControlReadParameters(bleManager: bleManager, handle: self.handle)

@@ -112,7 +112,8 @@ func getControlReadParameters(bleManager: BleManager, handle: UUID) -> BleParame
 }
   
 
-func _writeControlPacket(bleManager: BleManager, _ handle: UUID, _ packet: [UInt8]) -> Promise<Void> {
+
+func _writeControlPacketWithoutWaitingForReply(bleManager: BleManager, _ handle: UUID, _ packet: [UInt8]) -> Promise<Void> {
     let writeParams = getControlWriteParameters(bleManager: bleManager, handle: handle)
     
     return bleManager.writeToCharacteristic(
@@ -123,6 +124,23 @@ func _writeControlPacket(bleManager: BleManager, _ handle: UUID, _ packet: [UInt
         type: CBCharacteristicWriteType.withResponse
     )
 }
+
+/**
+ This waits for the write to finalize, but does not do anything with the result.
+ */
+func _writeControlPacket(bleManager: BleManager, _ handle: UUID, _ packet: [UInt8]) -> Promise<Void> {
+    let writeCommand =  { _writeControlPacketWithoutWaitingForReply(bleManager: bleManager, handle,  packet) }
+    let readParameters = getControlReadParameters(bleManager: bleManager, handle: handle);
+    return Promise<Void> { seal in
+        bleManager.setupSingleNotification(handle, serviceId: readParameters.service, characteristicId: readParameters.characteristic, writeCommand: writeCommand)
+            .done{ data -> Void in
+                seal.fulfill(())
+            }
+            .catch{ err in seal.reject(err) }
+    }
+}
+
+
 
 
 func _writePacketWithReply(bleManager: BleManager, handle: UUID, service: String, readCharacteristic: String, writeCommand : @escaping voidPromiseCallback) -> Promise<ResultBasePacket> {
@@ -142,7 +160,7 @@ func _writePacketWithReply(bleManager: BleManager, handle: UUID, service: String
 }
 
 func _writePacketWithReply(bleManager: BleManager, handle: UUID, _ packet: [UInt8]) -> Promise<ResultBasePacket> {
-    let writeCommand =  { _writeControlPacket(bleManager: bleManager, handle,  packet) }
+    let writeCommand =  { _writeControlPacketWithoutWaitingForReply(bleManager: bleManager, handle,  packet) }
     let readParameters = getControlReadParameters(bleManager: bleManager, handle: handle);
     return Promise<ResultBasePacket> { seal in
         bleManager.setupSingleNotification(handle, serviceId: readParameters.service, characteristicId: readParameters.characteristic, writeCommand: writeCommand)

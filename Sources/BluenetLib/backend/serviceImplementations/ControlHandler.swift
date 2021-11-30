@@ -319,9 +319,8 @@ public class ControlHandler {
                 deviceToken: deviceToken,
                 ttlMinutes: ttlMinutes
             )
-            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, self.handle, packet) }
             
-            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, writeCommand: writeCommand)
+            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, packet)
                 .done { resultPacket in
                     switch resultPacket.resultCode {
                     case .SUCCESS:
@@ -350,9 +349,8 @@ public class ControlHandler {
                 deviceToken: deviceToken,
                 ttlMinutes: ttlMinutes
             )
-            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, self.handle, packet) }
             
-            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, writeCommand: writeCommand)
+            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, packet)
                 .done { resultPacket in
                     switch resultPacket.resultCode {
                     case .SUCCESS:
@@ -373,27 +371,5 @@ public class ControlHandler {
                 .catch{ err in seal.reject(err)
             }
         }
-    }
-    
-    
-    
-    
-    // MARK: Util
-    public func _writeControlPacketWithReply(_ packet: [UInt8]) -> Promise<Void> {
-        return Promise { seal in
-            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, self.handle, packet) }
-            
-            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, writeCommand: writeCommand)
-               .done{ resultPacket -> Void in
-                    if resultPacket.resultCode == .SUCCESS {
-                        seal.fulfill(())
-                    }
-                    else if resultPacket.resultCode == .ERR_ALREADY_EXISTS {
-                        seal.reject(BluenetError.ERR_ALREADY_EXISTS)
-                    }
-                }
-                .catch{ err in seal.reject(err) }
-        }
-       
     }
 }

@@ -49,9 +49,8 @@ public class DebugHandler {
     public func getUptime() -> Promise<UInt32> {
         return Promise<UInt32> { seal in
             let packet = ControlPacketsGenerator.getControlPacket(type: .getUptime).getPacket()
-            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, self.handle, packet) }
             
-            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, writeCommand: writeCommand)
+            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, packet)
                 .done { resultPacket in
                     let payload = DataStepper(resultPacket.payload)
                     do { seal.fulfill(try payload.getUInt32()) }
@@ -65,9 +64,8 @@ public class DebugHandler {
     public func getAdcRestarts() -> Promise<Dictionary<String, NSNumber>> {
         return Promise<Dictionary<String, NSNumber>> { seal in
             let packet = ControlPacketsGenerator.getControlPacket(type: .getAdcRestart).getPacket()
-            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, self.handle, packet) }
             
-            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, writeCommand: writeCommand)
+            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, packet)
                 .done { resultPacket in
                     let payload = DataStepper(resultPacket.payload)
                     do {
@@ -89,9 +87,8 @@ public class DebugHandler {
     public func getSwitchHistory() -> Promise<[Dictionary<String, NSNumber>]> {
         return Promise<[Dictionary<String, NSNumber>]> { seal in
             let packet = ControlPacketsGenerator.getControlPacket(type: .getSwitchHistory).getPacket()
-            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, self.handle, packet) }
-
-            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, writeCommand: writeCommand)
+            
+            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, packet)
                 .done { resultPacket in
                     do {
                         let package = try SwitchHistoryList(resultPacket.payload)
@@ -128,9 +125,7 @@ public class DebugHandler {
     
     func _getPowerSamples(type: PowerSampleType, index: UInt8, collector: Collector) -> Promise<Void> {
         let packetIndex = ControlPacketsGenerator.getControlPacket(type: .getPowerSamples).load([type.rawValue, index]).getPacket()
-        let writeCommandIndex : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, self.handle, packetIndex) }
-        
-        return _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, writeCommand: writeCommandIndex)
+        return _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, packetIndex)
             .then { resultPacket -> Promise<Void> in
                 if (resultPacket.resultCode == .SUCCESS) {
                     let package = try PowerSamples(resultPacket.payload)
@@ -146,9 +141,7 @@ public class DebugHandler {
     public func getMinSchedulerFreeSpace() -> Promise<UInt16> {
         return Promise<UInt16> { seal in
             let packet = ControlPacketsGenerator.getControlPacket(type: .getMinSchedulerFreeSpace).getPacket()
-            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, self.handle, packet) }
-            
-            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, writeCommand: writeCommand)
+            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, packet)
                 .done { resultPacket in
                     let payload = DataStepper(resultPacket.payload)
                     do { seal.fulfill(try payload.getUInt16()) }
@@ -161,9 +154,8 @@ public class DebugHandler {
     public func getLastResetReason() -> Promise<Dictionary<String, Any>> {
         return Promise<Dictionary<String, Any>> { seal in
             let packet = ControlPacketsGenerator.getControlPacket(type: .getLastResetReason).getPacket()
-            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, self.handle, packet) }
             
-            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, writeCommand: writeCommand)
+            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, packet)
                 .done { resultPacket in
                     let payload = DataStepper(resultPacket.payload)
                     do {
@@ -215,9 +207,8 @@ public class DebugHandler {
     func _getGPREGRET(index: UInt8) -> Promise<UInt32> {
         return Promise<UInt32> { seal in
             let packet = ControlPacketsGenerator.getControlPacket(type: .getGPREGRET).load(index).getPacket()
-            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, self.handle, packet) }
             
-            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, writeCommand: writeCommand)
+            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, packet)
             .done { resultPacket in
                 let payload = DataStepper(resultPacket.payload)
                 do {
@@ -234,9 +225,7 @@ public class DebugHandler {
     public func getAdcChannelSwaps() -> Promise<Dictionary<String, NSNumber>> {
         return Promise<Dictionary<String, NSNumber>> { seal in
             let packet = ControlPacketsGenerator.getControlPacket(type: .getAdcChannelSwaps).getPacket()
-            let writeCommand : voidPromiseCallback = { return _writeControlPacket(bleManager: self.bleManager, self.handle, packet) }
-
-            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, writeCommand: writeCommand)
+            _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, packet)
             .done { resultPacket in
                 let payload = DataStepper(resultPacket.payload)
                 do {
@@ -257,7 +246,7 @@ public class DebugHandler {
             let getBehaviourPacket = ControlPacketsGenerator.getControlPacket(type: .getBehaviourDebug).getPacket()
             
             let writeCommand : voidPromiseCallback = {
-               return _writeControlPacket(bleManager: self.bleManager, self.handle, getBehaviourPacket)
+               return _writeControlPacketWithoutWaitingForReply(bleManager: self.bleManager, self.handle, getBehaviourPacket)
             }
             let readParameters = getControlReadParameters(bleManager: bleManager, handle: self.handle)
             self.bleManager.setupSingleNotification(self.handle, serviceId: readParameters.service, characteristicId: readParameters.characteristic, writeCommand: writeCommand)

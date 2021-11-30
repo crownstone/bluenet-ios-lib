@@ -82,10 +82,9 @@ public class DeviceHandler {
     
     
     public func getUICRData() -> Promise<[String: Any]> {
-        let writeCommand : voidPromiseCallback = {
-            return _writeControlPacket(bleManager: self.bleManager, self.handle, ControlPacketsGenerator.getControlPacket(type: .GET_UICR_DATA).getPacket())
-        }
-        return _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, writeCommand: writeCommand)
+        let packet = ControlPacketsGenerator.getControlPacket(type: .GET_UICR_DATA).getPacket()
+    
+        return _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, packet)
             .then{ resultPacket -> Promise<[String: Any]> in
                 return Promise<[String: Any]> { seal in
                     do {
@@ -124,10 +123,9 @@ public class DeviceHandler {
                 case .unknown, .legacy, .v1, .v2, .v3:
                     return self.getBootloaderRevisionInAppMode()
                 case .v5:
-                    let writeCommand : voidPromiseCallback = {
-                        return _writeControlPacket(bleManager: self.bleManager, self.handle, ControlPacketsGenerator.getControlPacket(type: .GET_BOOTLOADER_VERSION).getPacket())
-                    }
-                    return _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, writeCommand: writeCommand)
+                    let packet = ControlPacketsGenerator.getControlPacket(type: .GET_BOOTLOADER_VERSION).getPacket()
+                    
+                    return _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, packet)
                         .then{ resultPacket -> Promise<String> in
                             return Promise<String> { seal in
                                 do {
