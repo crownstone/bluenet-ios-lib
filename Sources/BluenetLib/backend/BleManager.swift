@@ -391,9 +391,6 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     
     
     
-   
-    
-    
     /**
      *  This does the actual connection. It stores the pending promise and waits for the delegate to return.
      */
@@ -814,26 +811,20 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         }
     }
 
-    public func enableNotifications(_ handle: UUID, serviceId: String, characteristicId: String, callback: @escaping eventCallback) -> Promise<voidPromiseCallback> {
-        var unsubscribeCallback : voidCallback? = nil
-        return Promise<voidPromiseCallback> { seal in
-            var topic = characteristicId.uppercased()
+    public func enableNotifications(_ handle: UUID, serviceId: String, characteristicId: String, callback: @escaping eventCallback) -> Promise<Void> {
+        return Promise<Void> { seal in
+            let topic = characteristicId.uppercased()
             // if there is already a listener on this topic, we assume notifications are already enabled. We just add another listener
             if (self.notificationBus(handle).hasListeners(topic)) {
-                unsubscribeCallback = self.notificationBus(handle).on(topic, callback)
-
-                // create the cleanup callback and return it.
-                let cleanupCallback : voidPromiseCallback = {
-                    return self.disableNotifications(handle, serviceId: serviceId, characteristicId: characteristicId, unsubscribeCallback: unsubscribeCallback!)
-                }
-                seal.fulfill(cleanupCallback)
+                _ = self.notificationBus(handle).on(topic, callback)
+                seal.fulfill(())
             }
             else {
                 // we first get the characteristic from the device
                 self.getChacteristic(handle, serviceId, characteristicId)
                     // then we subscribe to the feed before we know it works to miss no data.
                     .then{(characteristic: CBCharacteristic) -> Promise<Void> in
-                        unsubscribeCallback = self.notificationBus(handle).on(topic, callback)
+                        _ = self.notificationBus(handle).on(topic, callback)
 
                         // we now tell the device to notify us.
                         return Promise<Void> { innerSeal in
@@ -853,57 +844,52 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         }
                     }
                     .done{_ -> Void in
-                        let cleanupCallback : voidPromiseCallback = { self.disableNotifications(handle, serviceId: serviceId, characteristicId: characteristicId, unsubscribeCallback: unsubscribeCallback!) }
-                        seal.fulfill(cleanupCallback)
+                        seal.fulfill(())
                     }
                     .catch{(error: Error) -> Void in
-                        // if something went wrong, we make sure the callback will not be fired.
-                        if (unsubscribeCallback != nil) {
-                            unsubscribeCallback!()
-                        }
                         seal.reject(error)
                     }
             }
         }
     }
 
-    func disableNotifications(_ handle: UUID, serviceId: String, characteristicId: String, unsubscribeCallback: voidCallback) -> Promise<Void> {
-        return Promise<Void> { seal in
-            // remove the callback
-            unsubscribeCallback()
-
-            // if there are still other callbacks listening, we're done!
-            if (self.notificationBus(handle).hasListeners(characteristicId.uppercased())) {
-                seal.fulfill(())
-            }
-            else if self.isConnected(handle) {
-                // if there are no more people listening, we tell the device to stop the notifications.
-                self.getChacteristic(handle, serviceId, characteristicId)
-                    .done{characteristic -> Void in
-                        semaphore.wait()
-                        if let connection = self.connections[handle.uuidString] {
-                            // the fulfil and reject are handled in the peripheral delegate
-                            connection.setNotifyValue(false, for: characteristic)
-                            semaphore.signal()
-                            
-                            self.task(handle).load(seal.fulfill, seal.reject, type: .DISABLE_NOTIFICATIONS)
-                            self.task(handle).setDelayedReject(timeoutDurations.disableNotifications, errorOnReject: .DISABLE_NOTIFICATIONS_TIMEOUT)
-                        }
-                        else {
-                            semaphore.signal()
-                            seal.fulfill(())
-                        }
-                    }
-                    .catch{(error: Error) -> Void in
-                        seal.reject(error)
-                    }
-            }
-            else {
-                // if we are no longer connected we dont need to clean up.
-                seal.fulfill(())
-            }
-        }
-    }
+//    func disableNotifications(_ handle: UUID, serviceId: String, characteristicId: String, unsubscribeCallback: voidCallback) -> Promise<Void> {
+//        return Promise<Void> { seal in
+//            // remove the callback
+//            unsubscribeCallback()
+//
+//            // if there are still other callbacks listening, we're done!
+//            if (self.notificationBus(handle).hasListeners(characteristicId.uppercased())) {
+//                seal.fulfill(())
+//            }
+//            else if self.isConnected(handle) {
+//                // if there are no more people listening, we tell the device to stop the notifications.
+//                self.getChacteristic(handle, serviceId, characteristicId)
+//                    .done{characteristic -> Void in
+//                        semaphore.wait()
+//                        if let connection = self.connections[handle.uuidString] {
+//                            // the fulfil and reject are handled in the peripheral delegate
+//                            connection.setNotifyValue(false, for: characteristic)
+//                            semaphore.signal()
+//
+//                            self.task(handle).load(seal.fulfill, seal.reject, type: .DISABLE_NOTIFICATIONS)
+//                            self.task(handle).setDelayedReject(timeoutDurations.disableNotifications, errorOnReject: .DISABLE_NOTIFICATIONS_TIMEOUT)
+//                        }
+//                        else {
+//                            semaphore.signal()
+//                            seal.fulfill(())
+//                        }
+//                    }
+//                    .catch{(error: Error) -> Void in
+//                        seal.reject(error)
+//                    }
+//            }
+//            else {
+//                // if we are no longer connected we dont need to clean up.
+//                seal.fulfill(())
+//            }
+//        }
+//    }
 
 
     /**
@@ -911,8 +897,6 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      * The merged, finalized reply to the write command will be in the fulfill of this promise.
      */
     public func setupSingleNotification(_ handle: UUID, serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback, timeoutSeconds: Double = 2) -> Promise<[UInt8]> {
-        var unsubscribe : voidPromiseCallback = { return Promise.value(()) }
-        
         LOG.debug("BLUENET_LIB: Setting up single notification on service: \(serviceId) and characteristic \(characteristicId) for \(handle)")
         return Promise<[UInt8]> { seal in            
             var collectedData = [UInt8]();
@@ -936,9 +920,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     LOG.debug("Successfully combined data: \(collectedData) from \(handle)")
                 }
                 resolved = true
-                unsubscribe()
-                    .done{ _  in seal.fulfill(collectedData) }
-                    .catch{ err in seal.reject(err) }
+                seal.fulfill(collectedData)
             })
 
 
@@ -949,12 +931,10 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             }
 
             self.enableNotifications(handle, serviceId: serviceId, characteristicId: characteristicId, callback: notificationCallback)
-                .then{ unsub -> Promise<Void> in
-                    unsubscribe = unsub
+                .then{ _ -> Promise<Void> in
                     delay(timeoutSeconds, {
                         if (resolved == false) {
                             seal.reject(BluenetError.TIMEOUT)
-                            _ = unsubscribe()
                         }
                     })
                     return writeCommand()
@@ -969,7 +949,6 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      */
     public func setupNotificationStream(_ handle: UUID, serviceId: String, characteristicId: String, writeCommand: @escaping voidPromiseCallback, resultHandler: @escaping processCallback, timeout: Double = 5, successIfWriteSuccessful: Bool = false) -> Promise<Void> {
         return Promise<Void> { seal in
-            var unsubscribe : voidPromiseCallback? = nil
             var streamFinished = false
             var writeSuccessful = false
 
@@ -1002,24 +981,18 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     let result = resultHandler(data)
                     if (result == .FINISHED) {
                         streamFinished = true
-                        unsubscribe!()
-                            .done{ _  in seal.fulfill(()) }
-                            .catch{ err in seal.reject(err) }
+                        seal.fulfill(())
                     }
                     else if (result == .CONTINUE) {
                         // do nothing.
                     }
                     else if (result == .ABORT_ERROR) {
                         streamFinished = true
-                        unsubscribe!()
-                            .done{ _  in seal.reject(BluenetError.PROCESS_ABORTED_WITH_ERROR) }
-                            .catch{ err in seal.reject(err) }
+                        seal.reject(BluenetError.PROCESS_ABORTED_WITH_ERROR)
                     }
                     else {
                         streamFinished = true
-                        unsubscribe!()
-                            .done{ _  in seal.reject(BluenetError.UNKNOWN_PROCESS_TYPE) }
-                            .catch{ err in seal.reject(err) }
+                        seal.reject(BluenetError.UNKNOWN_PROCESS_TYPE)
                     }
                 }
             })
@@ -1034,31 +1007,17 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             delay(timeout, { () in
                 if (streamFinished == false) {
                     streamFinished = true
-                    if (unsubscribe != nil) {
-                        unsubscribe!()
-                            .done{ _ -> Void in
-                                if (successIfWriteSuccessful && writeSuccessful) {
-                                    seal.fulfill(())
-                                }
-                                else {
-                                    seal.reject(BluenetError.NOTIFICATION_STREAM_TIMEOUT)
-                                }
-                            }
-                            .catch{ err in
-                                if (successIfWriteSuccessful && writeSuccessful) {
-                                    seal.fulfill(())
-                                }
-                                else {
-                                    seal.reject(BluenetError.NOTIFICATION_STREAM_TIMEOUT)
-                                }
-                        }
+                    if (successIfWriteSuccessful && writeSuccessful) {
+                        seal.fulfill(())
+                    }
+                    else {
+                        seal.reject(BluenetError.NOTIFICATION_STREAM_TIMEOUT)
                     }
                 }
             })
 
             self.enableNotifications(handle, serviceId: serviceId, characteristicId: characteristicId, callback: notificationCallback)
-                .then{ unsub -> Promise<Void> in
-                    unsubscribe = unsub
+                .then{ _ -> Promise<Void> in
                     return writeCommand()
                 }
                 .done{ _ -> Void in

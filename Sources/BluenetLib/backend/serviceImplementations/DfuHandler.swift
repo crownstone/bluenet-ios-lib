@@ -113,7 +113,6 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
 
 
     public func bootloaderToNormalMode(handle: String) -> Promise<Void> {
-        var cleanup : voidPromiseCallback?
         var success = false
         return Promise<Void> { seal in
             self.bleManager.isReady() // first check if the bluenet lib is ready before using it for BLE things.
@@ -141,9 +140,8 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
                             .catch{ err in innerSeal.reject(err) }
                     }
                 }
-                .then {(_) -> Promise<voidPromiseCallback> in return self.setupNotifications() /*the bootloader requires the user to subscribe to notifications in order to function*/}
-                .then {cleanupCallback -> Promise<Void> in
-                    cleanup = cleanupCallback
+                .then {(_) -> Promise<Void> in return self.setupNotifications() /*the bootloader requires the user to subscribe to notifications in order to function*/}
+                .then {_ -> Promise<Void> in
                     success = true
                     return self._writeResetCommand()
                 }
@@ -162,23 +160,11 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
                 }
                 .then {(_) -> Promise<Void> in
                     self.bleManager.connectionState(self.handle).restoreEncryption()
-                    if (cleanup != nil) {
-                        return cleanup!()
-                    }
-                    else {
-                        return Promise.value(())
-                    }
-                }
-                .then {(_) -> Promise<Void> in
-                    cleanup = nil
                     return self.bleManager.disconnect(self.handle.uuidString)
                 }
                 .done {(_) -> Void in seal.fulfill(())}
                 .catch {(err) -> Void in
                     self.bleManager.connectionState(self.handle).restoreEncryption()
-                    if (cleanup != nil) {
-                        _ = cleanup!()
-                    }
                     self.bleManager.disconnect(self.handle.uuidString)
                         .done{_ -> Void in
                             if (success) { seal.fulfill(()) }
@@ -219,10 +205,10 @@ public class DfuHandler: DFUServiceDelegate, DFUProgressDelegate, LoggerDelegate
         }
     }
 
-    func setupNotifications() -> Promise<voidPromiseCallback> {
+    func setupNotifications() -> Promise<Void> {
         let notificationCallback = {(data: Any) -> Void in }
         return self.bleManager.getServicesFromDevice(self.handle)
-            .then{ services -> Promise<voidPromiseCallback> in
+            .then{ services -> Promise<Void> in
                 if getServiceFromList(services, DFUServices.SecureDFU.uuidString) != nil {
                     return self.bleManager.enableNotifications(
                         self.handle,

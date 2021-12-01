@@ -16,7 +16,7 @@ public class SetupHandler {
     let eventBus : EventBus!
     var handle: UUID
     
-    var unsubscribeNotificationCallback : voidPromiseCallback?
+//    var unsubscribeNotificationCallback : voidPromiseCallback?
     
     var matchPacket : [UInt8] = [UInt8]()
     var validationResult : (Bool) -> Void = { _ in }
@@ -147,7 +147,6 @@ public class SetupHandler {
                 }
                 .catch{(err: Error) -> Void in
                     self.eventBus.emit("setupProgress", 0);
-                    _ = self.clearNotifications()
                     self.bleManager.connectionState(self.handle).exitSetup()
                     self.bleManager.connectionState(self.handle).restoreEncryption()
                     _ = self.bleManager.errorDisconnect(self.handle.uuidString)
@@ -341,8 +340,7 @@ public class SetupHandler {
     }
     
     func wrapUp() -> Promise<Void> {
-        return self.clearNotifications()
-            .then{(_) -> Promise<Void> in return self.finalizeSetup()}
+        return self.finalizeSetup()
             .then{(_) -> Promise<Void> in self.eventBus.emit("setupProgress", 12); return self.bleManager.disconnect(self.handle.uuidString)}
     }
     
@@ -416,32 +414,13 @@ public class SetupHandler {
             }
         }
         
-        return self.clearNotifications()
-            .then{ _ in
-                return self.bleManager.enableNotifications(
-                    self.handle,
-                    serviceId: CSServices.SetupService,
-                    characteristicId: SetupCharacteristics.ConfigRead,
-                    callback: notificationCallback
-                )
-            }
-            .done{ callback -> Void in self.unsubscribeNotificationCallback = callback }
-    }
-    
-    func clearNotifications() -> Promise<Void> {
-        return Promise<Void> { seal in
-            if (unsubscribeNotificationCallback != nil) {
-                unsubscribeNotificationCallback!()
-                    .done{ _ -> Void in
-                        self.unsubscribeNotificationCallback = nil
-                        seal.fulfill(())
-                    }
-                    .catch{ _ in }
-            }
-            else {
-                seal.fulfill(())
-            }
-        }
+        
+        return self.bleManager.enableNotifications(
+            self.handle,
+            serviceId: CSServices.SetupService,
+            characteristicId: SetupCharacteristics.ConfigRead,
+            callback: notificationCallback
+        )
     }
     
     // MARK : Support functions
