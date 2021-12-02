@@ -200,11 +200,12 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         BleManager._connectionStates.removeValue(forKey: handle)
         // lets just remove it from the pending connections, just in case. It shouldn't be in here, but if it is, its cleaned up again.
         BleManager.pendingConnections.removeValue(forKey: handle)
+       
+        semaphore.signal();
+        // -- end of shared resource access.
         
         BleManager.notificationBus(handle).reset()
         
-        semaphore.signal();
-        // -- end of shared resource access.
         
         BleManager.eventBus.emit("disconnectedFromPeripheral", handle)
     }
