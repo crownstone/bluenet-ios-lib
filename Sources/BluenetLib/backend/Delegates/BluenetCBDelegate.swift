@@ -156,6 +156,7 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         
         let pendingTask = BleManager.task(handle)
         
+        LOG.debug("BLUENET_LIB: got task in didDisconnectPeripheral for handle: \(handle) taskType:\(pendingTask.type)")
         if (pendingTask.type == .NONE) {
             LOG.info("BLUENET_LIB: Peripheral disconnected for handle: \(handle) taskType:\(pendingTask.type)")
         }

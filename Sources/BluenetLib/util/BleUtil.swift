@@ -129,14 +129,20 @@ func _writeControlPacketWithoutWaitingForReply(bleManager: BleManager, _ handle:
  This waits for the write to finalize, but does not do anything with the result.
  */
 func _writeControlPacket(bleManager: BleManager, _ handle: UUID, _ packet: [UInt8]) -> Promise<Void> {
-    let writeCommand =  { _writeControlPacketWithoutWaitingForReply(bleManager: bleManager, handle,  packet) }
-    let readParameters = getControlReadParameters(bleManager: bleManager, handle: handle);
-    return Promise<Void> { seal in
-        bleManager.setupSingleNotification(handle, serviceId: readParameters.service, characteristicId: readParameters.characteristic, writeCommand: writeCommand)
-            .done{ data -> Void in
-                seal.fulfill(())
+    let connectionProtocolVersion = bleManager.connectionState(handle).connectionProtocolVersion
+    switch (connectionProtocolVersion) {
+        case .unknown, .legacy, .v1, .v2, .v3:
+            return _writeControlPacketWithoutWaitingForReply(bleManager: bleManager, handle, packet)
+        default:
+            let writeCommand =  { _writeControlPacketWithoutWaitingForReply(bleManager: bleManager, handle,  packet) }
+            let readParameters = getControlReadParameters(bleManager: bleManager, handle: handle);
+            return Promise<Void> { seal in
+                bleManager.setupSingleNotification(handle, serviceId: readParameters.service, characteristicId: readParameters.characteristic, writeCommand: writeCommand)
+                    .done{ data -> Void in
+                        seal.fulfill(())
+                    }
+                    .catch{ err in seal.reject(err) }
             }
-            .catch{ err in seal.reject(err) }
     }
 }
 

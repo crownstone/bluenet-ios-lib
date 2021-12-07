@@ -77,14 +77,20 @@ public class StateHandler {
     
     
     func _writeToState(packet: [UInt8]) -> Promise<Void> {
-        let params = _getStateWriteParameters()
-        return self.bleManager.writeToCharacteristic(
-            self.handle,
-            serviceId: params.service,
-            characteristicId: params.characteristic,
-            data: Data(bytes: packet, count: packet.count),
-            type: CBCharacteristicWriteType.withResponse
-       )
+        let connectionProtocolVersion = bleManager.connectionState(handle).connectionProtocolVersion
+        switch (connectionProtocolVersion) {
+            case .unknown, .legacy, .v1, .v2, .v3:
+                let params = _getStateWriteParameters()
+                return self.bleManager.writeToCharacteristic(
+                    handle,
+                    serviceId: params.service,
+                    characteristicId: params.characteristic,
+                    data: Data(bytes: packet, count: packet.count),
+                    type: CBCharacteristicWriteType.withResponse
+                )
+            default:
+                return _writeControlPacket(bleManager: bleManager, handle, packet)
+        }
     }
    
     public func _getState<T>(_ state : StateType) -> Promise<T> {

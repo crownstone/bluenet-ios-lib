@@ -100,42 +100,45 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     
     
     func task(_ handle: String) -> PromiseContainer {
+        let uppercaseHandle = handle.uppercased()
         semaphore.wait()
-        if let task = self._tasks[handle] {
-            LOG.debug("Returning task for \(handle)")
+        if let task = self._tasks[uppercaseHandle] {
+            LOG.debug("Returning task for \(uppercaseHandle)")
             semaphore.signal()
             return task
         }
         
-        let task = PromiseContainer(handle)
-        self._tasks[handle] = task
-        LOG.info("Creating task for \(handle)")
+        let task = PromiseContainer(uppercaseHandle)
+        self._tasks[uppercaseHandle] = task
+        LOG.info("Creating task for \(uppercaseHandle)")
         semaphore.signal()
         return task
     }
     
     func connectionState(_ handle: String) -> ConnectionState {
+        let uppercaseHandle = handle.uppercased()
         semaphore.wait()
-        if let state = self._connectionStates[handle] {
+        if let state = self._connectionStates[uppercaseHandle] {
             semaphore.signal()
             return state
         }
         
-        let state = ConnectionState(bleManager: self, handle: handle)
-        self._connectionStates[handle] = state
+        let state = ConnectionState(bleManager: self, handle: uppercaseHandle)
+        self._connectionStates[uppercaseHandle] = state
         semaphore.signal()
         return state
     }
     
     func notificationBus(_ handle: String) -> EventBus {
+        let uppercaseHandle = handle.uppercased()
         semaphore.wait()
-        if let bus = self._notificationEventBusses[handle] {
+        if let bus = self._notificationEventBusses[uppercaseHandle] {
             semaphore.signal()
             return bus
         }
         
         let bus = EventBus()
-        self._notificationEventBusses[handle] = bus
+        self._notificationEventBusses[uppercaseHandle] = bus
         semaphore.signal()
         return bus
     }
@@ -146,7 +149,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     
     func isConnected(_ handle: String) -> Bool {
         isConnectedSemaphore.wait()
-        let state = self.connections.keys.contains(handle)
+        let state = self.connections.keys.contains(handle.uppercased())
         isConnectedSemaphore.signal()
         return state
     }
@@ -159,10 +162,11 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     
     func isConnecting(_ handle: String) -> Bool {
         isConnectedSemaphore.wait()
-        let state = self.pendingConnections.keys.contains(handle)
+        let state = self.pendingConnections.keys.contains(handle.uppercased())
         isConnectedSemaphore.signal()
         return state
     }
+
     
     func _handleStateUpdate(_ state: Any) {
         LOG.info("BLUENET_LIB: Handling a state update \(state)")
@@ -371,8 +375,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     return seal.reject(BluenetError.NOT_INITIALIZED)
                 }
                 
-                
-                if (self.pendingConnections[nsUUID.uuidString] != nil) {
+                if self.isConnecting(handle) {
                     LOG.info("BLUENET_LIB: Already connecting to this peripheral. This throws an error to avoid multiple triggers on successful completion.  \(handle).")
                     return seal.reject(BluenetError.ALREADY_CONNECTING)
                 }
@@ -434,28 +437,38 @@ public class BleManager: NSObject, CBPeripheralDelegate {
     /**
      *  Cancel a pending connection
      */
-    func abortConnecting(_ handle: String) {
-        LOG.info("BLUENET_LIB: starting to abort pending connection request for \(handle)")
+    func abortConnecting(_ handle: String, errorMode: Bool = false) -> Promise<Void> {
+        return Promise<Void> { seal in
+            LOG.info("BLUENET_LIB: starting to abort pending connection request for \(handle)")
 
-        // if there was a connection in progress, cancel it with an error
-        if (task(handle).type == .CONNECT) {
-            LOG.info("BLUENET_LIB: rejecting the connection promise for \(handle)")
-            task(handle).reject(BluenetError.CONNECTION_CANCELLED)
-        }
-        
-        // remove peripheral from pending list.
-        if let connectingPeripheral = self.pendingConnections[handle] {
-            LOG.info("BLUENET_LIB: Waiting to cancel connection... for \(handle).")
-            self.centralManager.cancelPeripheralConnection(connectingPeripheral)
+            // if there was a connection in progress, cancel it with an error
+            if (task(handle).type == .CONNECT) {
+                LOG.info("BLUENET_LIB: rejecting the connection promise for \(handle)")
+                task(handle).reject(BluenetError.CONNECTION_CANCELLED)
+            }
             
-            // accessing shared resources.
+            // remove peripheral from pending list.
             semaphore.wait()
-            self.pendingConnections.removeValue(forKey: handle)
+            if let connectingPeripheral = self.pendingConnections[handle] {
+                LOG.info("BLUENET_LIB: Waiting to cancel connection... for \(handle).")
+                self.centralManager.cancelPeripheralConnection(connectingPeripheral)
+                
+                // accessing shared resources.
+                self.pendingConnections.removeValue(forKey: handle)
+                
+                semaphore.signal()
+                seal.fulfill(())
+                return
+            }
+            
             semaphore.signal()
-        }
-        else if self.isConnected(handle) {
-            self.disconnect(handle)
-                .catch{ _ in }
+            
+            if self.isConnected(handle) {
+                LOG.info("BLUENET_LIB: Already connected before called abort. Disconnecting... for \(handle). errorMode:\(errorMode)")
+                self._disconnect(handle, errorMode: errorMode)
+                    .done{ _ in seal.fulfill(()) }
+                    .catch{ error in seal.reject(error) }
+            }
         }
     }
     
@@ -495,10 +508,9 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             let handleString = uuidHandle.uuidString
             return Promise<Void> { seal in
                 // cancel any pending connections
-                if (self.pendingConnections[handleString] != nil) {
+                if self.isConnecting(handle) {
                     LOG.info("BLUENET_LIB: disconnecting from connecting peripheral due to error \(handle)")
-                    self.abortConnecting(uuidHandle.uuidString)
-                    self._disconnect(handleString, errorMode: true)
+                    self.abortConnecting(uuidHandle.uuidString, errorMode: true)
                         .done{_ -> Void in seal.fulfill(())}
                         .catch{err in seal.reject(err)}
                 }
@@ -522,10 +534,9 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             let handleString = uuidHandle.uuidString
             return Promise<Void> { seal in
                 // cancel any pending connections
-                if (self.pendingConnections[handleString] != nil) {
+                if self.isConnecting(handle) {
                     LOG.info("BLUENET_LIB: disconnecting from connecting peripheral \(handleString)")
-                    abortConnecting(handleString)
-                    self._disconnect(handleString)
+                    self.abortConnecting(handleString)
                         .done{_ -> Void in seal.fulfill(())}
                         .catch{err in seal.reject(err)}
                 }
@@ -572,10 +583,8 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         return Promise<Void> { seal in
             if let uuidHandle = UUID(uuidString: handle) {
                 // in case the connected peripheral has been disconnected beween the start and invocation of this method.
-                semaphore.wait()
+                isConnectedSemaphore.wait()
                 if let connection = self.connections[uuidHandle.uuidString] {
-                    self.centralManager.cancelPeripheralConnection(connection)
-                    semaphore.signal()
                     LOG.info("BLUENET_LIB: disconnecting from connected peripheral in _disconnectFromDevice \(handle) \(errorMode)")
                     if (errorMode == true) {
                         self.task(handle).load(seal.fulfill, seal.reject, type: .ERROR_DISCONNECT)
@@ -585,9 +594,11 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         self.task(handle).load(seal.fulfill, seal.reject, type: .DISCONNECT)
                         self.task(handle).setDelayedReject(timeoutDurations.disconnect, errorOnReject: .DISCONNECT_TIMEOUT)
                     }
+                    self.centralManager.cancelPeripheralConnection(connection)
+                    isConnectedSemaphore.signal()
                 }
                 else {
-                    semaphore.signal()
+                    isConnectedSemaphore.signal()
                     seal.fulfill(())
                 }
             }
@@ -604,22 +615,22 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      */
     public func getServicesFromDevice(_ handle: UUID) -> Promise<[CBService]> {
         return Promise<[CBService]> { seal in
-            semaphore.wait()
+            isConnectedSemaphore.wait()
             if let connection = self.connections[handle.uuidString] {
                 if let services = connection.services {
-                    semaphore.signal()
+                    isConnectedSemaphore.signal()
                     seal.fulfill(services)
                 }
                 else {
-                    semaphore.signal()
                     self.task(handle).load(seal.fulfill, seal.reject, type: .GET_SERVICES)
                     self.task(handle).setDelayedReject(timeoutDurations.getServices, errorOnReject: .GET_SERVICES_TIMEOUT)
                     // the fulfil and reject are handled in the peripheral delegate
                     connection.discoverServices(nil) // then return services
+                    isConnectedSemaphore.signal()
                 }
             }
             else {
-                semaphore.signal()
+                isConnectedSemaphore.signal()
                 seal.reject(BluenetError.NOT_CONNECTED)
             }
         }
@@ -657,23 +668,23 @@ public class BleManager: NSObject, CBPeripheralDelegate {
 
     func getCharacteristicsFromDevice(_ handle: UUID, service: CBService) -> Promise<[CBCharacteristic]> {
         return Promise<[CBCharacteristic]> { seal in
-            semaphore.wait()
+            isConnectedSemaphore.wait()
             if let connection = self.connections[handle.uuidString] {
                 if let characteristics = service.characteristics {
-                    semaphore.signal()
+                    isConnectedSemaphore.signal()
                     seal.fulfill(characteristics)
                 }
                 else {
                     // the fulfil and reject are handled in the peripheral delegate
-                    connection.discoverCharacteristics(nil, for: service)// then return services
-                    semaphore.signal()
-                    
                     self.task(handle).load(seal.fulfill, seal.reject, type: .GET_CHARACTERISTICS)
                     self.task(handle).setDelayedReject(timeoutDurations.getCharacteristics, errorOnReject: .GET_CHARACTERISTICS_TIMEOUT)
+                    
+                    connection.discoverCharacteristics(nil, for: service)// then return services
+                    isConnectedSemaphore.signal()
                 }
             }
             else {
-                semaphore.signal()
+                isConnectedSemaphore.signal()
                 seal.reject(BluenetError.NOT_CONNECTED)
             }
         }
@@ -734,17 +745,18 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         return Promise<[UInt8]> { seal in
             self.getChacteristic(handle, serviceId, characteristicId)
                 .done{characteristic -> Void in
-                    semaphore.wait()
+                    isConnectedSemaphore.wait()
                     if let connection = self.connections[handle.uuidString] {
-                        // the fulfil and reject are handled in the peripheral delegate
-                        connection.readValue(for: characteristic)
-                        semaphore.signal()
-                        
+                        // load the promises first, then perform the read
                         self.task(handle).load(seal.fulfill, seal.reject, type: .READ_CHARACTERISTIC)
                         self.task(handle).setDelayedReject(timeoutDurations.readCharacteristic, errorOnReject: .READ_CHARACTERISTIC_TIMEOUT)
+                        
+                        // the fulfil and reject are handled in the peripheral delegate
+                        connection.readValue(for: characteristic)
+                        isConnectedSemaphore.signal()
                     }
                     else {
-                        semaphore.signal()
+                        isConnectedSemaphore.signal()
                         seal.reject(BluenetError.NOT_CONNECTED)
                     }
                 }
@@ -774,13 +786,13 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                             do {
                                 let encryptedData = try EncryptionHandler.encrypt(data, connectionState: self.connectionState(handle))
                                 
-                                semaphore.wait()
+                                isConnectedSemaphore.wait()
                                 if let connection = self.connections[handle.uuidString] {
                                     connection.writeValue(encryptedData, for: characteristic, type: type)
-                                    semaphore.signal()
+                                    isConnectedSemaphore.signal()
                                 }
                                 else {
-                                    semaphore.signal()
+                                    isConnectedSemaphore.signal()
                                     throw BluenetError.NOT_CONNECTED
                                 }
                             }
@@ -790,12 +802,13 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         }
                         else {
                             LOG.debug("BLUENET_LIB: writing service \(serviceId) characteristic \(characteristicId) data: \(data.bytes) which is not encrypted. handle:\(handle)")
+                            isConnectedSemaphore.wait()
                             if let connection = self.connections[handle.uuidString] {
                                 connection.writeValue(data, for: characteristic, type: type)
-                                semaphore.signal()
+                                isConnectedSemaphore.signal()
                             }
                             else {
-                                semaphore.signal()
+                                isConnectedSemaphore.signal()
                                 seal.reject(BluenetError.NOT_CONNECTED)
                             }
                         }
@@ -818,38 +831,39 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             if (self.notificationBus(handle).hasListeners(topic)) {
                 _ = self.notificationBus(handle).on(topic, callback)
                 seal.fulfill(())
+                return
             }
-            else {
-                // we first get the characteristic from the device
-                self.getChacteristic(handle, serviceId, characteristicId)
-                    // then we subscribe to the feed before we know it works to miss no data.
-                    .then{(characteristic: CBCharacteristic) -> Promise<Void> in
-                        _ = self.notificationBus(handle).on(topic, callback)
+            
+            // we first get the characteristic from the device
+            self.getChacteristic(handle, serviceId, characteristicId)
+                // then we subscribe to the feed before we know it works to miss no data.
+                .then{(characteristic: CBCharacteristic) -> Promise<Void> in
+                    _ = self.notificationBus(handle).on(topic, callback)
 
-                        // we now tell the device to notify us.
-                        return Promise<Void> { innerSeal in
-                            semaphore.wait()
-                            if let connection = self.connections[handle.uuidString] {
-                                // the success and failure are handled in the peripheral delegate
-                                connection.setNotifyValue(true, for: characteristic)
-                                semaphore.signal()
-                                self.task(handle).load(innerSeal.fulfill, innerSeal.reject, type: .ENABLE_NOTIFICATIONS)
-                                self.task(handle).setDelayedReject(timeoutDurations.enableNotifications, errorOnReject: .ENABLE_NOTIFICATIONS_TIMEOUT)
-                                
-                            }
-                            else {
-                                semaphore.signal()
-                                innerSeal.reject(BluenetError.NOT_CONNECTED)
-                            }
+                    // we now tell the device to notify us.
+                    return Promise<Void> { innerSeal in
+                        isConnectedSemaphore.wait()
+                        if let connection = self.connections[handle.uuidString] {
+                            // the success and failure are handled in the peripheral delegate, first load the promises, then perform the action.
+                            self.task(handle).load(innerSeal.fulfill, innerSeal.reject, type: .ENABLE_NOTIFICATIONS)
+                            self.task(handle).setDelayedReject(timeoutDurations.enableNotifications, errorOnReject: .ENABLE_NOTIFICATIONS_TIMEOUT)
+                            
+                            connection.setNotifyValue(true, for: characteristic)
+                            isConnectedSemaphore.signal()
+                        }
+                        else {
+                            isConnectedSemaphore.signal()
+                            innerSeal.reject(BluenetError.NOT_CONNECTED)
                         }
                     }
-                    .done{_ -> Void in
-                        seal.fulfill(())
-                    }
-                    .catch{(error: Error) -> Void in
-                        seal.reject(error)
-                    }
-            }
+                }
+                .done{_ -> Void in
+                    seal.fulfill(())
+                }
+                .catch{(error: Error) -> Void in
+                    seal.reject(error)
+                }
+            
         }
     }
 
@@ -866,17 +880,19 @@ public class BleManager: NSObject, CBPeripheralDelegate {
 //                // if there are no more people listening, we tell the device to stop the notifications.
 //                self.getChacteristic(handle, serviceId, characteristicId)
 //                    .done{characteristic -> Void in
-//                        semaphore.wait()
+//                        isConnectedSemaphore.wait()
 //                        if let connection = self.connections[handle.uuidString] {
 //                            // the fulfil and reject are handled in the peripheral delegate
-//                            connection.setNotifyValue(false, for: characteristic)
-//                            semaphore.signal()
+//
 //
 //                            self.task(handle).load(seal.fulfill, seal.reject, type: .DISABLE_NOTIFICATIONS)
 //                            self.task(handle).setDelayedReject(timeoutDurations.disableNotifications, errorOnReject: .DISABLE_NOTIFICATIONS_TIMEOUT)
+    
+        //                    connection.setNotifyValue(false, for: characteristic)
+   //                         isConnectedSemaphore.signal()
 //                        }
 //                        else {
-//                            semaphore.signal()
+//                            isConnectedSemaphore.signal()
 //                            seal.fulfill(())
 //                        }
 //                    }
@@ -1230,6 +1246,8 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             }
         }
     }
+    
+    
     
     public func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
         let handle = peripheral.identifier

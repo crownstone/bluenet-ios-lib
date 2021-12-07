@@ -426,12 +426,12 @@ public class Bluenet {
     }
 
     
-    public func cancelConnectionRequest(_ handle: String) throws {
+    public func cancelConnectionRequest(_ handle: String) -> Promise<Void> {
         if let handleUUID = UUID(uuidString: handle) {
-            self.bleManager.abortConnecting(handleUUID.uuidString)
+            return self.bleManager.abortConnecting(handleUUID.uuidString)
         }
         else {
-            throw BluenetError.INVALID_UUID
+            return Promise<Void> { seal in seal.reject(BluenetError.INVALID_UUID) }
         }
     }
     
