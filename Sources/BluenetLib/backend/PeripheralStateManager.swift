@@ -81,6 +81,8 @@ struct TimeKeeperData {
 }
 
 public class PeripheralStateManager {
+    let lock = NSRecursiveLock()
+    
     var settings: BluenetSettings
     var blePeripheralManager : BlePeripheralManager!
     var elements = [BroadcastElement]()
@@ -251,7 +253,10 @@ public class PeripheralStateManager {
     }
     
     func stopForegroundBroadcasts() {
-        // print("TEST: stopForegroundBroadcasts")
+        // ensure single thread usage
+        lock.lock()
+        defer { lock.unlock() }
+        
         // this will fail all promises and clear the buffers.
         // background broadcasting should be enabled after this.
         for element in self.elements {
@@ -269,7 +274,10 @@ public class PeripheralStateManager {
     }
     
     public func stopActiveBroadcasts() {
-        // print("TEST: stopForegroundBroadcasts")
+        // ensure single thread usage
+        lock.lock()
+        defer { lock.unlock() }
+        
         // this will fail all promises and clear the buffers.
         // background broadcasting should be enabled after this.
         for element in self.elements {
@@ -291,6 +299,10 @@ public class PeripheralStateManager {
     /**   COMMAND METHODS **/
     
     func loadElement(element: BroadcastElement, autoExecute: Bool = true) {
+        // ensure single thread usage
+        lock.lock()
+        defer { lock.unlock() }
+        
         // existing elements of the same type for the same stone will be overwritten (old switch 0, replaced by new switch 1)
         self._handleDuplicates(incomingElement: element)
         
@@ -379,7 +391,10 @@ public class PeripheralStateManager {
     }
     
     func commandTick() {
-        // print("TEST: CommandTick")
+        // ensure single thread usage
+        lock.lock()
+        defer { lock.unlock() }
+        
         self.runningCommandCycle = true
         self._updateElementState()
         if (self.elements.count > 0) {
@@ -466,6 +481,10 @@ public class PeripheralStateManager {
     }
     
     func _removeSimilarTargetedElements(_ incomingElement: BroadcastElement) {
+        // ensure single thread usage
+        lock.lock()
+        defer { lock.unlock() }
+        
         // check if blocks are finished
         for (i, element) in self.elements.enumerated().reversed() {
             if element.referenceId == incomingElement.referenceId && element.type == incomingElement.type && element.target == incomingElement.target {
@@ -476,6 +495,10 @@ public class PeripheralStateManager {
     }
     
     func _removeSimilarElements(_ incomingElement: BroadcastElement) {
+        // ensure single thread usage
+        lock.lock()
+        defer { lock.unlock() }
+        
         // check if blocks are finished
         for (i, element) in self.elements.enumerated().reversed() {
             if element.referenceId == incomingElement.referenceId && element.type == incomingElement.type {
@@ -487,6 +510,10 @@ public class PeripheralStateManager {
     
     
     func _updateElementState() {
+        // ensure single thread usage
+        lock.lock()
+        defer { lock.unlock() }
+        
         for element in self.elements {
             element.stoppedBroadcasting()
         }
@@ -503,6 +530,10 @@ public class PeripheralStateManager {
     
     
     func _broadcastElements() {
+        // ensure single thread usage
+        lock.lock()
+        defer { lock.unlock() }
+        
         // check in which referenceId the first block to be advertised lives and what it's type is.
         if (self.elements.count == 0) {
             self.updateBaseAdvertisement()
@@ -531,6 +562,10 @@ public class PeripheralStateManager {
     
   
     func _broadcastBuffer(_ bufferToBroadcast: BroadcastBuffer) {
+        // ensure single thread usage
+        lock.lock()
+        defer { lock.unlock() }
+        
         let referenceIdOfBuffer = bufferToBroadcast.referenceId
         var time = getCurrentTimestampForCrownstone()
         if let offset = self.timeOffsetMap[referenceIdOfBuffer] {
@@ -583,6 +618,10 @@ public class PeripheralStateManager {
     
     // track time difference between crownstones and this phone per referenceId
     func _trackStoneTime(data: Any) {
+        // ensure single thread usage
+        lock.lock()
+        defer { lock.unlock() }
+        
         if let castData = data as? Advertisement {
             if let scanResponse = castData.scanResponse {
                 // only use times that are set

@@ -134,10 +134,8 @@ func _writeControlPacket(bleManager: BleManager, _ handle: UUID, _ packet: [UInt
         case .unknown, .legacy, .v1, .v2, .v3:
             return _writeControlPacketWithoutWaitingForReply(bleManager: bleManager, handle, packet)
         default:
-            let writeCommand =  { _writeControlPacketWithoutWaitingForReply(bleManager: bleManager, handle,  packet) }
-            let readParameters = getControlReadParameters(bleManager: bleManager, handle: handle);
             return Promise<Void> { seal in
-                bleManager.setupSingleNotification(handle, serviceId: readParameters.service, characteristicId: readParameters.characteristic, writeCommand: writeCommand)
+                _writePacketWithReply(bleManager: bleManager, handle: handle, packet)
                     .done{ data -> Void in
                         seal.fulfill(())
                     }
@@ -147,47 +145,21 @@ func _writeControlPacket(bleManager: BleManager, _ handle: UUID, _ packet: [UInt
 }
 
 
-
-
-func _writePacketWithReply(bleManager: BleManager, handle: UUID, service: String, readCharacteristic: String, writeCommand : @escaping voidPromiseCallback) -> Promise<ResultBasePacket> {
-    return Promise<ResultBasePacket> { seal in
-        bleManager.setupSingleNotification(handle, serviceId: service, characteristicId: readCharacteristic, writeCommand: writeCommand)
-            .done{ data -> Void in
-                let resultPacket = StatePacketsGenerator.getReturnPacket()
-                resultPacket.load(data)
-                if (resultPacket.valid == false) {
-                    LOG.error("BluenetLib: Error Invalid response data \(data)")
-                    return seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
-                }
-                seal.fulfill(resultPacket)
-            }
-            .catch{ err in seal.reject(err) }
-    }
-}
-
 func _writePacketWithReply(bleManager: BleManager, handle: UUID, _ packet: [UInt8]) -> Promise<ResultBasePacket> {
     let writeCommand =  { _writeControlPacketWithoutWaitingForReply(bleManager: bleManager, handle,  packet) }
-    let readParameters = getControlReadParameters(bleManager: bleManager, handle: handle);
-    return Promise<ResultBasePacket> { seal in
-        bleManager.setupSingleNotification(handle, serviceId: readParameters.service, characteristicId: readParameters.characteristic, writeCommand: writeCommand)
-            .done{ data -> Void in
-                let resultPacket = StatePacketsGenerator.getReturnPacket()
-                resultPacket.load(data)
-                if (resultPacket.valid == false) {
-                    LOG.error("BluenetLib: Error Invalid response data \(data)")
-                    return seal.reject(BluenetError.INCORRECT_RESPONSE_LENGTH)
-                }
-                seal.fulfill(resultPacket)
-            }
-            .catch{ err in seal.reject(err) }
-    }
+    return _writePacketWithReply(bleManager: bleManager, handle: handle, writeCommand: writeCommand)
 }
 
 
 func _writePacketWithReply(bleManager: BleManager, handle: UUID, writeCommand : @escaping voidPromiseCallback) -> Promise<ResultBasePacket> {
     let readParameters = getControlReadParameters(bleManager: bleManager, handle: handle);
+    return _writePacketWithReply(bleManager: bleManager, handle: handle, service: readParameters.service, readCharacteristic: readParameters.characteristic, writeCommand: writeCommand)
+}
+
+
+func _writePacketWithReply(bleManager: BleManager, handle: UUID, service: String, readCharacteristic: String, writeCommand : @escaping voidPromiseCallback) -> Promise<ResultBasePacket> {
     return Promise<ResultBasePacket> { seal in
-        bleManager.setupSingleNotification(handle, serviceId: readParameters.service, characteristicId: readParameters.characteristic, writeCommand: writeCommand)
+        bleManager.setupSingleNotification(handle, serviceId: service, characteristicId: readCharacteristic, writeCommand: writeCommand)
             .done{ data -> Void in
                 let resultPacket = StatePacketsGenerator.getReturnPacket()
                 resultPacket.load(data)

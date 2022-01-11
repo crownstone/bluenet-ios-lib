@@ -21,7 +21,7 @@ let package = Package(
         .package(
             name:"BluenetShared",
             url: "https://github.com/crownstone/bluenet-ios-shared",
-            .exact("2.0.0")
+            .exact("2.1.1")
         ),
         .package(
             url: "https://github.com/krzyzanowskim/CryptoSwift",
@@ -38,7 +38,7 @@ let package = Package(
         ),
         .package(
             url: "https://github.com/mxcl/PromiseKit",
-            .exact("6.13.2")
+            .exact("6.16.2")
         )
     ],
     targets: [
