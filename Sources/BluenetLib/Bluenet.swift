@@ -102,44 +102,54 @@ public class Bluenet {
     }
     
     public func config(_ handle: UUID) -> ConfigHandler {
+        LOG.info("BLUENET: Generating ConfigHandler for \(handle.uuidString)")
         return ConfigHandler(handle: handle, bleManager:bleManager, eventBus: eventBus, settings: settings)
     }
     
     public func control(_ handle: UUID) -> ControlHandler {
+        LOG.info("BLUENET: Generating ControlHandler for \(handle.uuidString)")
         return ControlHandler(handle: handle, bleManager:bleManager, eventBus: eventBus, settings: settings)
     }
     
     public func setup(_ handle: UUID) -> SetupHandler {
+        LOG.info("BLUENET: Generating SetupHandler for \(handle.uuidString)")
         return SetupHandler(handle: handle, bleManager:bleManager, eventBus: eventBus, settings: settings)
     }
     
     public func debug(_ handle: UUID) -> DebugHandler {
+        LOG.info("BLUENET: Generating DebugHandler for \(handle.uuidString)")
         return DebugHandler(handle: handle, bleManager:bleManager, eventBus: eventBus, settings: settings)
     }
     
     public func mesh(_ handle: UUID) -> MeshHandler {
+        LOG.info("BLUENET: Generating MeshHandler for \(handle.uuidString)")
         return MeshHandler(handle: handle, bleManager:bleManager, eventBus: eventBus, settings: settings)
     }
     
     public func device(_ handle: UUID) -> DeviceHandler {
+        LOG.info("BLUENET: Generating DeviceHandler for \(handle.uuidString)")
         return DeviceHandler(handle: handle, bleManager:bleManager, eventBus: eventBus, settings: settings)
     }
     
     public func state(_ handle: UUID) -> StateHandler {
+        LOG.info("BLUENET: Generating StateHandler for \(handle.uuidString)")
         return StateHandler(handle: handle, bleManager:bleManager, eventBus: eventBus, settings: settings)
     }
     
     #if os(iOS)
     public func dfu(_ handle: UUID) -> DfuHandler {
+        LOG.info("BLUENET: Generating DfuHandler for \(handle.uuidString)")
         return DfuHandler(handle: handle, bleManager:bleManager, eventBus: eventBus, settings: settings)
     }
     #endif
     
     public func hub(_ handle: UUID) -> HubHandler {
+        LOG.info("BLUENET: Generating HubHandler for \(handle.uuidString)")
         return HubHandler(handle: handle, bleManager:bleManager, eventBus: eventBus, settings: settings)
     }
     
     public func behaviour(_ handle: UUID) -> BehaviourHandler {
+        LOG.info("BLUENET: Generating BehaviourHandler for \(handle.uuidString)")
         return BehaviourHandler(handle: handle, bleManager:bleManager, eventBus: eventBus, settings: settings)
     }
     

@@ -179,12 +179,12 @@ public class ControlHandler {
             .then{_ -> Promise<Void> in
                 LOG.info("BLUENET_LIB: Written disconnect command, emitting event for... \(self.handle)")
                 disconnectStarted = true
-                LOG.info("BLUENET_LIB: Disconnecting in library...")
+                LOG.info("BLUENET_LIB: Disconnecting in library... \(self.handle)")
                 return self.bleManager.disconnect(self.handle.uuidString)
             }
-            .recover { _ -> Promise<Void> in
+            .recover { err -> Promise<Void> in
                 if (disconnectStarted == false) {
-                    LOG.info("BLUENET_LIB: Disconnecting in library...")
+                    LOG.info("BLUENET_LIB: Disconnecting in library... (recover from \(err)) \(self.handle)")
                     return self.bleManager.disconnect(self.handle.uuidString)
                 }
                 else {
@@ -368,8 +368,7 @@ public class ControlHandler {
                         seal.reject(BluenetError.UNKNOWN_ERROR)
                     }
                 }
-                .catch{ err in seal.reject(err)
-            }
+                .catch{ err in seal.reject(err) }
         }
     }
 }

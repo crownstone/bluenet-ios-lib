@@ -220,6 +220,7 @@ func _getCrownstoneModeInformation(bleManager: BleManager, handle: UUID) -> Prom
                                 seal.fulfill(ModeInformation(controlMode: .legacy, operationMode: .setup))
                             }
                         }
+                        .catch({ err in seal.reject(err) })
                 }
                 else if let service = getServiceFromList(services, CSServices.CrownstoneService) {
                     _ = bleManager.getCharacteristicsFromDevice(handle, service: service)
@@ -234,13 +235,14 @@ func _getCrownstoneModeInformation(bleManager: BleManager, handle: UUID) -> Prom
                                 seal.fulfill(ModeInformation(controlMode: .v1, operationMode: .operation))
                             }
                        }
+                       .catch({ err in seal.reject(err) })
                     
                 }
                 else if getServiceFromList(services, DFUServices.DFU.uuidString) != nil || getServiceFromList(services, DFUServices.SecureDFU.uuidString) != nil {
                     seal.fulfill(ModeInformation(controlMode: .unknown, operationMode: .dfu))
                 }
                 else {
-                    seal.fulfill(ModeInformation(controlMode: .unknown, operationMode: .unknown))
+                    seal.reject(BluenetError.UNKNOWN_OPERATION_MODE)
                 }
             }
         }

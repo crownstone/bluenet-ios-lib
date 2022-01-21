@@ -112,9 +112,13 @@ class BlePeripheralManager: NSObject, CBPeripheralManagerDelegate {
         }
     }
     
+
+    public func peripheralManager(_ peripheral: CBPeripheralManager, willRestoreState dict: [String : Any]) {
+        LOG.info("BluenetBroadcast: peripheralManagerStarting willRestoreState \(dict)")
+    }
     
-    public func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
-        
+    public func peripheralManager(_ peripheral: CBPeripheralManager, error: Error?) {
+        LOG.info("BluenetBroadcast: peripheralManager error \(error)")
     }
     
     

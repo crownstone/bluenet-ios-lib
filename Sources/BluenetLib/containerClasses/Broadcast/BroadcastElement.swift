@@ -29,6 +29,8 @@ class BroadcastElement {
     
     var customValidationNonce : UInt32?
     
+    var loggingToken : String = "no_token_loaded"
+    
     init(
         referenceId: String, type: BroadcastType, packet: [UInt8], seal: Resolver<Void>,             // required
         target: UInt8? = nil, singular: Bool = false, duration: Double = DEFAULT_BROADCAST_DURATION, customValidationNonce: UInt32? = nil // options
@@ -64,12 +66,15 @@ class BroadcastElement {
     }
     
     func broadcastHasStarted() {
+        LOG.info("BluenetBroadcast: Element broadcastHasStarted loggingToken:\(self.loggingToken)")
         self.startTime = Date().timeIntervalSince1970
         self.broadcasting = true
     }
     
     func fail() {
+        LOG.info("BluenetBroadcast: Element Failing loggingToken:\(self.loggingToken)")
         if let activeSeal = self.seal {
+            LOG.info("BluenetBroadcast: Element Failing loggingToken:\(self.loggingToken) with error.")
             activeSeal.reject(BluenetError.BROADCAST_ABORTED)
         }
         self.completed = true
@@ -77,13 +82,17 @@ class BroadcastElement {
     
     func stoppedBroadcasting() {
         if self.broadcasting {
+            
             self.endTime = Date().timeIntervalSince1970
             self.broadcasting = false
             
             let broadcastTime = self.endTime - self.startTime
             self.totalTimeBroadcasted += broadcastTime
+            
+            LOG.info("BluenetBroadcast: Element stoppedBroadcasting airtime:\(self.totalTimeBroadcasted) loggingToken:\(self.loggingToken)")
             if (self.totalTimeBroadcasted >= self.requiredDuration) {
                 if let activeSeal = self.seal {
+                    LOG.info("BluenetBroadcast: Element Fulfilling loggingToken:\(self.loggingToken)")
                     activeSeal.fulfill(())
                 }
                 self.completed = true

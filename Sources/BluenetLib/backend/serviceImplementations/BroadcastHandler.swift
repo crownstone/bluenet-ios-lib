@@ -25,11 +25,15 @@ public class BroadcastHandler {
 
     
     public func multiSwitch(referenceId: String, stoneId: UInt8, switchState: UInt8, autoExecute: Bool = true) -> Promise<Void> {
+        let loggingToken = UUID().uuidString
+        
+        LOG.info("BluenetBroadcast: Loading multiswitch referenceId:\(referenceId) stoneId:\(stoneId) switchState:\(switchState) autoExecute:\(autoExecute) loggingToken:\(loggingToken)")
         return Promise<Void> { seal in
             
             let switchState = min(100, switchState)
             let packet  = BroadcastStone_SwitchPacket(crownstoneId: stoneId, state: switchState).getPacket()
             let element = BroadcastElement(referenceId: referenceId, type: .multiSwitch, packet: packet, seal: seal, target: stoneId)
+            element.loggingToken = loggingToken
             
             self.peripheralStateManager.loadElement(element: element, autoExecute: autoExecute)
         }
@@ -37,11 +41,15 @@ public class BroadcastHandler {
     
     
     public func turnOn(referenceId: String, stoneId: UInt8, autoExecute: Bool = true) -> Promise<Void> {
+        let loggingToken = UUID().uuidString
+        
+        LOG.info("BluenetBroadcast: Loading turnOn referenceId:\(referenceId) stoneId:\(stoneId) autoExecute:\(autoExecute) loggingToken:\(loggingToken)")
         return Promise<Void> { seal in
             
             let switchState : UInt8 = 255
             let packet  = BroadcastStone_SwitchPacket(crownstoneId: stoneId, state: switchState).getPacket()
             let element = BroadcastElement(referenceId: referenceId, type: .multiSwitch, packet: packet, seal: seal, target: stoneId)
+            element.loggingToken = loggingToken
             
             self.peripheralStateManager.loadElement(element: element, autoExecute: autoExecute)
         }
@@ -49,10 +57,13 @@ public class BroadcastHandler {
     
     
     public func execute() {
+        LOG.info("BluenetBroadcast: executing broadcast")
         self.peripheralStateManager.broadcastCommand()
     }
     
     public func setBehaviourSettings(referenceId: String, enabled: Bool) -> Promise<Void> {
+        let loggingToken = UUID().uuidString
+        LOG.info("BluenetBroadcast: Loading setBehaviourSettings referenceId:\(referenceId) enabled:\(enabled) loggingToken:\(loggingToken)")
        return Promise<Void> { seal in
 
            var enabledState : UInt32 = 0
@@ -61,6 +72,7 @@ public class BroadcastHandler {
            }
         
            let element = BroadcastElement(referenceId: referenceId, type: .behaviourSettings, packet: Conversion.uint32_to_uint8_array(enabledState), seal: seal, singular: true, duration: 5)
+           element.loggingToken = loggingToken
            
            self.peripheralStateManager.loadElement(element: element)
        }
@@ -71,6 +83,8 @@ public class BroadcastHandler {
      * Method for setting the time on a crownstone
      */
     public func setTime(referenceId: String, time: UInt32? = nil, sunriseSecondsSinceMidnight: UInt32, sunsetSecondsSinceMidnight: UInt32, customValidationNonce: UInt32? = nil) -> Promise<Void> {
+        let loggingToken = UUID().uuidString
+        LOG.info("BluenetBroadcast: Loading setTime referenceId:\(referenceId) time:\(time) sunriseSecondsSinceMidnight:\(sunriseSecondsSinceMidnight) sunsetSecondsSinceMidnight:\(sunsetSecondsSinceMidnight) customValidationNonce:\(customValidationNonce) loggingToken:\(loggingToken)")
         return Promise<Void> { seal in
             
             var packet : [UInt8]!
@@ -90,6 +104,7 @@ public class BroadcastHandler {
                 singular: true,
                 customValidationNonce: customValidationNonce
             )
+            element.loggingToken = loggingToken
             
             self.peripheralStateManager.loadElement(element: element)
         }
@@ -107,6 +122,8 @@ public class BroadcastHandler {
         deviceToken: UInt32,
         ttlMinutes: UInt16
         ) -> Promise<Void> {
+        let loggingToken = UUID().uuidString
+        LOG.info("BluenetBroadcast: Loading updateTrackedDevice referenceId:\(referenceId) trackingNumber:\(trackingNumber) locationUid:\(locationUid) deviceToken:\(deviceToken) ignoreForPresence:\(ignoreForPresence) loggingToken:\(loggingToken)")
         return Promise<Void> { seal in
             let payload = ControlPacketsGenerator.getTrackedDeviceRegistrationPayload(
                 trackingNumber: trackingNumber,
@@ -125,6 +142,7 @@ public class BroadcastHandler {
                 seal: seal,
                 singular: true
             )
+            element.loggingToken = loggingToken
             
             self.peripheralStateManager.loadElement(element: element)
         }

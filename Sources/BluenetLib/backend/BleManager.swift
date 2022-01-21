@@ -407,8 +407,8 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     
                 LOG.info("BLUENET_LIB: connecting...  \(handle).")
                 self._connect(nsUUID)
-                    .done{    _ in seal.fulfill(()); /* self.lock.unlock()*/ }
-                    .catch{ err in seal.reject(err); /* self.lock.unlock()*/ }
+                    .done{    _ in seal.fulfill(()); }
+                    .catch{ err in seal.reject(err); }
             }
         }
         else {
@@ -434,7 +434,6 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             if peripheral == nil {
                 LOG.error("BLUENET_LIB: Can not get peripheral \(BluenetError.CAN_NOT_CONNECT_TO_UUID) \(handle)")
                 seal.reject(BluenetError.CAN_NOT_CONNECT_TO_UUID)
-                // lock.unlock()
             }
             else {
                 self.pendingConnections[handle.uuidString] = peripheral!
@@ -453,7 +452,6 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     "CBConnectPeripheralOptionStartDelayKey": NSNumber(value: 0)
                 ]
                 self.centralManager.connect(peripheral!, options: connectionOptions)
-                // lock.unlock()
             }
         }
     }
@@ -485,15 +483,18 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 self.pendingConnections.removeValue(forKey: handle)
                 
                 seal.fulfill(())
-                // lock.unlock()
                 return
             }
             
             if self.isConnected(handle) {
                 LOG.info("BLUENET_LIB: Already connected before called abort. Disconnecting... for \(handle). errorMode:\(errorMode)")
                 self._disconnect(handle, errorMode: errorMode)
-                    .done{ _ in seal.fulfill(());        /* self.lock.unlock()*/ }
-                    .catch{ error in seal.reject(error); /* self.lock.unlock()*/ }
+                    .done{ _ in seal.fulfill(());        }
+                    .catch{ error in seal.reject(error); }
+            }
+            else {
+                // not connected at all
+                seal.fulfill(())
             }
         }
     }
@@ -522,7 +523,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                         seal.fulfill(())
                         // self.lock.unlock()
                     }
-                    .catch { err in seal.reject(err); /* self.lock.unlock()*/ }
+                    .catch { err in seal.reject(err); }
             }
             else {
                 seal.fulfill(())
@@ -546,13 +547,13 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 if self.isConnecting(handle) {
                     LOG.info("BLUENET_LIB: disconnecting from connecting peripheral due to error \(handle)")
                     self.abortConnecting(uuidHandle.uuidString, errorMode: true)
-                        .done{_ -> Void in seal.fulfill(()); /* self.lock.unlock()*/ }
-                        .catch{err in seal.reject(err);      /* self.lock.unlock()*/ }
+                        .done{_ -> Void in seal.fulfill(()); }
+                        .catch{err in seal.reject(err);      }
                 }
                 else {
                     self._disconnect(handleString, errorMode: true)
-                        .done{_ -> Void in seal.fulfill(()); /* self.lock.unlock()*/ }
-                        .catch{err in seal.reject(err);      /* self.lock.unlock()*/ }
+                        .done{_ -> Void in seal.fulfill(()); }
+                        .catch{err in seal.reject(err);      }
                 }
             }
         }
@@ -569,21 +570,21 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         // ensure single thread usage
         lock.lock()
         defer { lock.unlock() }
-        
+        LOG.info("BLUENET_LIB: disconnecting called in BleManager \(handle)")
         if let uuidHandle = UUID(uuidString: handle) {
             let handleString = uuidHandle.uuidString
             return Promise<Void> { seal in
                 // cancel any pending connections
                 if self.isConnecting(handle) {
-                    LOG.info("BLUENET_LIB: disconnecting from connecting peripheral \(handleString)")
+                    LOG.info("BLUENET_LIB: disconnecting from connecting peripheral \(handle)")
                     self.abortConnecting(handleString)
-                        .done{_ -> Void in seal.fulfill(()); /* self.lock.unlock()*/ }
-                        .catch{err in seal.reject(err);      /* self.lock.unlock()*/ }
+                        .done{_ -> Void in seal.fulfill(()); }
+                        .catch{err in seal.reject(err);      }
                 }
                 else {
                     self._disconnect(handleString)
-                        .done{_ -> Void in seal.fulfill(()); /* self.lock.unlock()*/ }
-                        .catch{err in seal.reject(err);      /* self.lock.unlock()*/ }
+                        .done{_ -> Void in seal.fulfill(()); }
+                        .catch{err in seal.reject(err);      }
                 }
             }
         }
@@ -598,7 +599,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         lock.lock()
         defer { lock.unlock() }
         
-        
+        LOG.info("BLUENET_LIB: _disconnect called in BleManager \(handle)")
         return Promise<Void> { seal in
             if let uuidHandle = UUID(uuidString: handle) {
                 // only disconnect if we are actually connected!
@@ -611,9 +612,10 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                             seal.fulfill(())
                             // self.lock.unlock()
                         }
-                        .catch { err in seal.reject(err); /* self.lock.unlock()*/ }
+                        .catch { err in seal.reject(err); }
                 }
                 else {
+                    LOG.info("BLUENET_LIB: _disconnect resolved because the connection has already been disconnected \(handle)")
                     seal.fulfill(())
                     // self.lock.unlock()
                 }
@@ -631,9 +633,6 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         defer { lock.unlock() }
         
         return Promise<Void> { seal in
-            // if there are no promises inside this call, unlock when finished
-            defer { lock.unlock() }
-            
             if let uuidHandle = UUID(uuidString: handle) {
                 // in case the connected peripheral has been disconnected beween the start and invocation of this method.
                 if let connection = self.connections[uuidHandle.uuidString] {
@@ -664,13 +663,12 @@ public class BleManager: NSObject, CBPeripheralDelegate {
      *
      */
     public func getServicesFromDevice(_ handle: UUID) -> Promise<[CBService]> {
+        LOG.info("BLUENET: getServicesFromDevice \(handle)")
         // ensure single thread usage
         lock.lock()
         defer { lock.unlock() }
         
         return Promise<[CBService]> { seal in
-            // if there are no promises inside this call, unlock when finished
-            defer { lock.unlock() }
             if let connection = self.connections[handle.uuidString] {
                 if let services = connection.services {
                     seal.fulfill(services)
@@ -710,15 +708,14 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     }
                     // then get the characteristic we need if it is in the list.
                     .done {(characteristics: [CBCharacteristic]) -> Void in
-                        seal.fulfill(characteristics);  // self.lock.unlock();
+                        seal.fulfill(characteristics);
                     }
                     .catch {(error: Error) -> Void in
-                        seal.reject(error);             // self.lock.unlock();
+                        seal.reject(error);
                     }
             }
             else {
                 seal.reject(BluenetError.NOT_CONNECTED)
-                // self.lock.unlock();
             }
         }
     }
@@ -729,8 +726,6 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         defer { lock.unlock() }
         
         return Promise<[CBCharacteristic]> { seal in
-            // if there are no promises inside this call, unlock when finished
-            defer { lock.unlock() }
             if let connection = self.connections[handle.uuidString] {
                 if let characteristics = service.characteristics {
                     seal.fulfill(characteristics)
@@ -779,7 +774,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                             throw BluenetError.CHARACTERISTIC_DOES_NOT_EXIST
                         }
                     }
-                    .catch{err in seal.reject(err); /* self.lock.unlock()*/ }
+                    .catch{err in seal.reject(err); }
             }
             else {
                 seal.reject(BluenetError.NOT_CONNECTED)
@@ -829,7 +824,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     }
                     // self.lock.unlock()
                 }
-                .catch{err in seal.reject(err);/* self.lock.unlock()*/ }
+                .catch{err in seal.reject(err);}
         }
     }
 
@@ -1033,7 +1028,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                     })
                     return writeCommand()
                 }
-                .catch{ err in seal.reject(err); /* self.lock.unlock()*/ }
+                .catch{ err in seal.reject(err); }
         }
     }
 
@@ -1123,7 +1118,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
                 .done{ _ -> Void in
                     writeSuccessful = true
                 }
-                .catch{ err in seal.reject(err); /* self.lock.unlock()*/ }
+                .catch{ err in seal.reject(err); }
         }
     }
     

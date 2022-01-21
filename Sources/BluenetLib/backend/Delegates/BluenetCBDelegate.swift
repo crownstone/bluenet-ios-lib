@@ -162,7 +162,7 @@ public class BluenetCBDelegate: NSObject, CBCentralManagerDelegate {
         else {
             if (error != nil) {
                 LOG.info("BLUENET_LIB: Disconnected with error \(error!) for handle: \(handle) taskType:\(pendingTask.type)")
-                pendingTask.reject(error!)
+                pendingTask.reject(BluenetError.DISCONNECT_ERROR)
             }
             else {
                 LOG.info("BLUENET_LIB: Disconnected succesfully for handle: \(handle) taskType:\(pendingTask.type)")

@@ -92,7 +92,7 @@ public class PeripheralStateManager {
     var baseRefreshTickPostponed = false
     
     var runningBroadcastCycle = false
-    var runningCommandCycle = false // this means there are active commands being broadcasted
+    var runningCommandCycle   = false // this means there are active commands being broadcasted
     var backgroundEnabled: Bool
     let eventBus : EventBus!
     var broadcastCounter : UInt8 = 0
@@ -122,10 +122,12 @@ public class PeripheralStateManager {
     
     #if os(iOS)
     func startPeripheral() {
+        LOG.info("BluenetBroadcast: Starting peripheral...")
         self.blePeripheralManager.startPeripheral()
     }
     
     func checkBroadcastAuthorization() -> String {
+        LOG.info("BluenetBroadcast: Checking authorization...")
         return self.blePeripheralManager.checkBroadcastAuthorization()
     }
     #endif
@@ -144,6 +146,7 @@ public class PeripheralStateManager {
     }
     
     func setBackgroundOperations(newBackgroundState: Bool) {
+        LOG.info("BluenetBroadcast: setBackgroundOperations \(newBackgroundState)")
         self.backgroundEnabled = newBackgroundState
         
         // disable base background advertisements
@@ -155,6 +158,7 @@ public class PeripheralStateManager {
     
     
     func updateAdvertisements() {
+        LOG.info("BluenetBroadcast: updateAdvertisements")
         if (self.runningCommandCycle) {
             self._broadcastElements()
         }
@@ -166,6 +170,7 @@ public class PeripheralStateManager {
     #if os(iOS)
     /**   GLOBAL ADVERTISING STATE HANDLING METHODS, this is not used for watchOS as it has no background **/
     func pauseAdvertising() {
+        LOG.info("BluenetBroadcast: pauseAdvertising")
         self.cachedAdvertising = true
         if self.advertising {
             self.stopAdvertising()
@@ -173,12 +178,14 @@ public class PeripheralStateManager {
     }
     
     func resumeAdvertising() {
+        LOG.info("BluenetBroadcast: resumeAdvertising")
         if self.cachedAdvertising {
             self.startAdvertising()
         }
     }
     
     func startAdvertising() {
+        LOG.info("BluenetBroadcast: startAdvertising")
         self.advertising = true
         if self.settings.backgroundState {
             self.startBackgroundBroadcasts()
@@ -189,6 +196,7 @@ public class PeripheralStateManager {
     }
     
     func stopAdvertising() {
+        LOG.info("BluenetBroadcast: stopAdvertising")
         self.advertising = false
         if self.settings.backgroundState {
             self.stopBackgroundBroadcasts()
@@ -203,6 +211,7 @@ public class PeripheralStateManager {
     #endif
     
     func stopBroadcasting() {
+        LOG.info("BluenetBroadcast: stopBroadcasting")
         self.blePeripheralManager.stopAdvertising()
     }
     /** \ GLOBAL ADVERTISING STATE HANDLING METHODS **/
@@ -212,12 +221,14 @@ public class PeripheralStateManager {
 // MARK: Foreground Methods
     /**   FOREGROUND METHODS **/
     func startForegroundBroadcasts() {
+        LOG.info("BluenetBroadcast: startForegroundBroadcasts")
         if (self.advertising) {
             self._startForegroundBroadcasts()
         }
     }
     
     func _startForegroundBroadcasts() {
+        LOG.info("BluenetBroadcast: _startForegroundBroadcasts")
         if (self.runningBroadcastCycle == false) {
             self.baseRefreshTick()
         }
@@ -227,15 +238,19 @@ public class PeripheralStateManager {
     }
     
     func _refreshForegroundBroadcasts() {
+        LOG.info("BluenetBroadcast: _refreshForegroundBroadcasts")
+        
         if (self.settings.devicePreferences.useBaseBroadcasts == false) {
             return self.stopBroadcasting()
         }
         
         if let referenceId = self.settings.locationState.referenceId {
             if self.settings.sunsetSecondsSinceMidnight != nil {
+                LOG.info("BluenetBroadcast: broadcasting foreground basepacket...")
+                
                 let packet = Broadcast_ForegroundBasePacket(sunriseSecondsSinceMidnight: self.settings.sunriseSecondsSinceMidnight!, sunsetSecondsSinceMidnight: self.settings.sunsetSecondsSinceMidnight!).getPacket()
                 let suntimeElement = BroadcastElement(referenceId: referenceId, type: .timeData, packet: packet, singular: true, duration: 100)
-               
+                suntimeElement.loggingToken = "SUN_TIME_FOREGROUND_BASEPACKET"
                 let bufferToBroadcast = BroadcastBuffer(referenceId: referenceId, type: .timeData)
                 bufferToBroadcast.loadElement(suntimeElement)
                 
@@ -248,11 +263,13 @@ public class PeripheralStateManager {
         }
         else {
             self.stopBroadcasting()
-            print("PROBLEM - updateBaseAdvertisement: No active referenceId")
+            LOG.error("BluenetBroadcast: updateBaseAdvertisement: No active referenceId")
         }
     }
     
     func stopForegroundBroadcasts() {
+        LOG.info("BluenetBroadcast: stopForegroundBroadcasts")
+        
         // ensure single thread usage
         lock.lock()
         defer { lock.unlock() }
@@ -260,12 +277,14 @@ public class PeripheralStateManager {
         // this will fail all promises and clear the buffers.
         // background broadcasting should be enabled after this.
         for element in self.elements {
+            LOG.info("BluenetBroadcast: stopForegroundBroadcasts \(element.loggingToken)")
             element.fail()
         }
         self.elements.removeAll()
         
         // officially end the command cycle if this was running
         if (self.runningCommandCycle) {
+            LOG.info("BluenetBroadcast: stopForegroundBroadcasts endCommandCycle")
             self.endCommandCycle()
         }
         
@@ -274,6 +293,7 @@ public class PeripheralStateManager {
     }
     
     public func stopActiveBroadcasts() {
+        LOG.info("BluenetBroadcast: stopActiveBroadcasts")
         // ensure single thread usage
         lock.lock()
         defer { lock.unlock() }
@@ -299,6 +319,7 @@ public class PeripheralStateManager {
     /**   COMMAND METHODS **/
     
     func loadElement(element: BroadcastElement, autoExecute: Bool = true) {
+        LOG.info("BluenetBroadcast: loadElement \(element.loggingToken)")
         // ensure single thread usage
         lock.lock()
         defer { lock.unlock() }
@@ -332,6 +353,7 @@ public class PeripheralStateManager {
     }
     
     func _refreshBackgroundBroadcasts() {
+        LOG.info("BluenetBroadcast: _refreshBackgroundBroadcasts")
         if (self.backgroundEnabled == false || self.settings.devicePreferences.useBackgroundBroadcasts == false) {
             return self.stopBackgroundBroadcasts()
         }
@@ -430,19 +452,23 @@ public class PeripheralStateManager {
             }
             else {
                 self.updateBaseAdvertisement()
-                delay( 30, self.baseRefreshTick )
+                if self.settings.backgroundState && BroadcastProtocol.useDynamicBackground() == false {
+                    self.runningBroadcastCycle = false
+                }
+                else {
+                    delay( 30, self.baseRefreshTick )
+                }
             }
         }
         else {
-            if (runningBroadcastCycle) {
-                self.runningBroadcastCycle = false
-            }
+            self.runningBroadcastCycle = false
         }
     }
     
     
     func updateBaseAdvertisement() {
         #if os(iOS)
+        LOG.info("BluenetBroadcast: updateBaseAdvertisement")
 //         print("TEST: updateBaseAdvertisement")
         if self.settings.backgroundState {
             self._refreshBackgroundBroadcasts()
@@ -489,6 +515,7 @@ public class PeripheralStateManager {
         for (i, element) in self.elements.enumerated().reversed() {
             if element.referenceId == incomingElement.referenceId && element.type == incomingElement.type && element.target == incomingElement.target {
                 element.fail()
+                LOG.info("BluenetBroadcast: _removeSimilarTargetedElements \(element.loggingToken)")
                 self.elements.remove(at: i)
             }
         }
@@ -503,6 +530,7 @@ public class PeripheralStateManager {
         for (i, element) in self.elements.enumerated().reversed() {
             if element.referenceId == incomingElement.referenceId && element.type == incomingElement.type {
                 element.fail()
+                LOG.info("BluenetBroadcast: _removeSimilarElements \(element.loggingToken)")
                 self.elements.remove(at: i)
             }
         }
@@ -510,6 +538,7 @@ public class PeripheralStateManager {
     
     
     func _updateElementState() {
+        LOG.info("BluenetBroadcast: _updateElementState")
         // ensure single thread usage
         lock.lock()
         defer { lock.unlock() }
@@ -521,6 +550,7 @@ public class PeripheralStateManager {
         // check if blocks are finished
         for (i, element) in self.elements.enumerated().reversed() {
             if element.completed {
+                LOG.info("BluenetBroadcast: _updateElementState remove completed \(element.loggingToken)")
                 self.elements.remove(at: i)
             }
         }
@@ -530,13 +560,16 @@ public class PeripheralStateManager {
     
     
     func _broadcastElements() {
+        LOG.info("BluenetBroadcast: _broadcastElements")
         // ensure single thread usage
         lock.lock()
         defer { lock.unlock() }
         
         // check in which referenceId the first block to be advertised lives and what it's type is.
         if (self.elements.count == 0) {
+            LOG.info("BluenetBroadcast: _broadcastElements no elements left to broadcast.")
             self.updateBaseAdvertisement()
+            return;
         }
         
         let broadcastType = self.elements[0].type
@@ -549,6 +582,7 @@ public class PeripheralStateManager {
         for element in self.elements {
             if (bufferToBroadcast.accepts(element)) {
                 bufferToBroadcast.loadElement(element)
+                LOG.info("BluenetBroadcast: _broadcastElements load element to buffer \(element.loggingToken)")
                 // if the buffer is now full, stop the loop.
                 if (bufferToBroadcast.isFull()) {
                     break
@@ -562,6 +596,7 @@ public class PeripheralStateManager {
     
   
     func _broadcastBuffer(_ bufferToBroadcast: BroadcastBuffer) {
+        LOG.info("BluenetBroadcast: _broadcastBuffer")
         // ensure single thread usage
         lock.lock()
         defer { lock.unlock() }
@@ -606,12 +641,15 @@ public class PeripheralStateManager {
                     bufferToBroadcast.blocksAreBroadcasting()
                 }
                 catch let err {
-                    print("Could not get uint16 ids", err)
+                    LOG.error("BluenetBroadcast: _broadcastBuffer Could not get uint16 ids \(err)")
                 }
             }
             catch let err {
-                print("Could not get encrypted service uuid", err)
+                LOG.error("BluenetBroadcast: _broadcastBuffer Could not get encrypted service uuid \(err)")
             }
+        }
+        else {
+            LOG.warn("BluenetBroadcast: _broadcastBuffer No key to broadcast with!")
         }
     }
 

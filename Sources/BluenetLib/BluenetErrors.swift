@@ -12,6 +12,7 @@ public enum BluenetError : Error {
     case DISCONNECTED
     case CONNECTION_CANCELLED
     case CONNECTION_FAILED
+    case UNKNOWN_OPERATION_MODE
     case ALREADY_CONNECTING
     case NOT_CONNECTED
     case NO_SERVICES
@@ -24,6 +25,7 @@ public enum BluenetError : Error {
     case CANNOT_SET_TIMEOUT_WITH_THIS_TYPE_OF_PROMISE
     case TIMEOUT
     case DISCONNECT_TIMEOUT
+    case DISCONNECT_ERROR
     case ERROR_DISCONNECT_TIMEOUT
     case AWAIT_DISCONNECT_TIMEOUT
     case CONNECT_TIMEOUT
@@ -170,6 +172,7 @@ public enum BluenetError : Error {
     
     //hub
     case HUB_REPLY_TIMEOUT
+    
 }
 
 
