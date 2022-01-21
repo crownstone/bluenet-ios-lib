@@ -136,11 +136,13 @@ public class PeripheralStateManager {
 
     /**   BACKGROUND STATE HANDLING METHODS **/
     func applicationWillEnterForeground() {
+        LOG.info("BluenetBroadcast: applicationWillEnterForeground...")
         self.stopBackgroundBroadcasts()
         self.startForegroundBroadcasts()
     }
     
     func applicationDidEnterBackground() {
+        LOG.info("BluenetBroadcast: applicationDidEnterBackground...")
         self.stopForegroundBroadcasts()
         self.startBackgroundBroadcasts()
     }
@@ -263,7 +265,7 @@ public class PeripheralStateManager {
         }
         else {
             self.stopBroadcasting()
-            LOG.error("BluenetBroadcast: updateBaseAdvertisement: No active referenceId")
+            LOG.error("BluenetBroadcast: _refreshForegroundBroadcasts: No active referenceId")
         }
     }
     
@@ -429,6 +431,7 @@ public class PeripheralStateManager {
     }
     
     func baseRefreshTick() {
+        LOG.info("BluenetBroadcast: baseRefreshTick")
         // we check if we are allowed to do base refreshes or if we should stop. We can only do this if there is no active command cycle
         if (self.runningCommandCycle == false) {
             if self.settings.backgroundState {
