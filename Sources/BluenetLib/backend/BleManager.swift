@@ -970,7 +970,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         lock.lock()
         defer { lock.unlock() }
         
-        LOG.debug("BLUENET_LIB: Setting up single notification on service: \(serviceId) and characteristic \(characteristicId) for \(handle)")
+        LOG.info("BLUENET_LIB: Setting up single notification on service: \(serviceId) and characteristic \(characteristicId) for \(handle)")
         return Promise<[UInt8]> { seal in            
             var collectedData = [UInt8]()
             var resolved = false
@@ -1345,7 +1345,7 @@ public class BleManager: NSObject, CBPeripheralDelegate {
             }
         }
         else {
-            LOG.info("BLUENET_LIB: Unexpected type in task \(self.task(handle).type)")
+            LOG.info("BLUENET_LIB: Unexpected type in task \(self.task(handle).type) for \(handle)")
         }
     }
     

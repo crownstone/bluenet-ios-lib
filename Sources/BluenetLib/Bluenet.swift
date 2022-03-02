@@ -419,15 +419,18 @@ public class Bluenet {
                                 self.bleManager.connectionState(handleUUID).setActiveKeySet(self.settings.keySets[activeReferenceId!]!)
                                 self.control(handleUUID).getAndSetSessionNonce()
                                     .done{_ -> Void in
+                                        LOG.info("BLUENET_LIB: finished connection request and set nonce! \(modeInfo)  \(handle).")
                                         seal.fulfill(modeInfo.operationMode)
                                     }
                                     .catch{err in seal.reject(err)}
                             }
                             else {
+                                LOG.info("BLUENET_LIB: finished connection request, no encryption \(modeInfo)  \(handle).")
                                 seal.fulfill(modeInfo.operationMode)
                             }
                         }
                         else {
+                            LOG.info("BLUENET_LIB: finished connection request \(modeInfo)  \(handle).")
                             seal.fulfill(modeInfo.operationMode)
                         }
                     }
