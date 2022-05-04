@@ -408,18 +408,15 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
                 
                 // when just requesting in use, iBeacon permission is DENIED! We need ALWAYS!
                 manager.requestAlwaysAuthorization()
-
                 self.eventBus.emit("locationStatus", "unknown");
             case .restricted:
                 LOG.info("BLUENET_LOCALIZATION: location Restricted")
                 self.eventBus.emit("locationStatus", "off");
                 manager.requestAlwaysAuthorization()
-                showLocationAlert()
             case .denied:
                 LOG.info("BLUENET_LOCALIZATION: location Denied")
                 self.eventBus.emit("locationStatus", "off");
                 manager.requestAlwaysAuthorization()
-                showLocationAlert()
             case .authorizedAlways:
                 LOG.info("BLUENET_LOCALIZATION: location AuthorizedAlways")
                 self.eventBus.emit("locationStatus", "on");
@@ -428,7 +425,6 @@ public class LocationManager : NSObject, CLLocationManagerDelegate {
                 LOG.info("BLUENET_LOCALIZATION: location AuthorizedWhenInUse")
                 manager.requestAlwaysAuthorization()
                 self.eventBus.emit("locationStatus", "foreground");
-                showLocationAlert()
         }
     }
     

@@ -73,7 +73,7 @@ public class ScanResponsePacket {
     public var behaviourEnabled    :   Bool     = true
     public var behaviourMasterHash :   UInt16   = 0
     
-    public var deviceType          :   DeviceType = .undefined
+    public var deviceType          :   DeviceType = .unset
     public var rssiOfExternalCrownstone : Int8  = 0
     
     var serviceUUID : CBUUID? = nil
@@ -123,6 +123,22 @@ public class ScanResponsePacket {
                 return CrownstoneMode.setup
             default:
                 return CrownstoneMode.unknown
+        }
+    }
+    
+    func parsePublic() {
+        if self.data != nil {
+            if (self.validData) {
+                switch (self.opCode) {
+                case 1,2,3,4:
+                    self._getLegacyDeviceType()
+                case 5,6,7:
+                    // 5 and 7 have the same payload, but they use a different key.
+                    self.getDeviceTypeFromPublicData()
+                default:
+                    self.getDeviceTypeFromPublicData()
+                }
+            }
         }
     }
     

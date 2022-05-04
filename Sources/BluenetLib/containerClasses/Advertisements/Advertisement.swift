@@ -148,6 +148,12 @@ public class Advertisement {
         }
     }
     
+    public func parsePublic() {
+        if (serviceDataAvailable && self.scanResponse != nil) {
+            self.scanResponse!.parsePublic()
+        }
+    }
+    
     
     
 }

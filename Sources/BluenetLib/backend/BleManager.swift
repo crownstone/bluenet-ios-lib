@@ -373,7 +373,8 @@ public class BleManager: NSObject, CBPeripheralDelegate {
         }
 
         // get a peripheral from the known list (TODO: check what happens if it requests an unknown one)
-        let peripherals = centralManager.retrievePeripherals(withIdentifiers: [nsUuid!]);
+        let arrayOfUUIDs = [nsUuid!]
+        let peripherals = centralManager.retrievePeripherals(withIdentifiers: arrayOfUUIDs);
         if (peripherals.count == 0) {
             return nil
         }

@@ -32,7 +32,10 @@ public class ControlHandler {
                 .then {(_) -> Promise<Void> in return self._recoverByFactoryReset()}
                 .then {(_) -> Promise<Void> in return self._checkRecoveryProcess()}
                 .then {(_) -> Promise<Void> in return self.bleManager.disconnect(self.handle.uuidString)}
-                .then {(_) -> Promise<Void> in return self.bleManager.waitToReconnect()}
+                .then {(_) -> Promise<Void> in
+                    self.bleManager.connectionState(self.handle).disableEncryptionTemporarily()
+                    return self.bleManager.waitToReconnect()
+                }
                 .then {(_) -> Promise<Void> in return self.bleManager.connect(self.handle.uuidString, timeout: timeoutDurations.connect)}
                 .then {(_) -> Promise<Void> in return self._recoverByFactoryReset()}
                 .then {(_) -> Promise<Void> in return self._checkRecoveryProcess()}
@@ -42,6 +45,7 @@ public class ControlHandler {
                 }
                 .done {(_) -> Void in seal.fulfill(())}
                 .catch {(err) -> Void in
+                    LOG.error("BLUENET_LIB: recoverByFactoryReset ERROR \(err)")
                     self.bleManager.connectionState(self.handle).restoreEncryption()
                     self.bleManager.disconnect(self.handle.uuidString).done{_ in seal.reject(err)}.catch{_ in seal.reject(err)}
                 }

@@ -256,6 +256,8 @@ public enum DeviceType : UInt8 {
     case builtinOne = 5
     case plugOne = 6
     case hub = 7
+    
+    case unset = 255
 }
 
 

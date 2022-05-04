@@ -9,7 +9,7 @@
 import Foundation
 
 struct validationSet {
-    var uniqueIdentifier: NSNumber? = nil
+    var uniqueIdentifier: NSNumber?  = nil
     var crownstoneId: UInt8          = 0
     var validMeasurementCount: UInt8 = 0
 }
@@ -103,6 +103,7 @@ public class AdvertismentValidator {
                 self.attemptValidation(advertisement: advertisement)
             }
             else {
+                advertisement.parsePublic()
                 let timeSinceGivenUp = Date().timeIntervalSince1970 - self.failedTime
                 if (timeSinceGivenUp > self.retryValidationTimeoutSeconds) {
                     self.releaseLockOnDecryption()
