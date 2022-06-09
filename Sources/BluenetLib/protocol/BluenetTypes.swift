@@ -248,16 +248,22 @@ public enum MeshMultiSwitchType : UInt8 {
 //****************** DEVICE TYPES IN ADVERTISEMENTS *************//
 
 public enum DeviceType : UInt8 {
-    case undefined = 0
-    case plug = 1
-    case guidestone = 2
-    case builtin = 3
-    case crownstoneUSB = 4
-    case builtinOne = 5
-    case plugOne = 6
-    case hub = 7
+    case undefined              = 0
+    case plug                   = 1
+    case guidestone             = 2
+    case builtin                = 3
+    case crownstoneUSB          = 4
+    case builtinOne             = 5
+    case plugOne                = 6
+    case hub                    = 7
     
-    case unset = 255
+    case socketF                = 10
+    
+    case prototype_relay_dimmer = 252
+    case prototype_relay        = 253
+    case prototype_no_switching = 254
+    
+    case unset                  = 255
 }
 
 
