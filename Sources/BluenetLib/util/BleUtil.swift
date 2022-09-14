@@ -20,7 +20,7 @@ func getSessionNonceReadParameters(bleManager: BleManager, handle: UUID) -> BleP
         switch (bleManager.connectionState(handle).connectionProtocolVersion) {
             case  .unknown, .legacy, .v1, .v2, .v3:
                 characteristic = SetupCharacteristics.SessionNonce
-            case .v5:
+            case .v5, .v5_2:
                 characteristic = SetupCharacteristics.SessionNonceV5
         }
     }
@@ -31,6 +31,8 @@ func getSessionNonceReadParameters(bleManager: BleManager, handle: UUID) -> BleP
                 characteristic = CrownstoneCharacteristics.SessionNonce
             case .v5:
                 characteristic = CrownstoneCharacteristics.SessionNonceV5
+            case .v5_2:
+                characteristic = CrownstoneCharacteristics.SessionNonceV5_2
         }
     }
     
@@ -54,7 +56,7 @@ func getControlWriteParameters(bleManager: BleManager, handle: UUID) -> BleParam
                 characteristic = SetupCharacteristics.SetupControlV2
             case .v3:
                 characteristic = SetupCharacteristics.SetupControlV3
-            case .v5:
+            case .v5, .v5_2:
                 characteristic = SetupCharacteristics.SetupControlV5
         }
     }
@@ -66,7 +68,7 @@ func getControlWriteParameters(bleManager: BleManager, handle: UUID) -> BleParam
                 characteristic = CrownstoneCharacteristics.Control
             case .v3:
                 characteristic = CrownstoneCharacteristics.ControlV3
-            case .v5:
+            case .v5, .v5_2:
                 characteristic = CrownstoneCharacteristics.ControlV5
         }
     }
@@ -90,7 +92,7 @@ func getControlReadParameters(bleManager: BleManager, handle: UUID) -> BleParame
                 characteristic = SetupCharacteristics.SetupControlV2
             case .v3:
                 characteristic = SetupCharacteristics.ResultV3
-            case .v5:
+            case .v5, .v5_2:
                 characteristic = SetupCharacteristics.ResultV5
         }
     }
@@ -102,7 +104,7 @@ func getControlReadParameters(bleManager: BleManager, handle: UUID) -> BleParame
                 characteristic = CrownstoneCharacteristics.Control
             case .v3:
                 characteristic = CrownstoneCharacteristics.ResultV3
-            case .v5:
+            case .v5, .v5_2:
                 characteristic = CrownstoneCharacteristics.ResultV5
         }
     }
@@ -182,7 +184,7 @@ func getConfigPayloadFromResultPacket<T>(_ bleManager: BleManager, _ handle: UUI
             resultPayload = resultPacket.payload
         case .v3:
             resultPayload = Array(resultPacket.payload[4...]) // 4 is the 2 stateType and 2 ID, rest is data payload
-        case .v5:
+        case .v5, .v5_2:
              resultPayload = Array(resultPacket.payload[6...]) // 6 is the 2 stateType and 2 ID and 2 persistence, rest is data payload
     }
     
@@ -192,7 +194,7 @@ func getConfigPayloadFromResultPacket<T>(_ bleManager: BleManager, _ handle: UUI
 
 
 struct ModeInformation {
-    var controlMode: ConnectionProtocolVersion
+    var controlMode:   ConnectionProtocolVersion
     var operationMode: CrownstoneMode
 }
 
@@ -225,7 +227,10 @@ func _getCrownstoneModeInformation(bleManager: BleManager, handle: UUID) -> Prom
                 else if let service = getServiceFromList(services, CSServices.CrownstoneService) {
                     _ = bleManager.getCharacteristicsFromDevice(handle, service: service)
                        .done{(characteristics : [CBCharacteristic]) -> Void in
-                            if getCharacteristicFromList(characteristics, CrownstoneCharacteristics.ControlV5) != nil {
+                            if getCharacteristicFromList(characteristics, CrownstoneCharacteristics.SessionNonceV5_2) != nil {
+                                seal.fulfill(ModeInformation(controlMode: .v5_2, operationMode: .operation))
+                            }
+                            else if getCharacteristicFromList(characteristics, CrownstoneCharacteristics.ControlV5) != nil {
                                 seal.fulfill(ModeInformation(controlMode: .v5, operationMode: .operation))
                             }
                             else if getCharacteristicFromList(characteristics, CrownstoneCharacteristics.ControlV3) != nil {

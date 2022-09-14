@@ -389,6 +389,8 @@ public enum StateTypeV3 : UInt16 {
     case softOnSpeed = 156
     case hubMode = 157
     case uartKey = 158
+    case switchcraftDoubleTap = 167
+    case defaultDimValue = 168
 }
 
 public enum GetPersistenceMode : UInt8 {

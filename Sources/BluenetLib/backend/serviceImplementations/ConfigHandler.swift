@@ -367,7 +367,7 @@ public class ConfigHandler {
                     characteristicToReadFrom = SetupCharacteristics.ConfigRead
                 case .v3:
                     characteristicToReadFrom = SetupCharacteristics.ResultV3
-                case .v5:
+                case .v5, .v5_2:
                     characteristicToReadFrom = SetupCharacteristics.ResultV5
             }
         }
@@ -378,7 +378,7 @@ public class ConfigHandler {
                     characteristicToReadFrom = CrownstoneCharacteristics.ConfigRead
                 case .v3:
                     characteristicToReadFrom = CrownstoneCharacteristics.ResultV3
-                case .v5:
+                case .v5, .v5_2:
                     characteristicToReadFrom = CrownstoneCharacteristics.ResultV5
             }
         }
@@ -396,7 +396,7 @@ public class ConfigHandler {
                     characteristic = SetupCharacteristics.ConfigControl
                 case .v3:
                     characteristic = SetupCharacteristics.SetupControlV3
-                case .v5:
+                case .v5, .v5_2:
                     characteristic = SetupCharacteristics.SetupControlV5
             }
         }
@@ -407,7 +407,7 @@ public class ConfigHandler {
                     characteristic = CrownstoneCharacteristics.ConfigControl
                 case .v3:
                     characteristic = CrownstoneCharacteristics.ControlV3
-                case .v5:
+                case .v5, .v5_2:
                     characteristic = CrownstoneCharacteristics.ControlV5
             }
         }

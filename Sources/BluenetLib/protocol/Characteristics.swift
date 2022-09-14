@@ -30,6 +30,7 @@ public struct CrownstoneCharacteristics {
     public static let StateRead        = "24f00007-7d10-4805-bfc1-7663a01c3bff"
     public static let SessionNonce     = "24f00008-7d10-4805-bfc1-7663a01c3bff"
     public static let SessionNonceV5   = "24f0000e-7d10-4805-bfc1-7663a01c3bff"
+    public static let SessionNonceV5_2 = "24f0000f-7d10-4805-bfc1-7663a01c3bff"
     public static let FactoryReset     = "24f00009-7d10-4805-bfc1-7663a01c3bff"
     public static let ControlV3        = "24f0000a-7d10-4805-bfc1-7663a01c3bff"
     public static let ResultV3         = "24f0000b-7d10-4805-bfc1-7663a01c3bff"

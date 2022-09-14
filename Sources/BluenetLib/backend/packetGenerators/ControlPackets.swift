@@ -42,7 +42,7 @@ public enum EncryptionOption : UInt8 {
                 return FactoryResetPacket().getPacket()
             case .v3:
                 return FactoryResetPacketV3().getPacket()
-            case .v5:
+            case .v5, .v5_2:
                 return FactoryResetPacketV5().getPacket()
         }
     }
@@ -58,7 +58,7 @@ public enum EncryptionOption : UInt8 {
                 return ControlPacket(  type: .reset).getPacket()
             case .v3:
                 return ControlPacketV3(type: .reset).getPacket()
-            case .v5:
+            case .v5, .v5_2:
                 return ControlPacketV5(type: .reset).getPacket()
         }
     }
@@ -118,7 +118,7 @@ public enum EncryptionOption : UInt8 {
         switch (connectionProtocolVersion) {
             case .unknown, .legacy, .v1, .v2:
                 return ControlPacket(  type: .enable_switchcraft, payload8: enabledValue).getPacket()
-            case .v3, .v5:
+            case .v3, .v5, .v5_2:
                 let packet = StatePacketsGenerator.getWritePacket(type: .SWITCHCRAFT_ENABLED)
                 return packet.load(enabledValue).getPacket()
         }
@@ -140,7 +140,7 @@ public enum EncryptionOption : UInt8 {
                     convertedPayload.append([crownstoneId.stringValue: state])
                 }
                 return ControlPacketsGenerator.getMultiSwitchPacket(stones: convertedPayload)
-           case .v3, .v5:
+           case .v3, .v5, .v5_2:
                var innerPacket = [UInt8]()
                var count : UInt8 = 0
                for crownstoneId in stoneIds {
@@ -183,7 +183,7 @@ public enum EncryptionOption : UInt8 {
                     return commandPayload
                 }
                 return [UInt8]()
-            case .v3, .v5:
+            case .v3, .v5, .v5_2:
                 var innerPacket = [UInt8]()
                 var count : UInt8 = 0
                 for stone in stones {
@@ -357,7 +357,7 @@ public enum EncryptionOption : UInt8 {
                 return ControlPacket(type:   type)
             case .v3:
                 return ControlPacketV3(type: mappedType)
-            case .v5:
+            case .v5, .v5_2:
                 return ControlPacketV5(type: mappedType)
         }
     }

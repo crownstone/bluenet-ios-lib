@@ -273,17 +273,45 @@ public class ControlHandler {
         return self.bleManager.readCharacteristicWithoutEncryption(self.handle, service: sessionParameters.service, characteristic: sessionParameters.characteristic)
             .then{(sessionData : [UInt8]) -> Promise<Void> in
                 return Promise <Void> { seal in
-                    do {
-                        if let basicKey = self.bleManager.connectionState(self.handle).getBasicKey() {
-                            try EncryptionHandler.processSessionData(sessionData, key: basicKey, connectionState: self.bleManager.connectionState(self.handle))
+                    
+                    switch (self.bleManager.connectionState(self.handle).connectionProtocolVersion) {
+                    case .unknown, .legacy, .v1, .v2, .v3, .v5:
+                        do {
+                            if let basicKey = self.bleManager.connectionState(self.handle).getBasicKey() {
+                                try EncryptionHandler.processSessionData(sessionData, key: basicKey, connectionState: self.bleManager.connectionState(self.handle))
+                                seal.fulfill(())
+                            }
+                            else {
+                                throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY
+                            }
+                        }
+                        catch let err {
+                            seal.reject(err)
+                        }
+                        return;
+                    case .v5_2:
+                        do {
+                            let payload = DataStepper(sessionData)
+                            let protocolVersion = try payload.getUInt8()
+                            let sessionNonce    = try payload.getBytes(5)
+                            let validationKey   = try payload.getBytes(4)
+                            // since this is an uint8, we cannot support 5.2. If we're here, and the version is 5, we use .v5_2
+                            if protocolVersion == 5 {
+                                self.bleManager.connectionState(self.handle).setConnectionProtocolVersion(.v5_2)
+                            }
+                            else {
+                                throw BluenetError.COULD_NOT_VALIDATE_SESSION_NONCE
+                            }
+                            
+                            self.bleManager.connectionState(self.handle).setSessionNonce(sessionNonce)
+                            self.bleManager.connectionState(self.handle).setProtocolVersion(protocolVersion)
+                            self.bleManager.connectionState(self.handle).validationKey(validationKey)
+                            
                             seal.fulfill(())
                         }
-                        else {
-                            throw BluenetError.DO_NOT_HAVE_ENCRYPTION_KEY
+                        catch let err {
+                            seal.reject(err)
                         }
-                    }
-                    catch let err {
-                        seal.reject(err)
                     }
                 }
             }

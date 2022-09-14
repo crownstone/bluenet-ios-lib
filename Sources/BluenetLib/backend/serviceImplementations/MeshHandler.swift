@@ -46,7 +46,7 @@ public class MeshHandler {
         switch (self.bleManager.connectionState(handle).connectionProtocolVersion) {
             case .unknown, .legacy, .v1, .v2, .v3:
                  meshPayload = MeshCommandPacket(type: .control, crownstoneIds: [], payload: commandPayload).getPacket()
-            case .v5:
+            case .v5, .v5_2:
                  meshPayload = MeshCommandPacketV5(type: .control, payload: commandPayload).getPacket()
         }
         
@@ -60,7 +60,7 @@ public class MeshHandler {
         switch (self.bleManager.connectionState(handle).connectionProtocolVersion) {
             case .unknown, .legacy, .v1, .v2, .v3:
                  meshPayload = MeshCommandPacket(type: .control, crownstoneIds: [], payload: commandPayload).getPacket()
-            case .v5:
+            case .v5, .v5_2:
                  meshPayload = MeshCommandPacketV5(type: .control, payload: commandPayload).getPacket()
         }
       

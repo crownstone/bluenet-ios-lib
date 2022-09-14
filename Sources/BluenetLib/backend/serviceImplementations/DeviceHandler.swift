@@ -122,7 +122,7 @@ public class DeviceHandler {
             switch (self.bleManager.connectionState(handle).connectionProtocolVersion) {
                 case .unknown, .legacy, .v1, .v2, .v3:
                     return self.getBootloaderRevisionInAppMode()
-                case .v5:
+                case .v5, .v5_2:
                     let packet = ControlPacketsGenerator.getControlPacket(type: .GET_BOOTLOADER_VERSION).getPacket()
                     
                     return _writePacketWithReply(bleManager: self.bleManager, handle: self.handle, packet)

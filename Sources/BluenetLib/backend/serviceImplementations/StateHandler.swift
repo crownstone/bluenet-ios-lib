@@ -76,6 +76,18 @@ public class StateHandler {
     }
     
     
+    public func setDoubleTapSwitchcraft(enabled: Bool) -> Promise<Void> {
+        let enabledValue : UInt8 = enabled ? 1 : 0
+        let packet = StatePacketsGenerator.getWritePacket(type: StateTypeV3.switchcraftDoubleTap).load(enabledValue).getPacket()
+        return self._writeToState(packet: packet)
+    }
+    
+    public func setDefaultDimValue(dimValue: UInt8) -> Promise<Void> {
+        let dimValueCapped = min(dimValue, 99)
+        let packet = StatePacketsGenerator.getWritePacket(type: StateTypeV3.defaultDimValue).load(dimValueCapped).getPacket()
+        return self._writeToState(packet: packet)
+    }
+    
     func _writeToState(packet: [UInt8]) -> Promise<Void> {
         let connectionProtocolVersion = bleManager.connectionState(handle).connectionProtocolVersion
         switch (connectionProtocolVersion) {
@@ -136,7 +148,7 @@ public class StateHandler {
                 characteristicToReadFrom = CrownstoneCharacteristics.StateRead
             case .v3:
                 characteristicToReadFrom = CrownstoneCharacteristics.ResultV3
-            case .v5:
+            case .v5, .v5_2:
                 characteristicToReadFrom = CrownstoneCharacteristics.ResultV5
         }
         
@@ -154,7 +166,7 @@ public class StateHandler {
                 characteristicToWriteTo = CrownstoneCharacteristics.Control
             case .v3:
                 characteristicToWriteTo = CrownstoneCharacteristics.ControlV3
-            case .v5:
+            case .v5, .v5_2:
                 characteristicToWriteTo = CrownstoneCharacteristics.ControlV5
         }
         

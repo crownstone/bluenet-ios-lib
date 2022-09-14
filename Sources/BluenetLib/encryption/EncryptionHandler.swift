@@ -27,7 +27,7 @@ let CHECKSUM      : UInt32 = 0xcafebabe
 var BLUENET_ENCRYPTION_TESTING = false
 
 public class SessionData {
-    var sessionNonce : [UInt8]!
+    var sessionNonce  : [UInt8]!
     var validationKey : [UInt8]!
     
     init(_ connectionState: ConnectionState) throws {
@@ -222,7 +222,7 @@ class EncryptionHandler {
                else {
                    throw BluenetError.READ_SESSION_NONCE_ZERO_MAYBE_ENCRYPTION_DISABLED
                }
-            case .v5:
+            case .v5, .v5_2:
                 payload = try EncryptionHandler._decryptSessionData(input, key: key, connectionState: connectionState)
             }
         }
@@ -269,8 +269,8 @@ class EncryptionHandler {
 
         // decrypt data
         let package = try EncryptedPackage(data: input)
-        let key = try _getKey(package.userLevel, connectionState)
-        let IV = try generateIV(package.nonce, sessionData: sessionData.sessionNonce)
+        let key     = try _getKey(package.userLevel, connectionState)
+        let IV      = try generateIV(package.nonce, sessionData: sessionData.sessionNonce)
 
         let decrypted = try AES(key: key, blockMode: CryptoSwift.CTR(iv: IV), padding: .noPadding).decrypt(package.getPayload())
         

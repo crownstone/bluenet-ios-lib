@@ -14,7 +14,7 @@ public enum ConnectionProtocolVersion: UInt8 {
     case v2 = 2
     case v3 = 3
     case v5 = 5 // PROTOCOL V5, versioning based on protocol version starts here.
-    
+    case v5_2 = 6 // PROTOCOL V5.2, here the session data characteristic is not encrypted
     case unknown = 255
 }
 
@@ -109,7 +109,7 @@ class ConnectionState {
     
     func setConnectionProtocolVersion(_ version: ConnectionProtocolVersion) {
         ControlPacketsGenerator.connectionProtocolVersion = version
-        StatePacketsGenerator.connectionProtocolVersion = version
+        StatePacketsGenerator.connectionProtocolVersion   = version
         self.connectionProtocolVersion = version
     }
     

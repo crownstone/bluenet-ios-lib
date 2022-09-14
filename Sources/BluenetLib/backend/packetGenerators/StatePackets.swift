@@ -23,7 +23,7 @@ public class StatePacketsGeneratorClass {
                 return WriteConfigPacket(type: type)
             case .v3:
                 return ControlStateSetPacket(  type: StateTypeV3(rawValue: UInt16(type.rawValue))!)
-            case .v5:
+            case .v5, .v5_2:
                 return ControlStateSetPacketV5(type: StateTypeV3(rawValue: UInt16(type.rawValue))!)
         }
     }
@@ -33,7 +33,7 @@ public class StatePacketsGeneratorClass {
                  return WriteStatePacket(type: type)
             case .v3:
                 return ControlStateSetPacket(type: StateTypeV3(rawValue: UInt16(type.rawValue))!)
-            case .v5:
+            case .v5, .v5_2:
                 return ControlStateSetPacketV5(type: StateTypeV3(rawValue: UInt16(type.rawValue))!)
         }
     }
@@ -41,8 +41,8 @@ public class StatePacketsGeneratorClass {
         switch (connectionProtocolVersion) {
             case .unknown, .legacy, .v1, .v2, .v3:
                 return ControlStateSetPacket(type: type)
-            case .v5:
-                 return ControlStateSetPacketV5(type: type, id: id, persistence: persistenceMode)
+            case .v5, .v5_2:
+                return ControlStateSetPacketV5(type: type, id: id, persistence: persistenceMode)
         }
     }
     
@@ -52,7 +52,7 @@ public class StatePacketsGeneratorClass {
                 return ReadConfigPacket(type: type)
             case .v3:
                 return ControlStateGetPacket(  type: StateTypeV3(rawValue: UInt16(type.rawValue))!)
-            case .v5:
+            case .v5, .v5_2:
                 return ControlStateGetPacketV5(type: StateTypeV3(rawValue: UInt16(type.rawValue))!)
         }
     }
@@ -62,7 +62,7 @@ public class StatePacketsGeneratorClass {
                 return ReadStatePacket(type: type)
             case .v3:
                 return ControlStateGetPacket(  type: StateTypeV3(rawValue: UInt16(type.rawValue))!)
-            case .v5:
+            case .v5, .v5_2:
                 return ControlStateGetPacketV5(type: StateTypeV3(rawValue: UInt16(type.rawValue))!)
         }
     }
@@ -72,7 +72,7 @@ public class StatePacketsGeneratorClass {
                 return ControlStateGetPacket(  type: type)
             case .v3:
                 return ControlStateGetPacketV3(type: type, id: id)
-            case .v5:
+            case .v5, .v5_2:
                 return ControlStateGetPacketV5(type: type, id: id, persistence: persistenceMode)
         }
     }
@@ -82,7 +82,7 @@ public class StatePacketsGeneratorClass {
                 return ResultPacket()
             case .v3:
                 return ResultPacketV3()
-            case .v5:
+            case .v5, .v5_2:
                 return ResultPacketV5()
         }
     }

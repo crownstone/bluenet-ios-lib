@@ -9,13 +9,6 @@
 import Foundation
 import SwiftyJSON
 import CryptoSwift
-/*
- *
- *
- *  These are valid for SDK 0.13.0
- *
- *
- */
 
 protocol BLEPacketBaseProtocol {
     func load(_ payload: [UInt8]) -> Self
@@ -29,7 +22,8 @@ protocol BLEPacketBaseProtocol {
     func getPacket() -> [UInt8]
 }
 
-let PROTOCOL_VERSION_V5 : UInt8 = 5
+let CONTROL_PROTOCOL_VERSION_V5 : UInt8 = 5
+let CONTROL_PROTOCOL_VERSION_V6 : UInt8 = 6
 
 class BLEPacketBase: BLEPacketBaseProtocol {
     var payload = [UInt8]()
@@ -251,7 +245,7 @@ class ControlPacketV5 : ControlPacketV3 {
     
     override func getPacket() -> [UInt8] {
         var arr = [UInt8]()
-        arr.append(PROTOCOL_VERSION_V5)
+        arr.append(CONTROL_PROTOCOL_VERSION_V5)
         arr += Conversion.uint16_to_uint8_array(self.type)
         arr += Conversion.uint16_to_uint8_array(self.length)
         arr += self.payload
@@ -296,7 +290,7 @@ class ControlStateSetPacketV5 : ControlStateSetPacket {
     
     override func getPacket() -> [UInt8] {
         var arr = [UInt8]()
-        arr.append(PROTOCOL_VERSION_V5)
+        arr.append(CONTROL_PROTOCOL_VERSION_V5)
         arr += Conversion.uint16_to_uint8_array(self.type)
         arr += Conversion.uint16_to_uint8_array(self.length + 6) // the + 2 is for the stateType uint16 and +2 for the ID and +2 for the persistence mode
         arr += Conversion.uint16_to_uint8_array(self.stateType)
@@ -344,7 +338,7 @@ class ControlStateGetPacketV5 : ControlStateGetPacketV3 {
     
     override func getPacket() -> [UInt8] {
         var arr = [UInt8]()
-        arr.append(PROTOCOL_VERSION_V5)
+        arr.append(CONTROL_PROTOCOL_VERSION_V5)
         arr += Conversion.uint16_to_uint8_array(self.type)       // this is the command type
         arr += Conversion.uint16_to_uint8_array(self.length + 4) // 2 for the ID size, 2 for the persistence mode size
         arr += self.payload                                      // this is the state type
