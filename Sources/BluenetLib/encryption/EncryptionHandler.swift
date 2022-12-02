@@ -222,8 +222,10 @@ class EncryptionHandler {
                else {
                    throw BluenetError.READ_SESSION_NONCE_ZERO_MAYBE_ENCRYPTION_DISABLED
                }
-            case .v5, .v5_2:
+            case .v5:
                 payload = try EncryptionHandler._decryptSessionData(input, key: key, connectionState: connectionState)
+            case .v5_2:
+                payload = DataStepper(input)
             }
         }
         else if (connectionState.operationMode == .operation) {
@@ -236,7 +238,7 @@ class EncryptionHandler {
         var protocolVersion : UInt8 = 0
         var sessionNonce : [UInt8]
         var validationKey: [UInt8]
-        if (connectionState.connectionProtocolVersion == .v5) {
+        if (connectionState.connectionProtocolVersion == .v5 || connectionState.connectionProtocolVersion == .v5_2) {
             protocolVersion = try payload.getUInt8()
             sessionNonce    = try payload.getBytes(5)
             validationKey   = try payload.getBytes(4)

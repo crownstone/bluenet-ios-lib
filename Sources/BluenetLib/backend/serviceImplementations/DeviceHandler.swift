@@ -146,6 +146,7 @@ public class DeviceHandler {
                                     }
                                 }
                                 catch {
+                                    // returning empty string due to legacy reasons. The app will assume it failed, set the firmware into dfu mode and try again.
                                     seal.fulfill("")
                                 }
                             }

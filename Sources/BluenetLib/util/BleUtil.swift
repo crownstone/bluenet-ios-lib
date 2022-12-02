@@ -20,8 +20,10 @@ func getSessionNonceReadParameters(bleManager: BleManager, handle: UUID) -> BleP
         switch (bleManager.connectionState(handle).connectionProtocolVersion) {
             case  .unknown, .legacy, .v1, .v2, .v3:
                 characteristic = SetupCharacteristics.SessionNonce
-            case .v5, .v5_2:
+            case .v5:
                 characteristic = SetupCharacteristics.SessionNonceV5
+            case .v5_2:
+                characteristic = SetupCharacteristics.SessionNonceV5_2
         }
     }
     else {
